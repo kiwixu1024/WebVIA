@@ -1,0 +1,718 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小区公共事务投票平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [deleteTopicId, setDeleteTopicId] = useState(null);
+            const [expandedTopic, setExpandedTopic] = useState(null);
+            const [showHelpModal, setShowHelpModal] = useState(false);
+            const [selectedTopics, setSelectedTopics] = useState(new Set());
+            const [totalVotes, setTotalVotes] = useState(474);
+
+            const [topics, setTopics] = useState([
+                {
+                    id: 1,
+                    title: "在小区增加共享图书角",
+                    description: "在小区内设置一个公共图书角，居民可以捐藏和借阅图书，促进社区文化氛围。",
+                    supportCount: 128,
+                    opposeCount: 12,
+                    participants: 140,
+                    deadline: "2024-01-15",
+                    image: "https://picsum.photos/id/24/60/60",
+                    active: true,
+                    isExpanded: false
+                },
+                {
+                    id: 2,
+                    title: "调整快递收发点位置",
+                    description: "",
+                    supportCount: 89,
+                    opposeCount: 30,
+                    participants: 119,
+                    deadline: "2024-01-20",
+                    image: "https://picsum.photos/id/25/60/60",
+                    active: true,
+                    isExpanded: false
+                },
+                {
+                    id: 3,
+                    title: "绿化带增设夜间照明",
+                    description: "",
+                    supportCount: 200,
+                    opposeCount: 15,
+                    participants: 215,
+                    deadline: "2024-01-25",
+                    image: "https://picsum.photos/id/26/60/60",
+                    active: true,
+                    isExpanded: false
+                }
+            ]);
+
+            const selectAll = () => {
+                const allSelected = topics.every(topic => selectedTopics.has(topic.id));
+                if (selectAll) {
+                    setSelectedTopics(new Set());
+                    setTotalVotes(0);
+                } else {
+                    const newSelected = new Set();
+                    topics.forEach(topic => newSelected.add(topic.id));
+                    setSelectedTopics(newSelected);
+                    const total = topics.reduce((sum, topic) => sum + topic.supportCount + topic.opposeCount, 0);
+                    setTotalVotes(total);
+                }
+            };
+
+            const toggleTopic = (topicId) => {
+                const newSelected = new Set(selectedTopics);
+                if (newSelected.has(topicId)) {
+                    newSelected.delete(topicId);
+                } else {
+                    newSelected.add(topicId);
+                }
+                setSelectedTopics(newSelected);
+                setTotalVotes(topics.filter(t => newSelected.has(t.id)).reduce((sum, t) => sum + t.supportCount + t.opposeCount, 0));
+            };
+
+            const toggleExpand = (topicId) => {
+                setExpandedTopic(expandedTopic === topicId ? null : topicId);
+            };
+
+            const confirmDelete = (topicId) => {
+                setDeleteTopicId(topicId);
+                setShowDeleteModal(true);
+            };
+
+            const handleDeleteConfirm = () => {
+                const newTopics = topics.filter(topic => topic.id !== deleteTopicId);
+                setTopics(newTopics);
+                setShowDeleteModal(false);
+                setDeleteTopicId(null);
+            };
+
+            const renderPieChart = () => {
+                const votedCount = totalVotes;
+                const unvotedCount = 356 - votedCount;
+                const total = 356;
+                
+                let percentages;
+                if (votedCount > 0) {
+                    percentages = {
+                        '已投票': Math.round((votedCount / total) * 100),
+                        '未投票': Math.round((unvotedCount / total) * 100)
+                    };
+                } else {
+                    percentages = {
+                        '已投票': 0,
+                        '未投票': 100
+                    };
+                }
+
+                return (
+                    <div className="relative w-64 h-64 mx-auto">
+                        <img 
+                            src="https://picsum.photos/id/15/256/256" 
+                            alt="图表背景" 
+                            className="w-full h-full object-cover rounded-full"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <svg width="256" height="256" viewBox="0 0 256 256">
+                                {(() => {
+                                    let currentAngle = 90;
+                                    let segments = [];
+                                    
+                                    if (percentages['已投票']) {
+                                        segments.push({
+                                            angle: percentages['已投票'],
+                                            color: '#3b82f6',
+                                            border: '#e5e7eb'
+                                        });
+                                        currentAngle += percentages['已投票'];
+                                    }
+                                    
+                                    if (percentages['未投票']) {
+                                        segments.push({
+                                            angle: percentages['未投票'],
+                                            color: '#a8dbd7',
+                                            border: '#e5e7eb'
+                                        });
+                                    }
+                                    
+                                    segments.forEach(({ angle, color, border }) => {
+                                        const radius = 240;
+                                        const startX = 128 + Math.cos((currentAngle - 90) * Math.PI / 180) * radius;
+                                        const startY = 128 + Math.sin((currentAngle - 90) * Math.PI / 180) * radius;
+                                        const endX = 128 + Math.cos(((currentAngle - angle) - 90) * Math.PI / 180) * radius;
+                                        const endY = 128 + Math.sin(((currentAngle - angle) - 90) * Math.PI / 180) * radius;
+                                        
+                                        currentAngle += angle;
+                                        
+                                        let dashValue = 0;
+                                        if (angle > 0) {
+                                            dashValue = 30 + (angle / 360) * 100;
+                                        }
+                                        
+                                        if (angle > 0) {
+                                            segments.push({
+                                                start: [startX, startY],
+                                                end: [endX, endY],
+                                                dashValue: dashValue,
+                                                color: color
+                                            });
+                                        }
+                                    });
+                                })()}
+                                
+                                {segments.slice(0, segments.length - 1).map((segment, index) => {
+                                    const { start, end, dashValue, color } = segment;
+                                    return (
+                                        <svg key={index} className="absolute">
+                                            <circle cx={128} cy={128} r="20" fill={color} strokeWidth="24" stroke="#a8dbd7" fillOpacity="0.3"/>
+                                            <path
+                                                d={`M ${start[0]} ${start[1]} L ${end[0]} ${end[1]}`}
+                                                stroke={color}
+                                                strokeWidth="20"
+                                                fill="none"
+                                                opacity={1}
+                                                dasharray={`${dashValue}px ${256 - dashValue}px`}
+                                                className="ring-2 ring-gray-200"
+                                            />
+                                        </svg>
+                                    );
+                                })}
+                            </svg>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex items-center justify-between h-16">
+                                <div className="flex items-center">
+                                    <img 
+                                        src="https://picsum.photos/id/64/40/40" 
+                                        alt="头像" 
+                                        className="w-10 h-10 rounded-full mr-3"
+                                    />
+                                    <div>
+                                        <h1 className="text-lg font-semibold text-blue-600">小区公共事务投票平台</h1>
+                                        <p className="text-sm text-gray-500">让每位业主的声音都被听见</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <button
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 flex items-center"
+                                    >
+                                        <span className="mr-1">+</span>新增议题
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm">
+                                        <i className="fas fa-home mr-1"></i>首页
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm">
+                                        <i className="fas fa-poll mr-1"></i>投票页面
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm">
+                                        <i className="fas fa-chart-bar mr-1"></i>数据统计
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex gap-8">
+                            {/* Main Content */}
+                            <div className="flex-1">
+                                {/* Title Section */}
+                                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                                            <i className="fas fa-list-ul text-blue-600 mr-2"></i>
+                                            小区公共事务投票表
+                                        </h2>
+                                        <div className="flex gap-2">
+                                            <span className="text-gray-500 text-sm">投票状态：</span>
+                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-sm">已投票</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-4 gap-4">
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <img src="https://picsum.photos/id/120/100/80" alt="物业管理" className="w-full h-16 object-cover rounded mb-2"/>
+                                            <h3 className="font-semibold text-blue-900 mb-1">物业管理</h3>
+                                            <p className="text-sm text-blue-600 flex items-center">
+                                                <i className="fas fa-home mr-1"></i>预算计划一
+                                            </p>
+                                        </div>
+                                        <div className="bg-green-50 p-4 rounded-lg">
+                                            <img src="https://picsum.photos/id/121/100/80" alt="环境整治" className="w-full h-16 object-cover rounded mb-2"/>
+                                            <h3 className="font-semibold text-green-900 mb-1">环境整治</h3>
+                                            <p className="text-sm text-green-600 flex items-center">
+                                                <i className="fas fa-tree mr-1"></i>绿化栽培三
+                                            </p>
+                                        </div>
+                                        <div className="bg-yellow-50 p-4 rounded-lg">
+                                            <img src="https://picsum.photos/id/122/100/80" alt="安全出行" className="w-full h-16 object-cover rounded mb-2"/>
+                                            <h3 className="font-semibold text-yellow-900 mb-1">安全出行</h3>
+                                            <p className="text-sm text-yellow-600 flex items-center">
+                                                <i className="fas fa-car mr-1"></i>停车管理
+                                            </p>
+                                        </div>
+                                        <div className="bg-purple-50 p-4 rounded-lg">
+                                            <img src="https://picsum.photos/id/123/100/80" alt="文化娱乐" className="w-full h-16 object-cover rounded mb-2"/>
+                                            <h3 className="font-semibold text-purple-900 mb-1">文化娱乐</h3>
+                                            <p className="text-sm text-purple-600 flex items-center">
+                                                <i className="fas fa-users mr-1"></i>邻里交流
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Topic List */}
+                                <div className="bg-white rounded-lg shadow-sm">
+                                    <div className="px-6 py-4 border-b border-gray-200">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <i className="fas fa-list-ul text-blue-600"></i>
+                                                <h3 className="text-lg font-semibold text-gray-900">议题列表</h3>
+                                            </div>
+                                            <div className="flex items-center gap-6">
+                                                <span className="text-sm text-gray-600">共 {topics.length} 条议题</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 space-y-4">
+                                        {topics.map((topic) => (
+                                            <div key={topic.id} className="border border-gray-200 rounded-lg">
+                                                <div 
+                                                    className="flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer"
+                                                    onClick={() => toggleExpand(topic.id)}
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedTopics.has(topic.id)}
+                                                            onChange={() => toggleTopic(topic.id)}
+                                                            className="w-4 h-4"
+                                                        />
+                                                        <div>
+                                                            <h4 className="font-medium text-gray-900">{topic.title}</h4>
+                                                            <p className="text-sm text-gray-600">{topic.active ? "公共讨论" : "投票中"}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="text-right">
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="text-green-600 flex items-center">
+                                                                    <i className="fas fa-thumbs-up mr-1"></i>
+                                                                    支持: {topic.supportCount}
+                                                                </span>
+                                                                <span className="text-red-600 flex items-center">
+                                                                    <i className="fas fa-thumbs-down mr-1"></i>
+                                                                    反对: {topic.opposeCount}
+                                                                </span>
+                                                            </div>
+                                                            <div className="mt-2 text-xs text-gray-500">
+                                                                {topic.participants}票
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => toggleExpand(topic.id)}
+                                                            className="text-blue-600 hover:text-blue-800 text-sm"
+                                                        >
+                                                            {topic.isExpanded ? '收起' : '详情'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                {topic.isExpanded && topic.description && (
+                                                    <div className="px-6 pb-4">
+                                                        <div className="border-t border-gray-200 pt-4">
+                                                            <div className="flex items-start gap-4 mb-4">
+                                                                <img
+                                                                    src={topic.image}
+                                                                    alt={topic.title}
+                                                                    className="w-12 h-12 rounded object-cover"
+                                                                />
+                                                                <div className="flex-1">
+                                                                    <h5 className="font-medium text-gray-900 mb-2">议题详情</h5>
+                                                                    <p className="text-sm text-gray-600 mb-3">
+                                                                        {topic.description}
+                                                                    </p>
+                                                                    <div className="text-xs text-gray-500 mb-2 flex justify-between">
+                                                                        <span>截止时间: {topic.deadline}</span>
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-500">共{topic.participants}票</div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="flex gap-3">
+                                                                <button className="flex items-center gap-2 text-green-600 text-sm py-2 px-4 bg-green-50 rounded-md hover:bg-green-100 border border-green-200">
+                                                                    <i className="fas fa-thumbs-up"></i>
+                                                                    支持
+                                                                </button>
+                                                                <button className="flex items-center gap-2 text-red-600 text-sm py-2 px-4 bg-red-50 rounded-md hover:bg-red-100 border border-red-200">
+                                                                    <i className="fas fa-thumbs-down"></i>
+                                                                    反对
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                                        {selectedTopics.size > 0 && (
+                                            <button
+                                                onClick={() => {
+                                                    const confirmed = confirm();
+                                                    if (confirmed) {
+                                                        const topicToDelete = topics.find(t => t.id === deleteTopicId);
+                                                        setTopics(topics.filter(t => t.id !== deleteTopicId));
+                                                        setShowDeleteModal(false);
+                                                        setDeleteTopicId(null);
+                                                    }
+                                                }}
+                                                className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700"
+                                            >
+                                                <i className="fas fa-trash mr-1"></i>
+                                                删除选定 ({selectedTopics.size})
+                                            </button>
+                                        )}
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setShowHelpModal(true)}
+                                                className="bg-gray-600 text-white px-4 py-2 rounded text-sm hover:bg-gray-700"
+                                            >
+                                                <i className="fas fa-cog mr-1"></i>刷新列表
+                                            </button>
+                                            <button className="bg-gray-800 text-white px-4 py-2 rounded text-sm hover:bg-gray-900">
+                                                <i className="fas fa-download mr-1"></i>导出数据
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sidebar */}
+                            <div className="w-80">
+                                {/* Sidebar Header */}
+                                <div className="bg-white rounded-t-lg shadow-sm py-4 px-4">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="font-semibold text-gray-900">小区公共事务投票平台</h3>
+                                        <img src="https://picsum.photos/id/65/32/32" alt="平台图标" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                    <p className="text-sm text-gray-600 mb-4">让每位业主的声音都被听见</p>
+                                    
+                                    <div className="grid grid-cols-3 gap-6 text-center">
+                                        <div className="flex flex-col items-center justify-center py-3">
+                                            <i className="fas fa-home text-blue-600 text-xl mb-1"></i>
+                                            <p className="text-xs text-gray-500">透明、高效、参与式决策</p>
+                                        </div>
+                                        <div className="flex flex-col items-center justify-center py-3">
+                                            <i className="fas fa-mobile-alt text-green-600 text-xl mb-1"></i>
+                                            <p className="text-xs text-gray-500">移动投票，不受占比</p>
+                                        </div>
+                                        <div className="flex flex-col items-center justify-center py-3">
+                                            <i className="fas fa-download text-blue-600 text-xl mb-1"></i>
+                                            <p className="text-xs text-gray-500">操作简易、数据可视化、一键导出</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Data Statistics */}
+                                <div className="bg-white rounded-b-lg shadow-sm p-6">
+                                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                                        <i className="fas fa-chart-bar text-blue-600 mr-2"></i>
+                                        投票数据统计
+                                    </h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-700">议题总数</span>
+                                            <span className="font-semibold text-blue-600">{topics.length}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-700">总投票数</span>
+                                            <span className="font-semibold text-green-600 italic">{totalVotes}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-700">参与人数</span>
+                                            <span className="font-semibold text-blue-600">{topics.length === 0 ? 0 : Math.max(...topics.map(t => t.supportCount + t.opposeCount), 1)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-700">投票率</span>
+                                            <span className="font-semibold text-orange-600">{totalVotes === 0 ? 0 : Math.round((totalVotes / (topics.length === 0 ? 0 : Math.max(...topics.map(t => t.supportCount + t.opposeCount), 1))) * 100)}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Voting Rate */}
+                                <div className="bg-white rounded-b-lg shadow-sm p-6 mt-6">
+                                    <h3 className="font-semibold text-gray-900 mb-4">投票率统计</h3>
+                                    <div className="relative">
+                                        {renderPieChart()}
+                                        <div className="absolute right-4 top-4 bg-white bg-opacity-90 rounded px-3 py-2 text-right">
+                                            <div className="font-semibold text-gray-900">57%</div>
+                                            <div className="text-xs text-gray-500">89%</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Popular Topics */}
+                                <div className="bg-white rounded-b-lg shadow-sm p-6 mt-6">
+                                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
+                                        <i className="fas fa-fire text-orange-500 mr-2"></i>
+                                        热门议题排行
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {topics.map((topic, index) => (
+                                            <div key={topic.id} className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold ${
+                                                        index === 0 ? 'bg-yellow-500' : 
+                                                        index === 1 ? 'bg-gray-400' : 
+                                                        'bg-orange-500'
+                                                    }`}>
+                                                        {index + 1}
+                                                    </span>
+                                                    <span className="text-sm">{topic.title}</span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-semibold text-gray-900">100 +</div>
+                                                    <div className="text-xs text-gray-500">总投票数</div>
+                                                    <div className="text-xs text-gray-500">投票参与度 {Math.floor(topic.supportCount * 100 / (topic.supportCount + topic.opposeCount))}%</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div className="border-t pt-3 mt-4">
+                                            <button className="text-blue-600 text-sm flex items-center">
+                                                <i className="fas fa-ellipsis-v mr-1"></i>
+                                                查看更多热门话题
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Export Button */}
+                    <button className="fixed bottom-6 right-6 bg-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-orange-600">
+                        <i className="fas fa-download mr-2"></i>导出报表 (CSV/PDF) 
+                    </button>
+
+                    {/* Add Topic Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-xl w-96 max-w-lg mx-4">
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-semibold text-gray-900">新增议题</h3>
+                                        <button
+                                            onClick={() => setShowAddModal(false)}
+                                            className="text-gray-400 hover:text-gray-600"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                议题名称
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="请输入议题名称"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                议题描述
+                                            </label>
+                                            <textarea
+                                                placeholder="请输入议题详细描述"
+                                                rows="3"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                投票选项
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="支持"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="反对"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                截止日期
+                                            </label>
+                                            <input
+                                                type="date"
+                                                defaultValue="2024-12-31"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex gap-3 mt-6">
+                                        <button
+                                            onClick={() => setShowAddModal(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={() => setShowAddModal(false)}
+                                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                        >
+                                            保存
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-xl w-96 max-w-lg mx-4">
+                                <div className="p-6">
+                                    <div className="text-center">
+                                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i className="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">确认删除</h3>
+                                        <p className="text-gray-600 mb-6">
+                                            您确定要删除议题 &quot;{topics.find(t => t.id === deleteTopicId)?.title || '待删除的主题'}&quot; 吗？删除后<br/>
+                                            请谨慎操作。
+                                        </p>
+                                        
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={() => setShowDeleteModal(false)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                            >
+                                                取消
+                                            </button>
+                                            <button
+                                                onClick={handleDeleteConfirm}
+                                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                            >
+                                                确定删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Help Modal */}
+                    {showHelpModal && (
+                        <div className="fixed bottom-0 right-4 w-80 bg-white rounded-t-lg shadow-2xl border border-gray-200 z-40" style={{transform: 'translateY(-9999px)'}}>
+                            <div className="bg-orange-500 text-white p-4 rounded-t-lg flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <i className="fas fa-info-circle"></i>
+                                    <span className="font-semibold">操作指引</span>
+                                </div>
+                                <button 
+                                    onClick={() => setShowHelpModal(false)}
+                                    className="text-white hover:text-gray-200"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            
+                            <div className="p-4 space-y-3">
+                                <div>
+                                    <div className="flex items-start gap-2">
+                                        <i className="fas fa-circle text-green-500 text-xs mt-1"></i>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">如何新增议题？</h4>
+                                            <p className="text-sm text-gray-600">点击 "+" 新增议题"，填写信息点"保存"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div className="flex items-start gap-2">
+                                        <i className="fas fa-question-circle text-blue-500 text-xs mt-1"></i>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">如何查看议题详情？</h4>
+                                            <p className="text-sm text-gray-600">点击议题名称或"详情"按钮</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div className="flex items-start gap-2">
+                                        <i className="fas fa-trash text-red-500 text-xs mt-1"></i>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">删除议题会清空所有投票数据</h4>
+                                            <p className="text-sm text-gray-600">造成实际。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="border-t pt-3 mt-4">
+                                    <button 
+                                        onClick={() => setShowHelpModal(false)}
+                                        className="text-blue-600 text-xs hover:text-blue-800"
+                                    >
+                                        <i className="fas fa-times mr-1"></i>
+                                        关闭
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

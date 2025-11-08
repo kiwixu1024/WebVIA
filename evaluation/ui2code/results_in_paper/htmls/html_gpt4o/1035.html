@@ -1,0 +1,118 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>读书感悟打卡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body class="bg-[#f5efe6]">
+    <div id="app"></div>
+    <script type="text/babel">
+      const Card = ({ title, date, content, labels, mood, stats }) => {
+        return (
+          <div className="border rounded-md p-4 bg-[#fffdf8] shadow-md">
+            <div className="flex justify-between items-center">
+              <div className="text-xl font-semibold text-[#5c4534]">{title}</div>
+              <button className="text-xl">
+                <i className="fas fa-times text-[#867961]"></i>
+              </button>
+            </div>
+            <div className="text-sm text-[#867961] mt-1">{date}</div>
+            <div className="mt-2 text-[#5c4534] text-sm">{content}</div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {labels.map((label) => (
+                <span className="text-xs text-[#5c4534] border rounded px-2 py-1 border-[#867961]">
+                  {label}
+                </span>
+              ))}
+            </div>
+            <div className="flex justify-between items-center mt-2 text-[#867961]">
+              <div className="text-lg">{mood}</div>
+              <div className="text-sm flex items-center gap-2">
+                <span className="flex items-center gap-1">
+                  <i className="fas fa-heart"></i> {stats.likes}
+                </span>
+                <span className="flex items-center gap-1">
+                  <i className="fas fa-comment"></i> {stats.comments}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const Header = () => (
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-[#5c4534]">温馨读书感悟打卡圈</h1>
+          <button className="bg-[#af855a] text-white text-lg font-semibold px-4 py-2 rounded-md">
+            + 新增打卡
+          </button>
+        </div>
+      );
+
+      const Sidebar = () => (
+        <div className="bg-[#f5efe6] p-4">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-[#5c4534]">我的阅读统计</h2>
+            <div className="text-sm">
+              <div>累计打卡天数: <span className="font-bold">45</span></div>
+              <div>本月打卡次数: <span className="font-bold">12</span></div>
+              <div>最长连续天数: <span className="font-bold">7</span></div>
+            </div>
+          </div>
+          <div className="text-sm">
+            <h3 className="text-[#5c4534] font-semibold">图书信息</h3>
+            <p>
+              每一天书、每分钟领悟，互帮互勉。在这里，阅读者能够养成良好的阅读习惯。
+            </p>
+            <img
+              src="https://picsum.photos/id/1/250/150"
+              className="mt-2 rounded-md shadow-md"
+              alt="Random"
+            />
+          </div>
+        </div>
+      );
+
+      const App = () => {
+        return (
+          <div className="flex">
+            <div className="flex-[0.25] p-4">
+              <Sidebar />
+            </div>
+            <div className="flex-[0.75] p-4">
+              <Header />
+              <div className="mt-4">
+                <Card
+                  title="百年孤独"
+                  date="2023-03-15"
+                  content="爱与孤独交织时，时间顺环，故事永不褪色。"
+                  labels={["悠然落书"]}
+                  mood="😊"
+                  stats={{ likes: 16, comments: 5 }}
+                />
+                <Card
+                  title="活动"
+                  date="2023-04-10"
+                  content="苦难与希望配伍，活着本身就是胜利。"
+                  labels={["生活语录"]}
+                  mood="🤔"
+                  stats={{ likes: 24, comments: 8 }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.render(<App />, document.getElementById("app"));
+    </script>
+  </body>
+</html>

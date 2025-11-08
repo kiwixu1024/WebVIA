@@ -1,0 +1,476 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>远程协作平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const initialProjectsData = [
+      {
+        id: 1,
+        name: '移动应用开发',
+        tag: '优先级高',
+        tagColor: 'bg-yellow-100 text-yellow-700',
+        description: '为公司产品开发配套移动应用，支持 iOS 和 Android',
+        owner: '李宁',
+        ownerAvatar: 'https://picsum.photos/id/1027/40/40',
+        progress: 45,
+      },
+      {
+        id: 2,
+        name: '数据分析平台',
+        tag: '优先级低',
+        tagColor: 'bg-green-100 text-green-700',
+        description: '构建内部数据分析平台，支持多维度数据可视化',
+        owner: '王芳',
+        ownerAvatar: 'https://picsum.photos/id/1011/40/40',
+        progress: 20,
+      },
+    ];
+
+    function Sidebar() {
+      const navItems = [
+        { icon: 'fa-th-large', name: '仪表盘' },
+        { icon: 'fa-tasks', name: '项目管理', active: true },
+        { icon: 'fa-users', name: '团队成员' },
+        { icon: 'fa-chart-bar', name: '报告中心' },
+        { icon: 'fa-cog', name: '设置' },
+      ];
+
+      return (
+        <div className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+          <div className="h-16 flex items-center px-6 border-b border-gray-200">
+             <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center mr-3">
+                <i className="fas fa-layer-group text-white"></i>
+            </div>
+            <h1 className="text-xl font-bold text-gray-800">远程协作平台</h1>
+          </div>
+          <nav className="flex-1 px-4 py-6">
+            {navItems.map(item => (
+              <a href="#" key={item.name} className={`flex items-center px-4 py-3 text-sm rounded-lg ${item.active ? 'bg-blue-50 text-blue-600 font-semibold border-l-4 border-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}>
+                <i className={`fas ${item.icon} w-6 text-center ${item.active ? 'text-blue-600' : 'text-gray-400'}`}></i>
+                <span className="ml-3">{item.name}</span>
+              </a>
+            ))}
+          </nav>
+          <div className="p-4 border-t border-gray-200">
+            <div className="flex items-center">
+              <img className="w-10 h-10 rounded-full" src="https://picsum.photos/id/1005/40/40" alt="User Avatar" />
+              <div className="ml-3">
+                <p className="text-sm font-semibold text-gray-800">柳增强</p>
+                <p className="text-xs text-gray-500">组长</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Header({ onNewProjectClick, onHelpClick }) {
+      return (
+        <header className="bg-white h-16 flex items-center justify-between px-8 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center text-sm text-gray-500">
+            <a href="#" className="hover:text-gray-700">首页</a>
+            <i className="fas fa-chevron-right mx-2 text-xs"></i>
+            <span className="text-gray-800 font-medium">项目管理</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button onClick={onNewProjectClick} className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              <i className="fas fa-plus mr-2"></i>
+              新建项目
+            </button>
+            <button onClick={onHelpClick} className="flex items-center text-gray-600 hover:text-blue-600 text-sm">
+              <i className="far fa-question-circle mr-1"></i>
+              帮助
+            </button>
+          </div>
+        </header>
+      );
+    }
+
+    function ProjectProgressCard({ project, onEdit, onDelete }) {
+      return (
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className="font-bold text-gray-800">{project.name}
+                        <span className={`ml-2 text-xs font-medium px-2 py-1 rounded-full ${project.tagColor}`}>{project.tag}</span>
+                    </h3>
+                </div>
+                <div className="flex items-center text-sm text-gray-500 space-x-4">
+                    <button onClick={() => onEdit(project)} className="hover:text-blue-600"><i className="fas fa-pencil-alt mr-1"></i>编辑</button>
+                    <button onClick={() => onDelete(project)} className="hover:text-red-600"><i className="fas fa-trash-alt mr-1"></i>删除</button>
+                </div>
+            </div>
+            <p className="text-gray-600 mt-2 text-sm">{project.description}</p>
+            <div className="flex justify-between items-center mt-4">
+                <div className="flex items-center">
+                    <img className="w-6 h-6 rounded-full" src={project.ownerAvatar} alt={project.owner} />
+                    <span className="text-sm text-gray-500 ml-2">负责人: {project.owner}</span>
+                </div>
+                <span className="text-sm text-gray-500">进度: {project.progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${project.progress}%` }}></div>
+            </div>
+        </div>
+      );
+    }
+
+    function ProjectManagementSection({ showForm, onAddNew, onCancel }) {
+        const teamMembers = [
+            { name: '张辉', avatar: 'https://picsum.photos/id/237/40/40' },
+            { name: '李宁', avatar: 'https://picsum.photos/id/1027/40/40' },
+            { name: '王芳', avatar: 'https://picsum.photos/id/1011/40/40' },
+            { name: '刘强', avatar: 'https://picsum.photos/id/64/40/40' },
+            { name: '郑涛', avatar: 'https://picsum.photos/id/3/40/40' }
+        ];
+
+      return (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 mt-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-gray-800">项目管理</h2>
+            {!showForm && 
+                <button onClick={onAddNew} className="flex items-center bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700">
+                <i className="fas fa-plus mr-2"></i>
+                添加新项目
+                </button>
+            }
+          </div>
+          {showForm ? (
+            <div className="space-y-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                    <input type="text" placeholder="输入项目名称" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                    <input type="text" placeholder="输入项目描述" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                        <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option>中</option>
+                            <option>高</option>
+                            <option>低</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">初始进度</label>
+                        <input type="number" defaultValue="0" className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">选择团队成员</label>
+                    <div className="flex space-x-2">
+                        {teamMembers.map(member => (
+                             <img key={member.name} title={member.name} className="w-8 h-8 rounded-full" src={member.avatar} alt={member.name} />
+                        ))}
+                    </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-4">
+                    <button onClick={onCancel} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                    <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">保存项目</button>
+                </div>
+            </div>
+          ) : (
+            <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg">
+                <div className="inline-block bg-gray-100 rounded-full p-3">
+                    <i className="fas fa-folder-plus text-2xl text-gray-400"></i>
+                </div>
+                <p className="mt-4 text-sm font-semibold text-gray-800">点击“添加新项目”按钮开始创建</p>
+                <p className="text-xs text-gray-500">也可以随时添加、编辑和删除项目</p>
+                <div className="mt-4 inline-flex items-center bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full">
+                    <i className="far fa-lightbulb mr-2"></i>
+                    Tip: 使用优先级来管理、安排任务
+                </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    function TeamDataAnalysis() {
+        return (
+            <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-bold text-gray-800">团队数据分析</h2>
+                    <a href="#" className="text-sm text-blue-600 hover:underline">导出报表</a>
+                </div>
+                <div className="mt-4 border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-6 text-sm">
+                        <a href="#" className="whitespace-nowrap pb-3 px-1 border-b-2 font-semibold text-blue-600 border-blue-600">实时统计</a>
+                        <a href="#" className="whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">周报统计</a>
+                        <a href="#" className="whitespace-nowrap pb-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">月报统计</a>
+                    </nav>
+                </div>
+                <p className="mt-6 font-semibold text-gray-800 text-sm">团队成员在线时长 (今日)</p>
+                <div className="mt-4 h-56 relative">
+                    {/* Chart Gridlines */}
+                    <div className="absolute top-0 left-0 w-full h-full grid grid-rows-5">
+                      {['8h', '6h', '4h', '2h', '0h'].map((label, i) => (
+                        <div key={label} className={`flex items-start ${i < 4 ? 'border-b border-dashed border-gray-200' : ''}`}>
+                          <span className="text-xs text-gray-400 -mt-1.5 pr-2">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Chart SVG */}
+                    <svg className="absolute top-0 left-0 w-full h-full" viewBox="0 0 300 150" preserveAspectRatio="none">
+                      <polyline points="20,110 70,50 120,80 170,95 220,70 270,30" fill="none" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="20" cy="110" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="70" cy="50" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="120" cy="80" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="170" cy="95" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="220" cy="70" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                      <circle cx="270" cy="30" r="3" fill="white" stroke="#3B82F6" strokeWidth="2" />
+                    </svg>
+                </div>
+                 <div className="flex justify-between text-xs text-gray-400 mt-1 pl-6">
+                    <span>9:00</span>
+                    <span>11:00</span>
+                    <span>13:00</span>
+                    <span>15:00</span>
+                    <span>17:00</span>
+                </div>
+                <div className="mt-6 text-xs text-gray-500">
+                    <div className="inline-flex items-center bg-yellow-50 text-yellow-700 px-2 py-1 rounded">
+                        <i className="far fa-lightbulb mr-2"></i>
+                        Tip: 定期同步可降低沟通成本
+                    </div>
+                </div>
+                <p className="mt-3 text-xs text-gray-400">本次数据最后更新时间: 9/22/2023, 8:16:43 PM</p>
+            </div>
+        );
+    }
+    
+    function HelpSidebar({ onClose }) {
+        return (
+            <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-lg border-l border-gray-200 flex flex-col z-20">
+                <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h2 className="text-lg font-bold text-gray-800">使用指南</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                        <i className="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div className="flex-1 p-6 space-y-8 overflow-y-auto">
+                    <div>
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                            <div className="ml-4">
+                                <h3 className="font-bold text-gray-800">如何添加项目</h3>
+                                <p className="text-sm text-gray-600 mt-1">1. 点击页面顶部主内容区右上角的“新建项目”按钮</p>
+                                <p className="text-sm text-gray-600 mt-1">2. 在表单中填写项目名称、描述等信息</p>
+                                <p className="text-sm text-gray-600 mt-1">3. 选择项目优先级和项目成员</p>
+                                <p className="text-sm text-gray-600 mt-1">4. 点击“保存项目”按钮完成添加</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                            <div className="ml-4">
+                                <h3 className="font-bold text-gray-800">如何编辑并删除</h3>
+                                <p className="text-sm text-gray-600 mt-1">1. 在项目卡片右上角找到“编辑”或“删除”按钮</p>
+                                <p className="text-sm text-gray-600 mt-1">2. 点击“编辑”弹出编辑窗口，修改后保存</p>
+                                <p className="text-sm text-gray-600 mt-1">3. 点击“删除”会有确认提示，确认后删除</p>
+                                <p className="text-sm text-gray-600 mt-1">4. 所有操作都会即时在页面上反映</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                            <div className="ml-4">
+                                <h3 className="font-bold text-gray-800">如何查看统计</h3>
+                                <p className="text-sm text-gray-600 mt-1">1. 右侧统计区域提供多种数据可视化图表</p>
+                                <p className="text-sm text-gray-600 mt-1">2. 点击“实时统计”/“周报统计”/“月报统计”可切换视图</p>
+                                <p className="text-sm text-gray-600 mt-1">3. 点击“导出报表”可导出当前统计数据</p>
+                                <p className="text-sm text-gray-600 mt-1">4. 图表数据会根据队伍的实时情况实时更新</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                        <h4 className="font-bold text-blue-800">小贴士</h4>
+                        <ul className="mt-2 space-y-1 text-sm text-blue-700 list-inside">
+                           <li className="flex items-start"><i className="fas fa-check-circle text-blue-500 mt-1 mr-2"></i><span>使用优先级标签进行行为分组管理</span></li>
+                           <li className="flex items-start"><i className="fas fa-check-circle text-blue-500 mt-1 mr-2"></i><span>定期查看统计报表，了解团队整体进度</span></li>
+                           <li className="flex items-start"><i className="fas fa-check-circle text-blue-500 mt-1 mr-2"></i><span>为每个项目指派明确的负责人提高效率</span></li>
+                        </ul>
+                    </div>
+                </div>
+                 <div className="p-6 border-t border-gray-200">
+                    <p className="text-sm text-gray-500">如有其他问题，请联系系统管理员。</p>
+                </div>
+            </div>
+        );
+    }
+    
+    function EditModal({ project, onClose }) {
+        return (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-30">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+                    <div className="flex justify-between items-center p-5 border-b border-gray-200">
+                        <h3 className="text-lg font-bold text-gray-800">编辑项目</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times text-xl"></i></button>
+                    </div>
+                    <div className="p-6 space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                            <input type="text" defaultValue={project.name} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                            <input type="text" defaultValue={project.description} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                         <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                <select defaultValue={project.tag === '优先级高' ? '高' : (project.tag === '优先级低' ? '低' : '中')} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option>高</option>
+                                    <option>中</option>
+                                    <option>低</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目进度</label>
+                                <input type="number" defaultValue={project.progress} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end space-x-3 p-5 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">保存修改</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    function DeleteModal({ project, onClose, onConfirm }) {
+        return (
+             <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-30">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                    <div className="p-8 text-center">
+                        <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                            <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                        </div>
+                        <h3 className="mt-5 text-lg font-bold text-gray-900">确认删除项目</h3>
+                        <div className="mt-2">
+                            <p className="text-sm text-gray-500">您确定要删除项目“{project.name}”吗? 此操作无法撤销。</p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center space-x-4 p-5 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                        <button onClick={onClose} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                        <button onClick={onConfirm} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">确定删除</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+
+    function App() {
+      const [projects, setProjects] = useState(initialProjectsData);
+      const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+      const [showHelpSidebar, setShowHelpSidebar] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [editingProject, setEditingProject] = useState(null);
+      const [showDeleteModal, setShowDeleteModal] = useState(false);
+      const [deletingProject, setDeletingProject] = useState(null);
+
+      // --- Handlers for Interactions ---
+
+      // Interaction 1 & 5: New Project Form
+      const handleShowNewProject = () => setShowNewProjectForm(true);
+      const handleCancelNewProject = () => setShowNewProjectForm(false);
+      
+      // Interaction 2: Help Sidebar
+      const handleShowHelp = () => setShowHelpSidebar(true);
+      const handleCloseHelp = () => setShowHelpSidebar(false);
+
+      // Interaction 3: Edit Modal
+      const handleShowEdit = (project) => {
+        setEditingProject(project);
+        setShowEditModal(true);
+      };
+      const handleCloseEdit = () => {
+        setShowEditModal(false);
+        setEditingProject(null);
+      };
+
+      // Interaction 4: Delete Modal
+      const handleShowDelete = (project) => {
+        setDeletingProject(project);
+        setShowDeleteModal(true);
+      };
+      const handleCloseDelete = () => {
+        setShowDeleteModal(false);
+        setDeletingProject(null);
+      };
+      const handleConfirmDelete = () => {
+        // In a real app, this would modify the 'projects' state
+        console.log(`Deleting project: ${deletingProject.name}`);
+        handleCloseDelete();
+      };
+      
+      return (
+        <div className="h-screen w-screen bg-gray-100 flex font-sans overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 flex flex-col relative">
+            <Header onNewProjectClick={handleShowNewProject} onHelpClick={handleShowHelp}/>
+            <main className="flex-1 p-8 overflow-y-auto">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-8">
+                           <div>
+                             <div className="flex justify-between items-center mb-4">
+                               <h2 className="text-lg font-bold text-gray-800">项目进度展示</h2>
+                               <span className="text-sm text-gray-500">共 {projects.length} 个项目</span>
+                             </div>
+                             <div className="space-y-4">
+                                {projects.map(p => (
+                                    <ProjectProgressCard key={p.id} project={p} onEdit={handleShowEdit} onDelete={handleShowDelete} />
+                                ))}
+                             </div>
+                           </div>
+                           <ProjectManagementSection showForm={showNewProjectForm} onAddNew={handleShowNewProject} onCancel={handleCancelNewProject}/>
+                        </div>
+                        <div className="lg:col-span-1">
+                            <TeamDataAnalysis />
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer className="text-center py-4 text-gray-500 text-sm flex-shrink-0">
+                © 2024 远程团队协作平台 v1.0
+            </footer>
+          </div>
+
+          {/* Overlays */}
+          {showHelpSidebar && <HelpSidebar onClose={handleCloseHelp} />}
+          {showEditModal && editingProject && <EditModal project={editingProject} onClose={handleCloseEdit} />}
+          {showDeleteModal && deletingProject && <DeleteModal project={deletingProject} onClose={handleCloseDelete} onConfirm={handleConfirmDelete} />}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+
+</body>
+</html>

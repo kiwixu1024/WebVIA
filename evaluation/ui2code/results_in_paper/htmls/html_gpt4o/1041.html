@@ -1,0 +1,242 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营养早餐创新榜</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+
+    const breakfastData = [
+      {
+        id: 1,
+        title: "蒸麦水果杯",
+        type: "素食",
+        weight: "8g",
+        water: "40g",
+        fat: "6g",
+        fiber: "5g",
+        rating: 4.5,
+        image: "https://picsum.photos/id/102/300/200"
+      },
+      {
+        id: 2,
+        title: "法式土司",
+        type: "西式",
+        weight: "12g",
+        water: "35g",
+        fat: "5g",
+        fiber: "2g",
+        rating: 4.0,
+        image: "https://picsum.photos/id/103/300/200"
+      },
+      {
+        id: 3,
+        title: "皮蛋瘦肉粥",
+        type: "中式",
+        weight: "15g",
+        water: "30g",
+        fat: "8g",
+        fiber: "1g",
+        rating: 5.0,
+        image: "https://picsum.photos/id/104/300/200"
+      },
+      {
+        id: 4,
+        title: "牛油果吐司",
+        type: "西式",
+        weight: "10g",
+        water: "25g",
+        fat: "18g",
+        fiber: "7g",
+        rating: 4.5,
+        image: "https://picsum.photos/id/105/300/200"
+      },
+      {
+        id: 5,
+        title: "豆浆油条",
+        type: "中式",
+        weight: "8g",
+        water: "38g",
+        fat: "14g",
+        fiber: "9g",
+        rating: 4.0,
+        image: "https://picsum.photos/id/106/300/200"
+      },
+      {
+        id: 6,
+        title: "蓝莓松饼",
+        type: "甜品",
+        weight: "6g",
+        water: "45g",
+        fat: "12g",
+        fiber: "4g",
+        rating: 4.5,
+        image: "https://picsum.photos/id/107/300/200"
+      }
+    ];
+
+    function App() {
+      const [mode, setMode] = React.useState("view");
+      const [activeBreakfast, setActiveBreakfast] = React.useState(null);
+      
+      const handleAddClick = () => {
+        setActiveBreakfast(null);
+        setMode("add");
+      };
+
+      const handleEditClick = (item) => {
+        setActiveBreakfast(item);
+        setMode("edit");
+      };
+
+      const handleDeleteClick = (id) => {
+        alert(`删除早餐 ID: ${id}`);
+      };
+
+      return (
+        <div className="bg-gray-100 h-screen">
+          <header className="bg-white shadow-md py-4 px-6 flex items-center justify-between">
+            <h1 className="text-xl font-bold flex items-center">
+              <i className="fas fa-utensils text-yellow-400 mr-2"></i> 营养早餐创新榜
+            </h1>
+            <nav className="space-x-4 text-sm font-medium">
+              <a className="text-blue-500" href="#">展示区</a>
+              <a href="#">编辑区</a>
+              <a href="#">统计分析</a>
+              <a href="#">帮助说明</a>
+            </nav>
+          </header>
+          <main className="max-w-6xl mx-auto mt-4 flex gap-6">
+            <section className="flex-1">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold">早餐菜单展示</h2>
+                <button onClick={handleAddClick} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+                  + 添加新早餐
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {breakfastData.map(item => (
+                  <div key={item.id} className="bg-white shadow-md rounded-lg overflow-hidden">
+                    <img src={item.image} alt={item.title} className="w-full h-32 object-cover" />
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg">{item.title}</h3>
+                      <p className="text-gray-500 text-sm mb-2">{item.type}</p>
+                      <p className="text-gray-500 text-sm">重量: {item.weight} 水分: {item.water} 脂肪: {item.fat} 纤维: {item.fiber}</p>
+                      <div className="flex items-center mt-2">
+                        <span className="text-yellow-400 text-lg">{'★'.repeat(Math.round(item.rating))}</span>
+                        <span className="ml-1 text-gray-500 text-sm">({item.rating})</span>
+                      </div>
+                      <div className="flex justify-between mt-4">
+                        <button onClick={() => handleEditClick(item)} className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                          编辑
+                        </button>
+                        <button onClick={() => handleDeleteClick(item.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                          删除
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <aside className="w-1/4 bg-white shadow-md rounded-lg p-4">
+              <h3 className="text-lg font-bold mb-4">数据概览</h3>
+              <div className="mb-8">
+                <p className="text-gray-500">今日推荐：3 款早餐</p>
+                <ul className="text-sm mt-2">
+                  <li>1. 皮蛋瘦肉粥</li>
+                  <li>2. 蓝莓松饼</li>
+                  <li>3. 蒸麦水果杯</li>
+                </ul>
+              </div>
+              <div>
+                <div className="w-full h-32 bg-blue-100 rounded flex items-center justify-center">
+                  饮食类型占比饼图
+                </div>
+              </div>
+            </aside>
+          </main>
+          <footer className="bg-gray-800 text-white py-2 text-center text-sm">
+            版本: 1.0.0 © 2023 营养早餐创新榜 版权所有
+          </footer>
+          {/* Modal */}
+          {mode !== "view" && (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded-lg w-3/5 p-6 shadow-md">
+                <h3 className="text-lg font-bold mb-4">{mode === "edit" ? "编辑早餐" : "添加新早餐"}</h3>
+                <form>
+                  <div className="mb-4">
+                    <label className="block text-gray-600">名称</label>
+                    <input type="text" defaultValue={activeBreakfast?.title || ""} className="w-full px-3 py-2 border rounded" />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-600">类型</label>
+                    <div className="space-x-3">
+                      {["中式", "西式", "素食", "甜品"].map(type => (
+                        <label key={type}>
+                          <input type="radio" name="type" defaultChecked={activeBreakfast?.type === type} /> {type}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <label className="block text-gray-600">重量 (g)</label>
+                      <input type="number" defaultValue={activeBreakfast?.weight.replace("g", "") || 0} className="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-gray-600">水分 (g)</label>
+                      <input type="number" defaultValue={activeBreakfast?.water.replace("g", "") || 0} className="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-gray-600">脂肪 (g)</label>
+                      <input type="number" defaultValue={activeBreakfast?.fat.replace("g", "") || 0} className="w-full px-3 py-2 border rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-gray-600">纤维 (g)</label>
+                      <input type="number" defaultValue={activeBreakfast?.fiber.replace("g", "") || 0} className="w-full px-3 py-2 border rounded" />
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-600">推荐评分</label>
+                    <input type="range" min="1" max="5" step="0.5" defaultValue={activeBreakfast?.rating || 3} className="w-full" />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-600">图片 URL</label>
+                    <input type="text" defaultValue={activeBreakfast?.image || ""} className="w-full px-3 py-2 border rounded" />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-600">短文说明</label>
+                    <textarea defaultValue="健康的蒸麦搭配水果，美味营养搭配。" className="w-full px-3 py-2 border rounded"></textarea>
+                  </div>
+                  <div className="flex justify-end space-x-4">
+                    <button type="button" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" onClick={() => setMode("view")}>
+                      取消
+                    </button>
+                    <button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+                      保存
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    root.render(<App />);
+  </script>
+</body>
+
+</html>

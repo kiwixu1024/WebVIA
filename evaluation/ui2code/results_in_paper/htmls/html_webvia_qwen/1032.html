@@ -1,0 +1,585 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云聚会平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('homepage');
+            const [checkedItems, setCheckedItems] = useState([]);
+            const [showModal, setShowModal] = useState(false);
+            const [editingUser, setEditingUser] = useState(null);
+            const [selectedUser, setSelectedUser] = useState(null);
+            const [selectedTheme, setSelectedTheme] = useState('');
+            
+            const [users, setUsers] = useState([
+                { id: 1, name: '云朵小兔', theme: '春日云游会', time: '2024-04-23 09:15:30' },
+                { id: 2, name: '星空熊猫', theme: '春日云游会', time: '2024-04-23 10:25:45' },
+                { id: 3, name: '彩虹猫咪', theme: '春日云游会', time: '2024-04-23 11:05:12' }
+            ]);
+            
+            const [modalData, setModalData] = useState({
+                title: '',
+                style: '卡通',
+                description: ''
+            });
+
+            const handleToggleItem = (id) => {
+                setCheckedItems(prev => {
+                    if (prev.includes(id)) {
+                        return prev.filter(item => item !== id);
+                    } else {
+                        return [...prev, id];
+                    }
+                });
+            };
+
+            const handleEditUser = (user) => {
+                setEditingUser(user);
+                setModalData({
+                    title: user.name,
+                    style: '卡通',
+                    description: ''
+                });
+                setSelectedUser(user.id);
+            };
+
+            const handleSaveEdit = () => {
+                setUsers(users.map(user => 
+                    user.id === editingUser.id ? editingUser : user
+                ));
+                setEditingUser(null);
+                setShowModal(false);
+            };
+
+            const handleConfirmAdd = () => {
+                if (modalData.title) {
+                    const newUser = {
+                        id: users.length + 1,
+                        name: modalData.title,
+                        theme: '春日云游会',
+                        time: new Date().toLocaleString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        }).replace(/\//g, '-')
+                    };
+                    setUsers([newUser, ...users]);
+                    setShowModal(false);
+                    setModalData({ title: '', style: '卡通', description: '' });
+                }
+            };
+
+            const handleDeleteSelected = () => {
+                setUsers(users.filter(user => !checkedItems.includes(user.id)));
+            };
+
+            const renderMainContent = () => {
+                if (currentView === 'theme-management') {
+                    return (
+                        <div className="bg-white rounded-lg shadow p-6">
+                            <div className="flex items-center mb-4">
+                                <i className="fas fa-plus-circle text-indigo-500 mr-2"></i>
+                                <h3 className="text-lg font-semibold text-indigo-600">添加签到主题</h3>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">主题名称</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="请输入主题名称"
+                                        value={modalData.title}
+                                        onChange={(e) => setModalData({...modalData, title: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">主题风格</label>
+                                    <select 
+                                        value={modalData.style}
+                                        onChange={(e) => setModalData({...modalData, style: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    >
+                                        <option>卡通</option>
+                                        <option>简约</option>
+                                        <option>商务</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">主题描述</label>
+                                    <textarea 
+                                        placeholder="请输入主题描述"
+                                        value={modalData.description}
+                                        onChange={(e) => setModalData({...modalData, description: e.target.value})}
+                                        rows="4"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                
+                                <div className="flex space-x-3 pt-4">
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleConfirmAdd}
+                                        className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                    >
+                                        确认添加
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (currentView === 'edit-user') {
+                    return (
+                        <div className="bg-white rounded-lg shadow p-6">
+                            <div className="flex items-center mb-4">
+                                <i className="fas fa-edit text-indigo-500 mr-2"></i>
+                                <h3 className="text-lg font-semibold text-indigo-600">编辑签到用户</h3>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">用户名称</label>
+                                    <input 
+                                        type="text" 
+                                        value={modalData.title}
+                                        onChange={(e) => setModalData({...modalData, title: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">选择主题</label>
+                                    <select 
+                                        value={selectedTheme}
+                                        onChange={(e) => setSelectedTheme(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    >
+                                        <option value="">春日云游会</option>
+                                        {users.map(user => (
+                                            <option key={user.id} value={user.theme}>{user.theme}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                
+                                <div className="flex space-x-3 pt-4">
+                                    <button 
+                                        onClick={() => setEditingUser(null)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveEdit}
+                                        className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                    >
+                                        保存修改
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <>
+                        <div className="bg-white rounded-lg shadow p-6 mb-6">
+                            <img 
+                                src="https://picsum.photos/id/1081/900/300" 
+                                alt="欢迎图片" 
+                                className="w-full h-64 object-cover rounded-lg"
+                            />
+                            <div className="text-center mt-4">
+                                <h2 className="text-xl font-bold text-indigo-600 mb-2">欢迎参加云聚会！</h2>
+                                <p className="text-gray-600">在云端，让我们相聚，即使相隔千里～</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="col-span-2 space-y-6">
+                                {/* 签到列表 */}
+                                <div className="bg-white rounded-lg shadow p-6">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-list text-indigo-500 mr-2"></i>
+                                        <h3 className="text-lg font-semibold text-indigo-600">签到列表</h3>
+                                    </div>
+                                    
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b">
+                                                    <th className="text-left py-3 px-4">
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={checkedItems.length === users.length && users.length > 0}
+                                                            onChange={() => {}}
+                                                            className="rounded"
+                                                        />
+                                                    </th>
+                                                    <th className="text-left py-3 px-4 font-medium text-gray-700">用户</th>
+                                                    <th className="text-left py-3 px-4 font-medium text-gray-700">主题</th>
+                                                    <th className="text-left py-3 px-4 font-medium text-gray-700">签到时间</th>
+                                                    <th className="text-left py-3 px-4 font-medium text-gray-700">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {users.map(user => (
+                                                    <tr key={user.id} className="border-b">
+                                                        <td>
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={checkedItems.includes(user.id)}
+                                                                onChange={() => handleToggleItem(user.id)}
+                                                                className="rounded"
+                                                            />
+                                                        </td>
+                                                        <td className="py-3 px-4">
+                                                            <img src="https://picsum.photos/id/64/40/40" className="w-10 h-10 rounded-full mr-3" />
+                                                            <span>{user.name}</span>
+                                                        </td>
+                                                        <td className="py-3 px-4">{user.theme}</td>
+                                                        <td className="py-3 px-4">{user.time}</td>
+                                                        <td className="py-3 px-4">
+                                                            <button 
+                                                                onClick={() => handleEditUser(user)}
+                                                                className="px-3 py-1 bg-blue-500 text-white text-sm rounded mr-3 hover:bg-blue-600"
+                                                            >
+                                                                编辑
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteSelected()}
+                                                                className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                                                            >
+                                                                删除
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* 快速操作 */}
+                                <div className="bg-white rounded-lg shadow p-6">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-bolt text-orange-500 mr-2"></i>
+                                        <h3 className="text-lg font-semibold text-orange-600">快速操作</h3>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button 
+                                            onClick={() => {setCurrentView('theme-management'); setShowModal(true);}}
+                                            className="flex items-center px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>
+                                            添加签到主题
+                                        </button>
+                                        <button 
+                                            onClick={() => setCurrentView('edit-user'); setShowModal(true); setEditingUser(users[0]); setModalData(users[0].name)}
+                                            className="flex items-center px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                                        >
+                                            <i className="fas fa-user-plus mr-2"></i>
+                                            添加签到用户
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* 批量管理 */}
+                                <div className="bg-white rounded-lg shadow p-6">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-bolt text-orange-500 mr-2"></i>
+                                        <h3 className="text-lg font-semibold text-orange-600">批量管理</h3>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <button 
+                                            onClick={() => {setCheckedItems([]); setCurrentView('batch-management');}}
+                                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                                        >
+                                            批量删除已选 ({checkedItems.length})
+                                        </button>
+                                        <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                            <i className="fas fa-download mr-2"></i>
+                                            导出签到表
+                                        </button>
+                                    </div>
+                                    <div className="mt-2 text-gray-500 text-sm">当前选中签到数: {checkedItems.length}</div>
+                                </div>
+                            </div>
+
+                            {/* 右侧边栏 */}
+                            <div>
+                                <div className="bg-white rounded-lg shadow p-6 mb-6">
+                                    <h3 className="text-lg font-semibold text-blue-600 mb-4">统计数据</h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span>当前签到总数</span>
+                                                <span className="font-semibold text-indigo-600">3</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="bg-indigo-600 h-2 rounded-full" style={{width: '100%'}}></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span>签到率</span>
+                                                <span className="font-semibold text-purple-600">75%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-3">
+                                                <div className="bg-purple-500 h-3 rounded-full" style={{width: '75%'}}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg p-6 mb-6">
+                                    <h3 className="text-lg font-semibold text-red-600 mb-2">日签到趋势</h3>
+                                    <p className="text-center text-sm text-gray-600">日签到趋势统计</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm">当前在线用户</span>
+                                        <span className="font-semibold text-green-600">12</span>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">活跃</div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* 顶部导航栏 */}
+                    <header className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center">
+                                    <img src="https://picsum.photos/id/64/32/32" className="w-8 h-8 rounded-full mr-3" />
+                                    <h1 className="text-xl font-semibold text-indigo-600">云聚会</h1>
+                                </div>
+                                
+                                <nav className="flex space-x-6">
+                                    <button 
+                                        onClick={() => setCurrentView('homepage')}
+                                        className={`px-3 py-2 rounded-md text-sm font-medium ${currentView === 'homepage' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        活动首页
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('management')}
+                                        className={`px-3 py-2 rounded-md text-sm font-medium ${currentView === 'management' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        签到管理
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('report')}
+                                        className={`px-3 py-2 rounded-md text-sm font-medium ${currentView === 'report' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        统计报表
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('help')}
+                                        className={`px-3 py-2 rounded-md text-sm font-medium ${currentView === 'help' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        帮助说明
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* 主要内容区域 */}
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        {/* 左侧边栏 */}
+                        <div className="w-64 float-left bg-white rounded-lg shadow-sm p-6 mb-6">
+                            <div className="space-y-2">
+                                <button 
+                                    onClick={() => {setCurrentView('theme-management'); setShowModal(true);}}
+                                    className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 flex items-center"
+                                >
+                                    <i className="fas fa-folder mr-2"></i>
+                                    签到主题管理
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setCurrentView('user-list')}
+                                    className="w-full bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 flex items-center"
+                                >
+                                    <i className="fas fa-users mr-2"></i>
+                                    用户列表
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setCurrentView('permission')}
+                                    className="w-full bg-gray-500 text-white px-4 py-3 rounded-lg hover:bg-gray-600 flex items-center"
+                                >
+                                    <i className="fas fa-lock mr-2"></i>
+                                    权限设置
+                                </button>
+                            </div>
+                            
+                            <div className="mt-8">
+                                <img src="https://picsum.photos/id/64/120/120" className="w-24 h-24 rounded-full mx-auto" />
+                                <p className="text-center text-sm text-gray-500 mt-2">云聚会管理后台</p>
+                            </div>
+                        </div>
+
+                        {/* 主内容区域 */}
+                        <div className="flex-1 float-right">
+                            {renderMainContent()}
+                        </div>
+                    </main>
+
+                    {/* 模态框遮罩 */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-xl p-6 w-96">
+                                {currentView === 'theme-management' && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">主题名称</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="请输入主题名称"
+                                                value={currentView === 'edit-user' && editingUser ? editingUser.name : 
+                                                      modalData.title}
+                                                onChange={(e) => {if(currentView === 'edit-user') editingUser.name = e.target.value; else setModalData({...modalData, title: e.target.value})}}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">主题风格</label>
+                                            <select 
+                                                value={currentView === 'edit-user' && editingUser ? editingUser.theme : 
+                                                      modalData.style}
+                                                onChange={(e) => {if(currentView === 'edit-user') editingUser.theme = e.target.value; else setModalData({...modalData, style: e.target.value})}}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            >
+                                                <option>卡通</option>
+                                                <option>简约</option>
+                                                <option>商务</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">主题描述</label>
+                                            <textarea 
+                                                placeholder="请输入主题描述"
+                                                value={currentView === 'edit-user' && editingUser ? editingUser.theme : 
+                                                      modalData.description}
+                                                onChange={(e) => {if(currentView === 'edit-user') editingUser.theme = e.target.value; else setModalData({...modalData, description: e.target.value})}}
+                                                rows="4"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => {setCurrentView('homepage'); setShowModal(false); setEditingUser(null); setModalData({ title: '', style: '卡通', description: '' });}}
+                                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={currentView === 'theme-management' ? handleConfirmAdd : currentView === 'edit-user' ? handleSaveEdit : handleConfirmAdd}
+                                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                            >
+                                                确认添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {currentView === 'edit-user' && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">用户名称</label>
+                                            <input 
+                                                type="text" 
+                                                value={editingUser.name}
+                                                onChange={(e) => setModalData({...modalData, title: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">选择主题</label>
+                                            <select 
+                                                value={selectedTheme}
+                                                onChange={(e) => setSelectedTheme(e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            >
+                                                <option value="">春日云游会</option>
+                                                {users.map(user => (
+                                                    <option key={user.id} value={user.theme}>{user.theme}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => setEditingUser(null)}
+                                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleSaveEdit}
+                                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                                            >
+                                                保存修改
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 固定在右下角的指纹图标 */}
+                    <div className="fixed bottom-6 right-6">
+                        <img src="https://picsum.photos/id/91/40/40" className="w-8 h-8 rounded-full cursor-pointer" />
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

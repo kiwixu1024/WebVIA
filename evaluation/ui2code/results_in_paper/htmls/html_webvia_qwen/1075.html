@@ -1,0 +1,601 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭愿望清单</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-yellow-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function WishlistApp() {
+            const [的愿望列表, set愿望列表] = useState([
+                {
+                    id: 1,
+                    title: "家庭电影之夜",
+                    description: "每人选一部最爱的电影，准备爆米花和饮料，享受家庭电影时光",
+                    withinDays: 23,
+                    date: "2023-09-21",
+                    priority: "low",
+                    completed: true,
+                    note: "每个人都可以随意选择的时刻"
+                },
+                {
+                    id: 2,
+                    title: "家庭周末野餐",
+                    description: "带上野餐垫和家庭最爱的食物，去城市公园野餐",
+                    withinDays: 15,
+                    date: "2023-09-29",
+                    priority: "high",
+                    completed: false
+                },
+                {
+                    id: 3,
+                    title: "孩子生日派对",
+                    description: "为孩子准备一个主题派对，邀请他的好朋友们参加",
+                    withinDays: 34,
+                    date: "2023-10-14",
+                    priority: "medium",
+                    completed: false
+                }
+            ]);
+
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editWish, setEditWish] = useState(null);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [filterType, setFilterType] = useState("全部显示");
+            const [sortType, setSortType] = useState("时间");
+
+            const toggleComplete = (id) => {
+                set愿望列表(愿望列表.map(wish => 
+                    wish.id === id ? { ...wish, completed: !wish.completed } : wish
+                ));
+            };
+
+            const handleAddWish = () => {
+                setShowAddModal(true);
+            };
+
+            const handleEditWish = (wish) => {
+                setEditWish({...wish});
+                setShowEditModal(true);
+            };
+
+            const closeModal = () => {
+                setShowAddModal(false);
+                setShowEditModal(false);
+                setEditWish(null);
+            };
+
+            const submitAddWish = () => {
+                const newWish = {
+                    id:愿望列表.length + 1,
+                    title: addWishForm.title,
+                    description: addWishForm.note,
+                    withinDays: somewhat,
+                    date: addWishForm.date,
+                    priority: "medium",
+                    completed: false
+                };
+                set愿望列表([...愿望列表, newWish]);
+                closeModal();
+            };
+
+            const submitEditWish = () => {
+                set愿望列表(愿望列表.map(wish => 
+                    wish.id === editWish.id ? { ...editWish, withinDays: somewhat } : wish
+                ));
+                setShowEditModal(false);
+                setEditWish(null);
+            };
+
+            const filteredWishes =愿望列表.filter(wish => {
+                if (searchTerm && !wish.title.includes(searchTerm) && !wish.description.includes(searchTerm)) {
+                    return false;
+                }
+                if (filterType === "全部显示") return true;
+                if (filterType === "未完成") return !wish.completed;
+                return true;
+            });
+
+            const sortedWishes = [...filteredWishes].sort((a, b) => {
+                if (sortType === "时间") {
+                    return new Date(b.date) - new Date(a.date);
+                } else if (sortType === "优先级") {
+                    const priorityOrder = { "high": 3, "medium": 2, "low": 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                }
+                return 0;
+            });
+
+            const someWish =愿望列表.some(wish => !wish.completed);
+            const somewhat =愿望列表.filter(w => w.completed).length;
+
+            return (
+                <div className="min-h-screen bg-yellow-50">
+                    {/* Header */}
+                    <div className="bg-yellow-400 px-6 py-4">
+                        <div className="flex justify-between items-center max-w-7xl mx-auto">
+                            <div className="flex items-center">
+                                <i className="fas fa-home text-white text-xl mr-2"></i>
+                                <span className="text-white font-medium">家庭愿望清单</span>
+                            </div>
+                            <button 
+                                onClick={handleAddWish}
+                                className="bg-white text-yellow-400 px-4 py-2 rounded-full text-sm font-medium flex items-center hover:bg-gray-100"
+                            >
+                                <i className="fas fa-plus mr-1"></i>
+                                添加愿望
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto p-6">
+                        <div className="grid grid-cols-12 gap-6">
+                            {/* Left Sidebar */}
+                            <div className="col-span-3">
+                                <div className="bg-white rounded-lg p-4 mb-6">
+                                    <h3 className="text-gray-700 font-medium mb-4 flex items-center">
+                                        <i className="fas fa-times-circle text-yellow-400 mr-2"></i>
+                                        菜单
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center text-sm text-yellow-600">
+                                            <i className="fas fa-star mr-2"></i>
+                                            <span>所有愿望</span>
+                                        </div>
+                                        <div className="flex items-center text-sm text-blue-600">
+                                            <i className="fas fa-calendar-day mr-2"></i>
+                                            <span>今日到期</span>
+                                        </div>
+                                        <div className="flex items-center text-sm text-green-600">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            <span>已完成愿望</span>
+                                        </div>
+                                        <div className="flex items-center text-sm text-red-600">
+                                            <i className="fas fa-exclamation-triangle mr-2"></i>
+                                            <span>紧急愿望</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-yellow-100 rounded-lg p-4">
+                                    <h4 className="text-gray-700 font-medium mb-3">小贴士</h4>
+                                    <p className="text-gray-600 text-sm">定期更新你的愿望清单，让家庭生活充满惊喜与期待！</p>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="col-span-6">
+                                <div className="bg-white rounded-lg p-6">
+                                    <div className="flex items-center mb-6">
+                                        <i className="fas fa-heart text-red-500 mr-2"></i>
+                                        <h2 className="text-lg font-medium text-gray-800">家庭愿望清单</h2>
+                                    </div>
+
+                                    {/* Filters */}
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center space-x-4">
+                                            <input
+                                                type="text"
+                                                placeholder="搜索愿望..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="border border-gray-300 rounded-l px-3 py-2 w-80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            />
+                                            <select
+                                                value={filterType}
+                                                onChange={(e) => setFilterType(e.target.value)}
+                                                className="border border-gray-300 rounded-r px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            >
+                                                <option>全部显示</option>
+                                                <option>未完成</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-clock text-gray-500"></i>
+                                            <i className="fas fa-list text-gray-500"></i>
+                                            <i className="fas fa-flag text-orange-500"></i>
+                                        </div>
+                                    </div>
+
+                                    {/* Wishlist Cards */}
+                                    <div className="space-y-4">
+                                        {sortedWishes.map((wish) => (
+                                            <div key={wish.id} className="border border-gray-200 rounded-lg p-4">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <h3 className="text-lg font-medium text-gray-800">{wish.title}</h3>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => handleEditWish(wish)}
+                                                            className="text-blue-500 text-sm hover:text-blue-700"
+                                                        >
+                                                            <i className="fas fa-edit mr-1"></i>
+                                                            编辑
+                                                        </button>
+                                                        <button className="text-red-500 text-sm hover:text-red-700 bg-red-50 px-2 py-1 rounded">
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center text-sm text-gray-600 mb-3">
+                                                    <i className="fas fa-calendar text-gray-400 mr-2"></i>
+                                                    截止日期: {wish.date}
+                                                </div>
+
+                                                <p className="text-sm text-gray-600 mb-3">{wish.description}</p>
+
+                                                <div className="mb-3">
+                                                    {wish.note && (
+                                                        <p className="text-sm text-gray-600 mb-2">{wish.note}</p>
+                                                    )}
+                                                    <span className="inline-block bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded">
+                                                        优先级: {wish.priority === 'high' ? '高' : wish.priority === 'medium' ? '中' : '低'}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center space-x-2">
+                                                    <span className={`px-2 py-1 rounded text-xs ${
+                                                        wish.priority === 'high' ? 'bg-red-100 text-red-600' :
+                                                        wish.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                                                        'bg-green-100 text-green-600'
+                                                    }`}>
+                                                        优先级: {wish.priority === 'high' ? '高' : wish.priority === 'medium' ? '中' : '低'}
+                                                    </span>
+                                                    <label className="text-sm text-gray-600">状态:</label>
+                                                    <div className={`flex ${wish.completed ? 'flex-1' : 'w-16'}`}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={wish.completed}
+                                                            onChange={() => toggleComplete(wish.id)}
+                                                            className="toggle ml-1 appearance-none cursor-pointer"
+                                                        />
+                                                        <label className="toggle label cursor-pointer ml-2 flex-1 text-sm">
+                                                            <span className={`px-2 py-1 rounded ${wish.completed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                                                                {wish.completed ? '已完成' : '未完成'}
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Bottom Buttons */}
+                                <div className="grid grid-cols-2 gap-4 mt-6">
+                                    <button className="bg-green-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 flex items-center justify-center">
+                                        <i className="fas fa-info-circle mr-2"></i>
+                                        如何使用家庭愿望清单
+                                    </button>
+                                    <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4">
+                                        <div className="flex items-center text-yellow-700 font-medium mb-2">
+                                            <i className="fas fa-lightbulb mr-2"></i>
+                                            温馨提示
+                                        </div>
+                                        <p className="text-sm text-yellow-700">
+                                            和家人一起制定愿望清单，让每一个家庭时刻充满期待与仪式感！记录下你们想要一起完成的事情，创造美好回忆。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="col-span-3">
+                                <div className="bg-white rounded-lg p-6 mb-6">
+                                    <div className="flex items-center mb-4">
+                                        <img src="https://picsum.photos/id/1018/24/24" alt="统计图标" className="w-6 h-6 mr-2" />
+                                        <span className="text-gray-700 font-medium">愿望统计</span>
+                                    </div>
+                                    
+                                    <div className="text-center mb-4">
+                                        <div className="relative inline-block mb-3">
+                                            <svg className="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                                <path
+                                                    d="M18 2.0845a 15.915 15.915 0 0 1 0 31.831 15.915 15.915 0 0 1 0 -31.831"
+                                                    fill="none"
+                                                    stroke="#e5e7eb"
+                                                    strokeWidth="3"
+                                                />
+                                                <path
+                                                    d="M18 2.0845a 15.915 15.915 0 0 1 0 31.831 15.915 15.915 0 0 1 0 -31.831"
+                                                    fill="none"
+                                                    stroke="#10b981"
+                                                    strokeWidth="3"
+                                                    strokeDasharray={`${44 * somewhat}/44`}
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-2xl font-bold text-green-600">{someWish ? 2 : 1}</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-600 mb-4">已完成</p>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between p-2 rounded-lg bg-yellow-50">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                                <span className="text-sm text-gray-600">愿望总数</span>
+                                            </div>
+                                            <span className="text-lg font-bold text-green-600">{愿望列表.length}</span>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between p-2 rounded-lg bg-blue-50">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                                <span className="text-sm text-gray-600">今日到期</span>
+                                            </div>
+                                            <span className="text-lg font-bold text-blue-600">{愿望列表.filter(w => w.completed).length}</span>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between p-2 rounded-lg bg-purple-50">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                                                <span className="text-sm text-gray-600">完成率</span>
+                                            </div>
+                                            <span className="text-lg font-bold text-purple-600">{(愿望列表.filter(w => w.completed).length /愿望列表.length * 100).toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-bolt text-orange-500 mr-2"></i>
+                                        <span className="text-gray-700 font-medium">快捷操作</span>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <button 
+                                            onClick={handleAddWish}
+                                            className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center"
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>
+                                            添加新愿望
+                                        </button>
+                                        
+                                        <button 
+                                            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center"
+                                        >
+                                            <i className="fas fa-print mr-2"></i>
+                                            打印清单
+                                        </button>
+                                        
+                                        <button 
+                                            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center"
+                                        >
+                                            <i className="fas fa-share-alt mr-2"></i>
+                                            分享清单
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Wish Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium flex items-center">
+                                        <i className="fas fa-plus text-green-500 mr-2"></i>
+                                        添加愿望
+                                    </h3>
+                                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={(e) => e.preventDefault()}>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                愿望标题 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                placeholder="输入愿望标题"
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                required
+                                                value={addWishForm.title}
+                                                onChange={(e) => setAddWishForm({...addWishForm, title: e.target.value})}
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                截止日期 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                                required
+                                                value={addWishForm.date}
+                                                onChange={(e) => setAddWishForm({...addWishForm, date: e.target.value})}
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                                            <div className="flex space-x-4">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="high"
+                                                        checked={addWishForm.priority === "high"}
+                                                        onChange={(e) => setAddWishForm({...addWishForm, priority: e.target.value})}
+                                                        className="mr-1"
+                                                    />
+                                                    <span>高</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="medium"
+                                                        checked={addWishForm.priority === "medium"}
+                                                        onChange={(e) => setAddWishForm({...addWishForm, priority: e.target.value})}
+                                                        className="mr-1"
+                                                    />
+                                                    <span>中</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="low"
+                                                        checked={addWishForm.priority === "low"}
+                                                        onChange={(e) => setAddWishForm({...addWishForm, priority: e.target.value})}
+                                                        className="mr-1"
+                                                    />
+                                                    <span>低</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                                            <textarea
+                                                placeholder="添加备注信息..."
+                                                rows={4}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                                                value={addWishForm.note}
+                                                onChange={(e) => setAddWishForm({...addWishForm, note: e.target.value})}
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-3 mt-6">
+                                        <button
+                                            type="button"
+                                            onClick={closeModal}
+                                            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                        >
+                                            取消添加
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={submitAddWish}
+                                            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                                        >
+                                            添加愿望
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Wish Modal */}
+                    {showEditModal && editWish && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium flex items-center">
+                                        <i className="fas fa-edit text-blue-500 mr-2"></i>
+                                        编辑愿望
+                                    </h3>
+                                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={(e) => e.preventDefault()}>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                愿望标题 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={editWish.title}
+                                                onChange={(e) => setEditWish({...editWish, title: e.target.value})}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                截止日期 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={editWish.date}
+                                                onChange={(e) => setEditWish({...editWish, date: e.target.value})}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                                            <div className="flex space-x-4">
+                                                {["high", "medium", "low" ].map(priority => (
+                                                    <label key={priority} className="flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            name="priority"
+                                                            value={priority}
+                                                            checked={editWish.priority === priority}
+                                                            onChange={(e) => setEditWish({...editWish, priority: e.target.value})}
+                                                            className="mr-1"
+                                                        />
+                                                        <span>{priority === "high" ? "高" : priority === "medium" ? "中" : "低"}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                                            <textarea
+                                                value={editWish.note}
+                                                onChange={(e) => setEditWish({...editWish, note: e.target.value})}
+                                                rows={4}
+                                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-3 mt-6">
+                                        <button
+                                            type="button"
+                                            onClick={closeModal}
+                                            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                        >
+                                            取消编辑
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={submitEditWish}
+                                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                        >
+                                            保存修改
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<WishlistApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

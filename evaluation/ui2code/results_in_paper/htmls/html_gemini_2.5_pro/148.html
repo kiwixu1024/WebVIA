@@ -1,0 +1,419 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>AI 角色创作本</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const characters = [
+            {
+                id: 1,
+                name: "艾拉(ELLA)",
+                role: "网络侦探",
+                image: "https://picsum.photos/id/237/400/200",
+                status: "已完成",
+                statusColor: "bg-gray-400",
+                tags: ["冷静", "好奇", "果断"],
+                description: "出生于未来赛博都市，精通网络解码与虚拟潜入。艾拉曾经是顶尖科技公司的安全专家，后因发现公司内部黑幕而选择独立，成为网络世界的正义使者。",
+            },
+            {
+                id: 2,
+                name: "马克斯(MAX)",
+                role: "量子物理学家",
+                image: "https://picsum.photos/id/1025/400/200",
+                status: "进行中",
+                statusColor: "bg-blue-500",
+                tags: ["严谨", "内向", "关系"],
+                description: "哈佛大学量子物理博士，现任量子计算研究的首席科学家。马克斯发现了一种突破性的量子纠缠现象，为平行宇宙理论提供了实证可能。",
+            },
+            {
+                id: 3,
+                name: "露娜(LUNA)",
+                role: "星际生物学家",
+                image: "https://picsum.photos/id/1011/400/200",
+                status: "进行中",
+                statusColor: "bg-blue-500",
+                tags: ["富有同情心", "勇敢", "坚定果敢"],
+                description: "在太空站出生长大的第二代星际儿童，对外星生物有着与生俱来的亲和力。露娜能够感知生命体的情绪，这一特殊能力使她成为星际和平的的重要成员。",
+            },
+        ];
+
+        const Header = () => (
+            <header className="bg-gradient-to-r from-blue-800 to-blue-600 text-white flex items-center justify-between p-3 shadow-md">
+                <h1 className="text-xl font-bold">AI角色创作本</h1>
+                <div className="flex items-center space-x-4">
+                    <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md flex items-center space-x-2 text-sm">
+                        <i className="fas fa-plus-square"></i>
+                        <span>新建角色库</span>
+                    </button>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md flex items-center space-x-2 text-sm">
+                        <i className="fas fa-file-export"></i>
+                        <span>导出JSON</span>
+                    </button>
+                    <button className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-md flex items-center space-x-2 text-sm">
+                        <i className="fas fa-question-circle"></i>
+                        <span>帮助</span>
+                    </button>
+                </div>
+            </header>
+        );
+
+        const LeftSidebar = () => (
+            <aside className="w-64 bg-white p-4 flex flex-col">
+                <nav className="flex-grow">
+                    <ul>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-blue-600 bg-blue-100 rounded-lg font-semibold">
+                                <i className="fas fa-users w-6 text-center"></i>
+                                <span>角色总览</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-edit w-6 text-center"></i>
+                                <span>角色编辑</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-book-open w-6 text-center"></i>
+                                <span>故事大纲</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-image w-6 text-center"></i>
+                                <span>视觉参考</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-chart-pie w-6 text-center"></i>
+                                <span>统计分析</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div className="mt-auto bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="text-sm font-bold text-gray-800 mb-2">AI角色创作秘籍</h3>
+                    <ul className="text-xs text-gray-600 space-y-3">
+                        <li className="flex items-start">
+                            <i className="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                            <span>为角色创建丰富的背景故事可以增加其可信度</span>
+                        </li>
+                        <li className="flex items-start">
+                            <i className="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                            <span>考虑角色的动机和冲突，使其更加立体</span>
+                        </li>
+                        <li className="flex items-start">
+                            <i className="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                            <span>设计角色弱点或成长空间，增加发展潜力</span>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        );
+
+        const RightSidebar = () => (
+            <aside className="w-80 bg-transparent p-4 pl-0">
+                <div className="space-y-6">
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-bold text-gray-800 mb-4">角色统计</h3>
+                        <div className="flex justify-around text-center mb-4">
+                            <div>
+                                <p className="text-3xl font-bold text-blue-600">3</p>
+                                <p className="text-sm text-gray-500">角色总数</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-800">1</p>
+                                <p className="text-sm text-gray-500">已完成</p>
+                            </div>
+                            <div>
+                                <p className="text-3xl font-bold text-gray-800">2</p>
+                                <p className="text-sm text-gray-500">进行中</p>
+                            </div>
+                        </div>
+                        <div className="text-sm text-gray-500 flex justify-between mb-1">
+                            <span>完成进度</span>
+                            <span>33%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{ width: '33%' }}></div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-bold text-gray-800 mb-4">角色类型分布</h3>
+                        <div className="flex items-end justify-around text-xs text-gray-500 h-24">
+                           <div className="text-center"><div className="w-6 h-16 bg-blue-300 rounded-t-sm"></div><p>主角</p></div>
+                           <div className="text-center"><div className="w-6 h-10 bg-blue-300 rounded-t-sm"></div><p>配角</p></div>
+                           <div className="text-center"><div className="w-6 h-6 bg-blue-300 rounded-t-sm"></div><p>NPC</p></div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-bold text-gray-800 mb-4">AI创作小贴士</h3>
+                         <ul className="text-sm text-gray-600 space-y-3">
+                            <li className="flex items-start">
+                                <i className="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-1"></i>
+                                <span>避免创建完美无缺的角色，缺陷和弱点会让角色更加真实</span>
+                            </li>
+                            <li className="flex items-start">
+                                <i className="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-1"></i>
+                                <span>考虑角色的成长弧线，让他们随着故事发展而改变</span>
+                            </li>
+                            <li className="flex items-start">
+                                <i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                <span>确保角色的动机与行为一致，保持内在逻辑</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+        );
+
+        const CharacterCard = ({ char, onDeleteClick }) => (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="relative">
+                    <img src={char.image} alt={char.name} className="w-full h-40 object-cover" />
+                    <span className={`absolute top-2 right-2 text-white text-xs px-2 py-1 rounded-full ${char.statusColor}`}>{char.status}</span>
+                </div>
+                <div className="p-4">
+                    <h4 className="text-lg font-bold text-gray-800">{char.name}</h4>
+                    <p className="text-sm text-gray-500 mb-2">{char.role}</p>
+                    <div className="flex space-x-2 mb-3">
+                        {char.tags.map(tag => (
+                             <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">{tag}</span>
+                        ))}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">{char.description}</p>
+                    <div className="flex justify-end text-sm space-x-4">
+                        <a href="#" className="text-blue-600 hover:underline"><i className="fas fa-edit mr-1"></i>编辑角色</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onDeleteClick(char.name); }} className="text-red-600 hover:underline"><i className="fas fa-trash-alt mr-1"></i>删除角色</a>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const CharacterList = ({ onAddClick, onDeleteClick }) => (
+             <div>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">角色列表</h2>
+                    <button onClick={onAddClick} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md flex items-center space-x-2">
+                        <i className="fas fa-plus"></i>
+                        <span>添加新角色</span>
+                    </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {characters.map(char => <CharacterCard key={char.id} char={char} onDeleteClick={onDeleteClick}/>)}
+                </div>
+                <div className="bg-white rounded-lg shadow p-6 mt-8">
+                     <h3 className="text-lg font-bold text-gray-800 mb-4">场景化设定小贴士</h3>
+                     <ol className="list-decimal list-inside text-sm text-gray-600 space-y-2">
+                         <li>优秀的角色总需要明确的场景定位，考虑以下几点：</li>
+                         <li>角色存在的时代背景和环境是什么？</li>
+                         <li>该角色在社会中扮演什么样的身份？</li>
+                         <li>角色的核心价值观和行为准则是什么？</li>
+                         <li>角色的语言风格、表达方式有什么特点？</li>
+                     </ol>
+                </div>
+            </div>
+        );
+
+        const EditorPanel = ({ onAddClick }) => (
+            <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">编辑面板</h2>
+                <div className="bg-white p-8 rounded-lg shadow text-center">
+                    <p className="text-gray-500 mb-6">请从角色列表中选择一个角色进行编辑，或者创建新角色</p>
+                    <button onClick={onAddClick} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-md inline-flex items-center space-x-2">
+                        <i className="fas fa-plus"></i>
+                        <span>创建新角色</span>
+                    </button>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6 mt-8">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">个性化标签使用指南</h3>
+                    <p className="text-sm text-gray-600 mb-4">性格标签既能让你的角色更加立体和真实，选择互补或冲突的特质可以创造出复杂的角色。</p>
+                    <div className="flex justify-between text-sm text-gray-700">
+                        <div>
+                            <h4 className="font-semibold mb-2">常见性格组合：</h4>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>外向+乐观+健谈 - 适合领导者</li>
+                                <li>内向+严谨+理性 - 适合研究者</li>
+                                <li>好奇+叛逆+创新 - 适合创造者</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold mb-2">冲突性性格示例：</h4>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>理性+感性 - 内心挣扎</li>
+                                <li>勇敢+谨慎 - 进退两难</li>
+                                <li>严谨+随性 - 双重性格</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const BatchPanel = () => (
+             <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">批量管理</h2>
+                <div className="bg-white p-8 rounded-lg shadow text-center">
+                    <p className="text-gray-500">批量管理功能正在开发中，敬请期待</p>
+                </div>
+                <div className="bg-white rounded-lg shadow p-6 mt-8">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">角色关系图谱</h3>
+                    <p className="text-sm text-gray-600 mb-4">构建角色之间的关系网可以让你的AI角色世界更加丰富。考虑以下关系类型：</p>
+                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                        <li>家庭关系：父母、兄弟姐妹、婚恋</li>
+                        <li>社会关系：朋友、敌人、导师、学生</li>
+                        <li>职业关系：上司、下属、合作伙伴、竞争对手</li>
+                        <li>情感关系：爱人、前任、暗恋对象</li>
+                    </ul>
+                </div>
+            </div>
+        );
+
+        const AddCharacterModal = ({ onClose }) => {
+             const tags = ["冷静", "热情", "好奇", "果断", "严谨", "内向", "外向", "执着", "富有同情心", "勇敢", "直觉敏锐", "理性", "感性", "幽默", "忧郁", "乐观", "悲观", "神秘", "开朗", "谨慎", "冒险", "保守", "叛逆"];
+             return (
+                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                     <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl p-6 relative">
+                         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                         <h2 className="text-2xl font-bold text-gray-800 mb-6">添加新角色</h2>
+                         <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">角色名称</label>
+                                <input type="text" placeholder="例如：艾拉(ELLA)" className="w-full p-2 border border-gray-300 rounded-md text-sm"/>
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">年龄</label>
+                                        <input type="text" placeholder="例如：28" className="w-full p-2 border border-gray-300 rounded-md text-sm"/>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">性别</label>
+                                        <select className="w-full p-2 border border-gray-300 rounded-md text-sm">
+                                            <option>请选择</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">职业</label>
+                                    <input type="text" placeholder="例如：网络侦探" className="w-full p-2 border border-gray-300 rounded-md text-sm"/>
+                                </div>
+                                <div className="mt-4">
+                                     <label className="block text-sm font-medium text-gray-700 mb-1">性格特质 (可多选)</label>
+                                     <div className="flex flex-wrap gap-2">
+                                        {tags.map(tag => <button key={tag} className="text-xs border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-100">{tag}</button>)}
+                                     </div>
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">角色形象</label>
+                                    <div className="flex items-center space-x-4">
+                                        <img src="https://picsum.photos/id/103/100/100" className="w-20 h-20 rounded-md object-cover"/>
+                                        <input type="text" defaultValue="https://picsum.photos/id/1025/300/301" className="w-full p-2 border border-gray-300 rounded-md text-sm"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                 <label className="block text-sm font-medium text-gray-700 mb-1">背景故事</label>
+                                 <textarea placeholder="描述角色的背景故事、身份和主要特点..." rows="5" className="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
+                                 <div className="mt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">成长经历</label>
+                                    <textarea placeholder="描述角色的成长经历、关键事件和转折点..." rows="5" className="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
+                                 </div>
+                            </div>
+                         </div>
+                         <div className="mt-6 flex justify-end space-x-3">
+                             <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                             <button onClick={onClose} className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">保存</button>
+                         </div>
+                     </div>
+                 </div>
+             );
+        };
+        
+        const DeleteConfirmModal = ({ characterName, onClose, onConfirm }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4">确认删除</h2>
+                    <p className="text-gray-600 mb-6">您确定要删除角色 {characterName} 吗？此操作无法撤销。</p>
+                    <div className="flex justify-end space-x-3">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                        <button onClick={onConfirm} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">确认删除</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+
+        const MainContent = ({ activeTab, onTabChange, onAddClick, onDeleteClick }) => (
+             <main className="flex-grow p-6 bg-slate-100">
+                <div className="border-b border-gray-200 mb-6">
+                    <nav className="flex space-x-8 -mb-px">
+                        <button onClick={() => onTabChange('list')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'list' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                           角色列表
+                        </button>
+                        <button onClick={() => onTabChange('editor')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'editor' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                           编辑面板
+                        </button>
+                        <button onClick={() => onTabChange('batch')} className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'batch' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                           批量管理
+                        </button>
+                    </nav>
+                </div>
+                {activeTab === 'list' && <CharacterList onAddClick={onAddClick} onDeleteClick={onDeleteClick}/>}
+                {activeTab === 'editor' && <EditorPanel onAddClick={onAddClick} />}
+                {activeTab === 'batch' && <BatchPanel />}
+            </main>
+        );
+
+        const Footer = () => (
+             <footer className="bg-gray-800 text-gray-400 text-xs text-center p-2">
+                AI角色创作本 v1.0.0 | © 2023 AI创作工作室 | 联系我们 contact@aicreation.com
+            </footer>
+        );
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('list');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [deletingCharacterName, setDeletingCharacterName] = useState(null);
+
+            const handleTabChange = (tab) => setActiveTab(tab);
+            const openAddModal = () => setShowAddModal(true);
+            const closeAddModal = () => setShowAddModal(false);
+            const openDeleteModal = (name) => setDeletingCharacterName(name);
+            const closeDeleteModal = () => setDeletingCharacterName(null);
+            
+            return (
+                <div className="flex flex-col min-h-screen font-sans bg-slate-100">
+                    <Header />
+                    <div className="flex flex-grow">
+                        <LeftSidebar />
+                        <MainContent 
+                            activeTab={activeTab} 
+                            onTabChange={handleTabChange}
+                            onAddClick={openAddModal}
+                            onDeleteClick={openDeleteModal}
+                        />
+                        <RightSidebar />
+                    </div>
+                    <Footer />
+                    {showAddModal && <AddCharacterModal onClose={closeAddModal} />}
+                    {deletingCharacterName && <DeleteConfirmModal characterName={deletingCharacterName} onClose={closeDeleteModal} onConfirm={closeDeleteModal} />}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

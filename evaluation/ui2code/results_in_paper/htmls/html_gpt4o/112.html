@@ -1,0 +1,144 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>明信片分享</title>
+</head>
+<body class="bg-yellow-50 font-sans text-gray-700">
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script type="text/babel">
+        const App = () => {
+            const [currentTab, setCurrentTab] = React.useState("展示区");
+            const [postcards, setPostcards] = React.useState([
+                {
+                    id: 1,
+                    sender: "张小明",
+                    receiver: "李华",
+                    date: "2024-01-15",
+                    message: "新年快乐！希望你在新的一年里一切顺利，实现所有的愿望！",
+                    imageUrl: "https://picsum.photos/id/1/150/150",
+                },
+                {
+                    id: 2,
+                    sender: "王芳",
+                    receiver: "赵敏",
+                    date: "2024-02-14",
+                    message: "情人节快乐！虽然相隔千里，但我的心总与你同在。期待下次见面！",
+                    imageUrl: "https://picsum.photos/id/10/150/150",
+                },
+                {
+                    id: 3,
+                    sender: "陈晓",
+                    receiver: "刘强",
+                    date: "2024-03-08",
+                    message: "生日快乐！祝你的每一步充满情趣和幸福。愿所有美好的如你而至。",
+                    imageUrl: "https://picsum.photos/id/20/150/150",
+                },
+                {
+                    id: 4,
+                    sender: "林小雨",
+                    receiver: "张伟",
+                    date: "2024-04-01",
+                    message: "谢谢你的明信片！巴黎的夜色真美，期待有一天我也能去那里旅行。",
+                    imageUrl: "https://picsum.photos/id/30/150/150",
+                },
+                {
+                    id: 5,
+                    sender: "黄霞",
+                    receiver: "孙龙",
+                    date: "2024-04-15",
+                    message: "毕业快乐！四年时光匆匆，愿你前程似锦，未来可期。我们要一直保持联系哦！",
+                    imageUrl: "https://picsum.photos/id/40/150/150",
+                },
+                {
+                    id: 6,
+                    sender: "周小丽",
+                    receiver: "吴迪",
+                    date: "2024-05-01",
+                    message: "五一假期快乐！我已经到达海岛了，这里的海滩太美了，阳光明媚，海水透蓝，真像你曾在这提起。",
+                    imageUrl: "https://picsum.photos/id/50/150/150",
+                },
+            ]);
+            
+            const renderPostcards = () => (
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {postcards.map(postcard => (
+                        <div key={postcard.id} class="border rounded-lg shadow-md bg-white p-4 text-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <span>
+                                    <i class="fas fa-edit mr-1"></i>{postcard.sender} → {postcard.receiver}
+                                </span>
+                            </div>
+                            <span class="text-gray-400 mb-2 text-xs">{postcard.date}</span>
+                            <p>{postcard.message}</p>
+                            <div class="mt-4">
+                                <img src={postcard.imageUrl} alt="Postcard" class="rounded-md w-full h-24 object-cover"/>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            const renderHelp = () => (
+                <div>
+                    <h2 class="text-center text-orange-500 text-xl mb-6">使用指南</h2>
+                    <div class="space-y-4">
+                        <div class="bg-yellow-100 rounded-lg p-4">
+                            <h3 class="font-bold mb-2">如何添加明信片</h3>
+                            <ul class="list-disc ml-8 text-sm space-y-2">
+                                <li>在展示区页面点击右上角的"添加新明信片"按钮</li>
+                                <li>在弹出的窗口中填写发送者、接收者、日期和消息内容</li>
+                                <li>选择一张配图明信片(使用假定图片库)</li>
+                                <li>点击"保存"按钮完成添加</li>
+                            </ul>
+                        </div>
+                        <div class="bg-yellow-100 rounded-lg p-4">
+                            <h3 class="font-bold mb-2">如何编辑/删除明信片</h3>
+                            <h4 class="font-bold mb-2">编辑明信片:</h4>
+                            <ul class="list-disc ml-8 text-sm space-y-2">
+                                <li>在展示区找到要编辑更改的明信片</li>
+                                <li>点击明信片上的"编辑"图标</li>
+                                <li>修改弹窗中明信片的内容</li>
+                                <li>点击"保存"完成修改</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div class="container mx-auto p-6 space-y-6 bg-yellow-50">
+                    <header class="flex justify-between items-center">
+                        <h1 class="text-orange-500 font-bold text-xl">明信片分享</h1>
+                        <nav>
+                            <button 
+                                class={`px-4 py-2 ${currentTab === "展示区" ? "bg-orange-500 text-white" : "text-gray-700"}`} 
+                                onClick={() => setCurrentTab("展示区")}
+                            >
+                                展示区
+                            </button>
+                            <button 
+                                class={`px-4 py-2 ${currentTab === "帮助说明" ? "bg-orange-500 text-white" : "text-gray-700"}`} 
+                                onClick={() => setCurrentTab("帮助说明")}
+                            >
+                                帮助说明
+                            </button>
+                        </nav>
+                    </header>
+                    <main>
+                        {currentTab === "展示区" && renderPostcards()}
+                        {currentTab === "帮助说明" && renderHelp()}
+                    </main>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById("app"));
+    </script>
+</body>
+</html>

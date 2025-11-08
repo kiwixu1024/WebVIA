@@ -1,0 +1,436 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>环保宣传空间</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('首页总览');
+            const [addedSuccess, setAddedSuccess] = useState(false);
+            const [showModal, setShowModal] = useState(false);
+            const [statistics, setStatistics] = useState({
+                participants: 1250,
+                energy: 8760,
+                recycle: 5320,
+                activeCases: 3
+            });
+
+            const [newCase, setNewCase] = useState({
+                title: '',
+                category: '社区活动',
+                url: 'https://picsum.photos/id/10/300/200',
+                description: ''
+            });
+
+            const categories = [
+                '社区活动',
+                '水资源', 
+                '绿色出行', 
+                '能源节约'
+            ];
+
+            const cases = [
+                {
+                    id: 1,
+                    title: '社区垃圾分类活动',
+                    category: '社区活动',
+                    imageUrl: 'https://picsum.photos/id/2/300/200',
+                    description: '组织了一场社区垃圾分类活动，通过互动游戏和讲解，提高居民对垃圾分类的认识和参与度。'
+                },
+                {
+                    id: 2,
+                    title: '河流清洁志愿行动',
+                    category: '水资源',
+                    imageUrl: 'https://picsum.photos/id/3/300/200',
+                    description: '组织志愿者清理河道垃圾，维护水资源生态环境，提高公众对水资源保护的意识。'
+                },
+                {
+                    id: 3,
+                    title: '公共交通绿色出行',
+                    category: '绿色出行',
+                    imageUrl: 'https://picsum.photos/id/4/300/200',
+                    description: '倡导使用公共交通工具和自行车出行，减少私家车使用，降低碳排放，缓解交通压力。'
+                }
+            ];
+
+            const handleAddCase = () => {
+                if (newCase.title.trim()) {
+                    setStatistics(prev => ({
+                        ...prev,
+                        activeCases: prev.activeCases + 1
+                    }));
+                    setAddedSuccess(true);
+                    setTimeout(() => {
+                        setAddedSuccess(false);
+                        setNewCase({
+                            title: '',
+                            category: '社区活动',
+                            url: 'https://picsum.photos/id/10/300/200',
+                            description: ''
+                        });
+                        setShowModal(false);
+                    }, 2000);
+                }
+            };
+
+            const renderHeader = () => (
+                <div className="bg-white shadow-sm">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            {/* Header Logo */}
+                            <div className="flex items-center">
+                                <i className="fas fa-leaf text-green-500 text-xl mr-2"></i>
+                                <span className="text-xl font-semibold text-gray-800">环保宣传空间</span>
+                            </div>
+                            
+                            {/* Navigation */}
+                            <div className="flex space-x-1">
+                                {['首页总览', '环保案例', '节能技巧', '统计报表', '帮助指南'].map((item) => (
+                                    <button
+                                        key={item}
+                                        onClick={() => setActiveTab(item)}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                            activeTab === item
+                                                ? 'bg-green-500 text-white'
+                                                : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {item}
+                                    </button>
+                                ))}
+                                
+                                {['主题特色', '新增内容', '编辑管理', '删除痕迹', '使用说明'].map((item) => (
+                                    <button
+                                        key={item}
+                                        onClick={() => setActiveTab(item)}
+                                        className="px-4 py-2 rounded-md text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    >
+                                        {item}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderSidebar = () => (
+                <div className="w-80 space-y-6">
+                    {/* Statistics */}
+                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">环保数据统计</h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">参与人数</span>
+                                <span className="text-green-500 font-semibold">{statistics.participants}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">节能总量 (kWh)</span>
+                                <span className="text-green-500 font-semibold">{statistics.energy}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">回收总量 (kg)</span>
+                                <span className="text-green-500 font-semibold">{statistics.recycle}</span>
+                            </div>
+                            <div className="mt-4">
+                                <div className="flex justify-between text-sm text-gray-600 mb-1">
+                                    <span>活跃案例数</span>
+                                    <span>{statistics.activeCases}</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-green-500 h-2 rounded-full" style={{width: '100%'}}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tips */}
+                    <div className="bg-orange-50 rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">环保小贴士</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-start">
+                                <i className="fas fa-bicycle text-orange-500 mr-2 mt-1"></i>
+                                <span className="text-sm text-gray-700">每天多骑行，一周节约1公斤碳排放</span>
+                            </div>
+                            <div className="flex items-start">
+                                <i className="fas fa-tint text-blue-500 mr-2 mt-1"></i>
+                                <span className="text-sm text-gray-700">节约用水，洗菜水可用于浇花</span>
+                            </div>
+                            <div className="flex items-start">
+                                <i className="fas fa-recycle text-green-500 mr-2 mt-1"></i>
+                                <span className="text-sm text-gray-700">塑料袋可重复使用，减少白色污染</span>
+                            </div>
+                            <div className="flex items-start">
+                                <i className="fas fa-plug text-yellow-500 mr-2 mt-1"></i>
+                                <span className="text-sm text-gray-700">不用电器及时拔插头，省电又安全</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderMainContent = () => {
+                const getCurrentCards = () => {
+                    if (activeTab === '教学技巧') {
+                        return [
+                            { title: '环保节电妙招', content: '每天睡觉前记得关闭所有电器设备，使用节电型灯具，合理规划空调温度，定期检查电器设备散热情况...', image: false },
+                            { title: '水资源保护心得', content: '节约用水从我做起，使用节水龙头，收集雨水浇灌植物，安装马桶节水器，避免高楼水管跑水...', image: false },
+                            { title: '可回收物品重组', content: '废旧纸箱变身收纳盒，玻璃瓶制作玻璃清洗剂，电子零件利回收利用...', image: false }
+                        ];
+                    } else if (activeTab === '统计报表') {
+                        return [
+                            { title: '社区垃圾分类活动', content: '组织了一场社区垃圾分类活动，通过互动游戏和讲解，提高居民对垃圾分类的认识和参与度...', image: false },
+                            { title: '河流清洁志愿行动', content: '组织志愿者清理河道垃圾，维护水资源生态环境，提高公众对水资源保护的意识...', image: false },
+                            { title: '公共交通绿色出行', content: '倡导使用公共交通工具和自行车出行，减少私家车使用，降低碳排放，缓解交通压力...', image: false }
+                        ];
+                    } else {
+                        return cases;
+                    }
+                };
+
+                const currentCards = getCurrentCards();
+                const topCard = currentCards[0];
+
+                return (
+                    <>
+                        {/* Hero Section */}
+                        <div className="bg-blue-50">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-900 mb-2">{activeTab}</h1>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md inline-flex items-center text-sm font-medium"
+                                        >
+                                            + 添加新案例
+                                        </button>
+                                    </div>
+                                    <img 
+                                        src="https://picsum.photos/id/1/500/200" 
+                                        alt="Laptop Banner"
+                                        className="w-96 h-32 object-cover rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Cases Display */}
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            <h2 className="text-xl font-semibold text-gray-900 mb-8">环保案例展示</h2>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {currentCards.map((card, index) => (
+                                    <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                        <img 
+                                            src={card.image ? card.image : "https://picsum.photos/id/2/400/250"} 
+                                            alt={card.title}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                        <div className="p-6">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <h3 className="text-lg font-semibold text-gray-900">{card.title}</h3>
+                                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                                                    {card.category}
+                                                </span>
+                                            </div>
+                                            {addedSuccess && (
+                                                <div className="mb-3 p-2 bg-green-100 text-green-800 rounded text-sm">
+                                                    该案例已成功添加到案例列表
+                                                </div>
+                                            )}
+                                            <p className="text-gray-600 text-sm leading-relaxed">{card.content}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Operations Help */}
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            <div className="bg-white rounded-lg p-6 shadow-sm">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-6">操作帮助</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="bg-green-50 rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <i className="fas fa-plus-circle text-green-500 mr-2"></i>
+                                            <h4 className="font-medium text-gray-900">如何添加新案例</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-600 leading-relaxed">
+                                            点击页面上方的"添加新案例"按钮，在弹出的表单中填写案例标题、选择类别、上传图片并添加描述，最后点击"提交添加"即可。添加成功后，您的案例将立即显示在列表中。
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="bg-blue-50 rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <i className="fas fa-edit text-blue-500 mr-2"></i>
+                                            <h4 className="font-medium text-gray-900">如何编辑已有案例</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-600 leading-relaxed">
+                                            在任意案例卡片右上角，点击编辑按钮，在弹出的编辑表单中修改相应内容，完成后点击"保存修改"按钮即可更新案例内容。修改成功后，您的案例将立即显示列表。
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="bg-orange-50 rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <i className="fas fa-trash text-orange-500 mr-2"></i>
+                                            <h4 className="font-medium text-gray-900">如何删除案例</h4>
+                                        </div>
+                                        <p className="text-sm text-gray-600 leading-relaxed">
+                                            在任意案例卡片右上角，点击删除按钮（垃圾桶图标），在弹出的确认框中点击"确认删除"即可移除该案例。请注意，删除操作不可撤销！
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                );
+            };
+
+            const renderSuccessfulFeedback = () => (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-4 max-w-sm mx-4">
+                        <div className="text-sm font-medium text-gray-900 mb-2">最新案例已被成功添加</div>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <div className="font-medium text-gray-900 mb-1">家庭LED节能改造</div>
+                                <div className="text-sm text-gray-600">践行之城电</div>
+                            </div>
+                            <button 
+                                onClick={() => {
+                                    setAddedSuccess(false);
+                                    setStatistics(prev => ({
+                                        ...prev,
+                                        activeCases: prev.activeCases + 1
+                                    }));
+                                }}
+                                className="ml-4 text-gray-400 hover:text-gray-600"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {renderHeader()}
+                    
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        {renderSidebar()}
+                        {renderMainContent()}
+                    </div>
+
+                    {renderSuccessfulFeedback()}
+
+                    {/* Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900">添加环保案例</h3>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            案例标题
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newCase.title}
+                                            onChange={(e) => setNewCase(prev => ({...prev, title: e.target.value}))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            placeholder="请输入案例标题"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            案例类别
+                                        </label>
+                                        <select
+                                            value={newCase.category}
+                                            onChange={(e) => setNewCase(prev => ({...prev, category: e.target.value}))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                        >
+                                            {categories.map(category => (
+                                                <option key={category} value={category}>{category}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            案例图片URL
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newCase.url}
+                                            onChange={(e) => setNewCase(prev => ({...prev, url: e.target.value}))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                            placeholder="例如：https://picsum.photos/id/10/300/200"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            案例描述
+                                        </label>
+                                        <textarea
+                                            value={newCase.description}
+                                            onChange={(e) => setNewCase(prev => ({...prev, description: e.target.value}))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 h-20"
+                                            placeholder="简单描述案例的具体内容和主要措施..."
+                                        />
+                                    </div>
+
+                                    <div className="flex space-x-3 pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowModal(false)}
+                                            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddCase}
+                                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                        >
+                                            提交添加
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

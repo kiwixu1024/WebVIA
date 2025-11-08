@@ -1,0 +1,513 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表情日志</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [activeTab, setActiveTab] = useState('全部');
+            const [selectedEmotion, setSelectedEmotion] = useState('');
+            const [newNote, setNewNote] = useState({
+                date: '',
+                content: '',
+                category: '开心',
+                emoji: '😄'
+            });
+
+            const [logs, setLogs] = useState([
+                {
+                    id: 1,
+                    date: '2024-06-01',
+                    content: '今日工作顺利完成上线啦！',
+                    category: '开心',
+                    emoji: '😄',
+                    image: 'https://picsum.photos/id/1025/60/60',
+                    fullContent: '今日工作顺利完成上线啦！处理了几个紧急的bug问题，心情很不错呢'
+                },
+                {
+                    id: 2,
+                    date: '2024-05-30',
+                    content: '项目延期，有点沮丧',
+                    category: '伤感',
+                    emoji: '😢',
+                    image: 'https://picsum.photos/id/1022/60/60',
+                    fullContent: '项目延期，有点沮丧'
+                },
+                {
+                    id: 3,
+                    date: '2024-05-29',
+                    content: '收到意外惊喜，朋友送了我一本期待已久的书！',
+                    category: '惊讶',
+                    emoji: '😍',
+                    image: 'https://picsum.photos/id/1021/60/60',
+                    fullContent: '收到意外惊喜，朋友送了我一本期待已久的书！'
+                }
+            ]);
+
+            const emotionCategories = [
+                { name: '全部', emoji: '😍' },
+                { name: '开心', emoji: '😄', selected: selectedEmotion === '开心' },
+                { name: '伤感', emoji: '😢', selected: selectedEmotion === '伤感' },
+                { name: '惊讶', emoji: '😍', selected: selectedEmotion === '惊讶' },
+                { name: '日常小记', emoji: '😊' }
+            ];
+
+            const filteredLogs = activeTab === '全部' 
+                ? logs 
+                : logs.filter(log => {
+                    if (activeTab === '日常小记') log.category = '日常小记';
+                    return log.category === activeTab;
+                });
+
+            const activeEmotionButton = emotionCategories.find(btn => {
+                if (activeTab === '日常小记') return true;
+                return selectedEmotion === btn.name;
+            });
+
+            const handleAddLog = () => {
+                setShowAddModal(true);
+            };
+
+            const handleSaveLog = () => {
+                // 这里可以处理保存日志的逻辑
+                setShowAddModal(false);
+                setNewNote({
+                    date: '',
+                    content: '',
+                    category: '开心',
+                    emoji: '😄'
+                });
+            };
+
+            const handleCategorySelect = (category) => {
+                setSelectedEmotion(category);
+                setActiveTab(category);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white px-6 py-4 flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-lg flex items-center justify-center">
+                                <i className="fas fa-book text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-semibold text-gray-900">表情日志</h1>
+                                <p className="text-sm text-gray-600">每天记录小情绪，汇聚大感动</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <button 
+                                onClick={handleAddLog}
+                                className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
+                            >
+                                <i className="fas fa-plus"></i>
+                                <span>添加新日志</span>
+                            </button>
+                            <button className="bg-gradient-to-r from-green-400 to-teal-400 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
+                                <i className="fas fa-download"></i>
+                                <span>导出日志</span>
+                            </button>
+                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <i className="fas fa-user text-gray-600"></i>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex h-screen">
+                        {/* Sidebar */}
+                        <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
+                            <div className="p-4">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-cog text-orange-500"></i>
+                                    <span className="font-medium text-gray-900">功能区</span>
+                                </div>
+
+                                {/* Navigation Tabs */}
+                                <div className="space-y-2 mb-8">
+                                    <div className="flex items-center space-x-3 p-3 bg-yellow-100 rounded-lg">
+                                        <i className="fas fa-star text-yellow-600"></i>
+                                        <span className="text-sm font-medium text-gray-900">展示区</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                        <i className="fas fa-edit text-gray-600"></i>
+                                        <span className="text-sm text-gray-600">编辑区</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                        <i className="fas fa-chart-bar text-gray-600"></i>
+                                        <span className="text-sm text-gray-600">统计区</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                                        <i className="fas fa-question-circle text-gray-600"></i>
+                                        <span className="text-sm text-gray-600">帮助说明</span>
+                                    </div>
+                                </div>
+
+                                {/* Theme Switch */}
+                                <div className="flex items-center space-x-2 mb-6">
+                                    <i className="fas fa-palette text-purple-500"></i>
+                                    <span className="font-medium text-gray-900">主题切换</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="w-full h-8 rounded-full overflow-hidden">
+                                        <div className="w-8 h-8 bg-yellow-400 rounded-full mx-auto"></div>
+                                    </div>
+                                    <div className="w-full h-8 rounded-full overflow-hidden">
+                                        <div className="w-8 h-8 bg-green-400 rounded-full mx-auto"></div>
+                                    </div>
+                                    <div className="w-full h-8 rounded-full overflow-hidden">
+                                        <div className="w-8 h-8 bg-blue-400 rounded-full mx-auto"></div>
+                                    </div>
+                                    <div className="w-full h-8 rounded-full overflow-hidden">
+                                        <div className="w-8 h-8 bg-pink-400 rounded-full mx-auto"></div>
+                                    </div>
+                                </div>
+
+                                <p className="text-xs text-gray-500 mt-6 text-center">
+                                    © 2024 表情日志团队 \u3000版本 v1.0.0
+                                </p>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-semibold text-gray-900">特色主题表情日志</h2>
+                                    <span className="text-gray-500 text-sm">每日记录小情绪，汇报无感动</span>
+                                </div>
+
+                                {/* Category Buttons */}
+                                <div className="flex items-center space-x-3 mb-6">
+                                    <div className="flex items-center space-x-3">
+                                        {['全部', '开心', '伤感', '惊讶', '日常小记'].map((category) => (
+                                            <button
+                                                key={category}
+                                                onClick={() => handleCategorySelect(category)}
+                                                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                                    activeTab === category 
+                                                        ? 'bg-yellow-400 text-black' 
+                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {category}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Content Area */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Logs Display */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                    <div className="p-6">
+                                        {filteredLogs.length > 0 ? (
+                                            <div className="space-y-6">
+                                                {filteredLogs.map((log) => (
+                                                    <div key={log.id} className="border-b border-gray-100 pb-6 last:border-b-0">
+                                                        <div className="flex items-start justify-between mb-3">
+                                                            <div className="flex items-center space-x-3">
+                                                                <img 
+                                                                    src={log.image} 
+                                                                    alt="Emotion" 
+                                                                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                                                                />
+                                                                <span className="text-lg">{log.emoji}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <button className="text-gray-400 hover:text-gray-600">
+                                                                    <i className="fas fa-edit"></i>
+                                                                </button>
+                                                                <button className="text-gray-400 hover:text-gray-600">
+                                                                    <i className="fas fa-redo"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="mb-3">
+                                                            <h3 className="font-medium text-gray-900">{log.date}</h3>
+                                                            <p className="text-gray-600 mt-1">{log.fullContent}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-3">
+                                                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full">
+                                                                {log.category}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-12">
+                                                <img 
+                                                    src="https://picsum.photos/id/1015/300/200" 
+                                                    alt="Empty state" 
+                                                    className="w-48 h-32 mx-auto mb-4 rounded-lg object-cover"
+                                                />
+                                                <h3 className="text-lg font-medium text-gray-900 mb-2">暂无表情日志</h3>
+                                                <p className="text-gray-600 mb-6">点亮心情，记录生活瞬间。开始记录你的第一条表情目志吧！</p>
+                                                <button 
+                                                    onClick={handleAddLog}
+                                                    className="bg-yellow-400 text-black px-6 py-2 rounded-lg font-medium hover:bg-yellow-500 transition-colors"
+                                                >
+                                                    + 立即添加日志
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Statistics and Trends */}
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                    <div className="p-6">
+                                        <h3 className="font-medium text-gray-900 mb-4">第{activeTab}趋势</h3>
+                                        <div className="flex items-center justify-center h-32 mb-4">
+                                            <div className="flex items-center space-x-2">
+                                                {['一', '二', '三', '四', '五', '六', '日'].map((day) => (
+                                                    <div key={day} className="shape" style={{
+                                                        transform: `translateX(-100%) translateY(${Math.random() * 30 - 15}%)`,
+                                                        transition: 'transform 2s ease-in-out'
+                                                    }}></div>
+                                                ))}
+                                                {[15, 12, 14, 16, 13, 13].map((height, index) => (
+                                                    <div key={`bar-${index}`} className="shape" style={{
+                                                        width: '4px',
+                                                        height: `${height}px`,
+                                                        transform: 'translateX(-100%)',
+                                                        transition: 'height 2s ease-in-out'
+                                                    }}></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-center space-x-1 text-xs text-blue-500">
+                                            <span>▲ 昨</span>
+                                            <span>昨</span>
+                                            <span>昨</span>
+                                            <span>昨</span>
+                                            <span>昨</span>
+                                            <span>昨</span>
+                                            <span>昨</span>
+                                        </div>
+                                        <div className="flex justify-center items-center space-x-4 mt-4 text-xs text-gray-600">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="w-3 h-3 bg-blue-400 rounded"></div>
+                                                <span>每天情绪比例</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar - Emotion Statistics */}
+                        <aside className="w-80 bg-white border-l border-gray-200 p-6">
+                            <div className="mb-6">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-chart-bar text-green-600"></i>
+                                    <h3 className="font-medium text-gray-900">情绪统计</h3>
+                                </div>
+                                
+                                <div className="bg-green-50 rounded-lg p-4">
+                                    <h4 className="font-medium text-gray-900 mb-3">表情使用频率</h4>
+                                    <div className="space-y-3">
+                                        {emotionCategories
+                                            .filter(categ => categ.name !== '全部')
+                                            .map((categ) => (
+                                                <div key={categ.name} className="flex items-center space-x-3">
+                                                    <span className="text-2xl">{categ.emoji}</span>
+                                                    <span className="text-gray-900 font-medium">{categ.name}</span>
+                                                    <div className="flex items-center space-x-2 ml-auto">
+                                                        <div className="w-20 h-2 bg-gray-200 rounded-full">
+                                                            <div 
+                                                                className="h-2 bg-yellow-400 rounded-full" 
+                                                                style={{
+                                                                    width: `${selectedEmotion === categ.name ? 100 : 0}%`
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-sm text-gray-600 w-8">
+                                                            {selectedEmotion === categ.name ? '12' : '0'}次
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 rounded-lg p-4">
+                                <h4 className="font-medium text-gray-900 mb-3">本周情绪趋势</h4>
+                                <div className="flex items-center justify-center h-20">
+                                    {['一', '二', '三', '四', '五', '六', '日'].map((day) => (
+                                        <div key={day} className="shape" style={{
+                                            transform: `translateX(-100%) translateY(-20%)`,
+                                            transition: 'transform 2s ease-in-out'
+                                        }}></div>
+                                    ))}
+                                    {[15, 12, 14, 16, 13, 13].map((height, index) => (
+                                        <div key={`bar-${index}`} className="shape" style={{
+                                            width: '4px',
+                                            height: `${height}px`,
+                                            transform: 'translateX(-100%)',
+                                            transition: 'height 2s ease-in-out'
+                                        }}></div>
+                                    ))}
+                                </div>
+                                <div className="flex justify-center items-center space-x-1 text-xs text-blue-500">
+                                    <span>▲ 昨</span>
+                                    <span>昨</span>
+                                    <span>昨</span>
+                                    <span>昨</span>
+                                    <span>昨</span>
+                                    <span>昨</span>
+                                    <span>昨</span>
+                                </div>
+                                <div className="flex justify-center items-center space-x-4 mt-4 text-xs text-gray-600">
+                                    <span>每</span>
+                                    <span>目</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-center mt-6 text-xs text-gray-500">
+                                <i className="fas fa-info-circle mr-2"></i>
+                                点击趋势中心右下角的"数据完整统计按钮"
+                            </div>
+
+                            <div className="mt-6">
+                                <button className="w-full bg-green-50 text-green-600 px-4 py-2 rounded-lg flex items-center justify-center space-x-2 text-sm border border-green-200 hover:bg-green-100 transition-colors">
+                                    <i className="fas fa-download"></i>
+                                    <span>查看完整统计数据</span>
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Emotion Selection Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-edit text-yellow-600"></i>
+                                        <h3 className="font-medium text-gray-900">添加新日志</h3>
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <div className="flex items-center space-x-2 mb-3">
+                                            <i className="fas fa-calendar text-gray-600"></i>
+                                            <label className="font-medium text-gray-900">日期</label>
+                                        </div>
+                                        <input
+                                            type="date"
+                                            value={newNote.date}
+                                            onChange={(e) => setNewNote({...newNote, date: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="mm/dd/yyyy"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <div className="flex items-center space-x-2 mb-3">
+                                            <i className="fas fa-smile text-yellow-600"></i>
+                                            <label className="font-medium text-gray-900">表情</label>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['😄', '😊', '😍', '😢', '😤', '😰', '😴', '😤', '😡'].map((emoji) => (
+                                                <span key={emoji} className="text-lg cursor-pointer hover:underline"></span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="flex items-center space-x-2 mb-3">
+                                            <i className="fas fa-edit text-gray-600"></i>
+                                            <label className="font-medium text-gray-900">内容</label>
+                                        </div>
+                                        <textarea
+                                            value={newNote.content}
+                                            onChange={(e) => setNewNote({...newNote, content: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-24 resize-none"
+                                            placeholder="写下你此刻的心情..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <div className="flex items-center space-x-2 mb-3">
+                                            <i className="fas fa-list text-green-600"></i>
+                                            <label className="font-medium text-gray-900">分类</label>
+                                        </div>
+                                        <select
+                                            value={newNote.category}
+                                            onChange={(e) => setNewNote({...newNote, category: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        >
+                                            {emotionCategories.filter(categ => categ.name !== '全部').map((categ) => (
+                                                <option key={categ.name} value={categ.name}>{categ.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={handleSaveLog}
+                                        className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-white py-2 px-4 rounded-lg font-medium hover:from-yellow-500 hover:to-orange-500 transition-colors"
+                                    >
+                                        保存
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-400 transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setNewNote({
+                                                date: '',
+                                                content: '',
+                                                category: '开心',
+                                                emoji: '😄'
+                                            });
+                                            setShowAddModal(false);
+                                        }}
+                                        className="w-12 h-12 bg-gray-300 text-gray-700 hover:bg-gray-400 transition-colors rounded-lg"
+                                    >
+                                        重置
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

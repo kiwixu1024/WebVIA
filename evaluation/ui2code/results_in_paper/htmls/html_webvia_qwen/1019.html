@@ -1,0 +1,484 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线涂鸦墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('gallery');
+            const [sortBy, setSortBy] = useState('按日期排序');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingWork, setEditingWork] = useState(null);
+            const [confirmDelete, setConfirmDelete] = useState('');
+            const [filteredWorks, setFilteredWorks] = useState([]);
+
+            const initialWorks = [
+                {
+                    id: 1,
+                    title: '浪漫彩虹',
+                    subtitle: '用七彩颜色描绘出的梦幻彩虹',
+                    author: '@小艺',
+                    date: '2024-01-15',
+                    likes: 128,
+                    comments: 32,
+                    image: 'https://picsum.photos/id/1018/400/250',
+                    tag: '手绘',
+                    color: '#ef4444'
+                },
+                {
+                    id: 2,
+                    title: '夜空城市',
+                    subtitle: '城市的夜晚与星空的完美融合',
+                    author: '@Rock',
+                    date: '2024-01-14',
+                    likes: 205,
+                    comments: 45,
+                    image: 'https://picsum.photos/id/1036/400/250',
+                    tag: '夜景',
+                    color: '#ef4444'
+                },
+                {
+                    id: 3,
+                    title: '萌宠集结',
+                    subtitle: '各种可爱的小动物聚在一起',
+                    author: '@喵喵',
+                    date: '2024-01-13',
+                    likes: 87,
+                    comments: 12,
+                    image: 'https://picsum.photos/id/1059/400/250',
+                    tag: '宠物',
+                    color: '#3b82f6'
+                }
+            ];
+
+            useEffect(() => {
+                setFilteredWorks(initialWorks);
+            }, []);
+
+            const handleSortChange = (value) => {
+                setSortBy(value);
+                if (value === '按热度排序') {
+                    // 按热度排序逻辑
+                    setFilteredWorks(initialWorks);
+                } else {
+                    setFilteredWorks(initialWorks);
+                }
+            };
+
+            const handleSearch = (term) => {
+                setSearchTerm(term);
+                if (term === '测试作品') {
+                    setFilteredWorks([]);
+                } else {
+                    setFilteredWorks(initialWorks);
+                }
+            };
+
+            const handleEdit = (work) => {
+                setEditingWork(work);
+                setShowEditModal(true);
+            };
+
+            const handleDelete = () => {
+                const workToDelete = editingWork;
+                setConfirmDelete(workToDelete?.title);
+                setShowDeleteModal(true);
+            };
+
+            const handleSaveChanges = () => {
+                setShowEditModal(false);
+                setEditingWork(null);
+            };
+
+            const handleCancelEdit = () => {
+                setShowEditModal(false);
+                setEditingWork(null);
+            };
+
+            const handleConfirmDelete = () => {
+                const workToDelete = confirmDelete;
+                // 这里可以添加实际的删除逻辑
+                setShowDeleteModal(false);
+                setConfirmDelete('');
+            };
+
+            const handleCancelDelete = () => {
+                setShowDeleteModal(false);
+                setConfirmDelete('');
+            };
+
+            const renderMainContent = () => {
+                if (currentPage === 'overview') {
+                    return (
+                        <div className="bg-white rounded-lg p-8 shadow-sm">
+                            <h2 className="text-xl font-semibold mb-6">首页概览</h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-yellow-100 rounded-lg p-6 text-center">
+                                    <img src="https://picsum.photos/id/1080/60/60" alt="开始创作" className="w-15 h-15 rounded-full mx-auto mb-4" />
+                                    <h3 className="font-semibold mb-2">开始创作</h3>
+                                    <p className="text-gray-600 text-sm mb-4">使用多种画笔与模板，创作你的个性涂鸦</p>
+                                    <button className="bg-yellow-500 text-white px-4 py-2 rounded-sm text-sm hover:bg-yellow-600">
+                                        <i className="fas fa-edit mr-1"></i>前往创作
+                                    </button>
+                                </div>
+                                
+                                <div className="bg-blue-100 rounded-lg p-6 text-center">
+                                    <img src="https://picsum.photos/id/1005/60/60" alt="浏览作品" className="w-15 h-15 rounded-full mx-auto mb-4" />
+                                    <h3 className="font-semibold mb-2">浏览作品</h3>
+                                    <p className="text-gray-600 text-sm mb-4">查看来自世界各地的创意涂鸦作品</p>
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded-sm text-sm hover:bg-blue-600">
+                                        <i className="fas fa-eye mr-1"></i>查看画展
+                                    </button>
+                                </div>
+                                
+                                <div className="bg-purple-100 rounded-lg p-6 text-center">
+                                    <img src="https://picsum.photos/id/1016/60/60" alt="查看统计" className="w-15 h-15 rounded-full mx-auto mb-4" />
+                                    <h3 className="font-semibold mb-2">查看统计</h3>
+                                    <p className="text-gray-600 text-sm mb-4">了解最受欢迎的作品和创作趋势</p>
+                                    <button className="bg-purple-500 text-white px-4 py-2 rounded-sm text-sm hover:bg-purple-600">
+                                        <i className="fas fa-chart-bar mr-1"></i>查看统计
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h3 className="font-semibold text-lg mb-4">近期活动</h3>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                        <h4 className="font-semibold text-purple-600 mb-2">每周挑战 <span className="text-sm font-normal">城市之光</span></h4>
+                                        <p className="text-gray-600 text-sm mb-2">以城市夜景为主题，创作你心中的城市灯光之美</p>
+                                        <p className="text-gray-400 text-xs">还剩 3 天</p>
+                                        <button className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs mt-2">
+                                            <i className="fas fa-user mr-1"></i>参与挑战
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                        <h4 className="font-semibold text-green-600 mb-2">创作教程 <span className="text-sm font-normal">数字水彩技法入门</span></h4>
+                                        <p className="text-gray-600 text-sm mb-2">学习如何在数字画布上创造水彩般的效果</p>
+                                        <p className="text-gray-400 text-xs">45 分钟课程</p>
+                                        <button className="bg-green-500 text-white px-3 py-1 rounded-full text-xs mt-2">
+                                            <i className="fas fa-video mr-1"></i>观看教程
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="bg-white rounded-lg p-8 shadow-sm">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-semibold">创作展示墙</h2>
+                            <div className="flex space-x-4">
+                                <select 
+                                    value={sortBy}
+                                    onChange={(e) => handleSortChange(e.target.value)}
+                                    className="border border-gray-300 rounded px-3 py-1 text-sm"
+                                >
+                                    <option value="按日期排序">按日期排序</option>
+                                    <option value="按热度排序">按热度排序</option>
+                                </select>
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        placeholder="搜索作品..."
+                                        value={searchTerm}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        className="border border-gray-300 rounded-l px-3 py-1 w-48 text-sm"
+                                    />
+                                    <button className="bg-yellow-500 text-white px-4 py-1 rounded-r text-sm">
+                                        <i className="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {searchTerm && searchTerm === '测试作品' ? (
+                            <div className="text-center py-20 text-gray-500">
+                                没有找到匹配的作品
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {filteredWorks.map((work) => (
+                                        <div key={work.id} className="bg-gray-50 rounded-lg overflow-hidden">
+                                            <div className="relative">
+                                                <img src={work.image} alt={work.title} className="w-full h-48 object-cover" />
+                                                <div className="absolute top-3 right-3">
+                                                    <span className={`px-2 py-1 rounded text-xs text-white`}>
+                                                        {work.tag}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="font-semibold mb-2">{work.title}</h3>
+                                                <p className="text-gray-600 text-sm mb-4">{work.subtitle}</p>
+                                                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                                    <span><i className="fas fa-user mr-1"></i>{work.author}</span>
+                                                    <div className="flex space-x-4">
+                                                        <span className="flex items-center"><i className="fas fa-heart text-red-500 mr-1"></i>{work.likes}</span>
+                                                        <span className="flex items-center"><i className="fas fa-comment text-blue-500 mr-1"></i>{work.comments}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex space-x-2">
+                                                    <button 
+                                                        onClick={() => handleEdit(work)}
+                                                        className="w-8 h-8 bg-blue-500 text-white rounded flex items-center justify-center hover:bg-blue-600"
+                                                    >
+                                                        <i className="fas fa-edit text-xs"></i>
+                                                    </button>
+                                                    <button className="w-8 h-8 bg-red-500 text-white rounded flex items-center justify-center hover:bg-red-600">
+                                                        <i className="fas fa-trash text-xs"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {switchCurrentPageButton}
+                            </>
+                        )}
+                    </div>
+                );
+            };
+
+            const switchCurrentPageButton = () => {
+                if (currentPage === 'gallery') {
+                    return (
+                        <div className="flex space-x-4 mt-8">
+                            <button 
+                                onClick={() => setCurrentPage('overview')}
+                                className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-medium"
+                            >
+                                首页概览
+                            </button>
+                            <div className="bg-gray-200 text-white px-4 py-2 rounded-lg font-medium">展示区</div>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <button 
+                            onClick={() => setCurrentPage('overview')}
+                            className="bg-gray-300 text-gray-600 px-4 py-2 rounded-lg font-medium mb-8 opacity-75"
+                        >
+                            首页概览
+                        </button>
+                    );
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <div className="flex items-center">
+                                        <i className="fas fa-paint-brush text-yellow-500 text-xl mr-2"></i>
+                                        <span className="text-xl font-bold text-gray-800">在线涂鸦墙</span>
+                                    </div>
+                                </div>
+                                
+                                <nav className="flex items-center space-x-6 mt-6">
+                                    <button 
+                                        onClick={() => setCurrentPage('overview')}
+                                        className={`px-3 py-2 rounded text-sm font-medium ${
+                                            currentPage === 'overview' ? 'bg-yellow-100 text-gray-800' : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                    >
+                                        <i className="fas fa-home mr-1"></i>首页概览
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('gallery')}
+                                        className={`px-3 py-2 rounded text-sm font-medium ${
+                                            currentPage === 'gallery' ? 'bg-yellow-100 text-gray-800' : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                    >
+                                        <i className="fas fa-images mr-1"></i>展示区
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                        <i className="fas fa-edit mr-1"></i>编辑区
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                        <i className="fas fa-chart-bar mr-1"></i>统计区
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                        <i className="fas fa-question-circle mr-1"></i>帮助说明
+                                    </button>
+                                </nav>
+                                
+                                <div className="flex items-center space-x-3">
+                                    <button className="text-gray-600 hover:text-gray-800">
+                                        <i className="fas fa-user mr-1"></i>我的画板
+                                    </button>
+                                    <button className="text-gray-600 hover:text-gray-800">
+                                        <i className="fas fa-bell mr-1"></i>消息通知
+                                    </button>
+                                    <div className="w-8 h-8 bg-gray-300 rounded-full">
+                                        <img src="https://picsum.photos/id/91/32/32" alt="用户头像" className="w-full h-full rounded-full object-cover" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="flex gap-6">
+                            <aside className="w-64 space-y-6">
+                                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
+                                    <div className="flex items-center mb-3">
+                                        <i className="fas fa-lightbulb text-blue-400 mr-2"></i>
+                                        <h3 className="font-semibold text-blue-800">小贴士</h3>
+                                    </div>
+                                    <p className="text-sm text-blue-700">
+                                        在这里，每一笔都能被世界看见！使用多种画笔与模板，创作你的个性涂鸦。
+                                    </p>
+                                </div>
+                            </aside>
+
+                            <main className="flex-1">
+                                {renderMainContent()}
+                            </main>
+                        </div>
+                    </div>
+
+                    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 text-xs text-gray-500 py-4">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <div className="text-center flex-1 mr-8">
+                                <div className="flex items-center mb-2">
+                                    <i className="fas fa-paint-brush text-yellow-500 text-lg mr-2"></i>
+                                    <span className="font-semibold">在线涂鸦墙 - 让创意无限绽放</span>
+                                </div>
+                                <p className="text-gray-400">使用条款 | 隐私政策 | 关于我们 | <a href="#" className="text-blue-500 underline">联系我们</a></p>
+                            </div>
+                            <div className="text-center">
+                                版本号: v1.2.5
+                            </div>
+                        </div>
+                    </footer>
+
+                    <FloatingPanel show={showEditModal} onClose={handleCancelEdit} editingWork={editingWork} />
+
+                    <ModalPanel show={showDeleteModal} onClose={handleCancelDelete} title="确认删除" message={`确认要删除"${confirmDelete || '浪漫彩虹'}"这幅作品吗？此操作不可撤销。`} actions={[{ text: '再想想', onClick: handleCancelDelete }, { text: '确认删除', onClick: handleConfirmDelete, color: 'red' }]} />
+                </div>
+            );
+        }
+
+        function FloatingPanel({ show, onClose, editingWork, setEditingWork }) {
+            if (!show) return null;
+
+            return (
+                <div className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-semibold text-lg">编辑涂鸦</h3>
+                            <button 
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">标题</label>
+                                <input 
+                                    type="text" 
+                                    defaultValue={editingWork?.title || '浪漫彩虹'} 
+                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">描述</label>
+                                <textarea 
+                                    defaultValue={editingWork?.subtitle || '用七彩颜色描绘出的梦幻彩虹'} 
+                                    className="w-full border border-gray-300 rounded px-3 py-2 h-20 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">标签 (用逗号分隔)</label>
+                                <input 
+                                    type="text" 
+                                    defaultValue={editingWork?.tag || '手绘，涂鸦，色彩'} 
+                                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex space-x-3 mt-6">
+                            <button 
+                                onClick={onClose}
+                                className="flex-1 bg-gray-200 text-gray-600 py-2 rounded hover:bg-gray-300"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={handleSaveChanges}
+                                className="flex-1 bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600"
+                            >
+                                保存更改
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ModalPanel({ show, onClose, title, message, actions }) {
+            if (!show) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i className="fas fa-exclamation text-red-500 text-2xl"></i>
+                            </div>
+                            <h3 className="text-lg font-semibold mb-4">{title}</h3>
+                            <p className="text-gray-600 text-sm leading-relaxed">{message}</p>
+                        </div>
+
+                        <div className="flex space-x-3">
+                            {actions.map((action, index) => (
+                                <button 
+                                    key={index}
+                                    onClick={action.onClick}
+                                    className={`flex-1 py-3 rounded-lg font-medium text-sm ${
+                                        action.color ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600'
+                                    }`}
+                                >
+                                    {action.text}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

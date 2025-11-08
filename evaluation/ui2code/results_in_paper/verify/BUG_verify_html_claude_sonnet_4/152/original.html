@@ -1,0 +1,423 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏排行榜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showHelpModal, setShowHelpModal] = useState(false);
+            const [showAddGameModal, setShowAddGameModal] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('全部游戏');
+            const [sortBy, setSortBy] = useState('默认排序');
+            const [sortOrder, setSortOrder] = useState('升序');
+            const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+            const [gameData, setGameData] = useState([
+                {
+                    id: 1,
+                    title: '魔法王国',
+                    downloads: 550,
+                    rating: 9.1,
+                    updateDate: '3/27/2023',
+                    tags: ['魔法', '奇幻', 'RPG'],
+                    image: 'https://picsum.photos/id/1/200/120',
+                    category: 'RPG'
+                },
+                {
+                    id: 2,
+                    title: '太空射击王',
+                    downloads: 98.6,
+                    rating: 8.7,
+                    updateDate: '6/21/2023',
+                    tags: ['射击', '动作', '科幻'],
+                    image: 'https://picsum.photos/id/2/200/120',
+                    category: '射击'
+                },
+                {
+                    id: 3,
+                    title: '幻境冒险',
+                    downloads: 150,
+                    rating: 9.3,
+                    updateDate: '5/14/2023',
+                    tags: ['冒险', 'RPG', '开放世界'],
+                    image: 'https://picsum.photos/id/3/200/120',
+                    category: '冒险'
+                },
+                {
+                    id: 4,
+                    title: '豪车极速',
+                    downloads: 120,
+                    rating: 8.5,
+                    updateDate: '7/4/2023',
+                    tags: ['竞速', '体育', '多人'],
+                    image: 'https://picsum.photos/id/4/200/120',
+                    category: '体育'
+                },
+                {
+                    id: 5,
+                    title: '美食大亨',
+                    downloads: 230,
+                    rating: 7.9,
+                    updateDate: '4/9/2023',
+                    tags: ['模拟', '经营', '休闲'],
+                    image: 'https://picsum.photos/id/5/200/120',
+                    category: '经营'
+                }
+            ]);
+
+            const filteredGames = selectedCategory === '全部游戏' 
+                ? gameData 
+                : gameData.filter(game => game.category === selectedCategory);
+
+            const sortedGames = [...filteredGames].sort((a, b) => {
+                if (sortBy === '按下载量排序') {
+                    return sortOrder === '降序' ? b.downloads - a.downloads : a.downloads - b.downloads;
+                }
+                return 0;
+            });
+
+            const handleCategoryClick = (category) => {
+                setSelectedCategory(category);
+                setSortBy('默认排序');
+                setSortOrder('升序');
+            };
+
+            const handleSortChange = (newSortBy) => {
+                setSortBy(newSortBy);
+                setShowSortDropdown(false);
+            };
+
+            const toggleSortOrder = () => {
+                setSortOrder(sortOrder === '升序' ? '降序' : '升序');
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-purple-700 text-white px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-8">
+                                <h1 className="text-xl font-bold flex items-center">
+                                    🎮 游戏排行榜
+                                </h1>
+                                <nav className="flex space-x-6">
+                                    <button className="bg-cyan-500 px-4 py-2 rounded text-sm">排行榜</button>
+                                    <button className="text-white px-4 py-2 text-sm">统计</button>
+                                    <button 
+                                        className="text-white px-4 py-2 text-sm"
+                                        onClick={() => setShowHelpModal(true)}
+                                    >
+                                        帮助
+                                    </button>
+                                </nav>
+                            </div>
+                            <button 
+                                className="bg-orange-500 px-4 py-2 rounded text-sm flex items-center"
+                                onClick={() => setShowAddGameModal(true)}
+                            >
+                                + 添加新游戏
+                            </button>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-white h-screen shadow-sm">
+                            <div className="p-4">
+                                <div className="mb-6">
+                                    <div className="flex items-center text-gray-700 mb-3">
+                                        <i className="fas fa-home mr-2"></i>
+                                        <span className="text-sm">首页概览</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-700 mb-3">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        <span className="text-sm">排行榜管理</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-700 mb-3">
+                                        <i className="fas fa-chart-line mr-2"></i>
+                                        <span className="text-sm">数据统计</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-700 mb-3">
+                                        <i className="fas fa-cog mr-2"></i>
+                                        <span className="text-sm">系统设置</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-gray-500 text-xs mb-3">游戏分类</h3>
+                                    {['全部游戏', '冒险', 'RPG', '开放世界', '射击', '动作', '休闲', '经营', '体育', '老友'].map((category) => (
+                                        <div 
+                                            key={category}
+                                            className={`cursor-pointer py-1 px-2 text-sm rounded ${
+                                                selectedCategory === category 
+                                                    ? 'bg-cyan-100 text-cyan-700' 
+                                                    : 'text-gray-600 hover:bg-gray-100'
+                                            }`}
+                                            onClick={() => handleCategoryClick(category)}
+                                        >
+                                            {category}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-semibold">游戏排行榜</h2>
+                                <div className="flex items-center space-x-4">
+                                    <div className="relative">
+                                        <button 
+                                            className="border border-gray-300 px-4 py-2 text-sm rounded bg-white flex items-center"
+                                            onClick={() => setShowSortDropdown(!showSortDropdown)}
+                                        >
+                                            {sortBy}
+                                            <i className="fas fa-chevron-down ml-2"></i>
+                                        </button>
+                                        {showSortDropdown && (
+                                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                                <div 
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                    onClick={() => handleSortChange('默认排序')}
+                                                >
+                                                    默认排序
+                                                </div>
+                                                <div 
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                    onClick={() => handleSortChange('按下载量排序')}
+                                                >
+                                                    按下载量排序
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {sortBy === '按下载量排序' && (
+                                        <button 
+                                            className="bg-purple-600 text-white px-4 py-2 text-sm rounded"
+                                            onClick={toggleSortOrder}
+                                        >
+                                            {sortOrder}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {sortedGames.map((game, index) => (
+                                    <div key={game.id} className="bg-white rounded-lg p-4 shadow-sm flex items-center">
+                                        <div className="bg-purple-600 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold mr-4">
+                                            {index + 1}
+                                        </div>
+                                        <img 
+                                            src={game.image} 
+                                            alt={game.title}
+                                            className="w-24 h-16 object-cover rounded mr-4"
+                                        />
+                                        <div className="flex-1">
+                                            <h3 className="font-semibold text-lg">{game.title}</h3>
+                                            <div className="text-gray-600 text-sm mb-2">
+                                                <span className="mr-4">📱 {game.downloads}万 下载</span>
+                                                <span>📅 更新于 {game.updateDate}</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                {game.tags.map((tag, i) => (
+                                                    <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-4">
+                                            <div className="flex items-center">
+                                                <span className="text-yellow-500 mr-1">⭐</span>
+                                                <span className="font-semibold">{game.rating}</span>
+                                            </div>
+                                            <button className="border border-purple-600 text-purple-600 px-4 py-2 rounded text-sm">
+                                                编辑
+                                            </button>
+                                            <button className="border border-red-500 text-red-500 px-4 py-2 rounded text-sm">
+                                                删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-64 bg-white p-4">
+                            <h3 className="font-semibold mb-4">统计概览</h3>
+                            <div className="space-y-4 mb-6">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">游戏总数</span>
+                                    <span className="font-semibold">5</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">今日新增</span>
+                                    <span className="font-semibold text-blue-600">2</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">访问量</span>
+                                    <span className="font-semibold text-orange-600">15,783</span>
+                                </div>
+                            </div>
+
+                            <h3 className="font-semibold mb-4">排行榜特色</h3>
+                            <div className="space-y-3 text-sm text-gray-600 mb-6">
+                                <div className="flex items-start">
+                                    <span className="mr-2">📊</span>
+                                    <span>实时更新，为好友发送游戏排行榜</span>
+                                </div>
+                                <div className="flex items-start">
+                                    <span className="mr-2">🌍</span>
+                                    <span>全球数据同步，掌握国际游戏动态</span>
+                                </div>
+                                <div className="flex items-start">
+                                    <span className="mr-2">🏆</span>
+                                    <span>玩家评分机制，真实反映游戏质量</span>
+                                </div>
+                                <div className="flex items-start">
+                                    <span className="mr-2">💎</span>
+                                    <span>社区投票支持，由玩家共同决定</span>
+                                </div>
+                            </div>
+
+                            <h3 className="font-semibold mb-4">快捷操作</h3>
+                            <div className="space-y-2">
+                                <button className="w-full bg-purple-600 text-white py-2 rounded text-sm">
+                                    🔍 导出数据
+                                </button>
+                                <button className="w-full bg-cyan-500 text-white py-2 rounded text-sm">
+                                    📊 数据图表
+                                </button>
+                                <button className="w-full bg-gray-500 text-white py-2 rounded text-sm">
+                                    ⚙️ 设置
+                                </button>
+                                <button className="w-full bg-orange-500 text-white py-2 rounded text-sm">
+                                    💡 帮助
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Add Game Modal */}
+                    {showAddGameModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="bg-purple-600 text-white px-4 py-2 -mx-6 -mt-6 rounded-t-lg mb-4 flex justify-between items-center">
+                                    <h3 className="font-semibold">添加新游戏</h3>
+                                    <button 
+                                        className="text-white"
+                                        onClick={() => setShowAddGameModal(false)}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">游戏名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入游戏名称"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">评分 (0-10)</label>
+                                        <input 
+                                            type="number" 
+                                            min="0" 
+                                            max="10"
+                                            defaultValue="0"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">下载量</label>
+                                        <input 
+                                            type="number" 
+                                            defaultValue="0"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">封面图URL</label>
+                                        <input 
+                                            type="text" 
+                                            defaultValue="https://picsum.photos/id/123/200/200"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">游戏标签</label>
+                                        <div className="grid grid-cols-3 gap-2 text-xs">
+                                            {['RPG', '冒险', '动作', '射击', '策略', '模拟', '休闲', '体育', '竞速', '科幻', '奇幻', '开放世界'].map(tag => (
+                                                <button 
+                                                    key={tag}
+                                                    className="border border-gray-300 rounded px-2 py-1 hover:bg-gray-100"
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <p className="text-red-500 text-xs mt-1">请至少选择一个标签</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        className="px-4 py-2 border border-gray-300 rounded text-sm"
+                                        onClick={() => setShowAddGameModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="px-4 py-2 bg-purple-600 text-white rounded text-sm">
+                                        提交
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-gray-800 text-white py-4 px-6">
+                        <div className="flex justify-between text-sm">
+                            <span>© 2023 游戏排行榜 | 版本 1.0.0</span>
+                            <div className="space-x-4">
+                                <span>联系我们</span>
+                                <span>隐私政策</span>
+                                <span>使用条款</span>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

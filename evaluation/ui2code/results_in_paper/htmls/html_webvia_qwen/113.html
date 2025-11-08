@@ -1,0 +1,762 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校招简历管家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Microsoft+YaHei:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [currentView, setCurrentView] = useState('home');
+            const [showResumeForm, setShowResumeForm] = useState(false);
+            const [resumeName, setResumeName] = useState('2024校招-张三简历');
+            const [formData, setFormData] = useState({
+                name: '张三',
+                phone: '13800138000',
+                email: 'zhangsan@example.com',
+                position: '软件开发工程师',
+                eduStatus: 0,
+                projectStatus: 0,
+                skillsCount: 0
+            });
+
+            const handleStartCreation = () => {
+                setShowResumeForm(true);
+                setCurrentView('new');
+            };
+
+            const handleNewResume = () => {
+                setShowResumeForm(true);
+                setCurrentView('new');
+            };
+
+            const handleEducationAdd = () => {
+                setFormData({...formData, eduStatus: 1});
+            };
+
+            const handleProjectAdd = () => {
+                setFormData({...formData, projectStatus: 1});
+            };
+
+            const handleEditResume = () => {
+                setCurrentView('edit');
+            };
+
+            const handlePrivacyPolicy = () => {
+                setCurrentPage('privacy');
+            };
+
+            const handleExit = () => {
+                setShowResumeForm(false);
+                setCurrentView('home');
+            };
+
+            const handleSave = () => {
+                setShowResumeForm(false);
+            };
+
+            // Navigation bar
+            const NavBar = () => (
+                <div className="bg-slate-700 text-white px-6 py-4">
+                    <div className="max-w-7xl mx-auto flex justify-between items-center">
+                        <div className="flex items-center cursor-pointer" onClick={() => setCurrentPage('home')}>
+                            <i className="fas fa-file-alt mr-2 text-lg"></i>
+                            <span className="text-lg font-medium">校招简历管家</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button 
+                                className={`px-4 py-2 rounded text-sm ${currentPage === 'home' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}
+                                onClick={handleStartCreation}
+                            >
+                                首页
+                            </button>
+                            <button className={`px-4 py-2 rounded text-sm ${currentPage === 'home' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'}`}>
+                                我的简历
+                            </button>
+                            <button className="text-gray-300 hover:text-white text-sm">模板库</button>
+                            <button className="text-gray-300 hover:text-white text-sm">帮助中心</button>
+                            <button className="text-gray-300 hover:text-white text-sm">设置</button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Footer
+            const Footer = () => (
+                <div className="bg-slate-700 text-gray-300 text-center py-4 text-sm">
+                    © 2024 校招简历管家 | 隐私协议 | 用户协议
+                </div>
+            );
+
+            // Header and main content header
+            const PageHeader = () => {
+                let headerContent;
+                if (currentPage === 'privacy') {
+                    headerContent = (
+                        <div className="bg-white py-8 mx-6 max-w-5xl">
+                            <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">校招应届生简历制作平台</h1>
+                            <p className="text-gray-600 text-center mb-6">一站式简历撰写、可视化预览、智能排版、数据化统计，助力你的职场起步</p>
+                            <div className="flex justify-center space-x-4">
+                                <button 
+                                    className="flex items-center px-6 py-2 bg-slate-600 text-white rounded hover:bg-slate-700"
+                                    onClick={() => setCurrentPage('home')}
+                                >
+                                    <i className="fas fa-search mr-2"></i>
+                                    立即开始制作
+                                </button>
+                                <button className="flex items-center px-6 py-2 bg-slate-600 text-white rounded hover:bg-slate-700">
+                                    <i className="fas fa-eye mr-2"></i>
+                                    查看示例模板
+                                </button>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    headerContent = (
+                        <div className="flex justify-center py-16">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-800 text-center mb-2">校招应届生简历制作平台</h1>
+                                <p className="text-gray-600 text-center mb-6">一站式简历撰写、可视化预览、智能排版、数据化统计，助力你的职场起步</p>
+                                <div className="flex justify-center space-x-4">
+                                    <button 
+                                        className="flex items-center px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800"
+                                        onClick={handleStartCreation}
+                                    >
+                                        <i className="fas fa-edit mr-2"></i>
+                                        立即开始制作
+                                    </button>
+                                    <button className="flex items-center px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800">
+                                        <i className="fas fa-eye mr-2"></i>
+                                        查看示例模板
+                                    </button>
+                                </div>
+                            </div>
+                            {currentPage === 'home' && (
+                                <div className="absolute top-4 right-8 flex items-center space-x-4">
+                                    <img src="https://picsum.photos/id/1080/150/150" alt="帮助中心" className="rounded-lg" />
+                                    <div className="flex flex-col">
+                                        <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0"></div>
+                                        <span className="bg-gray-700 px-3 py-1 rounded text-white text-sm cursor-pointer hover:bg-gray-600">使用此模板</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+
+                if (currentPage === 'privacy') {
+                    return (
+                        <div className="flex flex-col min-h-screen pb-20">
+                            <NavBar />
+                            <div className="flex-1 px-6">{headerContent}</div>
+                            <Footer />
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="flex flex-col min-h-screen pb-20">
+                        <NavBar />
+                        <div className="flex-1 px-6">
+                            {headerContent}
+                            <div className="grid grid-cols-4 gap-6 mx-6 mt-6">
+                                <div className="bg-yellow-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-yellow-600" onClick={() => setCurrentView('home')}>
+                                    <i className="fas fa-plus mr-2"></i>
+                                    <span>新增简历</span>
+                                </div>
+                                <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600" onClick={() => setCurrentView('profile')}>
+                                    <i className="fas fa-folder mr-2"></i>
+                                    <span>我的简历</span>
+                                </div>
+                                <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600" onClick={() => setCurrentView('projects')}>
+                                    <i className="fas fa-list mr-2"></i>
+                                    <span>我的项目</span>
+                                </div>
+                                <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600" onClick={() => setCurrentView('reports')}>
+                                    <i className="fas fa-chart-bar mr-2"></i>
+                                    <span>统计报表</span>
+                                </div>
+                                <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600" onClick={() => setCurrentView('accounts')}>
+                                    <i className="fas fa-user mr-2"></i>
+                                    <span>账号管理</span>
+                                </div>
+                            </div>
+                        </div>
+                        <Footer />
+                        {showResumeForm && (
+                            <ResumeFormForm 
+                                formData={formData} 
+                                setFormData={setFormData}
+                                resumeName={resumeName}
+                                setResumeName={setResumeName}
+                                onEditResume={handleEditResume}
+                                onClose={handleExit}
+                                onSave={handleSave}
+                            />
+                        )}
+                        {(currentPage === 'home' && currentView !== 'home') && (
+                            <ResumeFormForm 
+                                formData={formData} 
+                                setFormData={setFormData}
+                                resumeName={resumeName}
+                                setResumeName={setResumeName}
+                                onEditResume={handleEditResume}
+                                onClose={handleExit}
+                                onSave={handleSave}
+                            />
+                        )}
+                    </div>
+                );
+            };
+
+            const ResumeFormForm = ({ 
+                formData, 
+                setFormData, 
+                resumeName,
+                setResumeName,
+                onEditResume,
+                onClose,
+                onSave
+            }) => (
+                <div className="py-8">
+                    <div className="grid grid-cols-4 gap-6 mx-6 mb-6">
+                        <div className="bg-yellow-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-yellow-600">
+                            <i className="fas fa-plus mr-2"></i>
+                            <span>新增简历</span>
+                        </div>
+                        <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                            <i className="fas fa-folder mr-2"></i>
+                            <span>我的简历</span>
+                        </div>
+                        <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                            <i className="fas fa-list mr-2"></i>
+                            <span>我的项目</span>
+                        </div>
+                        <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                            <i className="fas fa-chart-bar mr-2"></i>
+                            <span>统计报表</span>
+                        </div>
+                        <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                            <i className="fas fa-user mr-2"></i>
+                            <span>账号管理</span>
+                        </div>
+                    </div>
+
+                    {currentPage === 'home' && !showResumeForm && currentView === 'home' && (
+                        <div className="bg-white rounded-lg shadow-lg p-6 w-full">
+                            <h3 className="text-xl font-semibold mb-4 flex items-center">
+                                <i className="fas fa-edit text-blue-600 mr-2"></i>
+                                招应届生简历制作平台
+                            </h3>
+                            <p className="text-gray-600 mb-6">一站式简历撰写、可视化预览、智能排版、数据化统计，助力你的职场起步</p>
+                            <div className="flex justify-center">
+                                <div className="flex space-x-4">
+                                    <button 
+                                        className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800 flex items-center"
+                                        onClick={handleStartCreation}
+                                    >
+                                        <i className="fas fa-edit mr-2"></i>
+                                        立即开始制作
+                                    </button>
+                                    <button className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800 flex items-center">
+                                        <i className="fas fa-eye mr-2"></i>
+                                        <span>查看示例模板</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {!showResumeForm && currentView !== 'home' && (
+                        <div className="bg-white rounded-lg shadow-lg p-6 w-full">
+                            <h3 className="text-xl font-semibold mb-4 flex items-center">
+                                <i className="fas fa-edit text-blue-600 mr-2"></i>
+                                高校应届生简历制作平台
+                            </h3>
+                            <p className="text-gray-600 mb-6">一站式简历撰写、可视化预览、智能排版、数据化统计，助力你的职场起步</p>
+                            <div className="flex justify-center">
+                                <div className="flex space-x-4">
+                                    <button 
+                                        className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800 flex items-center"
+                                        onClick={handleStartCreation}
+                                    >
+                                        <i className="fas fa-edit mr-2"></i>
+                                        立即开始制作
+                                    </button>
+                                    <button className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800 flex items-center">
+                                        <i className="fas fa-eye mr-2"></i>
+                                        <span>查看示例模板</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+
+            const Sidebar = ({ onEditResume }) => (
+                <div className="w-80 mx-6 mt-8">
+                    <div className="bg-slate-50 rounded-lg p-4">
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-3 cursor-pointer hover:bg-slate-600 p-2 rounded" onClick={onEditResume}>
+                                <i className="fas fa-plus text-yellow-500"></i>
+                                <span className="font-medium">新增简历</span>
+                            </div>
+                            <div className="flex items-center space-x-3 cursor-pointer hover:bg-slate-600 p-2 rounded">
+                                <i className="fas fa-folder text-blue-500"></i>
+                                <span className="font-medium">我的简历</span>
+                            </div>
+                            <div className="flex items-center space-x-3 cursor-pointer hover:bg-slate-600 p-2 rounded">
+                                <i className="fas fa-list text-green-500"></i>
+                                <span className="font-medium">我的项目</span>
+                            </div>
+                            <div className="flex items-center space-x-3 cursor-pointer hover:bg-slate-600 p-2 rounded">
+                                <i className="fas fa-chart-bar text-purple-500"></i>
+                                <span className="font-medium">统计报表</span>
+                            </div>
+                            <div className="flex items-center space-x-3 cursor-pointer hover:bg-slate-600 p-2 rounded">
+                                <i className="fas fa-user text-orange-500"></i>
+                                <span className="font-medium">账号管理</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const HomePage = () => (
+                <div className="flex-1">
+                    <Sidebar onEditResume={handleEditResume} />
+                    <div className="flex-1 mx-6 mt-8">
+                        <div className="w-full">
+                            <button className="fixed top-8 right-8 flex items-center space-x-2">
+                                <i className="fas fa-folder"></i>
+                                <span>我的简历</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const CurrentView = () => {
+                if (currentPage === 'privacy') {
+                    if (currentView === 'home') {
+                        return <HomePage />;
+                    }
+                }
+
+                return showResumeForm ? (
+                    <div className="w-full max-w-7xl mx-auto">
+                        <div className="grid grid-cols-3 gap-8 px-6 mt-8">
+                            <div className="col-span-2 space-y-6">
+                                <div className="bg-white rounded-lg shadow-lg p-6">
+                                    <h2 className="text-lg font-semibold mb-4 flex items-center">
+                                        <i className="fas fa-user text-blue-600 mr-2"></i>
+                                        我的简历
+                                    </h2>
+                                    
+                                    <div className="mb-6">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-medium">{resumeName}</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="flex items-center px-4 py-2 text-sm border rounded hover:bg-slate-50">
+                                                    <i className="far fa-eye mr-1"></i>
+                                                    预览
+                                                </button>
+                                                <button className="flex items-center px-4 py-2 text-sm border rounded hover:bg-slate-50">
+                                                    <i className="fas fa-download mr-1"></i>
+                                                    导出PDF
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                                <i className="fas fa-user text-white text-sm"></i>
+                                            </div>
+                                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-3">
+                                                <i className="fas fa-calendar text-white text-sm"></i>
+                                            </div>
+                                            <p className="text-sm text-gray-500">
+                                                <span className="font-medium">完成度</span><br />
+                                                85%
+                                            </p>
+                                            <div className="w-full bg-gray-200 mt-2 rounded">
+                                                <div className="h-2 bg-gray-200 rounded" style={{width: '85%'}}></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-start">
+                                            <img src="https://picsum.photos/id/1005/50/50" alt="用户头像" className="w-12 h-12 rounded-full mr-4 mb-2" />
+                                            <div>
+                                                <div className="font-medium text-sm">最后编辑: 2024-05-10</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <h3 className="font-medium">常见问题FAQ</h3>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <div className="border-b pb-2">
+                                                    <span className="text-sm font-medium">如何导出PDF？</span>
+                                                    <p className="text-xs text-gray-500 mt-1 opacity-80">点击简历卡片底部的"导出PDF"按钮即可导出当前简历。</p>
+                                                </div>
+                                                <div className="border-b pb-2">
+                                                    <span className="text-sm font-medium">如何使用智能排版？</span>
+                                                    <p className="text-xs text-gray-500 mt-1 opacity-80">编辑简历时，系统会自动为您的内容进行智能排版，无需手动调整。</p>
+                                                </div>
+                                                <div className="border-b pb-2">
+                                                    <span className="text-sm font-medium">简历有字数限制吗？</span>
+                                                    <p className="text-xs text-gray-500 mt-1 opacity-80">为了保证简历的可读性和专业性，我们建议每个项目描述控制在100字以内。</p>
+                                                </div>
+                                                <div className="border-b pb-2">
+                                                    <span className="text-sm font-medium">可以使用自定义模板吗？</span>
+                                                    <p className="text-xs text-gray-500 mt-1 opacity-80">高级会员可以上传自定义模板或修改现有模板的样式。</p>
+                                                </div>
+                                                <div className="border-b pb-2">
+                                                    <span className="text-sm font-medium">如何提高简历完成度？</span>
+                                                    <p className="text-xs text-gray-500 mt-1 opacity-80">完善所有必填字段，并添加至少一条教育经历、项目经验或技能即可提高完成度。</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center mb-3">
+                                                <i className="fas fa-keyboard mr-2"></i>
+                                                <span className="text-sm font-medium">操作指引: 简历编辑快捷键</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+S 保存</span>
+                                                <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+Z 撤销</span>
+                                                <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+Y 重做</span>
+                                                <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+B 加粗</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg shadow-lg p-6">
+                                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                                        <i className="fas fa-question-circle text-blue-600 mr-2"></i>
+                                        常见问题FAQ
+                                    </h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="border-b pb-4">
+                                            <div className="text-sm font-medium mb-2">如何导出PDF？</div>
+                                            <div className="text-sm text-gray-600">
+                                                点击简历卡片底部的"导出PDF"按钮即可导出当前简历。 
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="border-b pb-4">
+                                            <div className="text-sm font-medium mb-2">如何使用智能排版？</div>
+                                            <div className="text-sm text-gray-600">
+                                                编辑简历时，系统会自动为您
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="border-b pb-4">
+                                            <div className="text-sm font-medium mb-2">简历有字数限制吗？</div>
+                                            <div className="text-sm text-gray-600">
+                                                为了保证简历的可读性和专业性，我们建议每个
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="border-b pb-4">
+                                            <div className="text-sm font-medium mb-2">可以使用自定义模板吗？</div>
+                                            <div className="text-sm text-gray-600">
+                                                高级会员可以上传自定义模板或修改现有
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="border-b pb-4">
+                                            <div className="text-sm font-medium mb-2">如何提高简历完成度？</div>
+                                            <div className="text-sm text-gray-600">
+                                                完善所有必填字段，并添加至少一条教育经历
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-6">
+                                        <div className="flex items-center mb-3">
+                                            <i className="fas fa-keyboard mr-2"></i>
+                                            <span className="text-sm font-medium">操作指引: 简历编辑快捷键</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+S 保存</span>
+                                            <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+Z 撤销</span>
+                                            <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+Y 重做</span>
+                                            <span className="text-xs text-gray-500 bg-slate-100 px-2 py-1 rounded">Ctrl+B 加粗</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-medium">实时统计</h3>
+                                        <div className="text-sm text-gray-500">简历完成度</div>
+                                    </div>
+                                    <button className="text-white text-sm px-3 py-1 rounded bg-blue-600">
+                                        <i className="fas fa-sync-alt mr-1"></i>
+                                        更新
+                                    </button>
+                                </div>
+                                
+                                <div className="text-center mb-4">
+                                    <img src="https://picsum.photos/id/1025/120/120" alt="设备" className="w-32 h-32 rounded-lg mx-auto mb-2" />
+                                    <p className="font-medium">简历完成进度</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span>基本信息</span>
+                                            <span className="text-blue-600">90%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '90%'}}></div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span>项目经验</span>
+                                            <span className="text-orange-600">70%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-orange-600 h-2 rounded-full" style={{width: '70%'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span>技能证书</span>
+                                            <span className="text-green-600">60%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-green-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span>教育经历</span>
+                                            <span className="text-blue-600">80%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-blue-600 h-2 rounded-full" style={{width: '80%'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="text-xs text-gray-500">
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between">
+                                            <span>最近30天操作次数</span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center space-x-2">
+                                                <button className="text-gray-400 w-6 h-6 rounded flex items-center justify-center">
+                                                    <span>10</span>
+                                                </button>
+                                                <span>09</span>
+                                                <button className="text-gray-400 w-6 h-6 rounded flex items-center justify-center">
+                                                    <span>08</span>
+                                                </button>
+                                                <button className="text-gray-400 w-6 h-6 rounded flex items-center justify-center">
+                                                    <span>07</span>
+                                                </button>
+                                                <button className="text-gray-400 w-6 h-6 rounded flex items-center justify-center">
+                                                    <span>06</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="w-full bg-white rounded-lg shadow-lg mt-8">
+                            <div className="p-6">
+                                <h3 className="text-lg font-semibold mb-6 flex items-center">
+                                    <i className="fas fa-arrow-left mr-2"></i>
+                                    最新操作记录
+                                </h3>
+                                
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="flex items-start space-x-3">
+                                        <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded flex-shrink-0">新建</span>
+                                        <div>
+                                            <div className="font-medium">2024校招-张三简历</div>
+                                            <div className="text-xs text-gray-500 flex justify-between">
+                                                <span>编辑</span>
+                                                <span>10分钟前</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded flex-shrink-0">新建</span>
+                                        <div>
+                                            <div className="font-medium">2024校招-李四简历</div>
+                                            <div className="text-xs text-gray-500 flex justify-between">
+                                                <span>新建</span>
+                                                <span>5小时前</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded flex-shrink-0">导出</span>
+                                        <div>
+                                            <div className="font-medium">2024校招-张三简历</div>
+                                            <div className="text-xs text-gray-500 flex justify-between">
+                                                <span>导出</span>
+                                                <span>2小时前</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded flex-shrink-0">删除</span>
+                                        <div>
+                                            <div className="font-medium">旧版简历</div>
+                                            <div className="text-xs text-gray-500">1天前</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-3">
+                                        <span className="bg-slate-800 text-white text-xs px-2 py-1 rounded flex-shrink-0">编辑</span>
+                                        <div>
+                                            <div className="font-medium">2024校招-张三简历</div>
+                                            <div className="text-xs text-gray-500">2天前</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 bg-white border rounded-lg p-3 flex items-center text-xs text-gray-500">
+                                    <img src="https://picsum.photos/id/1074/24/24" alt="frequency" className="w-6 h-6 mr-2" />
+                                    <span>新操作记录将实时显示在上方列表</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="w-full bg-white rounded-lg shadow-lg mt-8">
+                            <div className="p-6">
+                                <h3 className="text-lg font-semibold mb-6 flex items-center">
+                                    <i className="fas fa-images mr-2"></i>
+                                    精选模板
+                                </h3>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="aspect-video rounded-lg overflow-hidden">
+                                        <img src="https://picsum.photos/id/1018/400/300" alt="模板图片" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="aspect-video rounded-lg overflow-hidden">
+                                        <img src="https://picsum.photos/id/1015/400/300" alt="模板图片" className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 flex items-center space-x-3">
+                                    <span className="text-xs text-gray-500">模板预览列表</span>
+                                    <img src="https://picsum.photos/id/1016/24/24" alt="使用" className="w-6 h-6" />
+                                    <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded">使用此模板</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const PrivacyPage = () => (
+                <div className="flex-1">
+                    <div className="py-8">
+                        <div className="grid grid-cols-4 gap-6 mx-6 mb-6">
+                            <div className="bg-yellow-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-yellow-600" onClick={() => setCurrentPage('home')}>
+                                <i className="fas fa-plus mr-2"></i>
+                                <span>新增简历</span>
+                            </div>
+                            <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                                <i className="fas fa-folder mr-2"></i>
+                                <span>我的简历</span>
+                            </div>
+                            <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                                <i className="fas fa-list mr-2"></i>
+                                <span>我的项目</span>
+                            </div>
+                            <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                                <i className="fas fa-chart-bar mr-2"></i>
+                                <span>统计报表</span>
+                            </div>
+                            <div className="bg-gray-500 text-white p-4 rounded-lg cursor-pointer flex items-center hover:bg-gray-600 text-sm">
+                                <i className="fas fa-user mr-2"></i>
+                                <span>账号管理</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="col-span-2">
+                                <div className="flex justify-center mb-8">
+                                    <button className="px-6 py-2 bg-slate-700 text-white rounded hover:bg-slate-800 flex items-center">
+                                        <i className="fas fa-search mr-2"></i>
+                                        新增简历
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            if (currentPage === 'privacy') {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <NavBar />
+                        <div className="px-6 py-8">
+                            <div className="flex justify-between items-center mb-8 ml-8 mr-8">
+                                <button className="text-sm text-gray-500">
+                                    <i className="fas fa-folder mr-2"></i>
+                                    我的简历
+                                </button>
+                                <h1 className="text-2xl font-bold text-gray-800">隐私政策</h1>
+                            </div>
+                            
+                            <div className="lang-cnt ml-8 mr-8">
+                                <p className="text-gray-700 leading-relaxed">
+                                    我们承诺在相关的操作系统部署过程中，您的简历将由简历自检企业严格的隐
+                                    私保护政策，确保仅在您明确同意的前提下被数据收集。
+                                </p>
+                            </div>
+                        </div>
+                        <Footer />
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <NavBar />
+                    {currentPage === 'home' && <HomePage />}
+                    {currentPage === 'privacy' && <PrivacyPage />}
+                    <CurrentView />
+                    <Footer />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

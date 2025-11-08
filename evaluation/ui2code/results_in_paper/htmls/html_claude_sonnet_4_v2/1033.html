@@ -1,0 +1,602 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创意作品</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const App = () => {
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showHelpModal, setShowHelpModal] = useState(false);
+            const [selectedWork, setSelectedWork] = useState(null);
+            
+            const works = [
+                {
+                    id: 1,
+                    title: "城市之光",
+                    description: "探索现代城市夜景的光影效果，展现都市的独特与活跃。",
+                    image: "https://picsum.photos/id/1039/600/400",
+                    category: "摄影",
+                    tags: ["城市", "夜景", "光影"],
+                    likes: 245,
+                    stars: 124,
+                    views: 0
+                },
+                {
+                    id: 2,
+                    title: "自然之境",
+                    description: "深入大自然的怀抱，探索这些自然界的神奇之美，武夷山自然保护区的风光。",
+                    image: "https://picsum.photos/id/1036/600/400",
+                    category: "摄影",
+                    tags: ["自然", "风景", "环境"],
+                    likes: 189,
+                    stars: 97,
+                    views: 0
+                },
+                {
+                    id: 3,
+                    title: "音乐灵动",
+                    description: "音乐激发灵感的设计，这来源于对琴键的深度的演奏，音符飞符的内向。",
+                    image: "https://picsum.photos/id/96/600/400",
+                    category: "设计",
+                    tags: ["音乐", "灵感", "演奏"],
+                    likes: 312,
+                    stars: 156,
+                    views: 0
+                },
+                {
+                    id: 4,
+                    title: "海洋之梦",
+                    description: "深入海洋深处的神奇之旅，这是世界的奇妙和民族传统的深层的梦影。",
+                    image: "https://picsum.photos/id/1080/600/400",
+                    category: "摄影",
+                    tags: ["海洋", "梦幻", "自然"],
+                    likes: 275,
+                    stars: 132,
+                    views: 0
+                },
+                {
+                    id: 5,
+                    title: "星空之下",
+                    description: "高原天空的璀璨星河，记录了璀璨的星辰和星空中的无数的星际，眺望天空的夜影。",
+                    image: "https://picsum.photos/id/1025/600/400",
+                    category: "摄影",
+                    tags: ["星空", "自然", "璀璨"],
+                    likes: 298,
+                    stars: 143,
+                    views: 0
+                },
+                {
+                    id: 6,
+                    title: "电影美新",
+                    description: "电子游戏界的经典画面设计，在优化用户间的体验，提高现代化。",
+                    image: "https://picsum.photos/id/1016/600/400",
+                    category: "UI",
+                    tags: ["电影", "UI", "用户体验"],
+                    likes: 186,
+                    stars: 89,
+                    views: 0
+                }
+            ];
+
+            const handleEditClick = (work) => {
+                setSelectedWork(work);
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = () => {
+                setShowDeleteModal(true);
+            };
+
+            const handleAddNewWork = () => {
+                setShowAddModal(true);
+            };
+
+            const handleHelpCenter = () => {
+                setShowHelpModal(true);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-blue-600 text-white p-3 flex items-center">
+                        <i className="fas fa-palette mr-2"></i>
+                        <span className="font-medium">创意作品</span>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-48 bg-white border-r border-gray-200 min-h-screen">
+                            <div className="p-4">
+                                <div className="mb-4">
+                                    <div className="flex items-center text-green-600 bg-green-50 px-3 py-2 rounded mb-2">
+                                        <i className="fas fa-eye mr-2"></i>
+                                        <span className="text-sm">展示</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 mb-2">
+                                        <i className="fas fa-edit mr-2"></i>
+                                        <span className="text-sm">编辑</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        <span className="text-sm">统计</span>
+                                    </div>
+                                </div>
+
+                                <div className="border-t pt-4">
+                                    <div className="flex items-center text-green-600 bg-green-50 px-3 py-2 rounded mb-2">
+                                        <i className="fas fa-list mr-2"></i>
+                                        <span className="text-sm">所有作品</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 mb-2">
+                                        <i className="fas fa-palette mr-2"></i>
+                                        <span className="text-sm">画家</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 mb-2">
+                                        <i className="fas fa-pencil-ruler mr-2"></i>
+                                        <span className="text-sm">设计</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2">
+                                        <i className="fas fa-mobile-alt mr-2"></i>
+                                        <span className="text-sm">UI设计</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <h1 className="text-xl font-semibold mb-6">所有创意作品</h1>
+                            
+                            <div className="grid grid-cols-3 gap-6">
+                                {works.map((work) => (
+                                    <div key={work.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                        <div className="relative">
+                                            <img src={work.image} alt={work.title} className="w-full h-48 object-cover rounded-t-lg" />
+                                            <div className="absolute top-2 right-2 flex space-x-1">
+                                                <button 
+                                                    onClick={() => handleEditClick(work)}
+                                                    className="bg-white bg-opacity-80 p-1 rounded hover:bg-opacity-100"
+                                                >
+                                                    <i className="fas fa-edit text-gray-600 text-xs"></i>
+                                                </button>
+                                                <button 
+                                                    onClick={handleDeleteClick}
+                                                    className="bg-white bg-opacity-80 p-1 rounded hover:bg-opacity-100"
+                                                >
+                                                    <i className="fas fa-trash text-gray-600 text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-medium text-gray-900 mb-2">{work.title}</h3>
+                                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">{work.description}</p>
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                {work.tags.map((tag, index) => (
+                                                    <span key={index} className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm text-gray-500">
+                                                <div className="flex items-center space-x-3">
+                                                    <span className="flex items-center">
+                                                        <i className="far fa-heart mr-1 text-red-500"></i>
+                                                        {work.likes}
+                                                    </span>
+                                                    <span className="flex items-center">
+                                                        <i className="far fa-star mr-1 text-yellow-500"></i>
+                                                        {work.stars}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Copyright Notice */}
+                            <div className="mt-8 text-xs text-gray-500">
+                                <div className="mb-1">版权信息</div>
+                                <div>• 这样的图片可以随便使用的</div>
+                                <div>• 使用请注明来源于网络作品</div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-64 bg-white border-l border-gray-200 p-4">
+                            <div className="mb-6">
+                                <h3 className="font-medium text-gray-900 mb-3">数据概况</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">作品数量</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">摄影</span>
+                                        <span className="text-sm font-medium">2</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">绘画</span>
+                                        <span className="text-sm font-medium">2</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">UI设计</span>
+                                        <span className="text-sm font-medium">2</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="mb-3">
+                                    <span className="text-sm text-gray-600">互动映摄</span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">总点赞数</span>
+                                        <span className="text-sm font-medium">1505</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="bg-orange-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">总收藏数</span>
+                                        <span className="text-sm font-medium">741</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="bg-yellow-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="font-medium text-gray-900 mb-3">热门维度</h3>
+                                <div className="space-y-2">
+                                    <div className="flex space-x-2">
+                                        <span className="text-sm text-gray-600">城市</span>
+                                        <span className="text-sm text-gray-600">夜景</span>
+                                        <span className="text-sm text-gray-600">光影</span>
+                                        <span className="text-sm text-gray-600">自然</span>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <span className="text-sm text-gray-600">水景</span>
+                                        <span className="text-sm text-gray-600">环境</span>
+                                        <span className="text-sm text-gray-600">UI</span>
+                                        <span className="text-sm text-gray-600">游戏</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Buttons */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
+                        <div className="flex justify-center space-x-4">
+                            <button 
+                                onClick={handleAddNewWork}
+                                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm flex items-center"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加新作品
+                            </button>
+                            <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded text-sm flex items-center">
+                                <i className="fas fa-heart mr-2"></i>
+                                私藏管理
+                            </button>
+                            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm flex items-center">
+                                <i className="fas fa-download mr-2"></i>
+                                导出数据
+                            </button>
+                            <button 
+                                onClick={handleHelpCenter}
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm flex items-center"
+                            >
+                                <i className="fas fa-question-circle mr-2"></i>
+                                帮助中心
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold">编辑作品</h2>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品标题</label>
+                                        <input 
+                                            type="text" 
+                                            value="城市之光"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品描述</label>
+                                        <textarea 
+                                            rows="3"
+                                            value="探索现代城市夜景的光影效果，展现都市的独特与活跃。"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品分类</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                                            <option>摄影</option>
+                                            <option>绘画</option>
+                                            <option>设计</option>
+                                            <option>UI设计</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm flex items-center">
+                                                城市 <button className="ml-1 text-gray-500">×</button>
+                                            </span>
+                                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm flex items-center">
+                                                夜景 <button className="ml-1 text-gray-500">×</button>
+                                            </span>
+                                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm flex items-center">
+                                                光影 <button className="ml-1 text-gray-500">×</button>
+                                            </span>
+                                        </div>
+                                        <div className="flex">
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入新标签"
+                                                className="flex-1 border border-gray-300 rounded-l px-3 py-2 text-sm"
+                                            />
+                                            <button className="bg-green-500 text-white px-3 py-2 rounded-r text-sm">
+                                                添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">封面图片</label>
+                                        <div className="grid grid-cols-3 gap-2 mb-2">
+                                            <img src="https://picsum.photos/id/1600/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1036/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1025/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1016/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1039/600/400" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-green-500" />
+                                            <img src="https://picsum.photos/id/1080/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            value="https://picsum.photos/id/1039/600/400"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                        <img src="https://picsum.photos/id/1039/600/400" className="w-full h-32 object-cover rounded mt-2" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <div className="text-center">
+                                    <div className="text-red-500 text-3xl mb-4">
+                                        <i className="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2">确认删除</h3>
+                                    <p className="text-gray-600 mb-6">您确定要删除这个作品吗？此操作不可撤销。</p>
+                                    <div className="flex justify-center space-x-3">
+                                        <button 
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add New Work Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold">添加新作品</h2>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品标题</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品描述</label>
+                                        <textarea 
+                                            rows="3"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">作品分类</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                                            <option>摄影</option>
+                                            <option>绘画</option>
+                                            <option>设计</option>
+                                            <option>UI设计</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                                        <div className="flex">
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入标签"
+                                                className="flex-1 border border-gray-300 rounded-l px-3 py-2 text-sm"
+                                            />
+                                            <button className="bg-green-500 text-white px-3 py-2 rounded-r text-sm">
+                                                添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">封面图片</label>
+                                        <div className="grid grid-cols-3 gap-2 mb-2">
+                                            <div className="relative">
+                                                <img src="https://picsum.photos/id/1600/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-green-500" />
+                                                <div className="absolute top-1 right-1 bg-green-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                                                    <i className="fas fa-check"></i>
+                                                </div>
+                                            </div>
+                                            <img src="https://picsum.photos/id/1036/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1025/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1016/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1039/600/400" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                            <img src="https://picsum.photos/id/1080/400/300" className="w-full h-16 object-cover rounded cursor-pointer border-2 border-transparent hover:border-blue-500" />
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            value="https://picsum.photos/id/1600/400"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                                        />
+                                        <img src="https://picsum.photos/id/1600/400/300" className="w-full h-32 object-cover rounded mt-2" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Help Center Modal */}
+                    {showHelpModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-[500px] max-h-[80vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold">帮助中心</h2>
+                                    <button 
+                                        onClick={() => setShowHelpModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="font-medium text-gray-900 mb-3">基本操作指南</h3>
+                                        <ul className="space-y-2 text-sm text-gray-700">
+                                            <li>• 通过左侧导航栏可以按分类浏览作品</li>
+                                            <li>• 热门趋势标签可以快速找到相关作品</li>
+                                            <li>• 点击编辑图标"编辑"按钮可以编辑作品</li>
+                                            <li>• 每个编辑卡片上都有编辑删除和删除按钮</li>
+                                            <li>• 在编辑页面可以修改多个作品的排序和编辑作品</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <h3 className="font-medium text-gray-900 mb-3">常见问题</h3>
+                                        <div className="space-y-3 text-sm">
+                                            <div>
+                                                <div className="font-medium text-gray-900">如何添加作品？</div>
+                                                <div className="text-gray-600">点击底部的"添加新作品"按钮，填写作品信息并上传封面图片。</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-900">如何编辑已有作品？</div>
+                                                <div className="text-gray-600">点击作品卡片右上角的编辑按钮，或在编辑页面中找到对应作品的编辑选项。</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-900">如何删除多个作品？</div>
+                                                <div className="text-gray-600">在编辑页面可以选择多个作品，然后点击删除按钮来批量删除。</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-gray-900">如何导出作品数据？</div>
+                                                <div className="text-gray-600">点击底部的"导出数据"按钮，选择导出格式即可下载。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h3 className="font-medium text-gray-900 mb-3">关于创意作品</h3>
+                                        <p className="text-sm text-gray-600 leading-relaxed">
+                                            本平台提供平台自有的创作和展示作品效果和让则视觉设计的创意作品。通过数据的视觉分析平台
+                                            来呈现功能，希望以较松轻便灵活网络的创新内容，包括编程、摄影和UI设计等，我们提供了
+                                            实际的数据分析工具，帮助创作者优化设计的效果内容和状况功能。
+                                        </p>
+                                    </div>
+                                    
+                                    <div>
+                                        <h3 className="font-medium text-gray-900 mb-3">联系我们</h3>
+                                        <div className="text-sm text-gray-600 space-y-1">
+                                            <div>如有任何问题或建议，请联系我们：</div>
+                                            <div>邮箱：support@creativeworks.com</div>
+                                            <div>电话：400-123-4567</div>
+                                            <div>工作时间：周一至周五 9:00-18:00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 flex justify-center">
+                                    <button 
+                                        onClick={() => setShowHelpModal(false)}
+                                        className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded text-sm"
+                                    >
+                                        我知道了
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

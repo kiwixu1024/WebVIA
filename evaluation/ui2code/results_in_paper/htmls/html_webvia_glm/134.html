@@ -1,0 +1,552 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物养护日志</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function PlantCareApp() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showDetailModal, setShowDetailModal] = useState(false);
+            const [editingPlant, setEditingPlant] = useState(null);
+            const [deletingPlant, setDeletingPlant] = useState(null);
+
+            const [plants, setPlants] = useState([
+                {
+                    id: 1,
+                    name: "绿萝",
+                    date: "2024-06-01",
+                    description: "今天阳光充足，给绿萝浇了水，长势良好！",
+                    waterAmount: "200ml",
+                    lightCondition: "中等光照",
+                    status: "健康",
+                    image: "https://picsum.photos/id/96/300/200"
+                },
+                {
+                    id: 2,
+                    name: "虎皮兰",
+                    date: "2024-06-03",
+                    description: "叶子有点发黄，可能缺水了。",
+                    waterAmount: "100ml",
+                    lightCondition: "弱光",
+                    status: "警告",
+                    image: "https://picsum.photos/id/146/300/200"
+                },
+                {
+                    id: 3,
+                    name: "多肉",
+                    date: "2024-06-05",
+                    description: "多肉长势喜人，颜色非常漂亮！",
+                    waterAmount: "50ml",
+                    lightCondition: "强光",
+                    status: "健康",
+                    image: "https://picsum.photos/id/147/300/200"
+                }
+            ]);
+
+            const handleAddRecord = () => {
+                setShowAddModal(true);
+            };
+
+            const handleEditClick = (plant) => {
+                setEditingPlant(plant);
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = (plant) => {
+                setDeletingPlant(plant);
+                setShowDeleteModal(true);
+            };
+
+            const handleViewDetails = () => {
+                setShowDetailModal(true);
+            };
+
+            const confirmDelete = () => {
+                setPlants(plants.filter(p => p.id !== deletingPlant.id));
+                setShowDeleteModal(false);
+                setDeletingPlant(null);
+            };
+
+            const getStatusColor = (status) => {
+                return status === "健康" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800";
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-gradient-to-r from-green-400 to-green-500 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-white text-xl font-semibold">植物养护日志</h1>
+                            <div className="flex space-x-3">
+                                <button className="bg-orange-700 text-white px-4 py-2 rounded-md text-sm">日志总览</button>
+                                <button 
+                                    onClick={handleAddRecord}
+                                    className="bg-brown-700 text-white px-4 py-2 rounded-md text-sm hover:bg-brown-800"
+                                >
+                                    新增记录
+                                </button>
+                                <button className="bg-brown-700 text-white px-4 py-2 rounded-md text-sm hover:bg-brown-800">
+                                    统计分析
+                                </button>
+                                <button className="bg-brown-700 text-white px-4 py-2 rounded-md text-sm hover:bg-brown-800">
+                                    帮助中心
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-white shadow-sm min-h-screen">
+                            <nav className="p-4 space-y-2">
+                                <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md p-2">
+                                    <i className="fas fa-calendar-day"></i>
+                                    <span>今日记录</span>
+                                </button>
+                                <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md p-2">
+                                    <i className="fas fa-history"></i>
+                                    <span>历史记录</span>
+                                </button>
+                                <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md p-2">
+                                    <i className="fas fa-database"></i>
+                                    <span>植物库</span>
+                                </button>
+                                <button className="w-full flex items-center space-x-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md p-2">
+                                    <i className="fas fa-cog"></i>
+                                    <span>我的设置</span>
+                                </button>
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h2 className="text-lg font-medium text-gray-900 mb-4">记录每一滴水、每一缕阳光，让绿意常在。</h2>
+                                <button 
+                                    onClick={handleAddRecord}
+                                    className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 flex items-center space-x-2"
+                                >
+                                    <span>+</span>
+                                    <span>添加新日志</span>
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {plants.map((plant) => (
+                                    <div key={plant.id} className="bg-white rounded-lg shadow-sm overflow-hidden relative">
+                                        <button 
+                                            onClick={() => handleEditClick(plant)}
+                                            className="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm border hover:bg-gray-50 z-10"
+                                        >
+                                            <i className="fas fa-edit text-gray-600 text-xs"></i>
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeleteClick(plant)}
+                                            className="absolute top-3 right-3 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm border hover:bg-red-50 z-10"
+                                        >
+                                            <i className="fas fa-trash text-gray-600 text-xs"></i>
+                                        </button>
+                                        <img 
+                                            src={plant.image} 
+                                            alt={plant.name}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-lg font-medium text-gray-900">{plant.name}</h3>
+                                                <span className={`px-2 py-1 rounded text-xs ${getStatusColor(plant.status)}`}>
+                                                    {plant.status}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center text-gray-500 text-sm mb-2">
+                                                <i className="far fa-calendar-alt mr-2"></i>
+                                                <span>{plant.date}</span>
+                                            </div>
+                                            <p className="text-gray-700 text-sm mb-3">{plant.description}</p>
+                                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                                <span className="flex items-center">
+                                                    <i className="fas fa-tint mr-1"></i>
+                                                    {plant.waterAmount}
+                                                </span>
+                                                <span className="flex items-center">
+                                                    <i className="fas fa-sun mr-1"></i>
+                                                    {plant.lightCondition}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-80 bg-white shadow-sm p-6">
+                            <div className="mb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">植物类型分布</h3>
+                                <div className="relative w-32 h-32 mx-auto mb-4">
+                                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 128 128">
+                                        <circle cx="64" cy="64" r="56" fill="none" stroke="#f3f4f6" strokeWidth="14"/>
+                                        <circle cx="64" cy="64" r="56" fill="none" stroke="#22c55e" strokeWidth="14" strokeDasharray="226" strokeDashoffset="85.5" strokeLinecap="round"/>
+                                    </svg>
+                                </div>
+                                <div className="flex justify-center space-x-6 text-sm">
+                                    <span className="flex items-center">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                        绿萝 40%
+                                    </span>
+                                    <span className="flex items-center">
+                                        <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                        虎皮兰 30%
+                                    </span>
+                                    <span className="flex items-center">
+                                        <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                                        多肉 30%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">每周浇水次数</h3>
+                                <div className="space-y-2">
+                                    {[35, 25, 20, 45, 30, 15, 40].map((height, index) => (
+                                        <div key={index} className="flex items-center space-x-2">
+                                            <div className="w-8 text-sm text-gray-600">{index + 1}日</div>
+                                            <div className="flex-1 bg-gray-100 rounded-full h-4">
+                                                <div 
+                                                    className="bg-green-500 h-4 rounded-full" 
+                                                    style={{height: `${Math.max(height, 10)}%`}}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="text-center">
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">本月记录统计</h3>
+                                <div className="text-2xl font-bold text-green-600 mb-1">3</div>
+                                <div className="text-sm text-gray-600 mb-4">条养护记录</div>
+                                <div className="text-2xl font-bold text-brown-600 mb-4">3</div>
+                                <div className="text-sm text-gray-600 mb-4">种植物</div>
+                                <button 
+                                    onClick={handleViewDetails}
+                                    className="bg-brown-700 text-white px-4 py-2 rounded-md text-sm hover:bg-brown-800 w-full"
+                                >
+                                    查看详情
+                                </button>
+                                <p className="text-xs text-gray-500 mt-2">数据来源于您的养护记录，为您制定更精准的养护计划！</p>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-green-500 text-white py-4 px-6">
+                        <div className="flex justify-between items-center">
+                            <div className="text-sm">
+                                © 2024 植物养护日志 版权所有
+                            </div>
+                            <div className="text-sm">
+                                联系我们：plantsupport@example.com
+                            </div>
+                        </div>
+                        <div className="mt-2 text-sm opacity-80">
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <span>💡 小贴士：多肉植物冬季浇水应减少频率</span>
+                                <span>💡 小贴士：绿萝喜欢温暖湿润的环境</span>
+                                <span>💡 小贴士：虎皮兰耐旱，但需适当室内养护</span>
+                                <span>💡 小贴士：定期给植物松土可以增加土壤透气性</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Add/Edit Modal */}
+                    {(showAddModal || showEditModal) && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-medium">
+                                        {showEditModal ? '编辑植物记录' : '添加新植物记录'}
+                                    </h2>
+                                    <button 
+                                        onClick={() => {
+                                            setShowAddModal(false);
+                                            setShowEditModal(false);
+                                            setEditingPlant(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入植物名称（例如：绿萝）"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护日期</label>
+                                        <input 
+                                            type="date" 
+                                            defaultValue="2025-09-23"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物状态</label>
+                                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <option>健康</option>
+                                            <option>警告</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">浇水量 (ml)</label>
+                                        <input 
+                                            type="number" 
+                                            defaultValue="0"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">阳光需求</label>
+                                        <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <option>中等光照</option>
+                                            <option>强光</option>
+                                            <option>弱光</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护内容</label>
+                                        <textarea 
+                                            placeholder="请输入养护内容..."
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物图片</label>
+                                        <div className="border-2 border-gray-300 border-dashed rounded-md p-6 text-center">
+                                            <img 
+                                                src="https://picsum.photos/id/147/150/100" 
+                                                alt="已选择默认图片"
+                                                className="mx-auto mb-2 rounded"
+                                            />
+                                            <p className="text-sm text-gray-500">已选择默认图片</p>
+                                            <p className="text-xs text-blue-500">选择其他图片</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex space-x-3 pt-4">
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setShowAddModal(false);
+                                                setShowEditModal(false);
+                                                setEditingPlant(null);
+                                            }}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                                        >
+                                            保存
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i className="fas fa-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">确定删除此记录吗？</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        您即将删除"{deletingPlant?.name}"的养护记录，此操作不可撤销。
+                                    </p>
+                                    <div className="flex space-x-3">
+                                        <button 
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={confirmDelete}
+                                            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Detail Statistics Modal */}
+                    {showDetailModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-xl font-medium">详细统计数据</h2>
+                                        <button 
+                                            onClick={() => setShowDetailModal(false)}
+                                            className="text-gray-400 hover:text-gray-600"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="text-lg font-medium mb-4">植物养护记录历史</h3>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-sm">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="px-4 py-3 text-left">日期</th>
+                                                            <th className="px-4 py-3 text-left">植物名称</th>
+                                                            <th className="px-4 py-3 text-left">状态</th>
+                                                            <th className="px-4 py-3 text-left">浇水量</th>
+                                                            <th className="px-4 py-3 text-left">光照</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-200">
+                                                        <tr>
+                                                            <td className="px-4 py-3">2024-06-01</td>
+                                                            <td className="px-4 py-3">绿萝</td>
+                                                            <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">健康</span></td>
+                                                            <td className="px-4 py-3">200ml</td>
+                                                            <td className="px-4 py-3">中等光照</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="px-4 py-3">2024-06-03</td>
+                                                            <td className="px-4 py-3">虎皮兰</td>
+                                                            <td className="px-4 py-3"><span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">警告</span></td>
+                                                            <td className="px-4 py-3">100ml</td>
+                                                            <td className="px-4 py-3">弱光</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="px-4 py-3">2024-06-05</td>
+                                                            <td className="px-4 py-3">多肉</td>
+                                                            <td className="px-4 py-3"><span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">健康</span></td>
+                                                            <td className="px-4 py-3">50ml</td>
+                                                            <td className="px-4 py-3">强光</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <h3 className="text-lg font-medium mb-3">养护频率分析</h3>
+                                                <p className="text-sm text-gray-600 mb-3">您的植物养护记录显示：</p>
+                                                <ul className="space-y-2 text-sm">
+                                                    <li className="flex justify-between">
+                                                        <span>平均浇水频率：</span>
+                                                        <span>每天一次</span>
+                                                    </li>
+                                                    <li className="flex justify-between">
+                                                        <span>最常养护植物：</span>
+                                                        <span>绿萝 (82%)</span>
+                                                    </li>
+                                                    <li className="flex justify-between">
+                                                        <span>养护高峰期：</span>
+                                                        <span>周三、周日</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                            <div>
+                                                <h3 className="text-lg font-medium mb-3">植物健康状况</h3>
+                                                <p className="text-sm text-gray-600 mb-3">根据您的养护记录分析：</p>
+                                                <div className="space-y-3">
+                                                    <div>
+                                                        <div className="flex justify-between text-sm mb-1">
+                                                            <span>绿萝健康状况</span>
+                                                            <span>100%</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-green-500 h-2 rounded-full" style={{width: '100%'}}></div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex justify-between text-sm mb-1">
+                                                            <span>虎皮兰健康状况</span>
+                                                            <span>60%</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-yellow-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex justify-between text-sm mb-1">
+                                                            <span>多肉健康状况</span>
+                                                            <span>90%</span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                                            <div className="bg-green-500 h-2 rounded-full" style={{width: '90%'}}></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex space-x-3 pt-4">
+                                            <button className="px-4 py-2 bg-brown-700 text-white rounded-md hover:bg-brown-800">
+                                                导出数据
+                                            </button>
+                                            <button className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                                                打印报告
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<PlantCareApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

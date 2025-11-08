@@ -1,0 +1,296 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>表情日志</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Noto Sans SC", "ui-sans-serif", "system-ui"] }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const emotions = [
+      { emoji: '😄', label: '开心' },
+      { emoji: '😢', label: '伤感' },
+      { emoji: '😲', label: '惊讶' },
+      { emoji: '😐', label: '平静' },
+      { emoji: '😍', label: '喜爱' },
+      { emoji: '😡', label: '愤怒' },
+      { emoji: '🤔', label: '思考' },
+      { emoji: '😴', label: '疲倦' },
+    ];
+
+    const initialEntries = [
+      {
+        id: 1,
+        date: '2024-06-01',
+        emoji: '😄',
+        content: '今日工作顺利完成上线啦！',
+        category: '开心'
+      },
+      {
+        id: 2,
+        date: '2024-05-30',
+        emoji: '😢',
+        content: '项目延期，有点沮丧...',
+        category: '伤感'
+      },
+      {
+        id: 3,
+        date: '2024-05-29',
+        emoji: '😲',
+        content: '收到意外惊喜，朋友送了我一本期待已久的书！',
+        category: '惊讶'
+      }
+    ];
+
+    function App() {
+      const [entries, setEntries] = useState(initialEntries);
+      const [filter, setFilter] = useState('全部');
+      const [modalOpen, setModalOpen] = useState(false);
+      const [newDate, setNewDate] = useState(new Date().toISOString().slice(0,10));
+      const [newEmotion, setNewEmotion] = useState(emotions[0].label);
+      const [newContent, setNewContent] = useState('');
+      const [newCategory, setNewCategory] = useState(emotions[0].label);
+
+      const emotionLabels = emotions.map(e => e.label);
+
+      const filtered = filter === '全部'
+        ? entries
+        : entries.filter(e => e.category === filter);
+
+      const counts = emotionLabels.reduce((acc, cur) => {
+        acc[cur] = entries.filter(e => e.category === cur).length;
+        return acc;
+      }, {});
+
+      function handleSave() {
+        const newEntry = {
+          id: Date.now(),
+          date: newDate,
+          emoji: emotions.find(e => e.label === newEmotion)?.emoji || '😐',
+          content: newContent,
+          category: newCategory
+        };
+        setEntries([newEntry, ...entries]);
+        setModalOpen(false);
+        // reset
+        setNewDate(new Date().toISOString().slice(0,10));
+        setNewEmotion(emotions[0].label);
+        setNewContent('');
+        setNewCategory(emotions[0].label);
+      }
+
+      function resetForm() {
+        setNewDate(new Date().toISOString().slice(0,10));
+        setNewEmotion(emotions[0].label);
+        setNewContent('');
+        setNewCategory(emotions[0].label);
+      }
+
+      return (
+        <div className="flex h-screen overflow-hidden font-sans">
+          {/* 侧边栏 */}
+          <aside className="w-64 bg-white border-r flex flex-col justify-between">
+            <nav className="mt-6">
+              <ul>
+                <li onClick={()=>{}} className="px-4 py-2 flex items-center text-yellow-600 bg-yellow-100 cursor-pointer">
+                  <i className="fas fa-home mr-2"></i><span>展示区</span>
+                </li>
+                <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-100 cursor-pointer">
+                  <i className="fas fa-edit mr-2"></i><span>编辑区</span>
+                </li>
+                <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-100 cursor-pointer">
+                  <i className="fas fa-chart-line mr-2"></i><span>统计区</span>
+                </li>
+                <li className="px-4 py-2 flex items-center text-gray-600 hover:bg-gray-100 cursor-pointer">
+                  <i className="fas fa-info-circle mr-2"></i><span>帮助说明</span>
+                </li>
+              </ul>
+            </nav>
+            <div className="p-4 flex justify-center space-x-2">
+              <span className="w-6 h-6 bg-yellow-400 rounded-full border"></span>
+              <span className="w-6 h-6 bg-green-300 rounded-full border"></span>
+              <span className="w-6 h-6 bg-blue-300 rounded-full border"></span>
+              <span className="w-6 h-6 bg-pink-300 rounded-full border"></span>
+            </div>
+          </aside>
+          <div className="flex-1 flex flex-col">
+            {/* 顶部 */}
+            <header className="flex items-center justify-between bg-white px-6 py-4 border-b">
+              <div className="flex items-center text-xl font-semibold text-gray-800">
+                <div className="w-6 h-6 bg-yellow-400 rounded mr-2"></div>
+                <span>表情日志</span>
+                <span className="ml-4 text-gray-500 text-sm">特色主题表情日志</span>
+                <span className="ml-2 text-gray-400 text-sm">每天记录小情绪，汇聚大感动</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button onClick={()=>setModalOpen(true)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded">
+                  <i className="fas fa-plus mr-1"></i>添加新日志
+                </button>
+                <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center">
+                  <i className="fas fa-download mr-1"></i>导出日志
+                </button>
+                <i className="fas fa-question-circle text-gray-400 text-lg cursor-pointer"></i>
+              </div>
+            </header>
+            {/* 内容区 */}
+            <div className="flex flex-1 overflow-hidden">
+              {/* 主体 */}
+              <main className="flex-1 overflow-auto p-6">
+                {/* 标签页 */}
+                <div className="mb-4 flex space-x-4">
+                  {['全部', ...emotionLabels, '日常小记'].map(tab => (
+                    <button
+                      key={tab}
+                      onClick={()=>setFilter(tab)}
+                      className={`px-3 py-1 rounded ${
+                        filter===tab ? 'bg-yellow-400 text-white' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >{tab}</button>
+                  ))}
+                </div>
+                {/* 日志列表或空状态 */}
+                {filtered.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filtered.map(entry => (
+                      <div key={entry.id} className="bg-white rounded shadow p-4 relative">
+                        <div className="text-3xl">{entry.emoji}</div>
+                        <div className="text-gray-600 text-sm mt-1">{entry.date}</div>
+                        <div className="mt-2 text-gray-800">{entry.content}</div>
+                        <span className="inline-block bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded mt-2">{entry.category}</span>
+                        <div className="absolute top-2 right-2 flex space-x-2">
+                          <i className="fas fa-pencil-alt text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                          <i className="fas fa-trash-alt text-gray-400 hover:text-gray-600 cursor-pointer"></i>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded shadow p-6 text-center">
+                    <img src="https://picsum.photos/id/1063/400/200" alt="" className="mx-auto mb-4 rounded"/>
+                    <h3 className="text-gray-700 text-lg mb-2">暂无表情日志</h3>
+                    <p className="text-gray-500 mb-4">点亮心情，刻录生活瞬间，开始记录你的第一条表情日志吧！</p>
+                    <button onClick={()=>setModalOpen(true)} className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded">
+                      <i className="fas fa-plus mr-1"></i>立即添加日志
+                    </button>
+                  </div>
+                )}
+              </main>
+              {/* 侧边统计 */}
+              <aside className="w-64 bg-white border-l p-6 overflow-auto">
+                <h4 className="text-gray-700 font-medium mb-3">情绪统计</h4>
+                <ul className="space-y-2 mb-4">
+                  {emotionLabels.map(label => (
+                    <li key={label} className="flex justify-between text-sm">
+                      <span>
+                        {emotions.find(e=>e.label===label)?.emoji} {label}
+                      </span>
+                      <span className="text-yellow-600">{counts[label] || 0}次</span>
+                    </li>
+                  ))}
+                </ul>
+                <h5 className="text-gray-700 font-medium mb-2">本周情绪趋势</h5>
+                <div className="h-24 bg-gray-100 mb-2 rounded"></div>
+                <div className="text-gray-400 text-xs mb-4 flex justify-between">
+                  <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+                </div>
+                <a href="#" className="text-green-600 text-sm hover:underline">查看完整统计数据 &rarr;</a>
+              </aside>
+            </div>
+            {/* 页脚 */}
+            <footer className="flex justify-between items-center bg-white px-6 py-4 border-t text-xs text-gray-500">
+              <div>© 2024 表情日志团队 · 版本 v1.0.0</div>
+              <div className="space-x-4">
+                <a href="#" className="hover:underline">关于我们</a>
+                <a href="#" className="hover:underline">使用条款</a>
+                <a href="#" className="hover:underline">隐私政策</a>
+                <a href="#" className="hover:underline">反馈建议</a>
+              </div>
+            </footer>
+          </div>
+
+          {/* 添加新日志弹窗 */}
+          {modalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-96 p-6 relative">
+                <button onClick={()=>setModalOpen(false)} className="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+                  <i className="fas fa-times"></i>
+                </button>
+                <h3 className="text-lg font-medium mb-4">添加新日志</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-1">日期</label>
+                    <input
+                      type="date"
+                      className="w-full border rounded px-3 py-2 text-gray-700"
+                      value={newDate}
+                      onChange={e=>setNewDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-1">表情</label>
+                    <div className="flex space-x-2 text-2xl">
+                      {emotions.map(e => (
+                        <span
+                          key={e.label}
+                          onClick={()=>{ setNewEmotion(e.label); }}
+                          className={`cursor-pointer ${newEmotion===e.label ? 'scale-110' : ''}`}
+                        >{e.emoji}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-1">内容</label>
+                    <textarea
+                      className="w-full border rounded px-3 py-2 text-gray-700 h-20 resize-none"
+                      placeholder="写下你此刻的心情..."
+                      value={newContent}
+                      onChange={e=>setNewContent(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-600 text-sm mb-1">分类</label>
+                    <select
+                      className="w-full border rounded px-3 py-2 text-gray-700"
+                      value={newCategory}
+                      onChange={e=>setNewCategory(e.target.value)}
+                    >
+                      {emotionLabels.map(label => (
+                        <option key={label} value={label}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <button onClick={()=>setModalOpen(false)} className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-100">取消</button>
+                    <button onClick={resetForm} className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-100">重置</button>
+                    <button onClick={handleSave} className="px-4 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

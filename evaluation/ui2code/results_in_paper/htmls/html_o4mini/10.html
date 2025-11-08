@@ -1,0 +1,504 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>微笑打卡专属池</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const [page, setPage] = useState('display'); // 'display' or 'edit'
+      const [searchText, setSearchText] = useState('');
+      const [categoryFilter, setCategoryFilter] = useState('全部分类');
+      const [cards, setCards] = useState([
+        {
+          id: 1,
+          avatar: 'https://picsum.photos/id/1027/50/50',
+          user: '晴天',
+          date: '2024-06-01',
+          content: '今天在湖边看到了漂亮的日落，心情大好~',
+          image: 'https://picsum.photos/id/1006/600/400',
+          rating: 5,
+          category: '日常'
+        },
+        {
+          id: 2,
+          avatar: 'https://picsum.photos/id/1005/50/50',
+          user: '小白',
+          date: '2024-06-02',
+          content: '被家里小喵萌到，记录一次！',
+          image: 'https://picsum.photos/id/1062/600/400',
+          rating: 3,
+          category: '日常'
+        },
+        {
+          id: 3,
+          avatar: 'https://picsum.photos/id/1011/50/50',
+          user: '旅行者',
+          date: '2024-06-03',
+          content: '爬山到顶峰，看到了壮观的云海，太震撼了！',
+          image: 'https://picsum.photos/id/1056/600/400',
+          rating: 5,
+          category: '旅行'
+        },
+        {
+          id: 4,
+          avatar: 'https://picsum.photos/id/1012/50/50',
+          user: '美食家',
+          date: '2024-06-04',
+          content: '今天吃了一道香气扑鼻的美食，激人胃不绝口！',
+          image: 'https://picsum.photos/id/1008/600/400',
+          rating: 4,
+          category: '美食'
+        },
+        {
+          id: 5,
+          avatar: 'https://picsum.photos/id/1013/50/50',
+          user: '小明',
+          date: '2024-06-05',
+          content: '第一次玩游戏机，准有点慌张，她竟然释开心！',
+          image: 'https://picsum.photos/id/1080/600/400',
+          rating: 5,
+          category: '其他'
+        },
+        {
+          id: 6,
+          avatar: 'https://picsum.photos/id/1014/50/50',
+          user: '书虫',
+          date: '2024-06-06',
+          content: '终于读完了期待已久的小说，结局出乎意料又温暖~',
+          image: 'https://picsum.photos/id/1059/600/400',
+          rating: 2,
+          category: '日常'
+        }
+      ]);
+
+      const [editingCard, setEditingCard] = useState(null);
+      const [showAddModal, setShowAddModal] = useState(false);
+
+      const categories = ['全部分类', '日常', '旅行', '美食', '其他'];
+
+      // 过滤逻辑
+      const filtered = cards.filter(card => {
+        const matchText =
+          searchText === '' ||
+          card.content.includes(searchText) ||
+          card.user.includes(searchText);
+        const matchCat =
+          categoryFilter === '全部分类' || card.category === categoryFilter;
+        return matchText && matchCat;
+      });
+
+      function handleSaveEdit(updated) {
+        setCards(cards.map(c => (c.id === updated.id ? updated : c)));
+        setEditingCard(null);
+      }
+      function handleAddCard(newCard) {
+        setCards([...cards, { ...newCard, id: Date.now() }]);
+        setShowAddModal(false);
+      }
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-white shadow-sm">
+            <div className="container mx-auto px-4 flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <img src="https://picsum.photos/id/1000/32/32" alt="logo" className="rounded-full"/>
+                <span className="text-xl font-semibold text-yellow-600">微笑打卡专属池</span>
+                <nav className="flex space-x-4 ml-6">
+                  <button
+                    onClick={() => setPage('display')}
+                    className={`py-1 px-3 rounded ${page === 'display' ? 'bg-yellow-400 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                  >展示区</button>
+                  <button
+                    onClick={() => setPage('edit')}
+                    className={`py-1 px-3 rounded ${page === 'edit' ? 'bg-yellow-400 text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                  >编辑区</button>
+                  <button className="py-1 px-3 rounded text-gray-600 hover:text-gray-900">统计区</button>
+                  <button className="py-1 px-3 rounded text-gray-600 hover:text-gray-900">帮助说明</button>
+                </nav>
+              </div>
+              <div>
+                <img src="https://picsum.photos/id/1016/40/40" alt="user" className="rounded-full"/>
+              </div>
+            </div>
+          </header>
+
+          <div className="flex flex-1 container mx-auto px-4 mt-6">
+            {/* Sidebar */}
+            <aside className="w-48 pr-4">
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center space-x-2 bg-yellow-100 text-yellow-600 rounded px-2 py-2">
+                  <i className="fas fa-th-large"></i>
+                  <span>展示区</span>
+                </li>
+                <li className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-100 rounded cursor-pointer">
+                  <i className="fas fa-calendar-check"></i>
+                  <span>我的打卡</span>
+                </li>
+                <li className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-100 rounded cursor-pointer">
+                  <i className="fas fa-tags"></i>
+                  <span>标签管理</span>
+                </li>
+                <li className="flex items-center space-x-2 px-2 py-2 hover:bg-gray-100 rounded cursor-pointer">
+                  <i className="fas fa-cog"></i>
+                  <span>设置</span>
+                </li>
+              </ul>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1">
+              {page === 'display' && (
+                <>
+                  <div>
+                    <p className="text-gray-600 mb-4">在这里，你可以随时回顾自己或好友的微笑瞬间，每一个记录都温暖心田。</p>
+                    <div className="flex flex-wrap gap-4 mb-6">
+                      <div className="flex-1 min-w-[240px] flex items-center border rounded overflow-hidden bg-white">
+                        <input
+                          type="text"
+                          value={searchText}
+                          onChange={e => setSearchText(e.target.value)}
+                          className="flex-1 px-3 py-2 focus:outline-none"
+                          placeholder="输入关键词搜索..."
+                        />
+                        <button className="px-4 text-gray-500 hover:text-gray-700">
+                          <i className="fas fa-search"></i>
+                        </button>
+                      </div>
+                      <div className="min-w-[160px] flex items-center bg-white border rounded overflow-hidden">
+                        <select
+                          className="w-full px-3 py-2 focus:outline-none"
+                          value={categoryFilter}
+                          onChange={e => setCategoryFilter(e.target.value)}
+                        >
+                          {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <p className="text-yellow-600 text-sm mb-1"><i className="fas fa-info-circle mr-1"></i>点击“添加微笑”开始你的记录！</p>
+                    <p className="text-yellow-600 text-sm mb-6"><i className="fas fa-info-circle mr-1"></i>鼠标悬停卡片可编辑/删除</p>
+                  </div>
+                  {filtered.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filtered.map(card => (
+                        <div key={card.id} className="bg-white rounded shadow hover:shadow-lg overflow-hidden relative">
+                          <div className="p-4 flex items-center space-x-2">
+                            <img src={card.avatar} alt="" className="w-8 h-8 rounded-full"/>
+                            <div>
+                              <p className="font-semibold text-gray-700">{card.user}</p>
+                              <p className="text-gray-400 text-sm">{card.date}</p>
+                            </div>
+                            <div className="ml-auto opacity-0 hover:opacity-100 transition-opacity flex space-x-2">
+                              <button onClick={()=>setEditingCard(card)} className="text-gray-500 hover:text-gray-700"><i className="fas fa-edit"></i></button>
+                              <button className="text-gray-500 hover:text-gray-700"><i className="fas fa-trash-alt"></i></button>
+                            </div>
+                          </div>
+                          <div>
+                            <img src={card.image} alt="" className="w-full h-40 object-cover"/>
+                          </div>
+                          <div className="p-4">
+                            <p className="text-gray-700 mb-3">{card.content}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                {[1,2,3,4,5].map(i=>(
+                                  <i key={i} className={`fa-star fas mr-1 ${i<=card.rating?'text-yellow-400':'text-gray-300'}`}></i>
+                                ))}
+                              </div>
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-600 text-sm rounded">{card.category}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded shadow py-16 flex flex-col items-center">
+                      <img src="https://picsum.photos/id/1018/200/200" alt="" className="mb-6"/>
+                      <p className="text-gray-500 text-lg mb-2">暂无微笑记录</p>
+                      <p className="text-gray-400 mb-4">点击右下角的“添加微笑”按钮，记录你的第一个微笑瞬间吧！</p>
+                      <button
+                        onClick={()=>setShowAddModal(true)}
+                        className="bg-yellow-400 text-white px-5 py-2 rounded hover:bg-yellow-500"
+                      >立即添加微笑</button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {page === 'edit' && (
+                <div className="bg-white border-2 border-yellow-300 border-dashed rounded-lg p-8 text-center">
+                  <img src="https://picsum.photos/id/1019/100/100" alt="" className="mx-auto mb-4"/>
+                  <h2 className="text-xl font-semibold text-gray-700 mb-2">开始创建你的微笑记录</h2>
+                  <p className="text-gray-500 mb-6">分享你的微笑瞬间，记录每一个值得珍藏的美好时刻，让幸福常驻心间。</p>
+                  <button
+                    onClick={()=>setShowAddModal(true)}
+                    className="bg-yellow-400 text-white px-5 py-2 rounded hover:bg-yellow-500"
+                  >立即添加微笑</button>
+                </div>
+              )}
+            </main>
+
+            {/* Right Panel */}
+            <aside className="w-64 pl-4">
+              <div className="bg-white rounded shadow p-4 mb-6">
+                <h3 className="text-gray-600 mb-3">今日数据</h3>
+                <p className="flex justify-between"><span>今日打卡</span><span>78次</span></p>
+                <p className="flex justify-between"><span>活跃用户</span><span>56人</span></p>
+                <p className="flex items-center justify-between"><span>平均心情</span>
+                  <span>
+                    {[1,2,3,4,5].map(i=>(
+                      <i key={i} className="fas fa-star text-yellow-400"></i>
+                    ))}
+                  </span>
+                </p>
+              </div>
+              <div className="bg-white rounded shadow p-4 mb-6">
+                <h3 className="text-gray-600 mb-3">用户排行</h3>
+                <ol className="list-decimal list-inside space-y-1 text-gray-700">
+                  <li>晴天</li>
+                  <li>旅行者</li>
+                  <li>小白</li>
+                </ol>
+                <p className="text-yellow-500 text-sm mt-2 cursor-pointer hover:underline">查看更多</p>
+              </div>
+              <div className="bg-white rounded shadow p-4">
+                <h3 className="text-gray-600 mb-2">微笑小贴士</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  微笑可以减轻压力，增强免疫系统！<br/>
+                  每天至少花3分钟记录生活中的美好，有助于提升幸福感。<br/>
+                  分享你的微笑，能感染身边的人，传播积极能量。
+                </p>
+              </div>
+            </aside>
+          </div>
+
+          {/* Footer */}
+          <footer className="bg-white mt-12 pt-8 pb-4 text-gray-600 text-sm">
+            <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">微笑打卡专属池</h4>
+                <p>每天一个微笑，记录幸福瞬间！</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">快速链接</h4>
+                <ul className="space-y-1">
+                  <li>关于我们</li>
+                  <li>使用条款</li>
+                  <li>隐私政策</li>
+                  <li>帮助中心</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">联系我们</h4>
+                <p>smile@example.com</p>
+                <p>400-123-4567</p>
+                <p>微笑大厦，幸福路100号</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-700 mb-2">关注我们</h4>
+                <div className="flex space-x-3 text-xl">
+                  <i className="fab fa-weibo"></i>
+                  <i className="fab fa-weixin"></i>
+                  <i className="fab fa-qq"></i>
+                  <i className="fab fa-tiktok"></i>
+                </div>
+              </div>
+            </div>
+            <div className="text-center mt-6 text-gray-400">©2024 微笑打卡专属池，保留所有权利</div>
+          </footer>
+
+          {/* Floating Add Button */}
+          <button
+            onClick={()=>setShowAddModal(true)}
+            className="fixed right-6 bottom-6 bg-red-500 text-white w-12 h-12 rounded-full shadow-lg hover:bg-red-600 flex items-center justify-center text-2xl"
+          >
+            +
+          </button>
+
+          {/* Modals */}
+          {editingCard && (
+            <EditModal
+              card={editingCard}
+              onCancel={()=>setEditingCard(null)}
+              onSave={handleSaveEdit}
+            />
+          )}
+          {showAddModal && (
+            <AddModal
+              onCancel={()=>setShowAddModal(false)}
+              onSave={handleAddCard}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function EditModal({ card, onCancel, onSave }) {
+      const [content, setContent] = useState(card.content);
+      const [image, setImage] = useState(card.image);
+      const [rating, setRating] = useState(card.rating);
+      const [category, setCategory] = useState(card.category);
+      const categories = ['日常','旅行','美食','其他'];
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-11/12 max-w-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">编辑微笑</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-1">微笑备注</label>
+                <textarea
+                  className="w-full border rounded px-3 py-2 focus:outline-none"
+                  rows="3"
+                  value={content}
+                  onChange={e=>setContent(e.target.value)}
+                ></textarea>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">图片上传</label>
+                <div className="relative">
+                  <img src={image} alt="" className="w-full h-40 object-cover rounded"/>
+                  <button className="absolute top-2 right-2 bg-white p-1 rounded-full shadow hover:bg-gray-100">
+                    <i className="fas fa-sync-alt text-gray-600"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">心情评分 {rating}</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  value={rating}
+                  onChange={e=>setRating(+e.target.value)}
+                  className="w-full"
+                />
+                <div className="mt-2">
+                  {[1,2,3,4,5].map(i=>(
+                    <i key={i} className={`fas fa-star mr-1 ${i<=rating?'text-yellow-400':'text-gray-300'}`}></i>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">分类</label>
+                <select
+                  className="w-full border rounded px-3 py-2 focus:outline-none"
+                  value={category}
+                  onChange={e=>setCategory(e.target.value)}
+                >
+                  {categories.map(c=>(
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button onClick={onCancel} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">取消</button>
+              <button
+                onClick={()=>onSave({ ...card, content, image, rating, category })}
+                className="px-4 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500"
+              >保存修改</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AddModal({ onCancel, onSave }) {
+      const [content, setContent] = useState('');
+      const [image, setImage] = useState('');
+      const [rating, setRating] = useState(3);
+      const [category, setCategory] = useState('日常');
+      const categories = ['日常','旅行','美食','其他'];
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-11/12 max-w-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">添加微笑</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-1">微笑备注</label>
+                <textarea
+                  className="w-full border rounded px-3 py-2 focus:outline-none"
+                  rows="3"
+                  placeholder="分享你的微笑瞬间..."
+                  value={content}
+                  onChange={e=>setContent(e.target.value)}
+                ></textarea>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">图片上传</label>
+                <div className="w-full h-40 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer">
+                  <i className="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                  <p className="text-gray-400">点击上传图片，或将图片拖拽到此处</p>
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">心情评分 {rating}</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  value={rating}
+                  onChange={e=>setRating(+e.target.value)}
+                  className="w-full"
+                />
+                <div className="mt-2">
+                  {[1,2,3,4,5].map(i=>(
+                    <i key={i} className={`fas fa-star mr-1 ${i<=rating?'text-yellow-400':'text-gray-300'}`}></i>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-1">分类</label>
+                <select
+                  className="w-full border rounded px-3 py-2 focus:outline-none"
+                  value={category}
+                  onChange={e=>setCategory(e.target.value)}
+                >
+                  {categories.map(c=>(
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button onClick={onCancel} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100">取消</button>
+              <button
+                onClick={()=>onSave({ avatar:'https://picsum.photos/id/1000/50/50', user:'我自己', date: new Date().toISOString().slice(0,10), content, image: image || 'https://picsum.photos/seed/new/600/400', rating, category })}
+                className="px-4 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500"
+              >提交打卡</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

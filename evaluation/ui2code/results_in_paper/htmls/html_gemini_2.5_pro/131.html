@@ -1,0 +1,403 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>印象笔记同步</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const initialNotesData = [
+      {
+        id: 1,
+        title: '项目周报',
+        content: '完成了A模块开发，发现B问题需要解决，下周将继续优化C功能，团队协作顺利。',
+        tags: ['工作', '商务'],
+        imageUrl: 'https://picsum.photos/id/48/80/50',
+        status: 'synced',
+        updatedAt: '2024-06-10 14:32',
+      },
+      {
+        id: 2,
+        title: '旅行计划',
+        content: '计划下个月前往云南，包括昆明、大理、丽江三地，预计10天行程，需准备衣物、雨具等装备。',
+        tags: ['生活', '旅行'],
+        imageUrl: 'https://picsum.photos/id/104/80/50',
+        status: 'pending',
+        updatedAt: '2024-06-08 09:15',
+      },
+      {
+        id: 3,
+        title: '读书笔记：《刻意练习》',
+        content: '刻意练习的核心是有目的、有计划地练习，关注弱点，获得反馈，走出舒适区。这本书让我重新思考学习方法...',
+        tags: ['学习', '读书笔记'],
+        imageUrl: 'https://picsum.photos/id/24/80/50',
+        status: 'synced',
+        updatedAt: '2024-06-08 21:45',
+      }
+    ];
+
+    const NoteModal = ({ note, onClose, title, saveButtonText }) => {
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-8">
+            <h2 className="text-2xl font-semibold mb-6">{title}</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">标题</label>
+              <input 
+                type="text" 
+                defaultValue={note ? note.title : ''}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                placeholder="输入笔记标题"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">标签</label>
+              <div className="flex space-x-2">
+                {['工作', '生活', '学习', '游记', '旅行', '读书笔记'].map(tag => {
+                    const isSelected = note && note.tags.includes(tag);
+                    return (
+                        <button key={tag} className={`px-3 py-1 text-sm rounded-full ${isSelected ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                            {tag}
+                        </button>
+                    )
+                })}
+              </div>
+            </div>
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-bold mb-2">内容</label>
+              <div className="border rounded">
+                <div className="flex space-x-4 p-2 border-b bg-gray-50">
+                  <i className="fas fa-bold"></i>
+                  <i className="fas fa-italic"></i>
+                  <i className="fas fa-underline"></i>
+                  <i className="fas fa-list-ul"></i>
+                </div>
+                <textarea 
+                  className="w-full h-40 p-2 focus:outline-none" 
+                  placeholder="输入笔记内容..."
+                  defaultValue={note ? note.content : ''}
+                ></textarea>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold">取消</button>
+              <button onClick={onClose} className="px-6 py-2 bg-green-500 text-white rounded-md font-semibold">{saveButtonText}</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [notes, setNotes] = useState(initialNotesData);
+      const [activeTab, setActiveTab] = useState('all');
+      const [activeCategory, setActiveCategory] = useState(null);
+      const [isWorkExpanded, setIsWorkExpanded] = useState(false);
+      const [selectedNoteIds, setSelectedNoteIds] = useState(new Set());
+      const [showNewNoteModal, setShowNewNoteModal] = useState(false);
+      const [editingNote, setEditingNote] = useState(null);
+
+      const handleTabClick = (tab) => {
+        setActiveTab(tab);
+        setActiveCategory(null);
+        setIsWorkExpanded(false);
+      };
+
+      const handleCategoryClick = (category) => {
+          if (category === '工作') {
+              setIsWorkExpanded(prev => !prev);
+          }
+          setActiveCategory(prev => prev === category ? null : category);
+          setActiveTab('all');
+      };
+      
+      const handleNoteSelect = (noteId) => {
+        setSelectedNoteIds(prevIds => {
+          const newIds = new Set(prevIds);
+          if (newIds.has(noteId)) {
+            newIds.delete(noteId);
+          } else {
+            newIds.add(noteId);
+          }
+          return newIds;
+        });
+      };
+      
+      const handleSelectAll = (e) => {
+        if(e.target.checked) {
+          setSelectedNoteIds(new Set(filteredNotes.map(n => n.id)));
+        } else {
+          setSelectedNoteIds(new Set());
+        }
+      }
+
+      let filteredNotes = notes;
+      if (activeCategory) {
+          if (activeCategory === '工作') {
+               filteredNotes = notes.filter(note => note.tags.includes('工作') || note.tags.includes('商务'));
+          } else {
+               filteredNotes = notes.filter(note => note.tags.includes(activeCategory));
+          }
+      } else if (activeTab === 'pending') {
+          filteredNotes = notes.filter(note => note.status === 'pending');
+      } else if (activeTab === 'synced') {
+          filteredNotes = notes.filter(note => note.status === 'synced');
+      }
+
+      const areAllSelected = filteredNotes.length > 0 && selectedNoteIds.size === filteredNotes.length;
+
+      return (
+        <div className="bg-zinc-50 min-h-screen text-gray-800 flex flex-col">
+          {showNewNoteModal && <NoteModal onClose={() => setShowNewNoteModal(false)} title="新建笔记" saveButtonText="保存笔记" />}
+          {editingNote && <NoteModal note={editingNote} onClose={() => setEditingNote(null)} title="编辑笔记" saveButtonText="保存笔记" />}
+
+          <header className="bg-white shadow-sm sticky top-0 z-20">
+            <div className="max-w-screen-2xl mx-auto px-8 py-4 flex justify-between items-center">
+              <h1 className="text-xl font-bold">印象笔记同步</h1>
+              <button onClick={() => setShowNewNoteModal(true)} className="bg-green-500 text-white font-semibold px-4 py-2 rounded-md flex items-center space-x-2">
+                <i className="fas fa-plus"></i>
+                <span>新建笔记</span>
+              </button>
+            </div>
+          </header>
+
+          <div className="flex-grow max-w-screen-2xl mx-auto w-full px-8 py-6">
+            <div className="grid grid-cols-12 gap-8">
+              
+              {/* Left Sidebar */}
+              <aside className="col-span-2">
+                <div className="space-y-8">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                      </span>
+                      <span className="text-sm font-semibold">同步状态</span>
+                    </div>
+                    <p className="font-bold text-lg mt-1">已完成</p>
+                    <div className="mt-2 border-b-4 border-green-500 rounded"></div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs text-gray-500 font-semibold uppercase mb-3">笔记分类</h3>
+                    <ul className="space-y-2">
+                      <li onClick={() => handleCategoryClick('工作')} className={`flex justify-between items-center p-2 rounded-md cursor-pointer ${activeCategory === '工作' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
+                        <div className="flex items-center space-x-3">
+                          <i className="fas fa-folder fa-fw"></i>
+                          <span className="font-semibold">工作</span>
+                        </div>
+                        <span className="text-xs font-mono bg-gray-200 px-2 py-0.5 rounded-full">15</span>
+                      </li>
+                      {isWorkExpanded && (
+                          <ul className="pl-8 space-y-2 text-sm">
+                              <li className="flex justify-between items-center cursor-pointer text-gray-600 hover:text-black"><span>工作笔记1</span></li>
+                              <li className="flex justify-between items-center cursor-pointer text-gray-600 hover:text-black"><span>工作笔记2</span></li>
+                          </ul>
+                      )}
+                      <li onClick={() => handleCategoryClick('生活')} className={`flex justify-between items-center p-2 rounded-md cursor-pointer ${activeCategory === '生活' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
+                        <div className="flex items-center space-x-3">
+                          <i className="fas fa-home fa-fw"></i>
+                          <span className="font-semibold">生活</span>
+                        </div>
+                        <span className="text-xs font-mono bg-gray-200 px-2 py-0.5 rounded-full">8</span>
+                      </li>
+                      <li onClick={() => handleCategoryClick('学习')} className={`flex justify-between items-center p-2 rounded-md cursor-pointer ${activeCategory === '学习' ? 'bg-green-100 text-green-700' : 'hover:bg-gray-100'}`}>
+                        <div className="flex items-center space-x-3">
+                          <i className="fas fa-book fa-fw"></i>
+                          <span className="font-semibold">学习</span>
+                        </div>
+                        <span className="text-xs font-mono bg-gray-200 px-2 py-0.5 rounded-full">12</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xs text-gray-500 font-semibold uppercase mb-3">快速操作</h3>
+                    <div className="space-y-2">
+                       <button onClick={() => setShowNewNoteModal(true)} className="w-full bg-green-500 text-white font-semibold py-2.5 rounded-md flex items-center justify-center space-x-2">
+                          <i className="fas fa-plus"></i>
+                          <span>新建笔记</span>
+                       </button>
+                       <button className="w-full bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-md flex items-center justify-center space-x-2">
+                          <i className="fas fa-sync-alt"></i>
+                          <span>批量同步</span>
+                       </button>
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              {/* Main Content */}
+              <main className="col-span-7">
+                <div className="flex border-b">
+                  <button onClick={() => handleTabClick('all')} className={`py-2 px-4 text-sm font-semibold relative ${activeTab === 'all' && activeCategory === null ? 'text-green-600' : 'text-gray-500 hover:text-gray-800'}`}>
+                    全部笔记
+                    {activeTab === 'all' && activeCategory === null && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></span>}
+                  </button>
+                  <button onClick={() => handleTabClick('pending')} className={`py-2 px-4 text-sm font-semibold relative ${activeTab === 'pending' ? 'text-green-600' : 'text-gray-500 hover:text-gray-800'}`}>
+                    待同步
+                    {activeTab === 'pending' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></span>}
+                  </button>
+                  <button onClick={() => handleTabClick('synced')} className={`py-2 px-4 text-sm font-semibold relative ${activeTab === 'synced' ? 'text-green-600' : 'text-gray-500 hover:text-gray-800'}`}>
+                    已同步
+                    {activeTab === 'synced' && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500"></span>}
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm mt-6">
+                  <div className="px-6 py-4 border-b flex justify-between items-center">
+                      <p className="text-sm text-gray-600">展示区 - 在这里查看同步后的笔记清单，轻松管理您的内容</p>
+                      <div className="flex items-center space-x-2">
+                          <button disabled={selectedNoteIds.size === 0} className={`px-3 py-1.5 text-sm rounded-md flex items-center space-x-1.5 font-medium ${selectedNoteIds.size > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
+                            <i className="fas fa-trash-alt"></i>
+                            <span>批量删除</span>
+                          </button>
+                          <button disabled={selectedNoteIds.size === 0} className={`px-3 py-1.5 text-sm rounded-md flex items-center space-x-1.5 font-medium ${selectedNoteIds.size > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
+                            <i className="fas fa-sync-alt"></i>
+                            <span>批量同步</span>
+                          </button>
+                      </div>
+                  </div>
+                  
+                  <div className="text-sm">
+                      <div className="grid grid-cols-12 gap-4 items-center px-6 py-3 bg-gray-50 font-semibold text-gray-600">
+                          <div className="col-span-5 flex items-center">
+                            <input type="checkbox" className="mr-4" checked={areAllSelected} onChange={handleSelectAll} />
+                            <span>笔记标题</span>
+                          </div>
+                          <div className="col-span-2">状态</div>
+                          <div className="col-span-3">更新时间</div>
+                          <div className="col-span-2">操作</div>
+                      </div>
+
+                      <div className="divide-y">
+                        {filteredNotes.map(note => (
+                          <div key={note.id} className="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-gray-50">
+                            <div className="col-span-5 flex items-start">
+                              <input type="checkbox" className="mr-4 mt-1 flex-shrink-0" checked={selectedNoteIds.has(note.id)} onChange={() => handleNoteSelect(note.id)} />
+                              <div className="flex">
+                                <div>
+                                  <p className="font-semibold">{note.title}</p>
+                                  <p className="text-xs text-gray-500 mt-1 pr-4">{note.content}</p>
+                                  <div className="mt-2 flex space-x-1">
+                                    {note.tags.map(tag => <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{tag}</span>)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-span-2 self-center">
+                              {note.status === 'synced' ? (
+                                <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">已同步</span>
+                              ) : (
+                                <span className="text-xs font-medium bg-orange-100 text-orange-700 px-2 py-1 rounded-full">待同步</span>
+                              )}
+                            </div>
+                            <div className="col-span-3 self-center text-gray-500">{note.updatedAt}</div>
+                            <div className="col-span-2 self-center flex items-center space-x-4 text-gray-500">
+                               <img src={note.imageUrl} alt={note.title} className="w-16 h-10 object-cover rounded" />
+                               <div className="flex items-center space-x-3 text-base">
+                                <i onClick={() => setEditingNote(note)} className="fas fa-pen cursor-pointer hover:text-green-600"></i>
+                                <i className="fas fa-trash-alt cursor-pointer hover:text-red-600"></i>
+                               </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                  </div>
+
+                  <div className="px-6 py-4 border-t text-center">
+                    <button className="text-sm text-gray-600 font-semibold bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md">加载更多</button>
+                  </div>
+                </div>
+              </main>
+
+              {/* Right Sidebar */}
+              <aside className="col-span-3">
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                    <h3 className="font-semibold mb-4">今日笔记统计</h3>
+                    <div className="flex items-center justify-around">
+                      <div className="flex flex-col items-center">
+                        <p className="text-3xl font-bold text-green-600">12</p>
+                        <p className="text-sm text-gray-500">笔记总数</p>
+                      </div>
+                       <div className="relative w-24 h-24">
+                          <svg className="w-full h-full" viewBox="0 0 36 36">
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e6e6e6" strokeWidth="3"></path>
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" strokeWidth="3" strokeDasharray="95, 100" strokeLinecap="round" transform="rotate(90 18 18)"></path>
+                              <text x="18" y="22" textAnchor="middle" className="text-lg font-bold fill-current text-green-600">95%</text>
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <p className="text-xs text-gray-500 -mt-1">同步率</p>
+                          </div>
+                      </div>
+                    </div>
+                    <button className="mt-6 w-full border border-green-500 text-green-600 font-semibold py-2 rounded-md hover:bg-green-50">导出报表</button>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-sm p-6">
+                     <h3 className="font-semibold mb-4">历史同步趋势</h3>
+                     <div className="flex items-end justify-end">
+                        <div className="flex items-center space-x-1 text-xs">
+                          <span className="w-3 h-1.5 bg-green-400 rounded-full"></span>
+                          <span>同步成功率(%)</span>
+                        </div>
+                     </div>
+                     <div className="relative h-40 mt-2">
+                        <svg className="w-full h-full" preserveAspectRatio="none">
+                          <g className="text-gray-400 text-xs" fill="currentColor">
+                            <text x="0" y="8">100</text>
+                            <text x="0" y="44">95</text>
+                            <text x="0" y="80">90</text>
+                            <text x="0" y="116">85</text>
+                            <text x="0" y="152">80</text>
+                          </g>
+                           <g className="text-gray-500 text-xs" fill="currentColor" textAnchor="middle">
+                            <text x="15%" y="160">6月4日</text>
+                            <text x="30%" y="160">6月5日</text>
+                            <text x="45%" y="160">6月6日</text>
+                            <text x="60%" y="160">6月7日</text>
+                            <text x="75%" y="160">6月8日</text>
+                            <text x="90%" y="160">6月9日</text>
+                          </g>
+                          <path d="M 15% 45 L 30% 30 L 45% 40 L 60% 20 L 75% 15 L 90% 10" fill="none" stroke="#34d399" strokeWidth="2"></path>
+                        </svg>
+                     </div>
+                     <div className="mt-4 text-xs text-blue-600 bg-blue-50 p-2 rounded-md flex items-center space-x-2">
+                        <i className="fas fa-info-circle"></i>
+                        <span>小贴士：保持网络稳定可提高同步成功率</span>
+                     </div>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <footer className="text-sm text-gray-500 py-4 px-8 border-t">
+            <div className="max-w-screen-2xl mx-auto flex justify-between">
+              <span>© 2024 印象笔记同步 | 帮助中心 | 隐私策略</span>
+              <span>操作指引 <i className="fas fa-chevron-down text-xs"></i></span>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

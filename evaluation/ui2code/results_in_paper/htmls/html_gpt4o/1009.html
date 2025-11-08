@@ -1,0 +1,209 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青少年运动成就</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body class="bg-gray-100">
+<div id="root"></div>
+<script type="text/babel">
+    const { useState } = React;
+
+    const App = () => {
+        const [achievements, setAchievements] = useState([
+            {
+                id: 1,
+                title: "游泳比赛金牌",
+                date: "2023-06-15",
+                image: "https://picsum.photos/id/1/300/200",
+                description: "在青少年游泳比赛中获得50米自由泳金牌",
+            },
+            {
+                id: 2,
+                title: "篮球联赛最佳射手",
+                date: "2023-04-22",
+                image: "https://picsum.photos/id/2/300/200",
+                description: "在学校篮球联赛中获得最佳射手称号，场均得分22.55分",
+            },
+            {
+                id: 3,
+                title: "校园马拉松竞赛",
+                date: "2023-05-10",
+                image: "https://picsum.photos/id/3/300/200",
+                description: "成功完成10公里校园跑步竞赛，用时55分钟",
+            },
+        ]);
+
+        const [modalData, setModalData] = useState({});
+        const [modalType, setModalType] = useState(null);
+
+        const openAddModal = () => {
+            setModalType("add");
+            setModalData({});
+        };
+
+        const openEditModal = (achievement) => {
+            setModalType("edit");
+            setModalData({ ...achievement });
+        };
+
+        const closeModal = () => {
+            setModalType(null);
+            setModalData({});
+        };
+
+        const handleSaveAchievement = () => {
+            if (modalType === "add") {
+                const newAchievement = {
+                    ...modalData,
+                    id: achievements.length + 1,
+                    image: "https://picsum.photos/id/1079/300/200",
+                };
+                setAchievements([...achievements, newAchievement]);
+            } else if (modalType === "edit") {
+                setAchievements(
+                    achievements.map((achievement) =>
+                        achievement.id === modalData.id ? modalData : achievement
+                    )
+                );
+            }
+            closeModal();
+        };
+
+        const handleDeleteAchievement = (id) => {
+            setAchievements(achievements.filter((achievement) => achievement.id !== id));
+        };
+
+        return (
+            <div className="max-w-screen-lg mx-auto py-10">
+                {/* Header */}
+                <header className="bg-gradient-to-r from-orange-400 to-blue-400 rounded-lg p-6 flex justify-between items-center">
+                    <h1 className="text-white text-2xl font-bold">青少年运动成就</h1>
+                    <p className="text-white text-sm">记录青春的每一次突破</p>
+                </header>
+
+                {/* Main Content */}
+                <div className="mt-8 grid grid-cols-3 gap-6">
+                    <aside className="bg-white p-6 rounded-lg shadow-md">
+                        <img
+                            className="rounded-full w-16 h-16 mx-auto"
+                            src="https://picsum.photos/id/10/100/100" alt="profile"
+                        />
+                        <h2 className="text-center text-lg font-bold mt-4">青少年运动记录</h2>
+                        <nav className="mt-6 space-y-4">
+                            <a href="#" className="text-blue-500 font-bold block">主页</a>
+                            <a href="#" className="text-gray-600 block">我的成就</a>
+                            <a href="#" className="text-gray-600 block">统计分析</a>
+                            <a href="#" className="text-gray-600 block">帮助说明</a>
+                        </nav>
+                    </aside>
+
+                    <main className="col-span-2 bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-6">我的成就记录</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            {achievements.map((achievement) => (
+                                <div key={achievement.id} className="bg-white p-2 border rounded-lg shadow-sm hover:shadow-md">
+                                    <img src={achievement.image} alt={achievement.title} className="rounded-lg" />
+                                    <h4 className="text-lg mt-2 font-bold">{achievement.title}</h4>
+                                    <p className="text-sm text-gray-500">{achievement.date}</p>
+                                    <p className="text-sm text-gray-600 mt-2">{achievement.description}</p>
+                                    <div className="flex justify-end space-x-2 mt-2">
+                                        <button
+                                            className="text-white bg-blue-500 px-2 py-1 rounded hover:opacity-80"
+                                            onClick={() => openEditModal(achievement)}
+                                        >
+                                            编辑
+                                        </button>
+                                        <button
+                                            className="text-white bg-red-500 px-2 py-1 rounded hover:opacity-80"
+                                            onClick={() => handleDeleteAchievement(achievement.id)}
+                                        >
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            className="mt-6 bg-orange-500 text-white px-4 py-2 rounded hover:hover:opacity-80"
+                            onClick={openAddModal}
+                        >
+                            添加成就
+                        </button>
+                    </main>
+                </div>
+
+                {/* Modal */}
+                {modalType && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-white w-96 p-6 rounded-lg shadow-lg">
+                            <h3 className="text-lg font-bold mb-4">
+                                {modalType === "add" ? "添加新成就" : "编辑成就"}
+                            </h3>
+                            <input
+                                type="text"
+                                className="w-full mb-4 p-2 border rounded-lg"
+                                placeholder="项目名称"
+                                value={modalData.title || ""}
+                                onChange={(e) =>
+                                    setModalData({ ...modalData, title: e.target.value })
+                                }
+                            />
+                            <input
+                                type="date"
+                                className="w-full mb-4 p-2 border rounded-lg"
+                                value={modalData.date || ""}
+                                onChange={(e) =>
+                                    setModalData({ ...modalData, date: e.target.value })
+                                }
+                            />
+                            <input
+                                type="text"
+                                className="w-full mb-4 p-2 border rounded-lg"
+                                placeholder="图片URL"
+                                value={modalData.image || ""}
+                                onChange={(e) =>
+                                    setModalData({ ...modalData, image: e.target.value })
+                                }
+                            />
+                            <textarea
+                                className="w-full mb-4 p-2 border rounded-lg"
+                                placeholder="详细描述"
+                                value={modalData.description || ""}
+                                onChange={(e) =>
+                                    setModalData({
+                                        ...modalData,
+                                        description: e.target.value,
+                                    })
+                                }
+                            ></textarea>
+                            <div className="flex justify-end space-x-4">
+                                <button
+                                    className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+                                    onClick={closeModal}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:opacity-80"
+                                    onClick={handleSaveAchievement}
+                                >
+                                    保存成就
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+</script>
+</body>
+</html>

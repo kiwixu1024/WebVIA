@@ -1,0 +1,411 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄影师作品管理平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('作品展示');
+            const [favorites, setFavorites] = useState([]);
+            const [recycleBin, setRecycleBin] = useState([]);
+
+            const works = [
+                {
+                    id: 1,
+                    title: '晨曦之光',
+                    description: '清晨阳光透过薄雾照射在湖面上的瞬间',
+                    image: 'https://picsum.photos/id/1018/400/300',
+                    date: '2023-06-15',
+                    category: '风光',
+                    tags: ['自然', '日出', '湖泊'],
+                    views: '1280'
+                },
+                {
+                    id: 2,
+                    title: '城市剪影',
+                    description: '黄昏时分城市天际线的剪影效果',
+                    image: 'https://picsum.photos/id/1025/400/300',
+                    date: '2023-07-22',
+                    category: '风光',
+                    tags: ['城市', '黄昏', '剪影'],
+                    views: '945\''
+                },
+                {
+                    id: 3,
+                    title: '笑容背后',
+                    description: '捕捉真实笑容背后的情感瞬间',
+                    image: 'https://picsum.photos/id/1005/400/300',
+                    date: '2023-05-30',
+                    category: '人像',
+                    tags: ['人像', '情感', '黑白'],
+                    views: '876'
+                },
+                {
+                    id: 4,
+                    title: '街头故事',
+                    description: '繁忙都市中普通人的日常瞬间',
+                    image: 'https://picsum.photos/id/1011/400/300',
+                    date: '2023-08-05',
+                    category: '街拍',
+                    tags: ['街头', '人文', '日常'],
+                    views: '1123'
+                },
+                {
+                    id: 5,
+                    title: '雨后巷弄',
+                    description: '雨后的小巷反射着斑驳的灯光',
+                    image: 'https://picsum.photos/id/1036/400/300',
+                    date: '2023-04-18',
+                    category: '街拍',
+                    tags: ['雨天', '反射', '城市'],
+                    views: '789'
+                },
+                {
+                    id: 6,
+                    title: '山间静谧',
+                    description: '群山环绕中的平静湖面',
+                    image: 'https://picsum.photos/id/1039/400/300',
+                    date: '2023-03-29',
+                    category: '风光',
+                    tags: ['山脉', '湖泊', '宁静'],
+                    views: '956'
+                }
+            ];
+
+            const toggleFavorite = (workId) => {
+                setFavorites(prev => {
+                    if (prev.includes(workId)) {
+                        return prev.filter(id => id !== workId);
+                    } else {
+                        return [...prev, workId];
+                    }
+                });
+            };
+
+            const moveToRecycleBin = (workId) => {
+                setRecycleBin(prev => [...prev, workId]);
+            };
+
+            const addToFavorites = (work) => {
+                const isNewFavorite = !favorites.includes(work.id);
+                if (isNewFavorite) {
+                    setFavorites(prev => [...prev, work.id]);
+                }
+            };
+
+            const handleGenreClick = () => {
+                const genre = activeTab === '作品展示' && favorites.length > 0 ? '收藏作品' : '';
+                setActiveTab(genre);
+            };
+
+            const renderNavigation = () => (
+                <nav className="bg-slate-700 text-white">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex items-center justify-between h-16">
+                            <div className="flex items-center space-x-3">
+                                <img src="https://picsum.photos/id/64/40/40" alt="Logo" className="w-10 h-10 rounded-full object-cover" />
+                                <span className="text-xl font-semibold text-white">摄影师作品管理平台</span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <button 
+                                    onClick={() => setActiveTab('作品展示')}
+                                    className={`px-4 py-2 rounded ${activeTab === '作品展示' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}
+                                >
+                                    作品展示
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('作品编辑')}
+                                    className={`px-4 py-2 rounded ${activeTab === '作品编辑' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}
+                                >
+                                    作品编辑
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('数据统计')}
+                                    className={`px-4 py-2 rounded ${activeTab === '数据统计' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}
+                                >
+                                    数据统计
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('帮助中心')}
+                                    className={`px-4 py-2 rounded ${activeTab === '帮助中心' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}
+                                >
+                                    帮助中心
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+
+            const renderSidebar = () => (
+                <div className="bg-slate-700 text-white space-y-6">
+                    <div className="flex items-center space-x-2">
+                        <i className="fas fa-chart-bar"></i>
+                        <h3 className="text-lg font-semibold">作品统计</h3>
+                    </div>
+                    <div className="bg-slate-800 p-4 rounded">
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span>作品总数：</span>
+                                <span className="text-blue-400 font-semibold">{6}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>分类统计：</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>风光</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>人像</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>街拍</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="text-lg font-semibold mb-2">最近更新</h3>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex items-center space-x-2">
+                                <img src="https://picsum.photos/id/1018/40/40" alt="作品" className="w-10 h-10 rounded object-cover" />
+                                <div className="flex-1">
+                                    <div className="text-blue-400 font-semibold">晨曦之光</div>
+                                    <div className="text-gray-400 text-xs">2023-06-15</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <img src="https://picsum.photos/id/1025/40/40" alt="作品" className="w-10 h-10 rounded object-cover" />
+                                <div className="flex-1">
+                                    <div className="text-blue-400 font-semibold">城市剪影</div>
+                                    <div className="text-gray-400 text-xs">2023-07-22</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <img src="https://picsum.photos/id/1005/40/40" alt="作品" className="w-10 h-10 rounded object-cover" />
+                                <div className="flex-1">
+                                    <div className="text-blue-400 font-semibold">笑容背后</div>
+                                    <div className="text-gray-400 text-xs">2023-05-30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="rounded border border-slate-600">
+                        <div className="bg-slate-800 p-3 rounded-t flex items-center space-x-2">
+                            <i className="fas fa-info-circle text-info"></i>
+                            <span className="text-sm text-gray-300">您的作品浏览量较上月增长了15%</span>
+                        </div>
+                        <div className="bg-slate-700 p-3 flex items-center space-x-2">
+                            <img src="https://picsum.photos/id/1005/30/30" alt="作品" className="w-8 h-8 rounded object-cover" />
+                            <span className="text-sm">过去的观看热度</span>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderMainContent = () => {
+                if (activeTab === '帮助中心') {
+                    return (
+                        <div className="border-l-4 border-orange-400 bg-orange-50 p-4">
+                            <div className="flex items-center space-x-2 mb-4">
+                                <i className="fas fa-lightbulb text-orange-600"></i>
+                                <h1 className="text-2xl font-bold">摄影师作品管理平台</h1>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <i className="fas fa-check-circle text-blue-500"></i>
+                                        <h2 className="text-lg font-semibold">如何添加新作品</h2>
+                                    </div>
+                                    <p className="text-gray-700">点击页面上方的"添加作品"按钮，在弹出的窗口中填写作品照片信息并上传照片。点击保存即可添加新作品。</p>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <i className="fas fa-edit text-green-500"></i>
+                                        <h2 className="text-lg font-semibold">如何编辑作品</h2>
+                                    </div>
+                                    <p className="text-gray-700">在作品卡片或列表中找到您想要编辑的作品，点击"编辑"按钮，修改相关信息后保存即可。</p>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <i className="fas fa-trash text-red-500"></i>
+                                        <h2 className="text-lg font-semibold">如何删除作品</h2>
+                                    </div>
+                                    <p className="text-gray-700">在作品卡片或列表中找到您想要删除的作品，点击"删除"按钮，在确认对话框中确认删除操作。</p>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <i className="fas fa-question-circle text-yellow-500"></i>
+                                        <h2 className="text-lg font-semibold">常见问题</h2>
+                                    </div>
+                                    <button className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">上传图片有什么限制？</button>
+                                    <button className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600">如何备份我的作品？</button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="space-y-4">
+                        <div className="bg-slate-800 p-4 rounded flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <i className={`fas fa-images ${activeTab === '数据统计' ? 'text-blue-400' : 'text-blue-400'}`}></i>
+                                <h1 className="text-xl font-semibold">{activeTab}</h1>
+                            </div>
+                            <span className="text-gray-400">提示信息</span>
+                        </div>
+
+                        <div className="bg-slate-800 p-4 rounded">
+                            <div className="mb-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <button className={`px-4 py-2 rounded ml-0 ${activeTab === '作品展示' ? 'bg-blue-600' : 'hover:bg-slate-600'}`} onClick={handleGenreClick}>
+                                        作品展示
+                                    </button>
+                                    <button className={`px-4 py-2 rounded ml-2 ${activeTab === '收藏作品' ? 'bg-blue-600' : 'hover:bg-slate-600'}`}>
+                                        收藏作品
+                                    </button>
+                                    <button className="px-4 py-2 rounded ml-2 hover:bg-slate-600">
+                                        回收站
+                                    </button>
+                                    
+                                    <div className="flex space-x-2 ml-4">
+                                        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-1">
+                                            <i className="fas fa-plus"></i>
+                                            <span>添加作品</span>
+                                        </button>
+                                        <button className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 flex items-center space-x-1">
+                                            <i className="fas fa-filter"></i>
+                                            <span>筛选</span>
+                                        </button>
+                                        <button className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 flex items-center space-x-1">
+                                            <i className="fas fa-sync"></i>
+                                            <span>刷新</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {activeTab === '收藏作品' && (
+                                    <div className="flex space-x-3 mt-4">
+                                        <button>
+                                            <i className="fas fa-heart text-red-500"></i>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {activeTab === '收藏作品' && favorites.length > 0 ? (
+                                <div className="grid grid-cols-6 gap-4">
+                                    {favorites.map(workId => {
+                                        const work = works.find(w => w.id === workId);
+                                        if (work) {
+                                            return (
+                                                <div key={work.id} className="position relative bg-transparent">
+                                                    <img src={work.image} alt={work.title} className="w-full h-48 object-cover rounded-lg" />
+                                                    <div className="absolute top-2 left-2 flex space-x-1">
+                                                        <span className="bg-orange-500 text-white px-2 py-1 text-xs rounded">{work.category}</span>
+                                                        <i className="fas fa-heart text-red-500"></i>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-3 gap-6">
+                                    {works.map(work => (
+                                        <div key={work.id} className="relative">
+                                            <img src={work.image} alt={work.title} className="w-full h-48 object-cover rounded-lg" />
+                                            <div className="absolute top-2 left-2 flex space-x-1">
+                                                <span className="bg-orange-500 text-white px-2 py-1 text-xs rounded">{work.category}</span>
+                                                <i className="fas fa-heart text-red-500 animate-pulse" onClick={() => toggleFavorite(work.id)}></i>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 bg-black bg-opacity-70 text-white p-3 rounded-b-lg">
+                                                <h3 className="font-semibold text-sm">{work.title}</h3>
+                                                <p className="text-xs opacity-70">{work.description}</p>
+                                                <div className="flex items-center justify-between mt-2">
+                                                    <div className="flex items-center space-x-1">
+                                                        <i className="fas fa-calendar text-xs"></i>
+                                                        <span className="text-xs">{work.date}</span>
+                                                    </div>
+                                                    <div className="flex space-x-1 text-xs">
+                                                        <span className="bg-blue-600 text-xs px-2 py-1 rounded">{work.tags[0]}</span>
+                                                        {work.tags.length > 1 && (
+                                                            <span className="bg-green-600 text-xs px-2 py-1 rounded">{work.tags[1]}</span>
+                                                        )}
+                                                        {work.tags.length > 2 && (
+                                                            <span className="bg-purple-600 text-xs px-2 py-1 rounded">{work.tags[2]}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex">
+                    {renderNavigation()}
+                    
+                    <div className="flex-1 max-w-7xl mx-auto p-6 space-y-6">
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div className="p-4 border-b border-gray-200">
+                                <div className="flex space-x-2">
+                                    <button className="px-4 py-2 bg-blue-600 text-white rounded flex items-center space-x-2">
+                                        <i className="fas fa-star"></i>
+                                        <span>作品展示</span>
+                                    </button>
+                                    <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded flex items-center space-x-2">
+                                        <i className="fas fa-edit"></i>
+                                        <span>作品编辑</span>
+                                    </button>
+                                    <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded flex items-center space-x-2">
+                                        <i className="fas fa-chart-bar"></i>
+                                        <span>数据统计</span>
+                                    </button>
+                                    <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded flex items-center space-x-2">
+                                        <i className="fas fa-question-circle"></i>
+                                        <span>帮助中心</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {renderMainContent()}
+                        </div>
+
+                        {renderSidebar()}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>营养早餐创新榜</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="h-screen flex overflow-hidden">
+  <div id="root" class="flex-1 flex flex-col"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    const TYPE_OPTIONS = [
+      { key: '中式', color: 'red' },
+      { key: '西式', color: 'blue' },
+      { key: '素食', color: 'green' },
+      { key: '甜品', color: 'purple' }
+    ];
+
+    function starDisplay(rating) {
+      const full = Math.floor(rating);
+      const half = rating - full >= 0.5;
+      let stars = [];
+      for (let i = 0; i < full; i++) {
+        stars.push(<i key={'f'+i} className="fas fa-star text-yellow-400 mr-1"></i>);
+      }
+      if (half) {
+        stars.push(<i key="h" className="fas fa-star-half-alt text-yellow-400 mr-1"></i>);
+      }
+      return stars;
+    }
+
+    function AddEditModal({ item, onCancel, onSave }) {
+      // item为空时是 add
+      const isEdit = !!item;
+      const [name, setName] = useState(item?.name || '');
+      const [types, setTypes] = useState(item?.types || []);
+      const [protein, setProtein] = useState(item?.nutrition.protein || 0);
+      const [carbs, setCarbs] = useState(item?.nutrition.carbs || 0);
+      const [fat, setFat] = useState(item?.nutrition.fat || 0);
+      const [fiber, setFiber] = useState(item?.nutrition.fiber || 0);
+      const [rating, setRating] = useState(item?.rating || 3);
+      const [imageUrl, setImageUrl] = useState(item?.imageUrl || '');
+      const [description, setDescription] = useState(item?.description || '');
+
+      function toggleType(t) {
+        if (types.includes(t)) {
+          setTypes(types.filter(x => x !== t));
+        } else {
+          setTypes([...types, t]);
+        }
+      }
+
+      function handleSave() {
+        if (!name.trim()) { alert('请填写名称'); return; }
+        const newItem = {
+          id: isEdit ? item.id : Date.now(),
+          name: name.trim(),
+          types,
+          nutrition: { protein: Number(protein), carbs: Number(carbs), fat: Number(fat), fiber: Number(fiber) },
+          rating: Number(rating),
+          imageUrl: imageUrl.trim() || 'https://picsum.photos/id/102/300/200',
+          description: description.trim(),
+        };
+        onSave(newItem);
+      }
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl p-6 relative">
+            <h2 className="text-xl font-semibold mb-4">{isEdit ? '编辑早餐' : '添加新早餐'}</h2>
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-700" onClick={onCancel}>
+              <i className="fas fa-times"></i>
+            </button>
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+              <div>
+                <label className="block text-gray-700">名称</label>
+                <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="输入早餐名称"
+                  className="mt-1 w-full border rounded px-3 py-2 focus:outline-none focus:ring" />
+              </div>
+              <div>
+                <label className="block text-gray-700">类型 (可多选)</label>
+                <div className="flex flex-wrap mt-2">
+                  {TYPE_OPTIONS.map(opt => {
+                    const sel = types.includes(opt.key);
+                    const base = `border-${opt.color}-500 text-${opt.color}-500`;
+                    return (
+                      <div key={opt.key}
+                        className={`mr-3 mb-2 px-3 py-1 rounded-full cursor-pointer ${sel?`bg-${opt.color}-100 ${base}`:`bg-white ${base}`}`}
+                        onClick={() => toggleType(opt.key)}>
+                        {opt.key}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700">蛋白质 (g)</label>
+                  <input type="number" value={protein} onChange={e=>setProtein(e.target.value)}
+                    className="mt-1 w-full border rounded px-2 py-1 focus:outline-none focus:ring" />
+                </div>
+                <div>
+                  <label className="block text-gray-700">碳水 (g)</label>
+                  <input type="number" value={carbs} onChange={e=>setCarbs(e.target.value)}
+                    className="mt-1 w-full border rounded px-2 py-1 focus:outline-none focus:ring" />
+                </div>
+                <div>
+                  <label className="block text-gray-700">脂肪 (g)</label>
+                  <input type="number" value={fat} onChange={e=>setFat(e.target.value)}
+                    className="mt-1 w-full border rounded px-2 py-1 focus:outline-none focus:ring" />
+                </div>
+                <div>
+                  <label className="block text-gray-700">纤维 (g)</label>
+                  <input type="number" value={fiber} onChange={e=>setFiber(e.target.value)}
+                    className="mt-1 w-full border rounded px-2 py-1 focus:outline-none focus:ring" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700">推荐指数: {rating}</label>
+                <input type="range" min="1" max="5" step="0.5" value={rating}
+                  onChange={e=>setRating(e.target.value)}
+                  className="w-full mt-2" />
+                <div className="flex justify-between text-sm text-gray-500 mt-1">
+                  {[1,2,3,4,5].map(n=><span key={n}>{n}</span>)}
+                </div>
+              </div>
+              <div>
+                <label className="block text-gray-700">图片 URL</label>
+                <input type="text" value={imageUrl} onChange={e=>setImageUrl(e.target.value)}
+                  placeholder="输入图片 URL 或留空使用默认图片"
+                  className="mt-1 w-full border rounded px-3 py-2 focus:outline-none focus:ring" />
+                {imageUrl && (
+                  <img src={imageUrl} alt="预览" className="mt-2 rounded w-full h-40 object-cover" />
+                )}
+              </div>
+              <div>
+                <label className="block text-gray-700">短文案说明</label>
+                <textarea value={description} onChange={e=>setDescription(e.target.value)}
+                  placeholder="请简要描述风味与特色"
+                  className="mt-1 w-full border rounded px-3 py-2 focus:outline-none focus:ring"></textarea>
+              </div>
+            </div>
+            <div className="mt-6 text-right">
+              <button onClick={onCancel} className="px-4 py-2 border rounded mr-3">取消</button>
+              <button onClick={handleSave} className="px-4 py-2 bg-yellow-400 text-white rounded">保存</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Dashboard() {
+      const initial = [
+        {
+          id: 1, name: '燕麦水果杯', types: ['素食','甜品'],
+          nutrition: { protein:8, carbs:40, fat:6, fiber:5 },
+          rating: 4.5, imageUrl:'https://picsum.photos/id/102/300/200', description: '健康的燕麦搭配新鲜水果，富含膳食纤维，是一天能量的完美开始。'
+        },
+        {
+          id: 2, name: '法式土司', types: ['西式'],
+          nutrition: { protein:12, carbs:35, fat:15, fiber:2 },
+          rating: 4, imageUrl:'https://picsum.photos/id/20/300/200', description: ''
+        },
+        {
+          id: 3, name: '皮蛋瘦肉粥', types: ['中式'],
+          nutrition: { protein:15, carbs:30, fat:8, fiber:1 },
+          rating: 5, imageUrl:'https://picsum.photos/id/30/300/200', description: ''
+        },
+        {
+          id: 4, name: '牛油果吐司', types: ['西式','素食'],
+          nutrition: { protein:10, carbs:25, fat:18, fiber:7 },
+          rating: 4.5, imageUrl:'https://picsum.photos/id/40/300/200', description: ''
+        },
+        {
+          id: 5, name: '豆浆油条', types: ['中式'],
+          nutrition: { protein:12, carbs:38, fat:14, fiber:2 },
+          rating: 4, imageUrl:'https://picsum.photos/id/50/300/200', description: ''
+        },
+        {
+          id: 6, name: '蓝莓松饼', types: ['西式','甜品'],
+          nutrition: { protein:6, carbs:45, fat:12, fiber:4 },
+          rating: 5, imageUrl:'https://picsum.photos/id/60/300/200', description: ''
+        },
+      ];
+      const [items, setItems] = useState(initial);
+      const [showAdd, setShowAdd] = useState(false);
+      const [editItem, setEditItem] = useState(null);
+
+      function handleDelete(id) {
+        setItems(items.filter(it=>it.id!==id));
+      }
+      function handleAddClick() { setShowAdd(true); }
+      function handleEditClick(item) { setEditItem(item); }
+      function handleCancelModal() {
+        setShowAdd(false);
+        setEditItem(null);
+      }
+      function handleSaveNew(item) {
+        setItems([item, ...items]);
+        setShowAdd(false);
+      }
+      function handleSaveEdit(item) {
+        setItems(items.map(it=>it.id===item.id?item:it));
+        setEditItem(null);
+      }
+
+      return (
+        <div className="flex h-full">
+          {/* 左侧导航 */}
+          <aside className="w-16 bg-white border-r flex flex-col items-center pt-6 pb-4">
+            <div className="text-2xl mb-8">🥣</div>
+            <div className="flex-1 space-y-4">
+              <div className="text-blue-500"><i className="fas fa-tv fa-lg"></i></div>
+              <div className="text-gray-400"><i className="fas fa-edit fa-lg"></i></div>
+              <div className="text-gray-400"><i className="fas fa-list-alt fa-lg"></i></div>
+              <div className="text-gray-400"><i className="fas fa-question-circle fa-lg"></i></div>
+              <div className="text-gray-400"><i className="fas fa-cog fa-lg"></i></div>
+            </div>
+          </aside>
+          {/* 主体 */}
+          <div className="flex-1 flex flex-col">
+            {/* 顶部 */}
+            <header className="flex justify-between items-center h-16 px-6 border-b bg-white">
+              <nav className="space-x-6 text-gray-600 text-sm">
+                <a href="#" className="hover:text-blue-500">首页</a>
+                <a href="#" className="hover:text-blue-500">榜单展示</a>
+                <a href="#" className="hover:text-blue-500">内容编辑</a>
+                <a href="#" className="hover:text-blue-500">统计分析</a>
+                <a href="#" className="hover:text-blue-500">帮助说明</a>
+              </nav>
+            </header>
+            {/* 内容 */}
+            <div className="flex flex-1 overflow-hidden">
+              {/* 中央区 */}
+              <main className="flex-1 overflow-auto p-6 bg-gray-50">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-semibold">早餐菜单展示</h2>
+                  <button onClick={handleAddClick}
+                    className="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-yellow-500">
+                    + 添加新早餐
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {items.map(item => (
+                    <div key={item.id} className="bg-white rounded shadow overflow-hidden flex flex-col">
+                      <img src={item.imageUrl} alt={item.name} className="h-40 w-full object-cover"/>
+                      <div className="p-4 flex-1 flex flex-col">
+                        <h3 className="font-semibold mb-2">{item.name}</h3>
+                        <div className="flex flex-wrap mb-2">
+                          {item.types.map(t => {
+                            const col = TYPE_OPTIONS.find(o=>o.key===t)?.color || 'gray';
+                            return (
+                              <span key={t} className={`text-${col}-500 border border-${col}-500 rounded-full px-2 py-0.5 text-xs mr-2 mb-2`}>
+                                {t}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <div className="flex items-center mb-2 text-sm text-gray-600">
+                          <span className="mr-4">蛋白质 {item.nutrition.protein}g</span>
+                          <span className="mr-4">碳水 {item.nutrition.carbs}g</span>
+                          <span className="mr-4">脂肪 {item.nutrition.fat}g</span>
+                          <span>纤维 {item.nutrition.fiber}g</span>
+                        </div>
+                        <div className="flex items-center mt-auto">
+                          {starDisplay(item.rating)}
+                          <span className="text-gray-600 ml-1">({item.rating})</span>
+                        </div>
+                        <div className="mt-4 flex space-x-2">
+                          <button onClick={()=>handleEditClick(item)}
+                            className="flex-1 bg-blue-200 text-blue-600 px-3 py-1 rounded hover:bg-blue-300">
+                            编辑
+                          </button>
+                          <button onClick={()=>handleDelete(item.id)}
+                            className="flex-1 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <footer className="mt-6 text-center text-gray-500 text-sm">
+                  © 2023 营养早餐创新榜 版权所有
+                </footer>
+              </main>
+              {/* 右侧 */}
+              <aside className="w-80 bg-white border-l p-6 overflow-auto">
+                <h3 className="font-semibold mb-4">数据概览</h3>
+                <div className="bg-blue-100 p-4 rounded mb-6 flex items-center justify-between">
+                  <div>
+                    <div className="text-gray-600">今日新增</div>
+                    <div className="text-2xl font-bold">3 款早餐</div>
+                  </div>
+                  <i className="fas fa-utensils fa-2x text-blue-500"></i>
+                </div>
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">最受欢迎 TOP3</span>
+                  </div>
+                  <ol className="space-y-2">
+                    <li className="flex items-center">
+                      <span className="w-6 text-yellow-500 font-bold">1</span>
+                      <img src="https://picsum.photos/id/30/40/40" alt="" className="w-10 h-10 rounded mr-2 object-cover"/>
+                      <span className="flex-1">皮蛋瘦肉粥</span>
+                      <div className="text-yellow-400"><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i></div>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-6 text-yellow-500 font-bold">2</span>
+                      <img src="https://picsum.photos/id/60/40/40" alt="" className="w-10 h-10 rounded mr-2 object-cover"/>
+                      <span className="flex-1">蓝莓松饼</span>
+                      <div className="text-yellow-400">{[...Array(5)].map((_,i)=><i key={i} className="fas fa-star"></i>)}</div>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="w-6 text-yellow-500 font-bold">3</span>
+                      <img src="https://picsum.photos/id/102/40/40" alt="" className="w-10 h-10 rounded mr-2 object-cover"/>
+                      <span className="flex-1">燕麦水果杯</span>
+                      <div className="text-yellow-400">{[...Array(4)].map((_,i)=><i key={i} className="fas fa-star"></i>)}<i className="fas fa-star-half-alt"></i></div>
+                    </li>
+                  </ol>
+                </div>
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">饮食类型占比</span>
+                  </div>
+                  <div className="w-full h-40 flex items-center justify-center">
+                    <svg viewBox="0 0 32 32" className="w-32 h-32">
+                      <circle r="16" cx="16" cy="16" fill="#fde68a" stroke="white" strokeWidth="2" strokeDasharray="20 80"/>
+                      <circle r="16" cx="16" cy="16" fill="transparent" stroke="#bfdbfe" strokeWidth="2" strokeDasharray="30 70" transform="rotate(-90 16 16)"/>
+                      <circle r="16" cx="16" cy="16" fill="transparent" stroke="#bbf7d0" strokeWidth="2" strokeDasharray="25 75" transform="rotate(10 16 16)"/>
+                      <circle r="16" cx="16" cy="16" fill="transparent" stroke="#d8b4fe" strokeWidth="2" strokeDasharray="25 75" transform="rotate(60 16 16)"/>
+                    </svg>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600 mt-2">
+                    <div><span className="inline-block w-3 h-3 bg-red-300 mr-1"></span>中式 20%</div>
+                    <div><span className="inline-block w-3 h-3 bg-blue-300 mr-1"></span>西式 30%</div>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600 mt-1">
+                    <div><span className="inline-block w-3 h-3 bg-green-300 mr-1"></span>素食 25%</div>
+                    <div><span className="inline-block w-3 h-3 bg-purple-300 mr-1"></span>甜品 25%</div>
+                  </div>
+                </div>
+                <div className="mb-4 bg-blue-50 p-3 rounded text-sm text-blue-800">
+                  <strong>今日小贴士：</strong>每一天积极运动后，来碗热乎乎的粥最滋补~ 营养早餐，为身体提供所需能量。
+                </div>
+                <div className="bg-green-50 p-3 rounded text-sm text-green-800">
+                  <strong>健康提示：</strong>均衡搭配，吃够蔬果，均衡的早餐包含蛋白质、碳水与维生素，健康新的一天从早餐开始。
+                </div>
+                <div className="text-right text-gray-400 text-xs mt-4">版本 1.0.0</div>
+              </aside>
+            </div>
+          </div>
+          {showAdd && <AddEditModal onCancel={handleCancelModal} onSave={handleSaveNew} />}
+          {editItem && <AddEditModal item={editItem} onCancel={handleCancelModal} onSave={handleSaveEdit} />}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Dashboard />, document.getElementById('root'));
+  </script>
+</body>
+</html>

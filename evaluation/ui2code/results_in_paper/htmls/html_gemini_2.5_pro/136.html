@@ -1,0 +1,351 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>听歌识曲练习</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialSongsData = [
+            { id: 1, title: 'Shape of You', artist: 'Ed Sheeran', difficulty: '中级', duration: 30, imageUrl: 'https://picsum.photos/id/1/80/80' },
+            { id: 2, title: 'Blinding Lights', artist: 'The Weekend', difficulty: '初级', duration: 20, imageUrl: 'https://picsum.photos/id/10/80/80' },
+            { id: 3, title: 'Bad Guy', artist: 'Billie Eilish', difficulty: '高级', duration: 45, imageUrl: 'https://picsum.photos/id/100/80/80' },
+        ];
+
+        const DifficultyBadge = ({ difficulty }) => {
+            const styles = {
+                '初级': 'bg-green-100 text-green-800',
+                '中级': 'bg-yellow-100 text-yellow-800',
+                '高级': 'bg-red-100 text-red-800',
+            };
+            return <span className={`px-2 py-0.5 text-xs font-semibold rounded ${styles[difficulty]}`}>{difficulty}</span>;
+        };
+
+        const Sidebar = () => (
+            <div className="w-60 bg-gradient-to-b from-blue-500 to-blue-700 text-white flex flex-col flex-shrink-0">
+                <div className="p-6">
+                    <h1 className="text-xl font-bold"><i className="fas fa-music mr-2"></i>听歌识曲练习</h1>
+                </div>
+                <nav className="flex-grow px-4">
+                    <ul>
+                        <li className="mb-2"><a href="#" className="flex items-center p-3 rounded-lg bg-blue-600"><i className="fas fa-list w-6"></i>练习列表</a></li>
+                        <li className="mb-2"><a href="#" className="flex items-center p-3 rounded-lg hover:bg-blue-600"><i className="fas fa-user-check w-6"></i>我的成绩</a></li>
+                        <li className="mb-2"><a href="#" className="flex items-center p-3 rounded-lg hover:bg-blue-600"><i className="fas fa-trophy w-6"></i>排行榜</a></li>
+                    </ul>
+                </nav>
+                <div className="px-4 mb-4">
+                    <a href="#" className="flex items-center p-3 rounded-lg hover:bg-blue-600"><i className="fas fa-cog w-6"></i>设置</a>
+                </div>
+                <footer className="text-center p-4 text-xs text-blue-200">
+                    ©2024 音乐练习平台<br/>V1.0 (版本君)<br/>support@sample.com
+                </footer>
+            </div>
+        );
+
+        const Header = () => (
+            <header className="bg-white border-b border-gray-200">
+                <div className="max-w-7xl mx-auto px-8">
+                    <div className="flex justify-between items-center h-16">
+                        <nav className="flex space-x-8">
+                            <a href="#" className="text-sm font-medium text-blue-600 border-b-2 border-blue-600 pb-1">练习首页</a>
+                            <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-700">曲库管理</a>
+                            <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-700">使用教程</a>
+                        </nav>
+                        <p className="text-sm text-gray-500">所歌识曲练习——快速提升你的音乐辨识力</p>
+                    </div>
+                </div>
+            </header>
+        );
+
+        const SongItem = ({ song, onEdit, onDelete }) => (
+            <div className="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4">
+                <img src={song.imageUrl} alt={song.title} className="w-20 h-20 rounded-md object-cover" />
+                <div className="flex-grow">
+                    <h3 className="font-semibold text-lg text-gray-800">{song.title}</h3>
+                    <p className="text-sm text-gray-500">{song.artist}</p>
+                </div>
+                <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <DifficultyBadge difficulty={song.difficulty} />
+                    <span>{song.duration}秒</span>
+                </div>
+                <div className="flex items-center space-x-4">
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-600 flex items-center">
+                        <i className="fas fa-play mr-2"></i>播放试听
+                    </button>
+                    <button onClick={() => onEdit(song)} className="text-gray-500 hover:text-gray-800 text-sm">编辑</button>
+                    <button onClick={() => onDelete(song)} className="text-red-500 hover:text-red-700 text-sm">删除</button>
+                </div>
+            </div>
+        );
+
+        const SongList = ({ songs, onOpenAddModal, onOpenEditModal, onOpenDeleteModal }) => (
+            <div className="flex-grow">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">我的曲目练习</h2>
+                    <button onClick={onOpenAddModal} className="bg-orange-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-orange-600 flex items-center">
+                        <i className="fas fa-plus mr-2"></i>添加曲目练习
+                    </button>
+                </div>
+                <div className="space-y-4">
+                    {songs.map(song => (
+                        <SongItem key={song.id} song={song} onEdit={onOpenEditModal} onDelete={onOpenDeleteModal} />
+                    ))}
+                </div>
+            </div>
+        );
+
+        const StatsPanel = () => (
+            <aside className="w-80 flex-shrink-0 ml-8">
+                <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <h3 className="font-bold text-lg mb-4">练习统计</h3>
+                    <div className="flex justify-around text-center mb-4">
+                        <div>
+                            <p className="text-sm text-gray-500">已完成练习</p>
+                            <p className="text-3xl font-bold text-blue-600">128</p>
+                        </div>
+                        <div className="border-l border-gray-200"></div>
+                        <div>
+                            <p className="text-sm text-gray-500">正确率</p>
+                            <p className="text-3xl font-bold text-yellow-500">85%</p>
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-400 mb-2">近7日答题趋势</p>
+                    <div className="h-24 bg-slate-100 rounded flex items-center justify-center text-gray-400 text-xs">
+                        <div className="flex justify-around w-full px-2 text-center">
+                            <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="border-l-4 border-orange-400 bg-orange-50 p-4 rounded-r-lg mb-6 flex">
+                    <i className="fas fa-exclamation-triangle text-orange-400 mt-1 mr-3"></i>
+                    <div>
+                        <p className="font-semibold text-sm text-gray-800">您已连续答对 3 次，解锁高段位曲！</p>
+                        <p className="text-xs text-gray-500 mt-1">Tip: 多听各类曲风练习有助于扩大曲库！</p>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <img src="https://picsum.photos/id/1015/320/180" alt="每日音乐推荐" className="w-full h-auto object-cover" />
+                    <div className="p-4">
+                        <h4 className="font-semibold text-gray-800">每日音乐推荐</h4>
+                    </div>
+                </div>
+            </aside>
+        );
+
+        const PageFooter = () => (
+            <footer className="bg-white mt-8 p-8 rounded-lg shadow-sm">
+                <div className="flex justify-between">
+                    <div>
+                        <h3 className="font-bold text-lg mb-4">使用指引</h3>
+                        <ul className="list-disc list-inside text-sm text-gray-600 space-y-2">
+                            <li>点击▶试听 30s 片段</li>
+                            <li>根据旋律匹配正确答案</li>
+                            <li>实时查看对错与解析</li>
+                            <li>练习过程中可随时暂停或标示并查看答案解析。</li>
+                        </ul>
+                    </div>
+                    <div className="flex space-x-12 text-center text-sm text-gray-600">
+                        <div><i className="fas fa-comments text-2xl text-blue-500 mb-2"></i><p>实时反馈</p></div>
+                        <div><i className="fas fa-users text-2xl text-blue-500 mb-2"></i><p>分组练习</p></div>
+                        <div><i className="fas fa-chart-pie text-2xl text-blue-500 mb-2"></i><p>可视化统计</p></div>
+                    </div>
+                </div>
+            </footer>
+        );
+        
+        const AddEditModal = ({ mode, song, onSave, onCancel }) => {
+            const isEdit = mode === 'edit';
+            const initialData = isEdit ? song : { title: '', artist: '', difficulty: '初级', duration: 30 };
+            
+            const [formData, setFormData] = useState(initialData);
+
+            useEffect(() => {
+                setFormData(isEdit ? song : { title: '', artist: '', difficulty: '初级', duration: 30 });
+            }, [mode, song]);
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleDurationChange = (e) => {
+                setFormData(prev => ({ ...prev, duration: parseInt(e.target.value, 10) }));
+            };
+
+            const handleSave = () => {
+                const songToSave = { ...formData, imageUrl: song?.imageUrl || 'https://picsum.photos/id/1025/80/80' };
+                onSave(songToSave);
+            };
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 p-8">
+                        <h2 className="text-xl font-bold mb-6">{isEdit ? '编辑曲目练习' : '新增听歌识曲练习'}</h2>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">歌曲名</label>
+                                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="输入歌曲名称" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">艺术家</label>
+                                <input type="text" name="artist" value={formData.artist} onChange={handleChange} placeholder="输入艺术家名称" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">难度</label>
+                                <select name="difficulty" value={formData.difficulty} onChange={handleChange} className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white focus:ring-blue-500 focus:border-blue-500">
+                                    <option>初级</option>
+                                    <option>中级</option>
+                                    <option>高级</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">时长: {formData.duration}秒</label>
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-gray-500">10秒</span>
+                                    <input type="range" min="10" max="60" value={formData.duration} onChange={handleDurationChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                    <span className="text-xs text-gray-500">60秒</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">预览图</label>
+                                <div className="w-full h-32 bg-gray-100 rounded-md flex items-center justify-center">
+                                    <img src={isEdit ? song.imageUrl.replace('/80/80', '/320/180') : "https://picsum.photos/id/1025/320/180"} className="object-cover h-full w-full rounded-md" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-4 mt-8">
+                            <button onClick={onCancel} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md font-semibold hover:bg-gray-200">取消</button>
+                            <button onClick={handleSave} className="px-6 py-2 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600">{isEdit ? '保存修改' : '确认保存'}</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const DeleteModal = ({ song, onConfirm, onCancel }) => {
+            if (!song) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-8 text-center">
+                        <h2 className="text-xl font-bold mb-4">删除确认</h2>
+                        <p className="text-gray-600 mb-6">确定要删除 "{song.title}" 这个练习吗？</p>
+                        <div className="flex justify-center space-x-4">
+                            <button onClick={onCancel} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md font-semibold hover:bg-gray-200">取消</button>
+                            <button onClick={() => onConfirm(song.id)} className="px-6 py-2 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600">确定删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        function App() {
+            const [songs, setSongs] = useState(initialSongsData);
+            const [modal, setModal] = useState({ type: null, data: null });
+
+            const handleOpenAddModal = () => setModal({ type: 'add', data: null });
+            const handleOpenEditModal = (song) => setModal({ type: 'edit', data: song });
+            const handleOpenDeleteModal = (song) => setModal({ type: 'delete', data: song });
+            const handleCloseModal = () => setModal({ type: null, data: null });
+
+            const handleSaveSong = (songData) => {
+                if (modal.type === 'add') {
+                     // Simulate adding a new song as per interaction 4
+                    const newSong = {
+                        id: Date.now(), // Use a unique id
+                        title: songData.title,
+                        artist: songData.artist,
+                        difficulty: songData.difficulty,
+                        duration: songData.duration,
+                        imageUrl: 'https://picsum.photos/id/1025/80/80' // fixed image for the new song
+                    };
+                    setSongs(prevSongs => [...prevSongs, newSong]);
+                } else if (modal.type === 'edit') {
+                    setSongs(prevSongs => prevSongs.map(s => s.id === songData.id ? songData : s));
+                }
+                handleCloseModal();
+            };
+
+            const handleConfirmDelete = (songId) => {
+                setSongs(prevSongs => prevSongs.filter(s => s.id !== songId));
+                handleCloseModal();
+            };
+
+            return (
+                <div className="flex min-h-screen">
+                    <Sidebar />
+                    <div className="flex-1 flex flex-col">
+                        <Header />
+                        <main className="flex-1 p-8 flex">
+                            <SongList 
+                                songs={songs} 
+                                onOpenAddModal={handleOpenAddModal} 
+                                onOpenEditModal={handleOpenEditModal} 
+                                onOpenDeleteModal={handleOpenDeleteModal} 
+                            />
+                            <StatsPanel />
+                        </main>
+                        <div className="px-8 pb-8">
+                            <PageFooter />
+                        </div>
+                    </div>
+                    
+                    {(modal.type === 'add' || modal.type === 'edit') && (
+                        <AddEditModal 
+                            mode={modal.type}
+                            song={modal.data}
+                            onSave={handleSaveSong} 
+                            onCancel={handleCloseModal} 
+                        />
+                    )}
+
+                    {modal.type === 'delete' && (
+                        <DeleteModal 
+                            song={modal.data}
+                            onConfirm={handleConfirmDelete}
+                            onCancel={handleCloseModal}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

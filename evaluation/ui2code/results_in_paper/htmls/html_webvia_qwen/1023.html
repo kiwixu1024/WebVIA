@@ -1,0 +1,589 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱心捐赠平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('donations');
+            const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+            const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    title: '希望之光助学基金',
+                    description: '帮助贫困地区的孩子们完成学业',
+                    goalAmount: 20000,
+                    currentAmount: 12500,
+                    progress: 62,
+                    date: '2023-05-15',
+                    type: 'education',
+                    image: 'https://picsum.photos/id/1043/300/200'
+                },
+                {
+                    id: 2,
+                    title: '温暖冬衣行动',
+                    description: '为山区儿童送去冬日的温暖',
+                    goalAmount: 15000,
+                    currentAmount: 8300,
+                    progress: 55,
+                    date: '2023-06-20',
+                    type: 'relief',
+                    image: 'https://picsum.photos/id/1011/300/200'
+                },
+                {
+                    id: 3,
+                    title: '乡村图书馆改造',
+                    description: '为乡村学校提供更好的阅读环境',
+                    goalAmount: 25000,
+                    currentAmount: 18000,
+                    progress: 72,
+                    date: '2023-04-10',
+                    type: 'education',
+                    image: 'https://picsum.photos/id/1019/300/200'
+                }
+            ]);
+
+            const helpContent = {
+                introduction: '爱心捐赠平台致力于建立一个透明、高效的公益桥梁，连接爱心人士与需要帮助的群体。我们提供便捷的项目发起、管理和捐赠流程，确保每一份爱心都能得到最有效的传递。平台定期发布项目进展报告，保证资金使用透明度，让每一位捐赠人都能清晰了解自己的爱心去向。',
+                howToStart: '通过填写项目名称、描述、目标金额等信息，提交后经平台审核即可上线。',
+                howToDonate: '选择您想支持的项目，点击"立即捐赠"，输入金额并选择支付方式即可。',
+                howToViewData: '可以在"统计报表"标签查看平台整体捐赠情况，包括金额趋势、项目分类等多个维度统计信息。'
+            };
+
+            const commonQuestions = [
+                {
+                    id: 1,
+                    question: '捐赠是否可以开票据发票？',
+                    answer: '是的，单笔捐赠满100元可申请开具捐赠发票。请在完成捐赠后，在"我的捐赠记录"页面申请开具电子发票或纸质发票。'
+                },
+                {
+                    id: 2,
+                    question: '如何确认我的捐款被妥善使用？',
+                    answer: '平台会定期审核项目进展报告，致力于保护慈善慈善票据，确保善款用于慈善慈善票据，是的每个项目都经专业认证导师审查善款使用得住。'
+                },
+                {
+                    id: 3,
+                    question: '如果项目募集金额超过目标怎么办？',
+                    answer: '项目超募的资金将用于该项目的后续发展或类似性质的其他公益项目，为项目的后续发展或类似性质的其他公益项目，项目构建准备提交超募资金使用计划，并得到平台审核通过。'
+                }
+            ];
+
+            const filteredProjects = projects.filter(project => 
+                project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                project.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            const handleSubmitProject = (formData) => {
+                const newProject = {
+                    id: projects.length + 1,
+                    ...formData,
+                    currentAmount: 0,
+                    progress: 0,
+                    image: formData.imageUrl || 'https://picsum.photos/id/1025/300/200'
+                };
+                setProjects([...projects, newProject]);
+                setShowAddProjectModal(false);
+            };
+
+            const handleDeleteProject = () => {
+                setProjects(projects.filter(p => p.id !== selectedProject.id));
+                setShowDeleteConfirmModal(false);
+                setSelectedProject(null);
+            };
+
+            const renderDonationsTab = () => (
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold">精选项目</h2>
+                        <div className="flex gap-4">
+                            <input
+                                type="text"
+                                placeholder="搜索项目..."
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <button className="text-white px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+                                搜索
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {filteredProjects.map(project => (
+                            <div key={project.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                <div className="flex p-4">
+                                    <img src={project.image} alt={project.title} className="w-40 h-32 object-cover rounded-lg" />
+                                    <div className="ml-6 pr-6">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="text-lg font-semibold">{project.title}</h3>
+                                            <span className="px-2 py-1 bg-red-100 text-red-600 text-xs rounded-full">
+                                                {project.type}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-600 text-sm mb-4">{project.description}</p>
+                                        <div className="mb-4">
+                                            <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                                <span>募集进度</span>
+                                                <span>{project.progress}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-3">
+                                                <div 
+                                                    className="bg-red-500 h-3 rounded-full transition-all"
+                                                    style={{ width: `${project.progress}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm text-gray-600">
+                                            <span>已筹金额 / 目标金额</span>
+                                            <span className="text-red-600 font-medium">¥{project.currentAmount.toLocaleString()} / ¥{project.goalAmount.toLocaleString()}</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">发布时间：{project.date}</p>
+                                        <div className="flex gap-2 mt-3">
+                                            <button className="px-4 py-1 border border-gray-300 text-gray-700 rounded text-sm">
+                                                编辑项目
+                                            </button>
+                                            <button 
+                                                className="px-4 py-1 border border-red-300 text-red-600 rounded text-sm"
+                                                onClick={() => {
+                                                    setSelectedProject(project);
+                                                    setShowDeleteConfirmModal(true);
+                                                }}
+                                            >
+                                                删除项目
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const renderStatsTab = () => (
+                <div className="p-6">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                        <h2 className="text-lg font-semibold mb-6">捐赠统计分析</h2>
+                        
+                        <div className="grid grid-cols-2 gap-8">
+                            <div>
+                                <h3 className="font-medium mb-4">捐赠金额趋势图</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">第一周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '28%'}}></div>
+                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-white">
+                                                ¥3,000
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">第二周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '72%'}}></div>
+                                            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-white">
+                                                ¥9,000
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">第三周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '40%'}}></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">第四周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '91%'}}></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">第五周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '60%'}}></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">本周</span>
+                                        <div className="flex-1 mx-3 bg-gray-200 rounded-full h-6 relative">
+                                            <div className="bg-red-500 h-6 rounded-full" style={{width: '80%'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center text-xs text-gray-500 mt-2 space-x-8">
+                                    <span>本周合计</span>
+                                    <span className="text-red-600 font-medium">¥39,800</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 className="font-medium mb-4">项目类型分布</h3>
+                                <div className="text-center">
+                                    <img src="https://picsum.photos/id/1044/150/150" alt="项目分布图" className="w-32 h-32 mx-auto rounded-lg mb-4" />
+                                    <div className="rounded-lg p-6">
+                                        <img src="https://picsum.photos/id/1043/200/150" alt="三维分布图" className="w-full rounded-lg mb-2" />
+                                        <div className="text-xs text-gray-500 mb-4">
+                                            <div>红色切片：助学类项目（45%）</div>
+                                            <div>橙色切片：救灾类项目（30%）</div>
+                                            <div>蓝色切片：医疗类项目（25%）</div>
+                                        </div>
+                                        <div className="bg-gray-200 rounded-lg h-32"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderHelpTab = () => (
+                <div className="p-6">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <h2 className="text-xl font-semibold mb-6">爱心捐赠平台 - 连接您与需要帮助的人</h2>
+                        
+                        <div className="prose max-w-none">
+                            <p className="text-gray-700 mb-8 leading-relaxed">
+                                爱心捐赠平台致力于建立一个透明、高效的公益桥梁，连接爱心人士与需要帮助的群体。我们提供便捷的项目发起、管理和捐赠流程，确保每一份爱心都能得到最有效的传递。平台定期发布项目进展报告，保证资金使用透明度，让每一位捐赠人都能清晰了解自己的爱心去向。
+                            </p>
+                            
+                            <div className="grid grid-cols-3 gap-8">
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-red-600">
+                                        <i className="fas fa-plus-circle mr-2"></i>
+                                        如何发起项目
+                                    </h3>
+                                    <p className="text-gray-700">
+                                        点击"添加项目"按钮，填写项目详情，包括名称、描述、目标金额等信息，提交后经平台审核即可上线。
+                                    </p>
+                                    <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 mt-3">
+                                        <i className="fas fa-lightbulb text-red-500 mr-2"></i>
+                                        小贴士：请填写真实有效的信息，帮助更多人了解项目。详细的项目描述和真实的图片能够增加项目的可信度和支撑率。
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-red-600">
+                                        <i className="fas fa-heart mr-2"></i>
+                                        如何捐赠
+                                    </h3>
+                                    <p className="text-gray-700">
+                                        浏览项目列表，选择您想支持的项目，点击"立即捐赠"，输入金额并选择支付方式即可捐赠。
+                                    </p>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-red-600">
+                                        <i className="fas fa-chart-line mr-2"></i>
+                                        如何查看数据
+                                    </h3>
+                                    <p className="text-gray-700">
+                                        点击"统计报表"标签，可查看平台整体捐赠情况，包括金额趋势、项目分类等多维度统计信息。
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-8">
+                                <h3 className="text-lg font-semibold mb-6">常见问题</h3>
+                                <div className="space-y-4">
+                                    {commonQuestions.map(q => (
+                                        <div key={q.id} className="bg-gray-50 rounded-lg p-4">
+                                            <div className="flex items-center justify-between">
+                                                <h4 className="font-medium text-gray-800">{q.question}</h4>
+                                                <button className="text-red-500 text-sm ml-4">↓</button>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mt-1">{q.answer}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <i className="fas fa-heart text-red-500 text-2xl mr-3"></i>
+                                <h1 className="text-xl font-semibold text-gray-800">爱心捐赠平台</h1>
+                            </div>
+                            <nav className="flex space-x-6">
+                                <button 
+                                    className={`px-4 py-2 rounded-lg ${activeTab === 'home' ? 'bg-red-500 text-white' : 'text-gray-600 hover:text-gray-800'}`}
+                                    onClick={() => setActiveTab('donations')}
+                                >
+                                    <i className="fas fa-home mr-2"></i>首页
+                                </button>
+                                <button 
+                                    className={`px-4 py-2 rounded-lg ${activeTab === 'stats' ? 'bg-red-500 text-white' : 'text-gray-600 hover:text-gray-800'}`}
+                                    onClick={() => setActiveTab('stats')}
+                                >
+                                    <i className="fas fa-chart-bar mr-2"></i>统计报表
+                                </button>
+                                <button 
+                                    className={`px-4 py-2 rounded-lg ${activeTab === 'help' ? 'bg-red-500 text-white' : 'text-gray-600 hover:text-gray-800'}`}
+                                    onClick={() => setActiveTab('help')}
+                                >
+                                    <i className="fas fa-question-circle mr-2"></i>帮助说明
+                                </button>
+                            </nav>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-16 bg-white border-r border-gray-200 min-h-screen">
+                            <div className="p-4">
+                                {/* Logo and header */}
+                                <div className="flex items-center mb-8">
+                                    <div className="w-8 h-8 bg-red-500 rounded mr-3"></div>
+                                    <span className="text-gray-700 font-medium">爱心捐赠平台</span>
+                                </div>
+                                
+                                {/* Navigation */}
+                                <nav className="space-y-2">
+                                    <div className="flex items-center px-3 py-2 bg-red-500 rounded-lg text-white">
+                                        <i className="fas fa-search mr-3"></i>
+                                        <span>项目列表</span>
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg">
+                                        <i className="fas fa-piggy-bank mr-3 text-gray-500"></i>
+                                        <span>捐助记录</span>
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg">
+                                        <i className="fas fa-chart-line mr-3 text-gray-500"></i>
+                                        <span>统计分析</span>
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg">
+                                        <i className="fas fa-user mr-3 text-gray-500"></i>
+                                        <span>个人中心</span>
+                                    </div>
+                                </nav>
+                                
+                                {/* Footer */}
+                                <div className="mt-12 text-center text-xs text-gray-500">
+                                    <p>© 2023 爱心捐赠平台. All Rights Reserved.</p>
+                                    <p className="mt-1">联系我们  |  <a href="#" className="text-red-500 underline">使用条款</a> \u3000\u3000<a href="#" className="text-red-500 underline">隐私政策</a></p>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            {activeTab === 'donations' && renderDonationsTab()}
+                            {activeTab === 'stats' && renderStatsTab()}
+                            {activeTab === 'help' && renderHelpTab()}
+                        </main>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <aside className="w-80 bg-white border-l border-gray-200 p-6 h-fit">
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-4">捐赠项目</h3>
+                            <p className="text-red-600 font-bold text-lg">¥38,800</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center text-blue-600">
+                                <div className="w-3 h-3 bg-blue-600 rounded-full mr-3"></div>
+                                <span className="text-sm">活跃项目数</span>
+                            </div>
+                            <div className="text-2xl font-bold">3</div>
+                            
+                            <div className="flex items-center text-green-600">
+                                <div className="w-3 h-3 bg-green-600 rounded-full mr-3"></div>
+                                <span className="text-sm">本月新增捐赠数</span>
+                            </div>
+                            <div className="text-2xl font-bold text-green-600">25</div>
+                        </div>
+
+                        <div className="mt-8">
+                            <h3 className="text-lg font-semibold mb-4">每日名言</h3>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <blockquote className="text-gray-700 italic">
+                                    "给比受更有福。真正的财富不是占有的多少，而是给予的多少。"
+                                </blockquote>
+                                <p className="text-sm text-gray-500 mt-2">— 海伦·凯勒</p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Add Project Modal */}
+                    {showAddProjectModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-red-600">
+                                        <i className="fas fa-plus-circle mr-2"></i>添加新项目
+                                    </h3>
+                                    <button 
+                                        onClick={() => setShowAddProjectModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                        <input
+                                            type="text"
+                                            placeholder="输入项目名称"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                                        <textarea
+                                            placeholder="简要描述项目"
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">当前募集金额</label>
+                                            <input
+                                                type="number"
+                                                defaultValue="0"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">目标金额</label>
+                                            <input
+                                                type="number"
+                                                defaultValue="10000"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">项目类型</label>
+                                            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                <option>助学</option>
+                                                <option>救灾</option>
+                                                <option>医疗</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">发布日期</label>
+                                            <input
+                                                type="date"
+                                                defaultValue="2025-09-23"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">项目图片URL</label>
+                                        <input
+                                            type="text"
+                                            value="https://picsum.photos/id/1084/300/200"
+                                            placeholder="https://picsum.photos/生成/300/200"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        />
+                                        <p className="text-xs text-gray-500 text-center mt-1">
+                                            <i className="fas fa-lightbulb text-red-500"></i>
+                                            使用 https://picsum.photos/生成随机图片
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={() => setShowAddProjectModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        onClick={handleSubmitProject}
+                                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                    >
+                                        <i className="fas fa-paper-plane mr-2"></i>
+                                        提交并发布
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteConfirmModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-red-600">
+                                        <i className="fas fa-exclamation-triangle mr-2"></i>确认删除
+                                    </h3>
+                                    <button 
+                                        onClick={() => setShowDeleteConfirmModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i className="fas fa-trash text-red-500 text-2xl"></i>
+                                    </div>
+                                    <p className="text-gray-700 mb-6">确定删除项目 "希望之光助学基金"？</p>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => setShowDeleteConfirmModal(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={handleDeleteProject}
+                                            className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>互动幸福时光村</title>
+  <link rel="stylesheet" href="https://cdn.tailwindcss.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <script src="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap"></script>
+  <style>body { font-family: 'Rubik', sans-serif; }</style>
+</head>
+<body class="h-screen overflow-hidden">
+  <div id="root" class="h-full"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      // tabs: display, edit, stats
+      const [tab, setTab] = useState('display');
+      const [entries, setEntries] = useState([
+        {
+          id:1,
+          title:"家庭野餐",
+          date:"2023-01-15",
+          desc:"和家人一起去公园野餐，享受阳光和美食。",
+          image:"https://picsum.photos/id/1021/400/250",
+          likes:12,
+          comments:0
+        },
+        {
+          id:2,
+          title:"孩子的第一次画展",
+          date:"2023-02-20",
+          desc:"小明的绘画作品在学校展出，他很兴奋和自豪。",
+          image:"https://picsum.photos/id/1011/400/250",
+          likes:0,
+          comments:8
+        },
+        {
+          id:3,
+          title:"家庭游戏之夜",
+          date:"2023-03-10",
+          desc:"全家人一起玩桌游，欢笑声充满了整个客厅。",
+          image:"https://picsum.photos/id/1020/400/250",
+          likes:15,
+          comments:0
+        }
+      ]);
+      const [showModal, setShowModal] = useState(false);
+      const [modalType, setModalType] = useState('add'); // add or edit
+      const [current, setCurrent] = useState(null);
+      const [form, setForm] = useState({ date:'', title:'', desc:'', imageFile:null });
+      const [preview, setPreview] = useState('');
+
+      const openAdd = () => {
+        setModalType('add');
+        setForm({
+          date: new Date().toISOString().slice(0,10),
+          title:'',
+          desc:'',
+          imageFile:null
+        });
+        setPreview('https://picsum.photos/id/1043/200/120');
+        setShowModal(true);
+      };
+      const openEdit = (item) => {
+        setModalType('edit');
+        setCurrent(item);
+        setForm({
+          date:item.date,
+          title:item.title,
+          desc:item.desc,
+          imageFile:null
+        });
+        setPreview(item.image);
+        setShowModal(true);
+      };
+      const handleSave = () => {
+        if(modalType==='add'){
+          const newId = entries.length ? Math.max(...entries.map(e=>e.id))+1 : 1;
+          setEntries([...entries, {
+            id:newId,
+            title:form.title||'新时光',
+            date:form.date,
+            desc:form.desc,
+            image:preview,
+            likes:0,
+            comments:0
+          }]);
+        } else if(modalType==='edit' && current){
+          setEntries(entries.map(e=>{
+            if(e.id===current.id){
+              return {...e, title:form.title, date:form.date, desc:form.desc, image:preview};
+            }
+            return e;
+          }));
+        }
+        setShowModal(false);
+      };
+      const handleDelete = (id) => {
+        if(confirm('确定删除？')){
+          setEntries(entries.filter(e=>e.id!==id));
+        }
+      };
+      const totalInteractions = 35;
+      const todayNew = 2;
+      const hotItems = [
+        { title:'家庭游戏之夜', count:15 },
+        { title:'家庭野餐', count:12 },
+        { title:'孩子的第一次画展', count:8 }
+      ];
+      const activeUsers = [
+        { name:'妈妈', score:18 },
+        { name:'爸爸', score:12 },
+        { name:'小明', score:9 },
+        { name:'奶奶', score:7 },
+        { name:'爷爷', score:5 }
+      ];
+      // handle file select
+      const onFileChange = e => {
+        const file = e.target.files[0];
+        if(file){
+          const url = URL.createObjectURL(file);
+          setPreview(url);
+          setForm({...form, imageFile:file});
+        }
+      };
+
+      return (
+        <div className="flex h-full">
+          {/* Left Sidebar */}
+          <div className="w-56 bg-pink-50 flex flex-col justify-between">
+            <div>
+              <div className="py-6 text-center font-bold text-xl">互动幸福时光村</div>
+              <nav className="space-y-2 px-2">
+                <button onClick={()=>setTab('display')} className={`w-full text-left px-4 py-2 rounded ${tab==='display'?'bg-green-300':'hover:bg-green-100'}`}>展示区</button>
+                <button onClick={()=>setTab('edit')}    className={`w-full text-left px-4 py-2 rounded ${tab==='edit'?'bg-green-300':'hover:bg-green-100'}`}>编辑区</button>
+                <button onClick={()=>setTab('stats')}   className={`w-full text-left px-4 py-2 rounded ${tab==='stats'?'bg-green-300':'hover:bg-green-100'}`}>统计区</button>
+                <button disabled className="w-full text-left px-4 py-2 rounded hover:bg-green-100">操作栏</button>
+                <button disabled className="w-full text-left px-4 py-2 rounded hover:bg-green-100">帮助说明</button>
+                <button disabled className="w-full text-left px-4 py-2 rounded hover:bg-green-100">主题特色</button>
+              </nav>
+            </div>
+            <div className="p-4 text-sm italic text-gray-600">
+              "在互动幸福时光村上，分享家的温暖，记录爱的痕迹"
+            </div>
+          </div>
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-auto bg-gray-50">
+            {/* Top Nav Tabs */}
+            <div className="flex justify-center items-center space-x-4 py-4 bg-white shadow">
+              <button className="px-4 py-2 bg-blue-500 text-white rounded flex items-center space-x-1"><i className="fas fa-stream"></i><span>时间轴视图</span></button>
+              <button className="px-4 py-2 text-gray-600 flex items-center space-x-1"><i className="fas fa-sitemap"></i><span>树状视图</span></button>
+              <button className="px-4 py-2 text-gray-600 flex items-center space-x-1"><i className="fas fa-map-marked-alt"></i><span>地图视图</span></button>
+              <div className="ml-6 text-gray-500 text-sm">小贴士：点击顶部Tab可切换不同视图，发现更多惊喜</div>
+            </div>
+            {/* Content */}
+            <div className="flex-1 p-6 relative">
+              {/* Display Tab */}
+              {tab==='display' && (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-semibold text-green-600">幸福时光展示</h2>
+                    <button onClick={openAdd} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                      + 添加时光
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {entries.map(item=>(
+                      <div key={item.id} className="bg-white rounded shadow relative">
+                        <img src={item.image} alt="" className="w-full h-40 object-cover rounded-t"/>
+                        <div className="p-4">
+                          <div className="mb-2 font-medium">{item.title}</div>
+                          <div className="text-sm text-gray-500 mb-2">{item.date}</div>
+                          <div className="text-gray-700 text-sm mb-4">{item.desc}</div>
+                          <div className="flex justify-between items-center text-sm text-gray-600">
+                            <div className="flex items-center space-x-2">
+                              {item.likes>0 && <><i className="fas fa-heart text-red-500"></i><span>{item.likes} 互动</span></>}
+                              {item.comments>0 && <><i className="fas fa-comment text-blue-500"></i><span>{item.comments} 留言</span></>}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button onClick={()=>openEdit(item)} className="text-blue-500"><i className="fas fa-edit"></i></button>
+                              <button onClick={()=>handleDelete(item.id)} className="text-red-500"><i className="fas fa-trash"></i></button>
+                              <button className="text-green-500"><span>分享</span></button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center mt-6 text-gray-500 text-sm">* Tip: 长按卡片可快捷分享到社交平台</div>
+                </>
+              )}
+              {/* Edit Tab */}
+              {tab==='edit' && (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-semibold text-green-600">时光条目编辑</h2>
+                    <button onClick={openAdd} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                      批量添加条目
+                    </button>
+                  </div>
+                  <table className="min-w-full bg-white rounded shadow">
+                    <thead>
+                      <tr className="bg-gray-100 text-left">
+                        <th className="py-2 px-4">日期</th>
+                        <th className="py-2 px-4">标题</th>
+                        <th className="py-2 px-4">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entries.map(item=>(
+                        <tr key={item.id} className="border-t">
+                          <td className="py-2 px-4">{item.date}</td>
+                          <td className="py-2 px-4">{item.title}</td>
+                          <td className="py-2 px-4 space-x-2">
+                            <button onClick={()=>openEdit(item)} className="text-blue-500"><i className="fas fa-edit"></i> 编辑</button>
+                            <button onClick={()=>handleDelete(item.id)} className="text-red-500"><i className="fas fa-trash"></i> 删除</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
+              {/* Stats Tab */}
+              {tab==='stats' && (
+                <>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-semibold text-green-600">时光统计</h2>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-blue-100 p-6 rounded shadow flex flex-col items-center">
+                      <div className="text-gray-600">总互动次数</div>
+                      <div className="text-3xl font-bold text-blue-600">{totalInteractions}</div>
+                      <button className="mt-2 text-gray-500"><i className="fas fa-sync"></i></button>
+                    </div>
+                    <div className="bg-pink-100 p-6 rounded shadow flex flex-col items-center">
+                      <div className="text-gray-600">今日新增条目</div>
+                      <div className="text-3xl font-bold text-pink-600">{todayNew}</div>
+                      <button className="mt-2 text-gray-500"><i className="fas fa-sync"></i></button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white p-4 rounded shadow">
+                      <div className="font-medium mb-2 text-gray-700">热门时光条目 Top3</div>
+                      <ol className="list-decimal list-inside space-y-2 text-gray-600">
+                        {hotItems.map((it,idx)=>(
+                          <li key={idx} className="flex justify-between">
+                            <span>{it.title}</span><span className="text-pink-500"><i className="fas fa-heart"></i> {it.count}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                    <div className="bg-white p-4 rounded shadow">
+                      <div className="font-medium mb-2 text-gray-700">活跃用户排行前5</div>
+                      <ul className="space-y-2 text-gray-600">
+                        {activeUsers.map((u,idx)=>(
+                          <li key={idx} className="flex justify-between items-center">
+                            <div className="flex items-center space-x-2">
+                              <img src={`https://picsum.photos/seed/${u.name}/32/32`} alt="" className="rounded-full"/>
+                              <span>{u.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-1"><i className="fas fa-bolt text-yellow-500"></i><span>{u.score} 活跃度</span></div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="mt-6 text-center">
+                    <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded">
+                      导出报表
+                    </button>
+                  </div>
+                </>
+              )}
+              {/* Add/Edit Modal */}
+              {showModal && (
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex justify-center items-center z-20">
+                  <div className="bg-white w-96 rounded shadow-lg p-6 relative">
+                    <h3 className="text-xl font-medium mb-4 text-gray-800">{modalType==='add'?'添加新时光':'编辑时光'}</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-gray-700 mb-1">日期</label>
+                        <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}
+                               className="w-full border px-3 py-2 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">标题</label>
+                        <input type="text" placeholder="输入幸福瞬间的标题" value={form.title}
+                               onChange={e=>setForm({...form,title:e.target.value})}
+                               className="w-full border px-3 py-2 rounded" />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">描述</label>
+                        <textarea rows="3" placeholder="描述这个幸福的瞬间…" value={form.desc}
+                                  onChange={e=>setForm({...form,desc:e.target.value})}
+                                  className="w-full border px-3 py-2 rounded"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 mb-1">图片</label>
+                        <div className="flex items-center space-x-4">
+                          <img src={preview} alt="" className="w-24 h-16 object-cover border rounded"/>
+                          <input type="file" accept="image/*" onChange={onFileChange}
+                                 className="px-3 py-2 border rounded bg-blue-500 text-white cursor-pointer"/>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-4 pt-4">
+                        <button onClick={()=>setShowModal(false)} className="px-4 py-2 rounded border">取消</button>
+                        <button onClick={handleSave} className={`px-4 py-2 rounded text-white ${modalType==='add'?'bg-green-500 hover:bg-green-600':'bg-green-600 hover:bg-green-700'}`}>
+                          {modalType==='add'?'添加':'保存'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Footer */}
+            <div className="text-center text-gray-500 text-sm py-2 bg-green-100">记录美好，传递幸福</div>
+            <div className="flex justify-between items-center px-6 py-2 bg-pink-100 text-gray-600 text-xs">
+              <div>互动幸福时光v1.0 © 2023 幸福树 | 联系我们：contact@happytree.com</div>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <input type="text" placeholder="搜索时光记录..." className="border rounded px-3 py-1"/>
+                  <i className="fas fa-search absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <button className="text-gray-600 hover:text-gray-800">导入/导出</button>
+                <button className="text-gray-600 hover:text-gray-800">帮助中心</button>
+              </div>
+            </div>
+          </div>
+          {/* Right Sidebar */}
+          <div className="w-56 bg-gray-100 p-4 flex flex-col">
+            <div className="bg-blue-100 p-4 rounded mb-4 text-center">
+              <div className="text-gray-600">总互动次数</div>
+              <div className="text-3xl font-bold text-blue-600">{totalInteractions}</div>
+              <button className="mt-1 text-gray-500"><i className="fas fa-sync"></i></button>
+            </div>
+            <div className="bg-pink-100 p-4 rounded mb-4 text-center">
+              <div className="text-gray-600">今日新增</div>
+              <div className="text-3xl font-bold text-pink-600">{todayNew}</div>
+              <button className="mt-1 text-gray-500"><i className="fas fa-sync"></i></button>
+            </div>
+            <div className="bg-white p-4 rounded mb-4">
+              <div className="flex justify-between items-center mb-2 text-gray-700"><span>热门时光条目</span><button className="text-gray-500"><i className="fas fa-sync"></i></button></div>
+              <ul className="space-y-2">
+                {hotItems.map((it,idx)=>(
+                  <li key={idx} className="flex justify-between text-gray-600">
+                    <span>{it.title}</span>
+                    <span className="text-pink-500"><i className="fas fa-heart"></i> {it.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-white p-4 rounded mb-4 flex-1 overflow-auto">
+              <div className="flex justify-between items-center mb-2 text-gray-700"><span>活跃用户</span><button className="text-gray-500"><i className="fas fa-sync"></i></button></div>
+              <ul className="space-y-2">
+                {activeUsers.slice(0,3).map((u,idx)=>(
+                  <li key={idx} className="flex justify-between items-center text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <img src={`https://picsum.photos/seed/${u.name}/32/32`} alt="" className="rounded-full"/>
+                      <span>{u.name}</span>
+                    </div>
+                    <div className="flex items-center space-x-1"><i className="fas fa-bolt text-yellow-500"></i><span>{u.score}</span></div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">导出报表</button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

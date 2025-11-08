@@ -1,0 +1,341 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>编程题库管理平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const initialQuestions = [
+            { id: 1, title: '两数之和', difficulty: '简单', tags: ['数组', '哈希表'], submits: 1250 },
+            { id: 2, title: '二叉树的最大深度', difficulty: '中等', tags: ['树', '深度优先搜索'], submits: 980 },
+            { id: 3, title: '合并两个有序链表', difficulty: '简单', tags: ['链表', '递归'], submits: 1500 },
+            { id: 4, title: '最长回文子串', difficulty: '中等', tags: ['字符串', '动态规划'], submits: 850 },
+            { id: 5, title: '接雨水', difficulty: '困难', tags: ['栈', '数组', '设计'], submits: 620 },
+            { id: 6, title: 'LRU缓存机制', difficulty: '中等', tags: ['设计', '哈希表'], submits: 780 },
+            { id: 7, title: 'K个一组翻转链表', difficulty: '困难', tags: ['链表', '递归'], submits: 540 },
+            { id: 8, title: '二分查找', difficulty: '简单', tags: ['二分查找', '数组'], submits: 1680 },
+            { id: 9, title: '找到字符串中所有字母异位词', difficulty: '中等', tags: ['哈希表', '字符串'], submits: 920 },
+            { id: 10, title: '课程表', difficulty: '中等', tags: ['深度优先搜索', '广度优先搜索', '图'], submits: 760 },
+        ];
+
+        const DifficultyTag = ({ difficulty }) => {
+            const style = {
+                '简单': 'bg-green-100 text-green-600',
+                '中等': 'bg-yellow-100 text-yellow-600',
+                '困难': 'bg-red-100 text-red-600',
+            };
+            return <span className={`px-2 py-1 text-xs rounded ${style[difficulty]}`}>{difficulty}</span>;
+        };
+
+        const Tag = ({ label }) => {
+            return <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded mr-1">{label}</span>;
+        };
+        
+        const AddQuestionModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={onClose}>
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                            <h2 className="text-lg font-semibold text-gray-800">新增题目</h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">题目名称</label>
+                                <input type="text" placeholder="请输入题目名称" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">难度</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                                    <option>请选择难度</option>
+                                    <option>简单</option>
+                                    <option>中等</option>
+                                    <option>困难</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">标签 (用逗号分隔)</label>
+                                <p className="text-xs text-gray-400 mb-1">例如: 数组, 哈希表, 动态规划</p>
+                                <p className="text-xs text-gray-400 mb-2">多个标签请用中文逗号、英文逗号、顿号、或者空格分隔</p>
+                                <input type="text" placeholder="请输入题目标签" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">题目描述</label>
+                                <textarea rows="4" placeholder="请输入题目描述" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">示例</label>
+                                <textarea rows="4" placeholder="请输入示例" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">取消</button>
+                            <button className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">保存题目</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        function App() {
+            const [questions, setQuestions] = React.useState(initialQuestions);
+            const [searchTerm, setSearchTerm] = React.useState("");
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+            const [isModalOpen, setIsModalOpen] = React.useState(false);
+            const [selectedIds, setSelectedIds] = React.useState(new Set());
+
+            const filteredQuestions = questions.filter(q => q.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+            const handleSelectAll = (e) => {
+                if (e.target.checked) {
+                    const allIds = new Set(filteredQuestions.map(q => q.id));
+                    setSelectedIds(allIds);
+                } else {
+                    setSelectedIds(new Set());
+                }
+            };
+            
+            const handleSelectOne = (id, isChecked) => {
+                const newSelectedIds = new Set(selectedIds);
+                if (isChecked) {
+                    newSelectedIds.add(id);
+                } else {
+                    newSelectedIds.delete(id);
+                }
+                setSelectedIds(newSelectedIds);
+            };
+
+            const isAllSelected = filteredQuestions.length > 0 && selectedIds.size === filteredQuestions.length;
+
+            return (
+                <div className="bg-[#F7F8FA] min-h-screen flex flex-col text-gray-800">
+                    <header className="bg-white border-b border-gray-200 h-16 flex items-center px-6 justify-between flex-shrink-0 z-10">
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2 text-xl font-bold text-gray-800">
+                                <span className="text-blue-500">&lt;/&gt;</span>
+                                <span>编程题库管理平台</span>
+                            </div>
+                            <div className="w-px h-6 bg-gray-200"></div>
+                            <nav className="flex items-center space-x-6 text-gray-600">
+                                <a href="#" className="text-blue-500 font-medium border-b-2 border-blue-500 pb-5 -mb-5">题目管理</a>
+                                <a href="#" className="hover:text-blue-500">用户管理</a>
+                                <a href="#" className="hover:text-blue-500">系统设置</a>
+                            </nav>
+                        </div>
+                        <div className="flex items-center space-x-6">
+                            <div className="relative">
+                                <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="搜索题目关键字" 
+                                    className="bg-gray-100 rounded-md py-2 pl-9 pr-3 w-64 focus:outline-none focus:ring-2 focus:ring-blue-300" 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">多选/可同时筛选多种题型</span>
+                            </div>
+                            <div className="flex items-center space-x-4 text-gray-600">
+                                <a href="#" className="hover:text-blue-500">全部语言 <i className="fas fa-chevron-down text-xs"></i></a>
+                                <div className="w-px h-4 bg-gray-200"></div>
+                                <img src="https://picsum.photos/id/237/32/32" alt="User Avatar" className="w-8 h-8 rounded-full" />
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex-grow flex overflow-hidden">
+                        {/* Sidebar */}
+                        <aside className={`bg-[#1E293B] text-gray-300 flex flex-col flex-shrink-0 transition-all duration-300 ${isSidebarCollapsed ? 'w-20' : 'w-64'}`}>
+                            <div className={`flex items-center justify-between px-4 h-14 border-b border-gray-700`}>
+                                <span className={`${isSidebarCollapsed ? 'hidden' : 'block'} font-semibold`}>导航菜单</span>
+                                <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="text-gray-400 hover:text-white p-2 -mr-2">
+                                    <i className={`fas ${isSidebarCollapsed ? 'fa-angle-right' : 'fa-angle-left'}`}></i>
+                                </button>
+                            </div>
+                            <nav className="flex-grow p-4 space-y-2">
+                                <h3 className={`text-gray-500 text-sm font-semibold uppercase ${isSidebarCollapsed ? 'text-center' : 'pl-2'}`}>导航分类</h3>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-th-large w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>算法</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-database w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>数据结构</span>
+                                </a>
+                                 <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-server w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>数据库</span>
+                                </a>
+                                 <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-network-wired w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>网络</span>
+                                </a>
+                                 <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-desktop w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>操作系统</span>
+                                </a>
+                                <h3 className={`text-gray-500 text-sm font-semibold uppercase mt-4 ${isSidebarCollapsed ? 'text-center' : 'pl-2'}`}>快速选搜</h3>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-bolt w-6 text-yellow-400"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>最近浏览</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-crown w-6 text-yellow-400"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>高频题目</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-star w-6 text-yellow-400"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>收藏题目</span>
+                                </a>
+                                <h3 className={`text-gray-500 text-sm font-semibold uppercase mt-4 ${isSidebarCollapsed ? 'text-center' : 'pl-2'}`}>常用操作</h3>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md bg-blue-500 text-white ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-plus-circle w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>新增题目</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-file-import w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>导入题库</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-file-export w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>导出题库</span>
+                                </a>
+                                <a href="#" className={`flex items-center py-2 px-3 rounded-md hover:bg-gray-700 ${isSidebarCollapsed ? 'justify-center' : ''}`}>
+                                    <i className="fas fa-balance-scale w-6"></i> <span className={isSidebarCollapsed ? 'hidden' : 'ml-3'}>批量操作</span>
+                                </a>
+                            </nav>
+                            <div className="p-4 border-t border-gray-700 text-center text-xs text-gray-400">
+                                &copy; 2023 编程题库管理平台 v1.2.0
+                            </div>
+                        </aside>
+
+                        {/* Main content */}
+                        <main className="flex-grow p-6 flex space-x-6 overflow-y-auto">
+                            <div className="flex-grow flex flex-col">
+                                <div className="bg-white rounded-lg shadow-sm flex-grow flex flex-col">
+                                    <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                                        <h2 className="text-lg font-semibold">题目列表</h2>
+                                        <div className="space-x-2">
+                                            <button onClick={() => setIsModalOpen(true)} className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600"><i className="fas fa-plus mr-1"></i> 新增题目</button>
+                                            <button className="bg-white border border-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"><i className="fas fa-upload mr-1"></i> 导入题库</button>
+                                            <button className="bg-white border border-gray-300 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50"><i className="fas fa-download mr-1"></i> 导出题库</button>
+                                        </div>
+                                    </div>
+                                    <div className="flex-grow">
+                                        <table className="w-full text-sm text-left text-gray-600">
+                                            <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                                                <tr>
+                                                    <th className="px-6 py-3 w-12"><input type="checkbox" className="rounded" checked={isAllSelected} onChange={handleSelectAll} /></th>
+                                                    <th className="px-6 py-3">编号</th>
+                                                    <th className="px-6 py-3">标题</th>
+                                                    <th className="px-6 py-3">难度</th>
+                                                    <th className="px-6 py-3">标签</th>
+                                                    <th className="px-6 py-3">提交次数</th>
+                                                    <th className="px-6 py-3">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white">
+                                                {filteredQuestions.map(q => (
+                                                    <tr key={q.id} className="border-b border-gray-200 hover:bg-gray-50">
+                                                        <td className="px-6 py-4"><input type="checkbox" className="rounded" checked={selectedIds.has(q.id)} onChange={e => handleSelectOne(q.id, e.target.checked)} /></td>
+                                                        <td className="px-6 py-4">{q.id}</td>
+                                                        <td className="px-6 py-4 font-medium text-blue-500 hover:underline cursor-pointer">{q.title}</td>
+                                                        <td className="px-6 py-4"><DifficultyTag difficulty={q.difficulty} /></td>
+                                                        <td className="px-6 py-4">{q.tags.map(tag => <Tag key={tag} label={tag} />)}</td>
+                                                        <td className="px-6 py-4">{q.submits}</td>
+                                                        <td className="px-6 py-4 text-blue-500 space-x-4">
+                                                            <a href="#" className="hover:underline">编辑</a>
+                                                            <a href="#" className="text-red-500 hover:underline">删除</a>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {selectedIds.size > 0 && (
+                                        <div className="p-4 border-t border-gray-200 flex justify-between items-center text-sm">
+                                            <span>已选择 {selectedIds.size} 项</span>
+                                            <button className="bg-red-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-600">批量删除</button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="w-80 flex-shrink-0 space-y-6">
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="font-semibold">题库统计</h3>
+                                        <a href="#" className="text-sm text-blue-500 hover:underline"><i className="fas fa-sync-alt mr-1"></i> 刷新统计</a>
+                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center space-x-4">
+                                        <div className="text-blue-500">
+                                            <h4 className="text-sm">题库总题数</h4>
+                                            <p className="text-4xl font-bold">10</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4">
+                                        <h4 className="font-medium text-gray-600 mb-2">题目难度分布</h4>
+                                        <div className="flex justify-between items-center text-sm text-gray-500">
+                                            <span>简单 <span className="text-green-500 font-bold">3</span></span>
+                                            <span>中等 <span className="text-yellow-500 font-bold">5</span></span>
+                                            <span>困难 <span className="text-red-500 font-bold">2</span></span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4">
+                                        <h4 className="font-medium text-gray-600 mb-2">热门标签 (Top 5)</h4>
+                                        <div className="space-y-2 text-sm">
+                                            <div className="flex justify-between items-center"><span className="text-gray-600">数组</span><div className="w-3/4 bg-gray-200 rounded-full h-2"><div className="bg-blue-400 h-2 rounded-full" style={{width: '100%'}}></div></div><span className="text-gray-500 w-4 text-right">7</span></div>
+                                            <div className="flex justify-between items-center"><span className="text-gray-600">链表</span><div className="w-3/4 bg-gray-200 rounded-full h-2"><div className="bg-blue-400 h-2 rounded-full" style={{width: '60%'}}></div></div><span className="text-gray-500 w-4 text-right">4</span></div>
+                                            <div className="flex justify-between items-center"><span className="text-gray-600">哈希表</span><div className="w-3/4 bg-gray-200 rounded-full h-2"><div className="bg-blue-400 h-2 rounded-full" style={{width: '60%'}}></div></div><span className="text-gray-500 w-4 text-right">4</span></div>
+                                            <div className="flex justify-between items-center"><span className="text-gray-600">字符串</span><div className="w-3/4 bg-gray-200 rounded-full h-2"><div className="bg-blue-400 h-2 rounded-full" style={{width: '30%'}}></div></div><span className="text-gray-500 w-4 text-right">2</span></div>
+                                            <div className="flex justify-between items-center"><span className="text-gray-600">动态规划</span><div className="w-3/4 bg-gray-200 rounded-full h-2"><div className="bg-blue-400 h-2 rounded-full" style={{width: '30%'}}></div></div><span className="text-gray-500 w-4 text-right">2</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                        <h4 className="font-medium text-gray-600 text-sm">统计概要:</h4>
+                                        <p className="text-xs text-gray-500 mt-1">本月新增50道题, 平均提交次数为200次, 实现题目覆盖率提升20%。<a href="#" className="text-blue-500">点击刷新以获取最新统计数据</a></p>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+                                        <a href="#" className="text-sm text-gray-500">小贴士</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+
+                    <footer className="bg-[#1E293B] text-gray-300 flex-shrink-0 z-10">
+                         <div className="border-b border-gray-700">
+                             <div className="px-6 py-2 flex justify-between items-center text-sm">
+                                 <span>快捷操作面板</span>
+                                 <button className="text-gray-400 hover:text-white"><i className="fas fa-chevron-up"></i></button>
+                             </div>
+                             <div className="px-6 pb-4 grid grid-cols-5 gap-4">
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-400">最近打开</p>
+                                    <a href="#" className="text-sm text-blue-400 hover:underline">二叉树的最大深度</a>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-400">常用模板</p>
+                                    <a href="#" className="text-sm text-blue-400 hover:underline">两数之和</a>
+                                </div>
+                             </div>
+                         </div>
+                         <div className="h-12 flex items-center justify-center space-x-6 text-sm text-gray-400">
+                             <a href="#" className="hover:text-white">帮助中心</a>
+                             <a href="#" className="hover:text-white">意见反馈</a>
+                             <a href="#" className="hover:text-white">关于我们</a>
+                         </div>
+                    </footer>
+                    <AddQuestionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

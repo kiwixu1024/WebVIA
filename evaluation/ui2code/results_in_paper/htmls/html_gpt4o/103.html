@@ -1,0 +1,145 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音日记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        const images = {
+            diary1: "https://picsum.photos/id/100/200/70",
+            diary2: "https://picsum.photos/id/101/200/70",
+            diary3: "https://picsum.photos/id/102/200/70",
+            statsImage1: "https://picsum.photos/id/103/90/90",
+            statsImage2: "https://picsum.photos/id/104/90/90"
+        };
+
+        function Sidebar() {
+            return (
+                <div className="bg-gray-100 w-60 h-full flex flex-col py-4 px-2">
+                    <div className="flex items-center text-orange-500 font-bold mb-6">
+                        <i className="fas fa-microphone-alt mr-2"></i>
+                        <span>语音日记</span>
+                    </div>
+                    <nav className="text-gray-600 flex-grow">
+                        {["首页", "我的日记", "快速录音", "语音库", "设置"].map((item, index) => (
+                            <div key={index} className="flex items-center py-2 pl-4 hover:bg-gray-200 cursor-pointer">
+                                <i className={`fas fa-${index === 0 ? "home" : index === 1 ? "book" : index === 2 ? "record-vinyl" : index === 3 ? "database" : "cog"} mr-3`}></i>
+                                <span>{item}</span>
+                            </div>
+                        ))}
+                    </nav>
+                </div>
+            );
+        }
+
+        function SummaryStats() {
+            return (
+                <div className="mt-4">
+                    <div className="flex items-center bg-white shadow-md rounded-lg mb-4">
+                        <img src={images.statsImage1} alt="Stats" className="w-20 h-20 rounded-l-lg" />
+                        <div className="flex-grow px-4 py-2">
+                            <p className="text-gray-700">本月录音</p>
+                            <h3 className="text-orange-500 text-xl font-bold">12 次</h3>
+                            <p className="text-gray-500">累计时长: 03:45:20</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center bg-white shadow-md rounded-lg">
+                        <img src={images.statsImage2} alt="Mood Stats" className="w-20 h-20 rounded-l-lg" />
+                        <div className="flex-grow px-4 py-2">
+                            <p className="text-gray-700">情绪分布</p>
+                            <div className="text-gray-500 text-sm flex space-x-2">
+                                <span>平静 40%</span>
+                                <span>喜悦 30%</span>
+                                <span>愤怒 20%</span>
+                                <span>高兴 10%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function DiaryItem({ title, date, duration, mood, description, imgSrc }) {
+            const moodColors = {
+                平静: "blue",
+                高兴: "orange",
+                喜悦: "green"
+            };
+
+            return (
+                <div className="flex items-center bg-white shadow-md rounded-lg mb-4">
+                    <img src={imgSrc} alt={title} className="w-20 h-20 rounded-l-lg object-cover" />
+                    <div className="flex-grow px-4 py-2 relative">
+                        <div className="text-sm mb-1 flex items-center">
+                            <span className={`text-${moodColors[mood]}-500 font-bold`}>{mood}</span>
+                            <span className="text-gray-500 ml-2">{date}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-1">时长: {duration}</p>
+                        <h4 className="text-lg text-gray-800 mb-2 font-bold">{title}</h4>
+                        <p className="text-sm text-gray-600">{description}</p>
+                        <div className="absolute bottom-2 right-4 flex items-center space-x-4">
+                            <button className="text-blue-500 text-sm">编辑</button>
+                            <button className="text-red-500 text-sm">删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            return (
+                <div className="flex h-screen bg-gray-50">
+                    <Sidebar />
+                    <div className="flex-grow flex">
+                        <div className="flex-grow">
+                            <div className="flex items-center bg-white shadow-md px-4 py-2">
+                                <h2 className="flex-grow text-lg font-bold text-gray-800">语音日记</h2>
+                                <button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600">新增语音日记</button>
+                            </div>
+                            <div className="px-4 py-4">
+                                <DiaryItem
+                                    title="小喇叭录音"
+                                    date="2024-06-20 22:15"
+                                    duration="02:35"
+                                    mood="高兴"
+                                    description="今天下班路上遇到彩虹，心情瞬间明朗......"
+                                    imgSrc={images.diary1}
+                                />
+                                <DiaryItem
+                                    title="酷爽感悟"
+                                    date="2024-06-19 08:30"
+                                    duration="01:45"
+                                    mood="平静"
+                                    description="静谧梦境犹如妙的缓疗药，心情因此刷新流逝......"
+                                    imgSrc={images.diary2}
+                                />
+                                <DiaryItem
+                                    title="工作压力"
+                                    date="2024-06-18 19:45"
+                                    duration="03:12"
+                                    mood="喜悦"
+                                    description="今天项目组上层拉钩，感适力方向点次，从何调意心......"
+                                    imgSrc={images.diary3}
+                                />
+                            </div>
+                        </div>
+                        <div className="w-60 px-4 py-2">
+                            <SummaryStats />
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('app'));
+    </script>
+</body>
+</html>

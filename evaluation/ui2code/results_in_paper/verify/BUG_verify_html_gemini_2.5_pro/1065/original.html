@@ -1,0 +1,412 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>梦想许愿池</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useEffect } = React;
+
+        // Data for wishes
+        const initialWishes = [
+            { id: 1, title: '学习React', description: '掌握React框架, 能够独立开发前端应用', date: '2023-12-31', priority: '较高', progress: 35, category: '学习' },
+            { id: 2, title: '减重10公斤', description: '通过健康饮食和规律运动减轻体重', date: '2023-10-15', priority: '很高', progress: 60, category: '健康' },
+            { id: 3, title: '升职加薪', description: '在公司获得晋升和薪资提升', date: '2023-12-01', priority: '较高', progress: 70, category: '职业' },
+        ];
+
+        const latestWishes = [
+            { id: 4, title: '写一本书', description: '完成一部小说的创作并尝试出版', date: '2024-06-30', priority: '中等', progress: 10, category: '其他' },
+            { id: 3, title: '升职加薪', description: '在公司获得晋升和薪资提升', date: '2023-12-01', priority: '较高', progress: 70, category: '职业' },
+            { id: 5, title: '学习钢琴', description: '能够熟练演奏至少5首古典乐曲', date: '2024-03-01', priority: '较低', progress: 15, category: '学习' },
+            { id: 2, title: '减重10公斤', description: '通过健康饮食和规律运动减轻体重', date: '2023-10-15', priority: '很高', progress: 60, category: '健康' },
+            { id: 6, title: '环游世界', description: '走访至少10个国家，体验不同文化', date: '2025-06-30', priority: '中等', progress: 20, category: '旅行' },
+            { id: 1, title: '学习React', description: '掌握React框架, 能够独立开发前端应用', date: '2023-12-31', priority: '较高', progress: 35, category: '学习' },
+        ];
+        
+        const categoryStyles = {
+            '学习': { bg: 'bg-pink-100', text: 'text-pink-600', badge: 'bg-pink-500' },
+            '健康': { bg: 'bg-green-100', text: 'text-green-600', badge: 'bg-green-500' },
+            '职业': { bg: 'bg-blue-100', text: 'text-blue-600', badge: 'bg-blue-500' },
+            '旅行': { bg: 'bg-yellow-100', text: 'text-yellow-600', badge: 'bg-yellow-500' },
+            '其他': { bg: 'bg-purple-100', text: 'text-purple-600', badge: 'bg-purple-500' },
+        };
+
+        const Sidebar = () => (
+            <div className="w-64 bg-gradient-to-b from-[#ff9671] to-[#ffc75f] text-[#443c3c] flex flex-col fixed h-full">
+                <div className="flex items-center justify-center h-20 border-b border-white/20">
+                    <h1 className="text-2xl font-bold">梦想许愿池</h1>
+                </div>
+                <nav className="flex-grow px-4 py-6">
+                    <ul>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 rounded-lg bg-white/30 font-bold">
+                                <i className="fas fa-home w-6 text-center"></i>
+                                <span className="ml-3">首页</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 rounded-lg hover:bg-white/20">
+                                <i className="fas fa-star w-6 text-center"></i>
+                                <span className="ml-3">我的愿望</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 rounded-lg hover:bg-white/20">
+                                <i className="fas fa-thumbtack w-6 text-center"></i>
+                                <span className="ml-3">愿望墙</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" className="flex items-center p-3 rounded-lg hover:bg-white/20">
+                                <i className="fas fa-chart-pie w-6 text-center"></i>
+                                <span className="ml-3">许愿统计</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div className="px-6 pb-6 text-center">
+                    <div className="bg-white/20 p-4 rounded-lg">
+                        <p className="text-sm">已实现 8 个愿望</p>
+                        <p className="text-sm">尚有 6 个愿望在路上</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const WishCard = ({ wish, onEdit, onDelete }) => {
+            const style = categoryStyles[wish.category] || categoryStyles['其他'];
+            return (
+                <div className="bg-white rounded-lg shadow-md p-5 flex flex-col">
+                    <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-lg font-bold text-slate-800">{wish.title}</h3>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full text-white ${style.badge}`}>{wish.category}</span>
+                    </div>
+                    <p className="text-sm text-slate-500 mb-4 flex-grow">{wish.description}</p>
+                    <div className="text-xs text-slate-500 mb-1">目标日期: {wish.date}</div>
+                    <div className="text-xs text-slate-500 mb-3">优先级: {wish.priority}</div>
+                    <div className="mb-3">
+                        <div className="flex justify-between items-center text-xs text-slate-500 mb-1">
+                            <span>完成进度:</span>
+                            <span>{wish.progress}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-1.5">
+                            <div className="bg-violet-400 h-1.5 rounded-full" style={{ width: `${wish.progress}%` }}></div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end items-center gap-x-3 text-slate-400">
+                        <button onClick={() => onEdit(wish)} className="hover:text-blue-500">
+                            <i className="fas fa-edit"></i>
+                        </button>
+                        <button onClick={() => onDelete(wish)} className="hover:text-red-500">
+                            <i className="fas fa-trash-alt"></i>
+                        button>
+                    </div>
+                </div>
+            );
+        };
+
+        const AddEditModal = ({ show, onClose, onSave, wish }) => {
+            if (!show) return null;
+            
+            const isEditing = !!wish;
+            const title = isEditing ? '编辑愿望' : '添加新愿望';
+
+            const [formData, setFormData] = useState(isEditing ? wish : {
+                title: '',
+                description: '',
+                category: '学习',
+                date: '',
+                priorityValue: 3,
+                progress: 0,
+            });
+            
+            const priorityLabels = ["", "最低", "较低", "中等", "较高", "很高"];
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+                        <h2 className="text-2xl font-bold mb-6 text-slate-800">{title}</h2>
+                        <form>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-slate-600 mb-1">愿望标题</label>
+                                <input type="text" defaultValue={formData.title} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-orange-400 outline-none" />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-slate-600 mb-1">描述</label>
+                                <textarea rows="3" defaultValue={formData.description} className="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-orange-400 outline-none"></textarea>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-600 mb-1">类别</label>
+                                    <select defaultValue={formData.category} className="w-full p-2 border border-slate-300 rounded-md bg-white focus:ring-2 focus:ring-orange-400 outline-none">
+                                        <option>学习</option>
+                                        <option>健康</option>
+                                        <option>职业</option>
+                                        <option>旅行</option>
+                                        <option>其他</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-600 mb-1">目标日期</label>
+                                    <div className="relative">
+                                        <input type="text" defaultValue={formData.date} placeholder="mm/dd/yyyy" className="w-full p-2 border border-slate-300 rounded-md pr-8 focus:ring-2 focus:ring-orange-400 outline-none" />
+                                        <i className="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                             <div className="mb-4">
+                                <label className="block text-sm font-medium text-slate-600 mb-1">优先级 ({formData.priorityValue})</label>
+                                <div className="relative">
+                                    <input type="range" min="1" max="5" defaultValue={formData.priorityValue} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                                     <div className="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>较低</span><span>中等</span><span>较高</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-slate-600 mb-1">进度 ({formData.progress}%)</label>
+                                <input type="range" min="0" max="100" defaultValue={formData.progress} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                                <div className="flex justify-between text-xs text-slate-400 mt-1">
+                                        <span>0%</span><span>50%</span><span>100%</span>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-4">
+                                <button type="button" onClick={onClose} className="px-6 py-2 rounded-md text-slate-600 bg-slate-200 hover:bg-slate-300 font-semibold">取消</button>
+                                <button type="button" onClick={onClose} className="px-6 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 font-semibold">保存</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DeleteConfirmModal = ({ show, onClose, onConfirm }) => {
+            if(!show) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-8 text-center">
+                        <h2 className="text-xl font-bold mb-4 text-slate-800">确认删除</h2>
+                        <p className="text-slate-600 mb-6">确认删除该愿望吗？此操作无法撤销。</p>
+                         <div className="flex justify-center gap-4">
+                            <button onClick={onClose} className="px-6 py-2 rounded-md text-slate-600 bg-slate-200 hover:bg-slate-300 font-semibold">取消</button>
+                            <button onClick={onConfirm} className="px-6 py-2 rounded-md text-white bg-red-500 hover:bg-red-600 font-semibold">确认</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const HelpAccordionItem = ({ title, children }) => {
+            const [isOpen, setIsOpen] = useState(false);
+            return (
+                <div className="border-b border-slate-200">
+                    <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center text-left py-4 px-2 hover:bg-slate-100">
+                        <span className="font-semibold text-slate-700">{title}</span>
+                        <i className={`fas fa-chevron-right transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}></i>
+                    </button>
+                    {isOpen && <div className="p-4 bg-slate-50 text-slate-600 text-sm">{children}</div>}
+                </div>
+            );
+        };
+
+        const HelpDrawer = ({ show, onClose }) => {
+            return (
+                <div className={`fixed top-0 right-0 h-full bg-white shadow-2xl z-40 transition-transform duration-300 ease-in-out ${show ? 'translate-x-0' : 'translate-x-full'}`} style={{width: '400px'}}>
+                    <div className="flex justify-between items-center p-5 border-b">
+                        <h2 className="text-xl font-bold text-slate-800">帮助中心</h2>
+                        <button onClick={onClose} className="text-slate-500 hover:text-slate-800 text-2xl">&times;</button>
+                    </div>
+                    <div className="p-4">
+                        <HelpAccordionItem title="如何添加愿望">
+                            <p>点击主界面上的“添加愿望”按钮，在弹出的窗口中填写您的愿望详情，然后点击“保存”即可。</p>
+                        </HelpAccordionItem>
+                         <HelpAccordionItem title="如何编辑/删除">
+                            <p>在每个愿望卡片的右下角，分别有编辑和删除图标。点击编辑图标可以修改愿望内容，点击删除图标可以移除愿望。</p>
+                        </HelpAccordionItem>
+                         <HelpAccordionItem title="如何查看统计">
+                            <p>右侧的“愿望统计”面板展示了您的愿望概览、类别分布和趋势。数据会根据您的愿望列表自动更新。</p>
+                        </HelpAccordionItem>
+                    </div>
+                </div>
+            );
+        };
+
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('精选');
+            const [topNavTab, setTopNavTab] = useState('精选');
+            const [wishes, setWishes] = useState(initialWishes);
+
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [wishToEdit, setWishToEdit] = useState(null);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [wishToDelete, setWishToDelete] = useState(null);
+            const [showHelpDrawer, setShowHelpDrawer] = useState(false);
+
+            const handleTabClick = (tabName) => {
+                setTopNavTab(tabName);
+                if (tabName === '最新') {
+                    setWishes(latestWishes);
+                } else {
+                    // Assuming '精选' and '热门' show the same initial list for this mockup
+                    setWishes(initialWishes);
+                }
+            };
+            
+            const handleEditClick = (wish) => {
+                setWishToEdit(wish);
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = (wish) => {
+                setWishToDelete(wish);
+                setShowDeleteModal(true);
+            };
+            
+            const handleDeleteConfirm = () => {
+                // In a real app, you would remove the wish from the state
+                setShowDeleteModal(false);
+                setWishToDelete(null);
+            };
+
+            const closeModals = () => {
+                setShowAddModal(false);
+                setShowEditModal(false);
+                setShowDeleteModal(false);
+                setWishToEdit(null);
+                setWishToDelete(null);
+            }
+
+            return (
+                <div className="bg-slate-50 min-h-screen">
+                    <Sidebar />
+                    <div className="ml-64 flex flex-col">
+                        <header className="bg-white h-20 flex items-end px-10 border-b">
+                            <nav className="flex space-x-8">
+                                <button onClick={() => setActiveTab('精选')} className={`pb-3 text-slate-600 font-semibold border-b-2 ${activeTab === '精选' ? 'border-orange-500 text-orange-500' : 'border-transparent'}`}>精选</button>
+                                <button onClick={() => setActiveTab('热门')} className={`pb-3 text-slate-600 font-semibold border-b-2 ${activeTab === '热门' ? 'border-orange-500 text-orange-500' : 'border-transparent'}`}>热门</button>
+                                <button onClick={() => { handleTabClick('最新'); setActiveTab('最新'); }} className={`pb-3 text-slate-600 font-semibold border-b-2 ${activeTab === '最新' ? 'border-orange-500 text-orange-500' : 'border-transparent'}`}>最新</button>
+                            </nav>
+                        </header>
+
+                        <main className="flex-grow p-8">
+                            <div className="bg-[#334155] rounded-lg p-8 mb-6 text-center text-slate-200">
+                                <h2 className="text-xl font-semibold mb-2">在这里, 汇聚你的每一个小梦想, 让愿望萌芽、结实、飞向天空。</h2>
+                                <p className="text-slate-300">梦想许愿池, 助你看见未来。</p>
+                            </div>
+
+                            <div className="flex gap-8">
+                                <div className="flex-grow">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={() => setShowAddModal(true)} className="bg-orange-400 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-orange-500">
+                                                <i className="fas fa-plus"></i>
+                                                添加愿望
+                                            </button>
+                                            <button className="bg-slate-200 text-slate-600 font-bold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-slate-300">
+                                                <i className="fas fa-tasks"></i>
+                                                批量删除
+                                            </button>
+                                        </div>
+                                        <button className="text-blue-500 font-semibold flex items-center gap-2">
+                                            <i className="fas fa-download"></i>
+                                            导出愿望
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                        {wishes.map(wish => (
+                                            <WishCard key={wish.id} wish={wish} onEdit={handleEditClick} onDelete={handleDeleteClick} />
+                                        ))}
+                                    </div>
+                                </div>
+                                <aside className="w-80 flex-shrink-0">
+                                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                                        <h3 className="font-bold text-slate-800 mb-2">愿望统计</h3>
+                                        <div className="flex items-center gap-2 text-slate-500">
+                                            <i className="fas fa-lightbulb text-purple-500 text-2xl"></i>
+                                            <p className="text-lg"><span className="font-bold text-purple-500 text-2xl">6</span> 个愿望</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                                        <h3 className="font-bold text-slate-800 mb-4">类别分布</h3>
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-24 h-24 rounded-full" style={{ background: 'conic-gradient(#EC4899 0% 30%, #FBBF24 30% 50%, #3B82F6 50% 70%, #22C55E 70% 85%, #A855F7 85% 100%)' }}></div>
+                                            <div className="text-sm text-slate-600">
+                                                <div className="flex items-center gap-2 mb-1"><span className="w-3 h-3 bg-red-400 rounded-sm"></span>学习<span className="ml-auto">旅行</span><span className="w-3 h-3 bg-yellow-400 rounded-sm ml-2"></span></div>
+                                                <div className="flex items-center gap-2"><span className="w-3 h-3 bg-green-400 rounded-sm"></span>职业<span className="ml-auto">健康</span><span className="w-3 h-3 bg-blue-400 rounded-sm ml-2"></span></div>
+                                                <div className="flex items-center gap-2 mt-1"><span className="w-3 h-3 bg-purple-400 rounded-sm"></span>其他</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-4 text-center">学习类愿望占比最高</p>
+                                    </div>
+                                    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                                        <h3 className="font-bold text-slate-800 mb-4">愿望趋势</h3>
+                                        <div className="relative h-40">
+                                            <div className="absolute bottom-0 left-0 h-full flex flex-col justify-between text-xs text-slate-400">
+                                                <span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span><span>0</span>
+                                            </div>
+                                            <svg className="absolute bottom-6 left-6 w-full h-full" viewBox="0 0 200 100">
+                                                <path d="M 0 60 C 20 65, 30 40, 50 40 S 70 20, 90 20 S 110 30, 130 30 S 150 10, 170 5" stroke="#F87171" stroke-width="2" fill="none" />
+                                            </svg>
+                                            <div className="absolute bottom-0 left-6 w-full flex justify-between text-xs text-slate-400">
+                                                <span>7月</span><span>8月</span><span>9月</span><span>10月</span><span>11月</span><span>12月</span>
+                                            </div>
+                                        </div>
+                                         <p className="text-xs text-slate-400 mt-2 text-center">过去6个月新增愿望变化</p>
+                                    </div>
+                                </aside>
+                            </div>
+                        </main>
+                        
+                        <footer className="bg-[#14b8a6] text-white text-center text-sm py-3">
+                            © 2023 梦想许愿池 | 让每个愿望都有实现 proliferate 的可能
+                        </footer>
+                    </div>
+
+                    <div className="fixed bottom-6 right-6 flex items-center gap-3">
+                        <div className="bg-white p-3 rounded-lg shadow-lg text-sm text-slate-600">
+                            <p><span className="font-bold text-blue-500">小贴士:</span> 给你的愿望设置一个deadline，</p>
+                            <p>会更有可能实现哦! 定期回顾和更新进度，</p>
+                            <p>梦想会离你更近一步。</p>
+                        </div>
+                        <button onClick={() => setShowHelpDrawer(true)} className="w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-purple-600">
+                            <i className="fas fa-question"></i>
+                        </button>
+                         <button className="w-12 h-12 bg-white text-slate-600 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-slate-100">
+                            <i className="fas fa-phone-alt"></i>
+                        </button>
+                         <button className="w-12 h-12 bg-white text-slate-600 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-slate-100">
+                            <i className="far fa-envelope"></i>
+                        </button>
+                    </div>
+
+                    <AddEditModal show={showAddModal} onClose={closeModals} onSave={() => {}} />
+                    <AddEditModal show={showEditModal} onClose={closeModals} onSave={() => {}} wish={wishToEdit} />
+                    <DeleteConfirmModal show={showDeleteModal} onClose={closeModals} onConfirm={handleDeleteConfirm} />
+                    <HelpDrawer show={showHelpDrawer} onClose={() => setShowHelpDrawer(false)} />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+</html>

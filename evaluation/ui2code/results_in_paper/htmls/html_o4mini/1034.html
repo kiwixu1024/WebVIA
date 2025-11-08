@@ -1,0 +1,409 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>婚礼仪式流程编辑器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <style>
+      body { margin:0; font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="root" class="h-screen"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      // Donut chart component
+      function Donut({ percent, color }) {
+        const dash = percent + ',100';
+        const strokeColor = color || '#F472B6';
+        return (
+          <div className="relative w-16 h-16">
+            <svg viewBox="0 0 36 36" className="w-full h-full">
+              <path
+                className="text-gray-200"
+                d="M18 2.0845
+                   a 15.9155 15.9155 0 0 1 0 31.831
+                   a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                strokeWidth="3"
+                stroke="currentColor"
+              />
+              <path
+                d="M18 2.0845
+                   a 15.9155 15.9155 0 0 1 0 31.831
+                   a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                strokeWidth="3"
+                stroke={strokeColor}
+                strokeDasharray={dash}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center text-sm font-medium">
+              {percent.endsWith(',100') ? percent.split(',')[0] : percent}
+            </div>
+          </div>
+        );
+      }
+
+      function Sidebar({ page, setPage }) {
+        const items = [
+          { key: 'main', icon: 'fas fa-list-alt', label: '仪式流程管理' },
+          { key: 'stats', icon: 'fas fa-chart-bar', label: '流程统计' },
+          { key: 'theme', icon: 'fas fa-paint-brush', label: '主题定制' },
+          { key: 'help', icon: 'fas fa-question-circle', label: '帮助中心' },
+        ];
+        return (
+          <div className="w-60 bg-pink-100 h-full flex flex-col">
+            <div className="py-6 text-center text-2xl font-semibold text-pink-600 flex items-center justify-center">
+              <i className="fas fa-heart mr-2"></i>
+              浪漫婚礼策划
+            </div>
+            <nav className="flex-1">
+              {items.map(it => (
+                <div
+                  key={it.key}
+                  onClick={() => setPage(it.key)}
+                  className={
+                    "flex items-center px-6 py-3 cursor-pointer text-gray-700 " +
+                    (page === it.key ? "bg-white text-pink-600 font-medium" : "hover:bg-white")
+                  }
+                >
+                  <i className={it.icon + " w-5"}></i>
+                  <span className="ml-3">{it.label}</span>
+                </div>
+              ))}
+            </nav>
+            <div className="py-4 text-center text-gray-500 text-xs">
+              使用撤销/重做快速恢复编辑，保存后可随时导出分享
+              <div className="flex justify-center mt-2 space-x-4 text-sm">
+                <span className="cursor-pointer hover:underline"><i className="fas fa-undo mr-1"></i>撤销</span>
+                <span className="cursor-pointer hover:underline"><i className="fas fa-redo mr-1"></i>重做</span>
+                <span className="cursor-pointer hover:underline"><i className="fas fa-save mr-1"></i>保存草稿</span>
+                <span className="cursor-pointer hover:underline"><i className="fas fa-file-pdf mr-1"></i>导出PDF</span>
+                <span className="cursor-pointer hover:underline"><i className="fas fa-print mr-1"></i>打印</span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function Header({ }) {
+        return (
+          <div className="flex justify-between items-center px-6 bg-white border-b border-gray-200 h-16">
+            <div className="flex items-center text-xl font-semibold text-gray-800">
+              <i className="fas fa-heart text-pink-500 mr-2"></i>
+              婚礼仪式流程编辑器
+            </div>
+            <div className="space-x-4">
+              <button className="px-4 py-1 bg-pink-300 text-white rounded">简洁版预览</button>
+              <button className="px-4 py-1 bg-white border border-gray-300 text-gray-600 rounded">详细版说明</button>
+            </div>
+          </div>
+        );
+      }
+
+      function StatsSidebar({ steps }) {
+        const total = steps.length;
+        const completed = 0;
+        const totalTime = steps.reduce((sum, s) => sum + s.duration, 0);
+        const percentDone = Math.round((completed / total) * 100) + ',100';
+        const percentTime = Math.round((totalTime / totalTime) * 100) + ',100';
+        return (
+          <div className="w-80 bg-white p-6 border-l border-gray-200">
+            <h3 className="text-lg font-semibold mb-4">婚礼流程统计</h3>
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-600">总流程数</span>
+                <span className="text-xl font-bold">{total}</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded mb-2">
+                <div className="bg-pink-300 h-2 rounded" style={{width: (total/total*100)+'%'}}></div>
+              </div>
+            </div>
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-600">已完成流程</span>
+                <span className="text-xl font-bold">{completed}/{total}</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded mb-2">
+                <div className="bg-gray-400 h-2 rounded" style={{width: (completed/total*100)+'%'}}></div>
+              </div>
+            </div>
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-600">预计总时长</span>
+                <span className="text-xl font-bold">{totalTime} 分钟</span>
+              </div>
+              <div className="w-full bg-gray-200 h-2 rounded">
+                <div className="bg-yellow-400 h-2 rounded" style={{width: (totalTime/totalTime*100)+'%'}}></div>
+              </div>
+            </div>
+            <div className="my-6 flex justify-center">
+              <Donut percent={percentTime} color="#FEC84B" />
+            </div>
+            <p className="text-gray-500 text-sm mb-3">实时监控流程进度，避免现场混乱</p>
+            <div className="text-gray-600 text-sm">
+              <p><span className="text-blue-500 mr-1">•</span>每个流程保持建议时长在15-30分钟</p>
+              <p className="mt-2"><span className="text-blue-500 mr-1">•</span>整个婚礼仪式建议控制在2小时内</p>
+            </div>
+          </div>
+        );
+      }
+
+      function StepCard({ step, onEdit }) {
+        return (
+          <div className={"p-4 rounded-md mb-4 relative bg-" + step.color + "-100"}>
+            <div className="absolute top-3 right-3 space-x-2">
+              <i className="fas fa-edit cursor-pointer text-gray-600" onClick={onEdit}></i>
+              <i className="fas fa-trash-alt cursor-pointer text-gray-600"></i>
+            </div>
+            <div className="flex items-center mb-3">
+              <div className={"flex-shrink-0 w-10 h-10 bg-" + step.color + "-300 text-white flex items-center justify-center rounded-full"}>
+                <i className={step.icon}></i>
+              </div>
+              <div className="ml-4">
+                <div className="font-medium text-gray-800">{step.name}</div>
+                <div className="text-sm text-gray-600">{step.startTime}</div>
+              </div>
+            </div>
+            <div className="text-gray-700 text-sm mb-4">{step.description}</div>
+            <div className="flex items-center">
+              <div className="flex-1 h-1 bg-pink-200 relative">
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-3 h-3 bg-yellow-400 rounded-full -top-1"></div>
+              </div>
+              <div className="ml-4 text-sm text-gray-600">时长: {step.duration} 分钟</div>
+            </div>
+            <div className="text-right text-xs text-gray-500 mt-2">结束时间: {step.endTime}</div>
+          </div>
+        );
+      }
+
+      function AddEditModal({ visible, onClose, onSave, editData }) {
+        const icons = [
+          { key: 'fa-ring', label: '戒指' },
+          { key: 'fa-heart', label: '爱心' },
+          { key: 'fa-gift', label: '礼物' },
+          { key: 'fa-dove', label: '和平鸽' },
+          { key: 'fa-music', label: '音乐' },
+          { key: 'fa-camera', label: '相机' },
+          { key: 'fa-chalkboard-teacher', label: '教堂' },
+          { key: 'fa-gift', label: '礼物' },
+        ];
+        const colors = ['pink', 'rose', 'yellow'];
+        const [name, setName] = useState(editData ? editData.name : '');
+        const [icon, setIcon] = useState(editData ? editData.icon : 'fa-ring');
+        const [duration, setDuration] = useState(editData ? editData.duration : 15);
+        const [desc, setDesc] = useState(editData ? editData.description : '');
+        const [color, setColor] = useState(editData ? editData.color : 'pink');
+        if (!visible) return null;
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-96 p-6 relative">
+              <h3 className="text-lg font-medium mb-4">{editData ? '编辑流程步骤' : '添加流程步骤'}</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">步骤名称*</label>
+                  <input value={name} onChange={e=>setName(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-1 focus:outline-none"/>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-700 mb-2">图标</div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {icons.map(ic=>(
+                      <button key={ic.key} onClick={()=>setIcon(ic.key)} className={"p-2 border rounded flex items-center justify-center " + (icon===ic.key?'border-pink-500':'border-gray-300')}>
+                        <i className={`fas ${ic.key} text-gray-700`}></i>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">持续时长（分钟）</label>
+                  <input type="number" value={duration} onChange={e=>setDuration(parseInt(e.target.value)||0)} className="w-full border border-gray-300 rounded px-3 py-1 focus:outline-none"/>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">描述</label>
+                  <textarea value={desc} onChange={e=>setDesc(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-1 focus:outline-none"></textarea>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-700 mb-2">卡片颜色</div>
+                  <div className="flex space-x-2">
+                    {colors.map(col=>(
+                      <button key={col} onClick={()=>setColor(col)} className={"w-6 h-6 rounded-full border-2 " + (color===col?'border-pink-500':'border-transparent') + " bg-"+col+"-300"}></button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 text-right space-x-3">
+                <button onClick={onClose} className="px-4 py-1 border border-gray-300 rounded text-gray-600">取消</button>
+                <button onClick={()=>{onSave({name,icon,duration,desc,color}); onClose();}} className="px-4 py-1 bg-pink-300 text-white rounded">保存</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function MainPage({ steps, onEditStep, onAdd }) {
+        return (
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex-1 p-6 overflow-auto">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-semibold text-gray-800">婚礼仪式流程</h2>
+                  <p className="text-gray-600 mt-1">在这里新增婚礼仪式流程，支持自定义图标与时长。点击“添加流程”按钮开始创建您的完美婚礼流程。</p>
+                </div>
+                <button onClick={onAdd} className="px-4 py-1 bg-yellow-400 text-white rounded">+ 添加流程</button>
+              </div>
+              <div>
+                {steps.map((s,i)=>(
+                  <StepCard key={i} step={s} onEdit={()=>onEditStep(s)} />
+                ))}
+              </div>
+              <div className="text-center text-gray-400 text-sm mt-6">规划好每一个流程，让婚礼更完美</div>
+            </div>
+          </div>
+        );
+      }
+
+      function StatsPage({ steps }) {
+        return (
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex-1 p-6 overflow-auto">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">流程统计</h2>
+              <p className="text-gray-600 mb-6">实时监控流程进度，避免现场混乱。通过以下统计数据了解您的婚礼仪式安排情况。</p>
+              <div className="bg-white p-6 rounded-lg flex space-x-6">
+                <div className="flex-1 text-center">
+                  <Donut percent="100,100" color="#F472B6" />
+                  <div className="mt-2 text-gray-700">3</div>
+                  <div className="text-gray-500">总流程数</div>
+                </div>
+                <div className="flex-1 text-center">
+                  <Donut percent="0,100" color="#9CA3AF" />
+                  <div className="mt-2 text-gray-700">0</div>
+                  <div className="text-gray-500">已完成数</div>
+                </div>
+                <div className="flex-1 text-center">
+                  <Donut percent="55,100" color="#FEC84B" />
+                  <div className="mt-2 text-gray-700">55 分钟</div>
+                  <div className="text-gray-500">预计总时长</div>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <button className="px-4 py-1 bg-pink-100 text-pink-600 rounded"><i className="fas fa-sync mr-1"></i>刷新统计</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function ThemePage() {
+        const [color, setColor] = useState('pink');
+        const [font, setFont] = useState('song');
+        const [iconStyle, setIconStyle] = useState('flat');
+        return (
+          <div className="flex flex-1 overflow-hidden">
+            <div className="flex-1 p-6 overflow-auto">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">主题定制</h2>
+              <div className="bg-white p-6 rounded-lg space-y-6">
+                <div>
+                  <div className="text-gray-700 mb-2">配色方案</div>
+                  <div className="space-x-4">
+                    <button onClick={()=>setColor('pink')} className={"px-4 py-1 rounded "+(color==='pink'?'bg-pink-300 text-white':'bg-yellow-50 text-gray-700')}>浪漫粉</button>
+                    <button onClick={()=>setColor('gold')} className={"px-4 py-1 rounded "+(color==='gold'?'bg-yellow-300 text-white':'bg-yellow-50 text-gray-700')}>金色优雅</button>
+                    <button onClick={()=>setColor('cream')} className={"px-4 py-1 rounded "+(color==='cream'?'bg-gray-200 text-gray-800':'bg-yellow-50 text-gray-700')}>奶油白</button>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-700 mb-2">字体选择</div>
+                  <div className="space-x-4">
+                    <button onClick={()=>setFont('song')} className={"px-4 py-1 rounded border "+(font==='song'?'border-blue-500':'border-gray-300')}>宋体</button>
+                    <button onClick={()=>setFont('source')} className={"px-4 py-1 rounded border "+(font==='source'?'border-blue-500':'border-gray-300')}>思源宋体</button>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-gray-700 mb-2">图标风格</div>
+                  <div className="space-x-4">
+                    <button onClick={()=>setIconStyle('flat')} className={"px-4 py-1 rounded border "+(iconStyle==='flat'?'border-blue-500':'border-gray-300')}>扁平风格</button>
+                    <button onClick={()=>setIconStyle('line')} className={"px-4 py-1 rounded border "+(iconStyle==='line'?'border-blue-500':'border-gray-300')}>线性风格</button>
+                  </div>
+                </div>
+                <div className="space-x-4 text-right">
+                  <button className="px-4 py-1 bg-pink-300 text-white rounded">应用主题</button>
+                  <button className="px-4 py-1 border border-gray-300 rounded text-gray-600">重置默认</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [page, setPage] = useState('main');
+        const [steps, setSteps] = useState([
+          {
+            name: '新人进场',
+            icon: 'fas fa-heart',
+            color: 'pink',
+            startTime: '10:00',
+            duration: 20,
+            description: '新人携手进入婚礼现场，伴随着婚礼进行曲',
+            endTime: '10:20'
+          },
+          {
+            name: '证婚环节',
+            icon: 'fas fa-handshake',
+            color: 'rose',
+            startTime: '10:20',
+            duration: 20,
+            description: '请证婚人宣读证婚词，新人交换誓言',
+            endTime: '10:40'
+          },
+          {
+            name: '交换戒指',
+            icon: 'fas fa-ring',
+            color: 'pink',
+            startTime: '10:40',
+            duration: 15,
+            description: '新郎为新娘戴上戒指，新娘为新郎戴上戒指',
+            endTime: '10:55'
+          }
+        ]);
+        const [showAdd, setShowAdd] = useState(false);
+        const [editStep, setEditStep] = useState(null);
+
+        const handleSave = data => {
+          // do nothing for demo
+        };
+
+        return (
+          <div className="flex h-full">
+            <Sidebar page={page} setPage={setPage}/>
+            <div className="flex-1 flex flex-col">
+              <Header />
+              {page === 'main' && <div className="flex-1 flex bg-gray-50 overflow-hidden">
+                <MainPage steps={steps} onEditStep={s=>setEditStep(s)} onAdd={()=>setShowAdd(true)}/>
+                <StatsSidebar steps={steps}/>
+              </div>}
+              {page === 'stats' && <div className="flex-1 flex bg-gray-50 overflow-hidden">
+                <StatsPage steps={steps}/>
+                <StatsSidebar steps={steps}/>
+              </div>}
+              {page === 'theme' && <div className="flex-1 flex bg-gray-50 overflow-hidden">
+                <ThemePage/>
+                <StatsSidebar steps={steps}/>
+              </div>}
+            </div>
+            <AddEditModal visible={showAdd} onClose={()=>setShowAdd(false)} onSave={handleSave} />
+            <AddEditModal visible={!!editStep} onClose={()=>setEditStep(null)} onSave={handleSave} editData={editStep}/>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App/>, document.getElementById('root'));
+    </script>
+  </body>
+</html>

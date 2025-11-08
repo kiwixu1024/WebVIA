@@ -1,0 +1,674 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+            const [showHelpModal, setShowHelpModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    title: '移动应用开发',
+                    status: '开发阶段',
+                    description: '为公司产品开发配套移动应用，支持iOS和Android',
+                    progress: 45,
+                    assignee: { name: '李华', avatar: 'https://picsum.photos/id/1012/50/50' }
+                },
+                {
+                    id: 2,
+                    title: '数据分析平台',
+                    status: '规划阶段',
+                    description: '构建市场数据分析平台，支持多维度数据可视化展示',
+                    progress: 20,
+                    assignee: { name: '王芳', avatar: 'https://picsum.photos/id/1027/50/50' }
+                },
+            ]);
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [activeTab, setActiveTab] = useState('系统概览');
+
+            const handleNewProject = () => {
+                setShowNewProjectModal(true);
+            };
+
+            const handleHelp = () => {
+                setShowHelpModal(true);
+            };
+
+            const handleEdit = (project) => {
+                setSelectedProject(project);
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (project) => {
+                setSelectedProject(project);
+                setShowDeleteModal(true);
+            };
+
+            const handleAddNewProject = () => {
+                setShowNewProjectModal(true);
+            };
+
+            const handleSaveEdit = (title, description, priority, progress) => {
+                const updatedProjects = projects.map(p => {
+                    if (p.id === selectedProject.id) {
+                        return {
+                            ...p,
+                            title,
+                            description,
+                            progress: parseInt(progress),
+                            priority
+                        };
+                    }
+                    return p;
+                });
+                setProjects(updatedProjects);
+                setShowEditModal(false);
+            };
+
+            const handleConfirmDelete = () => {
+                const updatedProjects = projects.filter(p => p.id !== selectedProject.id);
+                setProjects(updatedProjects);
+                setShowDeleteModal(false);
+            };
+
+            const handleSaveNewProject = (title, description, priority, progress) => {
+                const newProject = {
+                    id: Date.now(),
+                    title,
+                    description,
+                    status: '规划阶段',
+                    progress: parseInt(progress || 0),
+                    priority,
+                    assignee: { name: '张明', avatar: 'https://picsum.photos/id/1012/50/50' }
+                };
+                setProjects([...projects, newProject]);
+                setShowNewProjectModal(false);
+            };
+
+            return (
+                <div className="flex h-screen bg-gray-100">
+                    <Sidebar />
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        <Header onNewProject={handleNewProject} onHelp={handleHelp} />
+                        <div className="flex flex-1 overflow-hidden">
+                            <MainContent 
+                                projects={projects} 
+                                onEdit={handleEdit} 
+                                onDelete={handleDelete}
+                                onAddNewProject={handleAddNewProject}
+                            />
+                            <Analytics activeTab={activeTab} setActiveTab={setActiveTab} />
+                        </div>
+                        <Footer />
+                    </div>
+
+                    {showNewProjectModal && (
+                        <NewProjectModal 
+                            onClose={() => setShowNewProjectModal(false)} 
+                            onSave={handleSaveNewProject}
+                        />
+                    )}
+
+                    {showHelpModal && (
+                        <HelpModal onClose={() => setShowHelpModal(false)} />
+                    )}
+
+                    {showEditModal && selectedProject && (
+                        <EditProjectModal 
+                            project={selectedProject}
+                            onClose={() => setShowEditModal(false)} 
+                            onSave={handleSaveEdit}
+                        />
+                    )}
+
+                    {showDeleteModal && selectedProject && (
+                        <DeleteProjectModal 
+                            project={selectedProject}
+                            onClose={() => setShowDeleteModal(false)} 
+                            onConfirm={handleConfirmDelete}
+                        />
+                    )}
+                </div>
+            );
+        };
+
+        const Sidebar = () => {
+            return (
+                <div className="w-52 bg-white border-r border-gray-200 flex flex-col">
+                    <div className="p-4 border-b border-gray-200">
+                        <div className="flex items-center">
+                            <span className="text-blue-500 mr-2">
+                                <i className="fas fa-project-diagram"></i>
+                            </span>
+                            <span className="text-blue-600 font-medium">运程协作平台</span>
+                        </div>
+                    </div>
+                    <nav className="flex-1 overflow-y-auto py-4">
+                        <ul>
+                            <li className="mb-1">
+                                <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-home mr-3 text-gray-400"></i>
+                                    <span>仪表盘</span>
+                                </a>
+                            </li>
+                            <li className="mb-1">
+                                <a href="#" className="flex items-center px-4 py-2 text-gray-600 bg-blue-50 border-l-4 border-blue-500">
+                                    <i className="fas fa-folder mr-3 text-blue-500"></i>
+                                    <span className="font-medium">项目管理</span>
+                                </a>
+                            </li>
+                            <li className="mb-1">
+                                <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-users mr-3 text-gray-400"></i>
+                                    <span>团队成员</span>
+                                </a>
+                            </li>
+                            <li className="mb-1">
+                                <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-chart-bar mr-3 text-gray-400"></i>
+                                    <span>报表中心</span>
+                                </a>
+                            </li>
+                            <li className="mb-1">
+                                <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-cog mr-3 text-gray-400"></i>
+                                    <span>设置</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <div className="p-4 border-t border-gray-200">
+                        <div className="flex items-center">
+                            <img src="https://picsum.photos/id/1005/40/40" className="w-8 h-8 rounded-full mr-3" />
+                            <div>
+                                <div className="text-sm font-medium">管理员</div>
+                                <div className="text-xs text-gray-500">在线</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Header = ({ onNewProject, onHelp }) => {
+            return (
+                <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                    <div className="flex items-center text-sm">
+                        <a href="#" className="text-gray-500 hover:text-gray-700">
+                            <i className="fas fa-home mr-1"></i> 首页
+                        </a>
+                        <span className="mx-2 text-gray-400">
+                            <i className="fas fa-chevron-right text-xs"></i>
+                        </span>
+                        <span className="text-gray-700">项目管理</span>
+                    </div>
+                    <div className="flex items-center">
+                        <button 
+                            onClick={onNewProject}
+                            className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded flex items-center mr-2"
+                        >
+                            <i className="fas fa-plus text-xs mr-1"></i> 新建项目
+                        </button>
+                        <button 
+                            onClick={onHelp}
+                            className="text-gray-600 hover:text-gray-800 py-1 px-2"
+                        >
+                            <i className="fas fa-question-circle"></i> 帮助
+                        </button>
+                    </div>
+                </header>
+            );
+        };
+
+        const ProjectCard = ({ project, onEdit, onDelete }) => {
+            return (
+                <div className="bg-white p-4 rounded-md shadow-sm mb-4">
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <div className="flex items-center">
+                                <h3 className="font-medium">{project.title}</h3>
+                                <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                                    project.status === '开发阶段' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                                }`}>
+                                    {project.status}
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">{project.description}</p>
+                        </div>
+                        <div className="flex">
+                            <button 
+                                onClick={() => onEdit(project)}
+                                className="text-gray-400 hover:text-blue-500 mr-2"
+                            >
+                                <i className="fas fa-edit"></i> 编辑
+                            </button>
+                            <button 
+                                onClick={() => onDelete(project)}
+                                className="text-gray-400 hover:text-red-500"
+                            >
+                                <i className="fas fa-trash-alt"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex items-center mt-4">
+                        <img 
+                            src={project.assignee.avatar} 
+                            className="w-6 h-6 rounded-full mr-2" 
+                            alt={project.assignee.name} 
+                        />
+                        <span className="text-xs text-gray-500">负责人: {project.assignee.name}</span>
+                        <div className="ml-auto text-xs text-gray-500">进度: {project.progress}%</div>
+                    </div>
+                    <div className="progress-bar mt-2">
+                        <div 
+                            className="progress-bar-fill" 
+                            style={{ width: `${project.progress}%` }} 
+                        ></div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MainContent = ({ projects, onEdit, onDelete, onAddNewProject }) => {
+            return (
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+                    <div className="max-w-3xl">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-medium mb-2">项目进度展示</h2>
+                            <div className="text-xs text-gray-500 mb-4">共 3 个项目</div>
+                            
+                            {projects.map(project => (
+                                <ProjectCard 
+                                    key={project.id} 
+                                    project={project} 
+                                    onEdit={onEdit} 
+                                    onDelete={onDelete}
+                                />
+                            ))}
+                        </div>
+                        
+                        <div className="mb-6">
+                            <h2 className="text-lg font-medium mb-4">项目管理</h2>
+                            <div className="bg-white rounded-md shadow-sm p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
+                                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                    <i className="fas fa-plus text-gray-400"></i>
+                                </div>
+                                <div onClick={onAddNewProject} className="cursor-pointer text-blue-500 hover:text-blue-600 mb-1">点击"添加新项目"按钮开始创建</div>
+                                <div className="text-xs text-gray-400 mb-4">或拖拽文件到此处，自动导入项目信息</div>
+                                <div className="flex items-center text-xs text-blue-500">
+                                    <i className="fas fa-lightbulb mr-1"></i> Tip: 使用内置模板管理，制作为项目模板
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Analytics = ({ activeTab, setActiveTab }) => {
+            const tabs = ["系统概览", "周度统计", "月度统计"];
+            
+            return (
+                <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto">
+                    <div className="p-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h2 className="font-medium">团队数据分析</h2>
+                            <button className="text-blue-500 text-sm flex items-center">
+                                <i className="fas fa-arrow-right text-xs ml-1"></i>
+                                <span className="ml-1">导出数据</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="p-4">
+                        <div className="flex space-x-1 mb-4">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab}
+                                    className={`px-3 py-1.5 text-sm rounded ${
+                                        activeTab === tab
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                    }`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                        
+                        <div className="mb-4">
+                            <h3 className="text-sm text-gray-500 mb-4">团队成员在线时长（今日）</h3>
+                            <div className="h-48 relative">
+                                <svg width="100%" height="100%" viewBox="0 0 280 180" preserveAspectRatio="none">
+                                    {/* Y-axis grid lines */}
+                                    <line x1="40" y1="20" x2="40" y2="160" stroke="#eee" strokeWidth="1" />
+                                    <line x1="40" y1="20" x2="280" y2="20" stroke="#eee" strokeWidth="1" />
+                                    <line x1="40" y1="55" x2="280" y2="55" stroke="#eee" strokeWidth="1" />
+                                    <line x1="40" y1="90" x2="280" y2="90" stroke="#eee" strokeWidth="1" />
+                                    <line x1="40" y1="125" x2="280" y2="125" stroke="#eee" strokeWidth="1" />
+                                    <line x1="40" y1="160" x2="280" y2="160" stroke="#eee" strokeWidth="1" />
+                                    
+                                    {/* X-axis */}
+                                    <line x1="40" y1="160" x2="280" y2="160" stroke="#eee" strokeWidth="1" />
+                                    
+                                    {/* Y-axis labels */}
+                                    <text x="20" y="160" fontSize="10" textAnchor="middle" fill="#999">0h</text>
+                                    <text x="20" y="125" fontSize="10" textAnchor="middle" fill="#999">2h</text>
+                                    <text x="20" y="90" fontSize="10" textAnchor="middle" fill="#999">4h</text>
+                                    <text x="20" y="55" fontSize="10" textAnchor="middle" fill="#999">6h</text>
+                                    <text x="20" y="20" fontSize="10" textAnchor="middle" fill="#999">8h</text>
+                                    
+                                    {/* X-axis labels */}
+                                    <text x="70" y="175" fontSize="10" textAnchor="middle" fill="#999">9:00</text>
+                                    <text x="120" y="175" fontSize="10" textAnchor="middle" fill="#999">11:00</text>
+                                    <text x="170" y="175" fontSize="10" textAnchor="middle" fill="#999">13:00</text>
+                                    <text x="220" y="175" fontSize="10" textAnchor="middle" fill="#999">15:00</text>
+                                    <text x="270" y="175" fontSize="10" textAnchor="middle" fill="#999">17:00</text>
+                                    
+                                    {/* Chart Line */}
+                                    <polyline
+                                        points="70,160 120,120 170,150 220,70 270,20"
+                                        fill="none"
+                                        stroke="#0d6efd"
+                                        strokeWidth="2"
+                                    />
+                                    
+                                    {/* Data Points */}
+                                    <circle cx="70" cy="160" r="3" fill="#0d6efd" />
+                                    <circle cx="120" cy="120" r="3" fill="#0d6efd" />
+                                    <circle cx="170" cy="150" r="3" fill="#0d6efd" />
+                                    <circle cx="220" cy="70" r="3" fill="#0d6efd" />
+                                    <circle cx="270" cy="20" r="3" fill="#0d6efd" />
+                                </svg>
+                            </div>
+                            <div className="flex justify-end text-xs text-gray-500">
+                                <i className="fas fa-info-circle mr-1"></i> 数据来源于团队成员活跃度检测
+                            </div>
+                        </div>
+                        
+                        <div className="text-xs text-gray-500">
+                            本周数据最后更新时间: 9/22/2025, 6:17:29 PM
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Footer = () => {
+            return (
+                <footer className="bg-white border-t border-gray-200 py-2 px-4 text-center text-xs text-gray-500">
+                    © 2024 运程协作协作平台 v1.0
+                </footer>
+            );
+        };
+
+        const NewProjectModal = ({ onClose, onSave }) => {
+            const [title, setTitle] = useState('');
+            const [description, setDescription] = useState('');
+            const [priority, setPriority] = useState('中');
+            const [progress, setProgress] = useState('0');
+            
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-md shadow-xl w-full max-w-md">
+                        <div className="p-6">
+                            <h3 className="text-lg font-medium mb-4">项目管理</h3>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="输入项目名称"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                                <textarea
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    rows="4"
+                                    placeholder="输入项目描述"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                ></textarea>
+                            </div>
+                            
+                            <div className="flex space-x-4 mb-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={priority}
+                                        onChange={(e) => setPriority(e.target.value)}
+                                    >
+                                        <option value="低">低</option>
+                                        <option value="中">中</option>
+                                        <option value="高">高</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">初始进度</label>
+                                    <input
+                                        type="number"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="0"
+                                        min="0"
+                                        max="100"
+                                        value={progress}
+                                        onChange={(e) => setProgress(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">选择团队成员</label>
+                                <div className="flex space-x-2">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300">
+                                        <img src="https://picsum.photos/id/1001/40/40" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300">
+                                        <img src="https://picsum.photos/id/1012/40/40" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300">
+                                        <img src="https://picsum.photos/id/1027/40/40" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300">
+                                        <img src="https://picsum.photos/id/1025/40/40" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-gray-500 cursor-pointer hover:bg-gray-300">
+                                        <img src="https://picsum.photos/id/1074/40/40" className="w-8 h-8 rounded-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-2 rounded-b-md">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={() => onSave(title, description, priority, progress)}
+                                className="px-4 py-2 bg-blue-500 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-600"
+                            >
+                                保存项目
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const HelpModal = ({ onClose }) => {
+            return (
+                <div className="fixed inset-0 flex items-start justify-end z-50">
+                    <div className="bg-white w-96 h-full shadow-lg border-l border-gray-200">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                            <h3 className="font-medium">使用指南</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="p-4 overflow-y-auto" style={{height: "calc(100% - 60px)"}}>
+                            <div className="mb-6">
+                                <div className="flex items-start mb-3">
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-500 mr-2">
+                                        <div className="text-sm">1</div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-sm mb-1">如何创建项目</h4>
+                                        <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
+                                            <li>点击页面顶部导航栏右侧的"新建项目"按钮</li>
+                                            <li>在表单中填写项目名称、描述等信息</li>
+                                            <li>选择项目优先级和进度</li>
+                                            <li>点击"保存项目"按钮保存配置</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start mb-3">
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-500 mr-2">
+                                        <div className="text-sm">2</div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-sm mb-1">如何编辑开发任务</h4>
+                                        <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
+                                            <li>在项目卡片右上角点击"编辑"按钮</li>
+                                            <li>点击"保存"按编辑窗口，再点击保存</li>
+                                            <li>点击"刷新"会有最新显示，查看最新的进度</li>
+                                            <li>所有操作都会自动保存在云端上传</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-start mb-3">
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-500 mr-2">
+                                        <div className="text-sm">3</div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-medium text-sm mb-1">如何查看统计</h4>
+                                        <ol className="text-xs text-gray-600 space-y-1 ml-4 list-decimal">
+                                            <li>在侧边栏选择模块查看不同数据可视化</li>
+                                            <li>点击"数据统计"打开数据统计"了解团队"中的统计"</li>
+                                            <li>点击"导出数据"可导出原始数据</li>
+                                            <li>选择数据显示周期以查看不同时间段的变化趋势曲线</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="text-blue-500 font-medium text-sm mb-2">
+                                <i className="fas fa-lightbulb mr-1"></i> 小贴士
+                            </div>
+                            <ul className="text-xs text-gray-600 space-y-2">
+                                <li className="flex items-start">
+                                    <div className="text-blue-500 mr-2 mt-0.5">•</div>
+                                    <div>使用拖拽功能可以灵活排序项目并进行分类管理</div>
+                                </li>
+                                <li className="flex items-start">
+                                    <div className="text-blue-500 mr-2 mt-0.5">•</div>
+                                    <div>定期查看数据统计，了解团队整体效率</div>
+                                </li>
+                                <li className="flex items-start">
+                                    <div className="text-blue-500 mr-2 mt-0.5">•</div>
+                                    <div>为项目添加适当的描述能够让团队成员更加清晰</div>
+                                </li>
+                            </ul>
+                            
+                            <div className="text-xs text-gray-400 mt-6 text-right">
+                                如有其他问题，请联系系统管理员
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const EditProjectModal = ({ project, onClose, onSave }) => {
+            const [title, setTitle] = useState(project.title);
+            const [description, setDescription] = useState(project.description);
+            const [priority, setPriority] = useState('高');
+            const [progress, setProgress] = useState(project.progress.toString());
+            
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-md shadow-xl w-full max-w-md">
+                        <div className="p-6">
+                            <h3 className="text-lg font-medium mb-4">编辑项目</h3>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input
+                                    type="text"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                            </div>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                                <textarea
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    rows="4"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                ></textarea>
+                            </div>
+                            
+                            <div className="flex space-x-4 mb-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                    <select
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={priority}
+                                        onChange={(e) => setPriority(e.target.value)}
+                                    >
+                                        <option value="低">低</option>
+                                        <option value="中">中</option>
+                                        <option value="高">高</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-

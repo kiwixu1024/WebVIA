@@ -1,0 +1,531 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微短文打卡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [activeSection, setActiveSection] = useState('today');
+            const [showAddModal, setShowAddModal] = useState(false);
+
+            const handlePersonalCenter = () => {
+                setActiveSection('today');
+            };
+
+            const handleHistoryReview = () => {
+                setActiveSection('history');
+            };
+
+            const handleAddNewStory = () => {
+                setShowAddModal(true);
+            };
+
+            const handleCloseModal = () => {
+                setShowAddModal(false);
+            };
+
+            const getSectionItems = (section) => {
+                if (section === 'today') {
+                    return [
+                        { id: 'today', icon: 'fas fa-calendar-day', label: '今日打卡' },
+                        { id: 'history', icon: 'fas fa-history', label: '历史回顾' },
+                        { id: 'challenge', icon: 'fas fa-trophy', label: '主题挑战' }
+                    ];
+                } else if (section === 'history') {
+                    return [
+                        { id: 'today', icon: 'fas fa-calendar-day', label: '今日打卡' },
+                        { id: 'history', icon: 'fas fa-history', label: '历史回顾' },
+                        { id: 'challenge', icon: 'fas fa-trophy', label: '主题挑战' }
+                    ];
+                }
+            };
+
+            const getSideContent = () => {
+                if (activeSection === 'today') {
+                    return (
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">打卡统计</h3>
+                            <div className="bg-yellow-50 rounded-lg p-4 mb-4">
+                                <div className="text-sm text-gray-600 mb-1">累计打卡</div>
+                                <div className="text-2xl font-bold text-orange-600">37 天</div>
+                                <div className="text-xs text-blue-600">距离下一成就还是3天</div>
+                            </div>
+                            <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                                <div className="text-sm text-gray-600 mb-1">当月平均字数</div>
+                                <div className="text-3xl font-bold text-blue-600">152 字/篇</div>
+                                <div className="text-xs text-gray-500">过去30天</div>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-900 mb-3">最近一周打卡趋势</h4>
+                                <div className="flex items-end justify-center space-x-2 h-16 bg-gray-50 rounded-lg overflow-hidden">
+                                    {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+                                        <div key={day} className="flex flex-col items-center">
+                                            <div 
+                                                className="w-3 h-4 bg-yellow-400 rounded-t"
+                                                style={{ 
+                                                    maxHeight: `${40 - day * 5}px`,
+                                                    transition: 'max-height 0.2s ease'
+                                                }}
+                                            ></div>
+                                            <div className="text-xs text-gray-500 mt-1">{day}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                } else if (activeSection === 'history') {
+                    return (
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">打卡统计</h3>
+                            <div className="bg-yellow-50 rounded-lg p-4 mb-4">
+                                <div className="text-sm text-gray-600 mb-1">累计打卡</div>
+                                <div className="text-2xl font-bold text-orange-600">37 天</div>
+                                <div className="text-xs text-blue-600">距离下一成就还是3天</div>
+                            </div>
+                            <div className="bg-blue-50 rounded-lg p-4 mb-4">
+                                <div className="text-sm text-gray-600 mb-1">当月平均字数</div>
+                                <div className="text-3xl font-bold text-blue-600">152 字/篇</div>
+                                <div className="text-xs text-gray-500">过去30天</div>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-900 mb-3">最近一周打卡趋势</h4>
+                                <div className="flex items-end justify-center space-x-2 h-16 bg-gray-50 rounded-lg overflow-hidden">
+                                    {[0, 1, 2, 3, 4, 5, 6].map((day) => (
+                                        <div key={day} className="flex flex-col items-center">
+                                            <div 
+                                                className="w-3 h-4 bg-yellow-400 rounded-t"
+                                                style={{ 
+                                                    maxHeight: `${40 - day * 5}px`,
+                                                    transition: 'max-height 0.2s ease'
+                                                }}
+                                            ></div>
+                                            <div className="text-xs text-gray-500 mt-1">{day}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+            };
+
+            const getTipContent = () => {
+                return (
+                    <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+                        <div className="flex items-start">
+                            <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3 flex-shrink-0">
+                                提
+                            </div>
+                            <div>
+                                <div className="font-medium text-gray-900 mb-1">Tip:</div>
+                                <div className="text-sm text-gray-700">每日1分钟，轻松养成文字习惯！</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const getSectionContent = () => {
+                if (activeSection === 'today') {
+                    return (
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center">
+                                    <i className="fas fa-trophy text-orange-500 mr-2"></i>
+                                    <h2 className="text-xl font-semibold text-gray-900">今日打卡</h2>
+                                </div>
+                                <span className="text-sm text-gray-500">11:36</span>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="bg-yellow-50 rounded-lg p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div className="flex items-center space-x-2 mb-1">
+                                                <img src="https://picsum.photos/id/64/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                <span className="font-medium text-gray-900">用户2</span>
+                                                <span className="text-sm text-gray-500">2023-05-09 19:15</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">日记</span>
+                                                <span className="px-2 py-1 text-xs bg-teal-100 text-teal-600 rounded">随笔</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                <i className="fas fa-undo mr-1"></i>倒叙
+                                            </span>
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-3">雨后的城市像被洗过一样干净，湿漉漉的街道反射着霓虹灯光，路边的小巷子陆续开始营业，烟火气息渐浓...</p>
+                                    <img src="https://picsum.photos/id/1018/300/200" alt="City landscape" className="w-full rounded-lg" />
+                                </div>
+
+                                <div className="bg-yellow-50 rounded-lg p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div className="flex items-center space-x-2 mb-1">
+                                                <img src="https://picsum.photos/id/91/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                <span className="font-medium text-gray-900">用户3</span>
+                                                <span className="text-sm text-gray-500">2023-05-08 21:47</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="px-2 py-1 text-xs bg-teal-100 text-teal-600 rounded">灵感</span>
+                                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">回忆</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                <i className="fas fa-heart mr-1"></i>正序
+                                            </span>
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-3">偶然翻开一本旧书，扉页上还有多年前写的批注，恍惚间似乎回到了那个夏天。风扇呼呼转动，我埋首书卷的样子...</p>
+                                    <img src="https://picsum.photos/id/24/300/200" alt="Open book" className="w-full rounded-lg" />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-center mt-6">
+                                <button className="text-sm text-gray-500 hover:text-gray-700">
+                                    加载更多 <i className="fas fa-chevron-down ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    );
+                } else if (activeSection === 'history') {
+                    return (
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center">
+                                    <i className="fas fa-history text-teal-500 mr-2"></i>
+                                    <h2 className="text-xl font-semibold text-gray-900">历史回顾</h2>
+                                </div>
+                                <span className="text-sm text-gray-500">11:36</span>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="bg-yellow-50 rounded-lg p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div className="flex items-center space-x-2 mb-1">
+                                                <img src="https://picsum.photos/id/342/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                <span className="font-medium text-gray-900">用户2</span>
+                                                <span className="text-sm text-gray-500">2023-05-08 18:22</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">长文</span>
+                                                <span className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded">情义</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                <i className="fas fa-refresh mr-1"></i>今日
+                                            </span>
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-3">今天实在太忙了...我想写点什么关于今天的总汇短发，想花钱，珠沦网络，回来还是社粉的承诺，这么点头...</p>
+                                    <img src="https://picsum.photos/id/1040/300/200" alt="Golden Tower" className="w-full rounded-lg" />
+                                </div>
+
+                                <div className="bg-yellow-50 rounded-lg p-4">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <div className="flex items-center space-x-2 mb-1">
+                                                <img src="https://picsum.photos/id/453/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                <span className="font-medium text-gray-900">用户3</span>
+                                                <span className="text-sm text-gray-500">2023-03-14 23:47</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">日常</span>
+                                                <span className="px-2 py-1 text-xs bg-teal-100 text-teal-600 rounded">自然</span>
+                                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">心情</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                <i className="fas fa-heart mr-1"></i>今日
+                                            </span>
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-share"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-700 mb-3">今天收到了新书的第一手报告，春日走过城市的小巷—— Sitting、音乐、笑声...的感受让稀薄日，发现小兽...有了铅...</p>
+                                    <img src="https://picsum.photos/id/1080/300/200" alt="Open book on desk" className="w-full rounded-lg" />
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-pen text-orange-500 text-xl"></i>
+                                    <div>
+                                        <h1 className="text-xl font-bold text-orange-500">微短文打卡</h1>
+                                        <p className="text-sm text-gray-500">记录每日文字，记录生活美好时光</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center space-x-8">
+                                    <button 
+                                        onClick={handleAddNewStory}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md flex items-center space-x-1 transition-colors"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>添加新短文</span>
+                                    </button>
+                                    
+                                    <div className="flex items-center space-x-6">
+                                        <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                                            <i className="fas fa-calendar-day text-gray-500"></i>
+                                            <span className="text-sm">今日打卡</span>
+                                        </a>
+                                        <a 
+                                            onClick={handlePersonalCenter}
+                                            className={`px-3 py-2 rounded-md text-sm transition-colors ${
+                                                activeSection === 'today' ? 'bg-orange-500 text-white' : 'text-gray-600 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            个人中心
+                                        </a>
+                                        <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                                            <i className="fas fa-users text-gray-500"></i>
+                                            <span className="text-sm">好友打卡</span>
+                                        </a>
+                                        <a href="#" className="text-gray-600 hover:text-gray-900 flex items-center space-x-1">
+                                            <i className="fas fa-trophy text-gray-500"></i>
+                                            <span className="text-sm">主题挑战</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div className="flex gap-6">
+                            {/* Main Content */}
+                            <div className="flex-1">
+                                {/* Today Section */}
+                                <div className="bg-white rounded-lg p-6 shadow-sm">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-trophy text-orange-500 mr-2"></i>
+                                            <h2 className="text-xl font-semibold text-gray-900">今日打卡</h2>
+                                        </div>
+                                        <span className="text-sm text-gray-500">11:36</span>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="bg-yellow-50 rounded-lg p-4">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="flex items-center space-x-2 mb-1">
+                                                        <img src="https://picsum.photos/id/64/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                        <span className="font-medium text-gray-900">用户2</span>
+                                                        <span className="text-sm text-gray-500">2023-05-09 19:15</span>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">日记</span>
+                                                        <span className="px-2 py-1 text-xs bg-teal-100 text-teal-600 rounded">城市</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                        <i className="fas fa-undo mr-1"></i>倒叙
+                                                    </span>
+                                                    <button className="text-gray-400 hover:text-gray-600">
+                                                        <i className="fas fa-share"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">雨后的城市像被洗过一样干净，湿漉漉的街道反射着霓虹灯光，路边的小摊贩陆续开始营业，烟火气息渐浓...</p>
+                                            <img src="https://picsum.photos/id/1018/300/200" alt="Night city" className="w-full rounded-lg" />
+                                        </div>
+
+                                        <div className="bg-yellow-50 rounded-lg p-4">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <div className="flex items-center space-x-2 mb-1">
+                                                        <img src="https://picsum.photos/id/91/40/40" alt="Avatar" className="w-10 h-10 rounded-full" />
+                                                        <span className="font-medium text-gray-900">用户3</span>
+                                                        <span className="text-sm text-gray-500">2023-05-08 21:47</span>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <span className="px-2 py-1 text-xs bg-teal-100 text-teal-600 rounded">灵感</span>
+                                                        <span className="px-2 py-1 text-xs bg-blue-100 text-blue-600 rounded">回忆</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
+                                                        <i className="fas fa-heart mr-1"></i>正序
+                                                    </span>
+                                                    <button className="text-gray-400 hover:text-gray-600">
+                                                        <i className="fas fa-share"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 mb-3">偶然翻到一本旧书，扉页上还有多年前写的批注，恍惚间似乎回到了那个夏天，风扇呼呼转动，我埋首书卷的样子...</p>
+                                            <img src="https://picsum.photos/id/24/300/200" alt="Open book" className="w-full rounded-lg" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* More Posts Section */}
+                                <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
+                                    <button className="text-sm text-gray-600 hover:text-gray-800 mb-4">
+                                        加载更多 <i className="fas fa-chevron-down ml-1"></i>
+                                    </button>
+                                </div>
+
+                                {/* Tips Section */}
+                                {getTipContent()}
+                            </div>
+
+                            {/* Sidebar */}
+                            <div className="w-80 space-y-6">
+                                {/* Navigation Sidebar */}
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">操作中心</h3>
+                                    <nav className="space-y-2">
+                                        {getSectionItems(activeSection).map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={item.id === 'today' ? handleAddNewStory : undefined}
+                                                className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                                                    activeSection === item.id 
+                                                        ? 'bg-orange-500 text-white shadow-sm' 
+                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <span className="mr-2">{item.icon}</span>
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
+
+                                {/* Statistics */}
+                                {getSideContent()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Story Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">新增微短文</h3>
+                                    <button 
+                                        onClick={handleCloseModal}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">内容</label>
+                                        <textarea 
+                                            className="w-full h-32 border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="写下你的想法，感受或记录..."
+                                        ></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['日记', '随笔', '灵感', '春日', '城市', '回忆', '生活', '旅行', '美食', '阅读'].map((tag) => (
+                                                <button
+                                                    key={tag}
+                                                    className="px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">图片</label>
+                                        <button className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                                            <i className="fas fa-image mr-2"></i>随机选择图片
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={handleCloseModal}
+                                        className="px-4 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                                        <i className="fas fa-save mr-1"></i>保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t border-gray-200 mt-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-pen text-orange-500"></i>
+                                    <span>每日微短文打卡 | 版本 1.0.0</span>
+                                </div>
+                                <div className="flex items-center space-x-6">
+                                    <a href="#" className="hover:text-gray-700">使用条款</a>
+                                    <a href="#" className="hover:text-gray-700">隐私政策</a>
+                                    <a href="#" className="hover:text-gray-700">联系我们</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

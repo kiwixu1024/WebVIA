@@ -1,0 +1,485 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万方数据 - 论文管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+            const [showAddPaperModal, setShowAddPaperModal] = useState(false);
+            const [showPaperDetail, setShowPaperDetail] = useState(false);
+            const [selectedPaper, setSelectedPaper] = useState(null);
+
+            const papers = [
+                {
+                    id: 1,
+                    title: "基于深度学习的自然语言处理技术研究",
+                    authors: "张明, 李华",
+                    year: 2023,
+                    keywords: ["深度学习", "自然语言处理", "人工智能"],
+                    views: 1245,
+                    downloads: 356,
+                    abstract: "随着计算机技术的发展，深度学习在自然语言处理领域取得了重要成果。本文探讨了深度学习在NLP中的应用过程，包括预训练语言模型，注意力机制等。为进一步推动语言理解技术，并探讨了未来的发展方向。"
+                },
+                {
+                    id: 2,
+                    title: "新冠肺炎疫情下远程医疗服务的应用与挑战",
+                    authors: "王建国, 陈丽, 赵明",
+                    year: 2022,
+                    keywords: ["远程医疗", "COVID-19", "医疗服务"],
+                    views: 2367,
+                    downloads: 892
+                },
+                {
+                    id: 3,
+                    title: "区块链技术在供应链金融中的应用研究",
+                    authors: "刘伟, 张小丽",
+                    year: 2021,
+                    keywords: ["区块链", "供应链金融", "金融科技"],
+                    views: 1832,
+                    downloads: 647
+                },
+                {
+                    id: 4,
+                    title: "中国农村电子商务发展现状与对策研究",
+                    authors: "李明, 王芳",
+                    year: 2023,
+                    keywords: ["农村电商", "农村经济", "数字经济"],
+                    views: 1056,
+                    downloads: 423
+                },
+                {
+                    id: 5,
+                    title: "基于物联网的智能家居安全风险评估模型",
+                    authors: "赵三, 李四, 王五",
+                    year: 2022,
+                    keywords: ["物联网", "智能家居", "安全风险", "评估模型"],
+                    views: 1678,
+                    downloads: 589
+                }
+            ];
+
+            const handleSearch = (value) => {
+                setSearchTerm(value);
+            };
+
+            const handleViewDetail = (paper) => {
+                setSelectedPaper(paper);
+                setShowPaperDetail(true);
+            };
+
+            const filteredPapers = papers.filter(paper => 
+                searchTerm === '' || 
+                paper.title.includes(searchTerm) || 
+                paper.keywords.some(keyword => keyword.includes(searchTerm))
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Top Navigation */}
+                    <nav className="bg-blue-600 text-white h-14 flex items-center px-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <i className="fas fa-bars text-white"></i>
+                                <span className="font-semibold text-lg">万方数据</span>
+                            </div>
+                            <div className="flex gap-6 ml-8">
+                                <span className="hover:bg-blue-700 px-3 py-2 rounded cursor-pointer">我的论文</span>
+                                <span className="hover:bg-blue-700 px-3 py-2 rounded cursor-pointer">文献检索</span>
+                                <span className="hover:bg-blue-700 px-3 py-2 rounded cursor-pointer">数据分析</span>
+                                <span className="hover:bg-blue-700 px-3 py-2 rounded cursor-pointer">引用管理</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 ml-auto">
+                            <div className="flex items-center bg-white rounded px-3 py-1">
+                                <input 
+                                    type="text" 
+                                    placeholder="搜索论文..." 
+                                    className="text-gray-800 outline-none flex-1 text-sm"
+                                    value={searchTerm}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                />
+                                <i className="fas fa-search text-gray-400 ml-2"></i>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <img src="https://picsum.photos/id/64/32/32" alt="User" className="w-8 h-8 rounded-full" />
+                                <span className="text-sm">张家骅</span>
+                                <i className="fas fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className={`bg-blue-700 text-white transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
+                            <div className="p-4">
+                                <button 
+                                    onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                    className="w-full text-left hover:bg-blue-600 p-2 rounded mb-4"
+                                >
+                                    <i className={`fas ${isSidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`}></i>
+                                </button>
+                                
+                                <div className="space-y-2">
+                                    <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-3">
+                                        <i className="fas fa-file-alt w-4"></i>
+                                        {!isSidebarCollapsed && <span>全部论文</span>}
+                                    </div>
+                                    <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-3">
+                                        <i className="fas fa-bookmark w-4"></i>
+                                        {!isSidebarCollapsed && <span>收藏论文</span>}
+                                    </div>
+                                    <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-3">
+                                        <i className="fas fa-history w-4"></i>
+                                        {!isSidebarCollapsed && <span>最近浏览</span>}
+                                    </div>
+                                    <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-3">
+                                        <i className="fas fa-chart-bar w-4"></i>
+                                        {!isSidebarCollapsed && <span>数据分析</span>}
+                                    </div>
+                                </div>
+
+                                {!isSidebarCollapsed && (
+                                    <div className="mt-8">
+                                        <h3 className="text-sm font-semibold mb-3">学科分类</h3>
+                                        <div className="space-y-1 text-sm">
+                                            <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-2">
+                                                <i className="fas fa-brain w-4"></i>
+                                                <span>计算机科学</span>
+                                            </div>
+                                            <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-2">
+                                                <i className="fas fa-microscope w-4"></i>
+                                                <span>医学健康</span>
+                                            </div>
+                                            <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-2">
+                                                <i className="fas fa-user-friends w-4"></i>
+                                                <span>人文社科</span>
+                                            </div>
+                                            <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-2">
+                                                <i className="fas fa-chart-line w-4"></i>
+                                                <span>经济管理</span>
+                                            </div>
+                                            <div className="hover:bg-blue-600 p-2 rounded cursor-pointer flex items-center gap-2">
+                                                <i className="fas fa-cogs w-4"></i>
+                                                <span>工程技术</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {!isSidebarCollapsed && (
+                                <div className="absolute bottom-4 left-4 text-xs text-blue-200">
+                                    <div>学研版达: 68% (1,7382,508)</div>
+                                    <div className="mt-4">© 2023 万方数据·论文管理系统 v2.1.5</div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 flex">
+                            {/* Paper List */}
+                            <div className="flex-1 p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h1 className="text-2xl font-semibold">论文列表</h1>
+                                    <button 
+                                        onClick={() => setShowAddPaperModal(true)}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded flex items-center gap-2"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        添加新论文
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {filteredPapers.map((paper) => (
+                                        <div key={paper.id} className="bg-white rounded-lg shadow p-6">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <h3 className="text-lg font-semibold text-blue-600 hover:text-blue-700 cursor-pointer">
+                                                        {paper.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                                        <span><i className="fas fa-user mr-1"></i>{paper.authors}</span>
+                                                        <span><i className="fas fa-calendar mr-1"></i>{paper.year}</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 mt-3">
+                                                        {paper.keywords.map((keyword, index) => (
+                                                            <span key={index} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                                                {keyword}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex items-center gap-6 mt-4 text-sm text-gray-500">
+                                                        <span><i className="fas fa-eye mr-1"></i>{paper.views}</span>
+                                                        <span><i className="fas fa-download mr-1"></i>{paper.downloads}</span>
+                                                        <button 
+                                                            onClick={() => handleViewDetail(paper)}
+                                                            className="text-blue-600 hover:text-blue-700"
+                                                        >
+                                                            查看详情 <i className="fas fa-chevron-right ml-1"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2 ml-4">
+                                                    <button className="text-blue-600 hover:text-blue-700">
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button className="text-red-600 hover:text-red-700">
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Empty State */}
+                                {filteredPapers.length === 0 && (
+                                    <div className="text-center py-16">
+                                        <i className="fas fa-file-alt text-6xl text-gray-300 mb-4"></i>
+                                        <h3 className="text-xl font-semibold text-gray-600 mb-2">论文编辑区</h3>
+                                        <p className="text-gray-500 mb-4">点击列表中的"编辑论文"按钮进入编辑区</p>
+                                        <div className="bg-blue-50 p-4 rounded-lg inline-block">
+                                            <p className="text-blue-600 text-sm">
+                                                提示：您可以在我们这里发布编辑区文档格式，包括结构分析、白测构性、作者、关键词等
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-80 p-6 bg-white border-l">
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="font-semibold">论文阅读趋势</h3>
+                                        <i className="fas fa-sync text-gray-400 cursor-pointer"></i>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 rounded">
+                                        <img src="https://picsum.photos/id/25/300/150" alt="趋势图" className="w-full" />
+                                    </div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="font-semibold">下载排行榜</h3>
+                                        <i className="fas fa-sync text-gray-400 cursor-pointer"></i>
+                                    </div>
+                                    <div className="bg-gray-50 p-4 rounded">
+                                        <img src="https://picsum.photos/id/26/300/200" alt="排行榜" className="w-full" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-4 mb-8">
+                                    <div className="text-center">
+                                        <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-file-alt text-blue-600"></i>
+                                        </div>
+                                        <div className="text-2xl font-bold">5</div>
+                                        <div className="text-sm text-gray-600">论文收录</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-chart-bar text-green-600"></i>
+                                        </div>
+                                        <div className="text-2xl font-bold">12</div>
+                                        <div className="text-sm text-gray-600">作者排名</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-download text-purple-600"></i>
+                                        </div>
+                                        <div className="text-2xl font-bold">2907</div>
+                                        <div className="text-sm text-gray-600">总下载次数</div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-orange-50 p-4 rounded">
+                                    <h4 className="font-semibold text-orange-800 mb-3">万方数据论文管理特色</h4>
+                                    <ul className="space-y-2 text-sm">
+                                        <li className="flex items-center text-orange-700">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            论文全文检索文档级搜索
+                                        </li>
+                                        <li className="flex items-center text-orange-700">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            一键导出报告
+                                        </li>
+                                        <li className="flex items-center text-orange-700">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            精准安全筛选
+                                        </li>
+                                        <li className="flex items-center text-orange-700">
+                                            <i className="fas fa-check-circle mr-2"></i>
+                                            智能论文分析
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="flex gap-2 mt-6">
+                                    <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded text-sm">
+                                        <i className="fas fa-upload mr-2"></i>导入论文
+                                    </button>
+                                    <button className="flex-1 bg-green-600 text-white py-2 px-4 rounded text-sm">
+                                        <i className="fas fa-file-excel mr-2"></i>导出Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Paper Modal */}
+                    {showAddPaperModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-full">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-white bg-blue-600 px-4 py-2 rounded">添加新论文</h3>
+                                    <button 
+                                        onClick={() => setShowAddPaperModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">论文标题</label>
+                                        <input type="text" className="w-full border rounded px-3 py-2" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">作者</label>
+                                        <input type="text" placeholder="多个作者请用逗号分隔" className="w-full border rounded px-3 py-2" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">发表年份</label>
+                                        <input type="number" placeholder="2000" className="w-full border rounded px-3 py-2" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">关键词</label>
+                                        <input type="text" placeholder="请输入多个关键词" className="w-full border rounded px-3 py-2" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">摘要</label>
+                                        <textarea rows="4" className="w-full border rounded px-3 py-2 resize-none"></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <div className="flex items-center text-xs text-gray-500 mr-auto">
+                                        <i className="fas fa-exclamation-circle mr-1"></i>
+                                        字数应不超过200字
+                                    </div>
+                                    <button 
+                                        onClick={() => setShowAddPaperModal(false)}
+                                        className="px-4 py-2 border rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+                                        添加论文
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Paper Detail Modal */}
+                    {showPaperDetail && selectedPaper && (
+                        <div className="fixed inset-y-0 right-0 w-1/2 bg-white shadow-xl z-50 overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-semibold">正在编辑：{selectedPaper.title}</h2>
+                                    <button 
+                                        onClick={() => setShowPaperDetail(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">论文标题</label>
+                                        <div className="bg-gray-50 p-3 rounded border">
+                                            {selectedPaper.title}
+                                            <span className="text-xs text-gray-500 ml-2">字/1000</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">作者</label>
+                                        <div className="bg-gray-50 p-3 rounded border">
+                                            {selectedPaper.authors}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">发表年份</label>
+                                        <div className="bg-gray-50 p-3 rounded border">
+                                            {selectedPaper.year}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">关键词</label>
+                                        <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded border">
+                                            {selectedPaper.keywords.map((keyword, index) => (
+                                                <span key={index} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm">
+                                                    {keyword}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">摘要</label>
+                                        <div className="bg-gray-50 p-3 rounded border min-h-32">
+                                            {selectedPaper.abstract || "暂无摘要"}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-8">
+                                    <button 
+                                        onClick={() => setShowPaperDetail(false)}
+                                        className="px-6 py-2 border rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                        数据解读
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦想清单</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function DreamListApp() {
+            const [isEditing, setIsEditing] = useState(false);
+            const [editingCard, setEditingCard] = useState(null);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [deletingCard, setDeletingCard] = useState(null);
+            
+            const [dreams, setDreams] = useState([
+                {
+                    id: 1,
+                    title: "环游世界",
+                    category: "旅行",
+                    completionDate: "2025-12-31",
+                    priority: 5,
+                    progress: "5/5",
+                    currentStatus: "进行中",
+                    type: "travel",
+                    image: "https://picsum.photos/id/1018/400/200"
+                },
+                {
+                    id: 2,
+                    title: "每天跑步5公里",
+                    category: "健康",
+                    completionDate: "2024-06-30",
+                    priority: 5,
+                    progress: "5/5",
+                    currentStatus: "已完成",
+                    type: "health",
+                    image: "https://picsum.photos/id/1043/400/200"
+                },
+                {
+                    id: 3,
+                    title: "掌握 Python 编程",
+                    category: "学习",
+                    completionDate: "2024-09-01",
+                    priority: 3,
+                    progress: "5/5",
+                    currentStatus: "进行中",
+                    type: "learning",
+                    image: "https://picsum.photos/id/225/400/200"
+                },
+                {
+                    id: 4,
+                    title: "完成个人博客",
+                    category: "事业",
+                    completionDate: "2024-03-15",
+                    priority: 5,
+                    progress: "5/5",
+                    currentStatus: "已完成",
+                    type: "career",
+                    image: "https://picsum.photos/id/433/400/200"
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                title: "",
+                category: "",
+                completionDate: "",
+                priority: 3,
+                currentStatus: "未完成",
+                existingCardId: null,
+                existingCardData: null
+            });
+
+            const handleAddDream = () => {
+                setIsEditing(true);
+                setEditingCard(null);
+                setFormData({
+                    title: "",
+                    category: "",
+                    completionDate: "",
+                    priority: 3,
+                    currentStatus: "未完成",
+                    existingCardId: null,
+                    existingCardData: null
+                });
+            };
+
+            const handleEditCard = (card) => {
+                if (isEditing) {
+                    setFormData({
+                        ...formData,
+                        existingCardId: card.id,
+                        existingCardData: {...card}
+                    });
+                } else {
+                    setFormData({
+                        title: card.title,
+                        category: card.category,
+                        completionDate: card.completionDate,
+                        priority: card.priority,
+                        currentStatus: card.currentStatus,
+                        existingCardId: card.id,
+                        existingCardData: {...card}
+                    });
+                }
+                setEditingCard(card);
+                setIsEditing(true);
+            };
+
+            const handleSave = () => {
+                if (formData.existingCardId) {
+                    // 编辑现有卡片
+                    setDreams(dreams.map(card => 
+                        card.id === formData.existingCardId 
+                            ? { 
+                                ...card, 
+                                title: formData.title,
+                                category: formData.category,
+                                completionDate: formData.completionDate,
+                                priority: formData.priority,
+                                progress: formData.existingCardData.progress,
+                                currentStatus: formData.currentStatus,
+                                type: formData.existingCardData.type,
+                                image: formData.existingCardData.image
+                            }
+                            : card
+                    ));
+                } else {
+                    // 添加新卡片
+                    const newCard = {
+                        id: Date.now(),
+                        title: formData.title,
+                        category: formData.category,
+                        completionDate: formData.completionDate,
+                        priority: formData.priority,
+                        progress: "0/5",
+                        currentStatus: formData.currentStatus,
+                        type: formData.category === "学习" ? "learning" : "other",
+                        image: formData.category === "健康" ? "https://picsum.photos/id/1048/400/200" : "https://picsum.photos/id/1005/400/200"
+                    };
+                    setDreams([...dreams, newCard]);
+                }
+                setIsEditing(false);
+                setEditingCard(null);
+            };
+
+            const handleDelete = (cardId) => {
+                setDeletingCard(cardId);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                setDreams(dreams.filter(card => card.id !== deletingCard));
+                setShowDeleteModal(false);
+                setDeletingCard(null);
+            };
+
+            const getStatistics = () => {
+                const total = dreams.length;
+                const completed = dreams.filter(card => card.currentStatus === "已完成").length;
+                const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+                
+                return [
+                    { category: "旅行", count: dreams.filter(card => card.type === "travel").length, completed: dreams.filter(card => card.type === "travel" && card.currentStatus === "已完成").length },
+                    { category: "健康", count: dreams.filter(card => card.type === "health").length, completed: dreams.filter(card => card.type === "health" && card.currentStatus === "已完成").length },
+                    { category: "学习", count: dreams.filter(card => card.type === "learning").length, completed: dreams.filter(card => card.type === "learning" && card.currentStatus === "已完成").length },
+                    { category: "事业", count: dreams.filter(card => card.type === "career").length, completed: dreams.filter(card => card.type === "career" && card.currentStatus === "已完成").length }
+                ];
+            };
+
+            const statistics = getStatistics();
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b border-orange-200">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold">⭐</span>
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold text-gray-800">梦想清单</h1>
+                                    <p className="text-sm text-gray-500">记录你的心愿</p>
+                                </div>
+                            </div>
+                            <img src="https://picsum.photos/id/1015/80/80" alt="Profile" className="w-16 h-16 rounded-lg object-cover" />
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="max-w-7xl mx-auto px-4 py-4">
+                        <div className="bg-white rounded-lg shadow-sm p-3">
+                            <nav className="flex space-x-2">
+                                <button className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium flex items-center space-x-2">
+                                    <i className="fas fa-home text-sm"></i>
+                                    <span>总览</span>
+                                </button>
+                                <button className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium flex items-center space-x-2">
+                                    <i className="fas fa-plus text-sm"></i>
+                                    <span>添加新梦想</span>
+                                </button>
+                                <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center space-x-2">
+                                    <i className="fas fa-folder text-sm"></i>
+                                    <span>我的分类</span>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6 flex gap-6">
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            <div className="bg-white rounded-xl shadow-sm p-6">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center space-x-3">
+                                        <img src="https://picsum.photos/id/1018/40/40" alt="Dream" className="w-10 h-10 rounded-lg object-cover" />
+                                        <h2 className="text-xl font-bold text-gray-800">我的梦想清单</h2>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-gray-600">当前视图:</span>
+                                            <button className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium flex items-center space-x-2">
+                                                <i className="fas fa-chart-bar text-sm"></i>
+                                                <span>展示区</span>
+                                            </button>
+                                            <button 
+                                                onClick={handleAddDream}
+                                                className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium flex items-center space-x-2"
+                                            >
+                                                <i className="fas fa-plus text-sm"></i>
+                                                <span>添加新梦想</span>
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-info-circle text-gray-400"></i>
+                                            <span className="text-gray-600">操作说明</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Dreams Cards */}
+                                <div className="space-y-6">
+                                    {dreams.map((card) => (
+                                        <div key={card.id}>
+                                            <div className="relative">
+                                                <div className="relative bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl overflow-hidden h-48">
+                                                    <img 
+                                                        src={card.image} 
+                                                        alt={card.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    <div className="absolute top-4 right-4">
+                                                        <button 
+                                                            onClick={() => handleEditCard(card)}
+                                                            className="w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white transition-colors"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div className="absolute bottom-4 left-4">
+                                                        <button 
+                                                            onClick={() => handleDelete(card.id)}
+                                                            className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                                                        >
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center space-x-3 mb-3">
+                                                            <span className="text-lg font-bold text-gray-800">{card.title}</span>
+                                                            <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded text-sm font-medium">{card.category}</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center space-x-4 text-sm text-gray-600 mb-1">
+                                                            <div className="flex items-center space-x-1">
+                                                                <i className="fas fa-calendar-alt"></i>
+                                                                <span>预计完成日期: {card.completionDate}</span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center space-x-1 mb-1">
+                                                            <i className="fas fa-star text-yellow-400"></i>
+                                                            <span className="text-sm text-gray-600">优先级: {'★'.repeat(card.priority)}</span>
+                                                        </div>
+                                                        
+                                                        <div className="flex items-center space-x-1 mb-2">
+                                                            <i className="fas fa-clock text-blue-400"></i>
+                                                            <span className="text-sm text-gray-600">当前状态: {card.currentStatus}</span>
+                                                        </div>
+                                                        
+                                                        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
+                                                            <div className="text-sm text-gray-600 mb-1">进展统计</div>
+                                                            <div className="flex justify-between text-sm">
+                                                                <span>{card.progress}</span>
+                                                                <span>已完成 {card.currentStatus === '已完成' ? '1/1' : `0/${card.progress.split('/')[1]}`}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center space-x-2">
+                                                        {!card.currentStatus.includes('已完成') ? (
+                                                            <span className="px-3 py-1 bg-green-100 text-green-600 rounded text-sm font-medium">已实现</span>
+                                                        ) : (
+                                                            <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded text-sm font-medium">中便进行</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="w-72 space-y-6">
+                            {/* Statistics */}
+                            <div className="bg-white rounded-xl shadow-sm p-4">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-chart-pie text-orange-500"></i>
+                                    <h3 className="font-semibold text-gray-800">梦想统计</h3>
+                                </div>
+                                
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-sm text-gray-600">完成度</span>
+                                    <div className="flex items-center space-x-1">
+                                        <span className="text-lg font-semibold text-orange-500">{statistics.reduce((acc, stat) => acc + stat.count, 0)}%</span>
+                                        <div className="w-16 h-2 bg-orange-200 rounded-full">
+                                            <div className="w-1/4 h-2 bg-orange-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <h4 className="font-medium text-gray-700 mb-2">分类情况</h4>
+                                    {statistics.map((stat, index) => (
+                                        <div key={stat.category} className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-600">{stat.category}</span>
+                                            <div>
+                                                <div className="text-sm font-medium">{stat.count}</div>
+                                                <div className="w-20 h-2 bg-green-200 rounded-full mt-1">
+                                                    {isEditing && formData.type === stat.category ? (
+                                                        <div className={`h-1 rounded-full transition-all duration-300 ${formData.existingCardId ? 'w-full' : 'auto'}`}>
+                                                            {formData.existingCardId && stat.count === 1 && formData.currentStatus === '已完成' ? 'w-full' : '0'}
+                                                        </div>
+                                                    ) : (
+                                                        <div className={`h-1 rounded-full transition-all duration-300 ${formData.existingCardId ? 'w-full' : ''}`}>
+                                                            {stat.count > 0 ? 'w-full' : '0'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Tips */}
+                            <div className="bg-yellow-50 rounded-xl shadow-sm p-4">
+                                <div className="flex items-center space-x-2 mb-3">
+                                    <i className="fas fa-lightbulb text-yellow-500"></i>
+                                    <h3 className="font-semibold text-gray-800">今日小提示</h3>
+                                </div>
+                                <div className="text-sm text-gray-700 leading-relaxed">
+                                    {delete(del) === undefined ? '设定具体的目标和时间，让梦想更容易实现' : '每天进步一点点，梦想终会实现'}
+                                    
+                                    {delete(del) !== undefined && (
+                                        <div className="mt-2">
+                                            <span className="text-sm text-orange-600">📅 期待目标和时间，让梦想更容易实现</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add New Dream Modal */}
+                    {isEditing && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+                                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-800">添加新梦想</h3>
+                                    <button 
+                                        onClick={() => setIsEditing(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="p-6 space-y-4">
+                                    {editingCard && editingCard.id !== 2 && (
+                                        <>
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入梦想标题"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                                value={formData.title}
+                                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                            />
+                                        </>
+                                        <select 
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                        >
+                                            <option value="">选择分类</option>
+                                            <option value="旅行">旅行</option>
+                                            <option value="健康">健康</option>
+                                            <option value="学习">学习</option>
+                                            <option value="事业">事业</option>
+                                        </select>
+                                    )}
+                                    <input 
+                                        type="date" 
+                                        placeholder="mm/dd/yyyy"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        value={formData.completionDate}
+                                        onChange={(e) => setFormData({...formData, completionDate: e.target.value})}
+                                    />
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-sm text-gray-600">优先级</span>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-64 h-2 bg-blue-200 rounded-full">
+                                                <div 
+                                                    className="h-2 bg-blue-500 rounded-full transition-all duration-300"
+                                                    style={{width: `${formData.priority * 20 + 10}%`}}
+                                                ></div>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-sm">高</span>
+                                                <span className="text-sm">中</span>
+                                                <span className="text-sm">低</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <select 
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        value={formData.currentStatus}
+                                        onChange={(e) => setFormData({...formData, currentStatus: e.target.value})}
+                                    >
+                                        <option value="未完成">未完成</option>
+                                        <option value="进行中">进行中</option>
+                                        <option value="已完成">已完成</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="flex items-center justify-between p-6 border-t border-gray-200">
+                                    <button 
+                                        onClick={() => setIsEditing(false)}
+                                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4">
+                                <div className="p-6 text-center">
+                                    <div className="mb-4">
+                                        <img src="https://picsum.photos/id/1005/60/60" alt="Delete" className="w-16 h-16 mx-auto rounded-full object-cover" />
+                                    </div>
+                                    
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">确认删除</h3>
+                                    <p className="text-gray-600 mb-6">你确定要删除"{delete(del) !== undefined ? "环游世界" : formData.existingCardData.title}"这个梦想吗？此操作无法撤销。</p>
+                                    
+                                    <div className="flex items-center justify-between">
+                                        <button 
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={confirmDelete}
+                                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
+                                        >
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Left Sidebar */}
+                    <div className="fixed left-0 top-0 h-full w-48 bg-white shadow-lg z-40 overflow-y-auto">
+                        <div className="p-4">
+                            <button 
+                                onClick={() => setIsEditing(false)}
+                                className="w-full py-2 px-4 bg-orange-500 text-white rounded-lg font-medium"
+                            >
+                                <i className="fas fa-chart-bar mr-2"></i>
+                                总览
+                            </button>
+                            
+                            <button 
+                                onClick={handleAddDream}
+                                className="w-full py-2 px-4 bg-red-500 text-white rounded-lg font-medium mt-2"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加新梦想
+                            </button>
+                            
+                            <div className="py-2 px-4 border-l-4 border-green-400 bg-green-50">
+                                <div className="text-sm font-medium text-green-800 mb-1">我的分类</div>
+                                <div className="text-sm text-green-600 space-y-1">
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-folder text-green-500"></i>
+                                        <span>旅行</span>
+                                        <span className="text-gray-500">0/1</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-folder text-green-500"></i>
+                                        <span>健康</span>
+                                        <span className="text-gray-500">1/1</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-folder text-green-500"></i>
+                                        <span>学习</span>
+                                        <span className="text-gray-500">1/1</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-folder text-green-500"></i>
+                                        <span>事业</span>
+                                        <span className="text-gray-500">1/1</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Overlay when editing */}
+                    {isEditing && 
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 z-40"></div>
+                    }
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DreamListApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

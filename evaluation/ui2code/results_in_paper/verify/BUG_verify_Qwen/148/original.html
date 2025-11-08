@@ -1,0 +1,700 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI角色创作本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('角色列表');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [selectedCharacter, setSelectedCharacter] = useState(null);
+            const [editingNewCharacter, setEditingNewCharacter] = useState(false);
+
+            const characters = [
+                {
+                    id: 1,
+                    name: '艾拉(ELLA)',
+                    occupation: '网络侦探',
+                    description: '生于未来量子都市，精通网络解码与虚拟潜入。艾拉曾经是顶尖科技公司的安全专家，后因发现公司内部黑幕而选择独立，成为网络世界的正义使者。',
+                    image: 'https://picsum.photos/id/659/400/300',
+                    tags: ['冷静', '好奇', '被动'],
+                    status: '已完成'
+                },
+                {
+                    id: 2,
+                    name: '马克斯(MAX)',
+                    occupation: '量子物理学家',
+                    description: '哈佛大学量子物理博士，现任量子计算研究所首席科学家。马克斯发现了一种突破性的量子纠缠现象，为平行宇宙理论提供了实现可能。',
+                    image: 'https://picsum.photos/id/1025/400/300',
+                    tags: ['严谨', '内向', '执着'],
+                    status: '进行中'
+                },
+                {
+                    id: 3,
+                    name: '露娜(LUNA)',
+                    occupation: '星际生物学家',
+                    description: '在太空站出生长大的第一代星际儿童，对外星生物有着与生俱来的亲和力。露娜能够感知生命体的情绪，这一特殊能力使她成为星际和平使团的重要成员。',
+                    image: 'https://picsum.photos/id/1036/400/300',
+                    tags: ['富有同情心', '勇敢', '直觉敏锐'],
+                    status: '进行中'
+                }
+            ];
+
+            const getCharacterStatus = () => {
+                // Status distribution for role status
+                return {
+                    '已完成': 1,
+                    '进行中': 2,
+                    '已删除': 1,
+                    '已创建': 0
+                };
+            };
+
+            const statusCounts = getCharacterStatus();
+            const totalCharacters = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
+            const progressPercentage = Math.round((totalCharacters * 0.33) * 100) / 100;
+
+            const handleDeleteCharacter = (character) => {
+                setSelectedCharacter(character);
+                setShowDeleteModal(true);
+            };
+
+            const handleAddCharacter = () => {
+                setShowAddModal(true);
+                setEditingNewCharacter(true);
+                setSelectedCharacter(null);
+            };
+
+            const confirmDelete = () => {
+                setShowDeleteModal(false);
+                deleteCharacterFromState();
+            };
+
+            const deleteCharacterFromState = () => {
+                setCurrentView('角色列表');
+                // Keep in mind we are removing a character and maybe reducing characters count
+            };
+
+            const renderMainContent = () => {
+                if (currentView === '编辑面板') {
+                    return (
+                        <div className="space-y-6">
+                            {/* Content Title */}
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-xl font-semibold text-gray-800">角色编辑器</h2>
+                                <div className="flex gap-3">
+                                    <a href="#" className="text-blue-500 hover:text-blue-600 flex items-center gap-1">
+                                        <i className="fas fa-plus"></i> 添加新角色
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                {!showAddModal && !editingNewCharacter && (
+                                    <div className="text-center py-16">
+                                        <div className="text-gray-400 mb-4">
+                                            <i className="fas fa-user-circle text-4xl"></i>
+                                        </div>
+                                        <p className="text-gray-500">请从角色列表中选择一个角色进行编辑，或者创建新角色</p>
+                                    </div>
+                                )}
+
+                                {!showAddModal && editingNewCharacter && (
+                                    <div className="text-center py-16">
+                                        <div className="text-gray-400 mb-4">
+                                            <i className="fas fa-user-plus text-4xl"></i>
+                                        </div>
+                                        <p className="text-gray-500">已创建新角色，请使用"添加新角色"按钮进行编辑</p>
+                                    </div>
+                                )}
+
+                                {showAddModal && !editingNewCharacter && (
+                                    <div className="text-center py-16">
+                                        <div className="text-blue-500 mb-4">
+                                            <i className="fas fa-edit text-4xl"></i>
+                                        </div>
+                                        <p className="text-blue-600 text-lg">开始编辑角色的属性或创建新的角色信息</p>
+                                    </div>
+                                )}
+
+                                {showAddModal && editingNewCharacter && (
+                                    <div className="text-center py-16">
+                                        <div className="text-green-500 mb-4">
+                                            <i className="fas fa-edit text-4xl"></i>
+                                        </div>
+                                        <p className="text-green-600 text-lg">选择一个角色进行编辑或创建新角色</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (currentView === '批量管理') {
+                    return (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-xl font-semibold text-gray-800">批量管理</h2>
+                                <div className="flex gap-3">
+                                    <a href="#" className="text-blue-500 hover:text-blue-600 flex items-center gap-1">
+                                        <i className="fas fa-plus"></i> 添加新角色
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <i className="fas fa-sync-alt text-purple-500"></i>
+                                    <h3 className="text-lg font-medium text-purple-600">场景化设定小贴士</h3>
+                                </div>
+                                
+                                <div className="text-center py-16">
+                                    <div className="text-gray-400 mb-4">
+                                        <i className="fas fa-users text-3xl"></i>
+                                    </div>
+                                    <p className="text-gray-500">批量管理功能正在开发中，敬请期待</p>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // Default to role list view
+                return (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-gray-800">角色列表</h2>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={handleAddCharacter}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-plus"></i> 添加新角色
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <i className="fas fa-users text-blue-500"></i>
+                                <h3 className="text-lg font-medium text-blue-600">角色关系图谱</h3>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {characters.map((character) => (
+                                    <div key={character.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="relative">
+                                            <img 
+                                                src={character.image} 
+                                                alt={character.name}
+                                                className="w-full h-40 object-cover"
+                                            />
+                                            <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                                {character.status}
+                                            </span>
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h4 className="font-medium text-gray-800 text-lg">{character.name}</h4>
+                                                <span className="text-sm text-gray-500">主角色</span>
+                                            </div>
+                                            
+                                            <p className="text-sm text-gray-600 mb-3">{character.occupation}</p>
+                                            
+                                            <p className="text-sm text-gray-700 mb-4 line-clamp-2">{character.description}</p>
+                                            
+                                            <div className="flex flex-wrap gap-1 mb-4">
+                                                {character.tags.map((tag, index) => (
+                                                    <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                                <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs">
+                                                    已完成
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex gap-2 mb-4">
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedCharacter(character);
+                                                        setCurrentView('编辑面板');
+                                                    }}
+                                                    className="flex-1 bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600"
+                                                >
+                                                    <i className="fas fa-edit mr-1"></i> 编辑角色
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteCharacter(character)}
+                                                    className="flex-1 bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600"
+                                                >
+                                                    <i className="fas fa-trash mr-1"></i> 删除角色
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="text-xs text-gray-500 text-center">
+                                                <span>编辑角色成功后会重新排列角色关系图谱</span>
+                                                <br />
+                                                <span>基于角色上下文特点</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+                        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <img src="https://picsum.photos/id/1005/40/40" alt="Logo" className="w-10 h-10 rounded-full" />
+                                <h1 className="text-xl font-bold">AI角色创作本</h1>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => {setCurrentView('角色总览'); setShowAddModal(false); setEditingNewCharacter(false);}}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-th"></i> 角色总览
+                                </button>
+                                
+                                <button 
+                                    onClick={() => {setCurrentView('角色编辑'); setShowAddModal(false); setEditingNewCharacter(false);}}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-edit"></i> 角色编辑
+                                </button>
+                                
+                                <button 
+                                    onClick={() => {setCurrentView('故事大纲'); setShowAddModal(false); setEditingNewCharacter(false);}}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-edit"></i> 故事大纲
+                                </button>
+                                
+                                <button 
+                                    onClick={() => {setCurrentView('视觉参考'); setShowAddModal(false); setEditingNewCharacter(false);}}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-image"></i> 视觉参考
+                                </button>
+                                
+                                <button 
+                                    onClick={() => {setCurrentView('统计分析'); setShowAddModal(false); setEditingNewCharacter(false);}}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-chart-bar"></i> 统计分析
+                                </button>
+                                
+                                <button className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2">
+                                    <i className="fas fa-database"></i> 新建角色库
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2"
+                                >
+                                    <i className="fas fa-download"></i> 导出 JSON
+                                </button>
+                                
+                                <button className="text-white px-4 py-2 rounded-lg hover:bg-gray-100 flex items-center gap-2">
+                                    <i className="fas fa-question-circle"></i> 帮助
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <div className="container mx-auto px-4 py-6">
+                        <div className="flex">
+                            {/* Left Sidebar */}
+                            <div className="w-80 mr-6">
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <i className="fas fa-th-large text-purple-500"></i>
+                                        <h3 className="font-semibold text-purple-600">功能模块</h3>
+                                    </div>
+                                    
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <i className="fas fa-th text-blue-500"></i>
+                                            <span className="text-sm text-gray-700">角色总览</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <i className="fas fa-edit text-blue-500"></i>
+                                            <span className="text-sm text-gray-700">角色编辑</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <i className="fas fa-edit text-blue-500"></i>
+                                            <span className="text-sm text-gray-700">故事大纲</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <i className="fas fa-image text-blue-500"></i>
+                                            <span className="text-sm text-gray-700">视觉参考</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                            <i className="fas fa-chart-bar text-blue-500"></i>
+                                            <span className="text-sm text-gray-700">统计分析</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                                    <img src="https://picsum.photos/id/882/300/150" alt="AI Assistant" className="w-full rounded-lg mb-3" />
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <i className="fas fa-lightbulb text-yellow-500"></i>
+                                        <h4 className="font-semibold text-gray-800">AI创作小贴士</h4>
+                                    </div>
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                                            <span>为角色构建比较复杂的故事</span>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                                            <span>考虑角色的成长弧线</span>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                                            <span>确保角色的动机与行为一致</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <img src="https://picsum.photos/id/1008/300/150" alt="Secrets" className="w-full rounded-lg mb-3" />
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <i className="fas fa-lock text-green-500"></i>
+                                        <h4 className="font-semibold text-gray-800">写作秘籍</h4>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                        <div>● 为角色创山丰富的背拖故事可以增题，制其可信度</div>
+                                        <div>● 考察角色的动机和冲突，使其更加立体</div>
+                                        <div>● 设计角色弱和成长空间，增加发展潜力</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="flex-1">
+                                {/* Content Header */}
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                                            {currentView === '编辑面板' ? '编辑面板' : '角色编辑'}
+                                        </h2>
+                                        <div className="flex gap-2">
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2">
+                                                <i className="fas fa-list"></i>
+                                                {currentView === '编辑面板' ? '角色列表' : '角色列表'}
+                                            </button>
+                                            <button 
+                                                onClick={() => setCurrentView('批量管理')}
+                                                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center gap-2"
+                                            >
+                                                <i className="fas fa-clipboard-list"></i> 批量管理
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Main Content */}
+                                {renderMainContent()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-red-600">确认删除</h3>
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <p className="text-gray-600 mb-6">
+                                    您确定要删除角色 {selectedCharacter?.name || '艾拉(ELLA)'} 吗？此操作无法撤销。
+                                </p>
+                                
+                                <div className="flex gap-3 justify-end">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Character Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-lg font-semibold text-blue-600">添加新角色</h3>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6 flex gap-6">
+                                    <div className="flex-1">
+                                        <img 
+                                            src="https://picsum.photos/id/1024/200/150" 
+                                            alt="Character Avatar" 
+                                            className="w-full h-32 object-cover rounded"
+                                        />
+                                    </div>
+                                    <div className="flex-1 border-l">
+                                        <input 
+                                            type="text" 
+                                            placeholder="李婧雅、成员..."
+                                            className="w-full p-3 border border-gray-300 rounded"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">角色姓名</label>
+                                        <div className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="艾拉(ELLA)"
+                                                className="flex-1 p-2 border border-gray-300 rounded bg-gray-50"
+                                            />
+                                            <div className="flex-1 grid grid-cols-2 gap-2 text-center mt-4">
+                                                <div>例: 艾拉</div>
+                                                <div>例: 28</div>
+                                                <div>例: n/天</div>
+                                                <div>例: A角色</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">性别</label>
+                                        <select className="w-full p-2 border border-gray-300 rounded">
+                                            <option>请选择</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">年龄</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="例如: 28"
+                                            className="w-full p-2 border border-gray-300 rounded"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">职业</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="例如: 网络侦侏"
+                                            className="w-full p-2 border border-gray-300 rounded bg-gray-50"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-3 mb-6">
+                                    <label className="text-sm font-medium text-gray-700">性格特质 (可多选)</label>
+                                    <div className="flex flex-wrap gap-2 form-check mb-6">
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">冷静</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">热情</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">好奇</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">果敢</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">谨慎</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">热情</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">内向</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">执着</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">理性</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">感性</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">外向</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">勇敢</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">直觉敏锐</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">神秘</label>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" className="form-check-input" />
+                                            <label className="form-check-label text-sm">谨慎</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">角色形象</label>
+                                    <div className="mb-2">
+                                        <input 
+                                            type="text" 
+                                            placeholder="https://picsum.photos/id/1025/300/300"
+                                            className="w-full p-2 border border-gray-300 rounded bg-gray-50"
+                                        />
+                                    </div>
+                                    <img src="https://picsum.photos/id/1025/300/300" alt="Character Avatar" className="w-64 h-40 object-cover rounded" />
+                                </div>
+
+                                <div className="bg-orange-50 p-4 mb-6 rounded">
+                                    <div className="flex items-start gap-2">
+                                        <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+                                        <p className="text-sm text-gray-600">在角色卡片预览效果突出特色，也能在其直接输入或选中的角色描述内容</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">背景故事</label>
+                                    <textarea 
+                                        placeholder="描述角色的背景故事、身份和主要特点..."
+                                        className="w-full p-3 border border-gray-300 rounded h-20 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">成长经历</label>
+                                    <textarea 
+                                        placeholder="描述角色的成长历程、关键事件和转折点..."
+                                        className="w-full p-3 border border-gray-300 rounded h-20 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6">
+                                    <img src="https://picsum.photos/id/1006/120/80" alt="City Skyline" className="w-24 h-16 object-cover rounded mb-2" />
+                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                        <i className="fas fa-check text-blue-500"></i>
+                                        推荐使用 8-10 张的精于 180°角度 {''}
+                                    </p>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">性格描述</label>
+                                    <textarea 
+                                        placeholder="描述角色的第一印象、外貌特征，一段关于""什么特点和关键特征属性"
+                                        className="w-full p-3 border border-gray-300 rounded h-20 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="bg-gray-50 p-4 rounded mb-6">
+                                    <img src="https://picsum.photos/id/1009/120/80" alt="Castle" className="w-24 h-16 object-cover rounded mb-2" />
+                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                        <i className="fas fa-check text-blue-500"></i>
+                                        推荐使用 45-120 张的精于如事情 {''}
+                                    </p>
+                                </div>
+
+                                <div className="flex justify-between items-end gap-3">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                                        <i className="fas fa-save mr-1"></i> 保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+                        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <img src="https://picsum.photos/id/1011/40/40" alt="Logo" className="w-10 h-10 rounded-full" />
+                                <div>
+                                    <h3 className="font-bold">AI角色创作本</h3>
+                                    <p className="text-sm opacity-90">v1.0.0 | © 2023 AI创作工作室</p>
+                                </div>
+                            </div>
+                            <div className="text-sm opacity-90">
+                                联系我们: contact@aicreation.com
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

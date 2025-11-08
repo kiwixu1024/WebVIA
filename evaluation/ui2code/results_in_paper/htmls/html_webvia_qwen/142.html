@@ -1,0 +1,450 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识星球社区</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function KnowledgePlanetApp() {
+            const [currentPage, setCurrentPage] = useState('首页');
+            const [showCreateModal, setShowCreateModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [deleteTarget, setDeleteTarget] = useState(null);
+            const [showStatistics, setShowStatistics] = useState(false);
+            const [plants, setPlants] = useState([
+                {
+                    id: 1,
+                    name: '数据分析星球',
+                    description: '汇聚最前沿数据科学知识与实践案例',
+                    members: 1284,
+                    image: 'https://picsum.photos/id/2/500/200',
+                    topics: ['数据科学', '机器学习', 'Python']
+                },
+                {
+                    id: 2,
+                    name: '前端探索团',
+                    description: '分享前端开发最新趋势和实用技巧',
+                    members: 965,
+                    image: 'https://picsum.photos/id/3/500/200',
+                    topics: ['JavaScript', 'React', 'CSS']
+                },
+                {
+                    id: 3,
+                    name: '产品经理圈',
+                    description: '探讨产品设计理念和用户体验优化',
+                    members: 756,
+                    image: 'https://picsum.photos/id/4/500/200',
+                    topics: ['产品设计', '用户体验', '需求分析']
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                name: '',
+                description: '',
+                tags: []
+            });
+
+            const handleAddPlanet = () => {
+                if (formData.name && formData.description) {
+                    const newPlant = {
+                        id: plants.length + 1,
+                        name: formData.name,
+                        description: formData.description,
+                        members: Math.floor(Math.random() * 1000) + 500,
+                        image: `https://picsum.photos/id/${plants.length + 5}/500/200`,
+                        topics: formData.tags
+                    };
+                    setPlants([newPlant, ...plants]);
+                    setFormData({ name: '', description: '', tags: [] });
+                    setShowCreateModal(false);
+                }
+            };
+
+            const handleDeleteConfirm = () => {
+                setPlants(plants.filter(p => p.id !== deleteTarget));
+                setShowDeleteModal(false);
+                setDeleteTarget(null);
+            };
+
+            const handleDeleteClick = (planet) => {
+                setDeleteTarget(planet.id);
+                setShowDeleteModal(true);
+            };
+
+            const renderSidebar = () => (
+                <div className="w-64 bg-gray-50 h-screen overflow-y-auto">
+                    <div className="p-4">
+                        <div className="flex items-center gap-2 mb-4">
+                            <i className="fas fa-users text-blue-500"></i>
+                            <span className="font-medium">我的订阅</span>
+                            <div className="ml-auto flex items-center gap-1">
+                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">2</span>
+                            </div>
+                        </div>
+                        <nav className="space-y-2">
+                            <button 
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${currentPage === '首页' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                onClick={() => setCurrentPage('首页')}
+                            >
+                                <i className="fas fa-home"></i>
+                                <span>首页</span>
+                            </button>
+                            <button 
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${currentPage === '添加新星球' ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                onClick={() => setCurrentPage('添加新星球')}
+                            >
+                                <i className="fas fa-plus"></i>
+                                <span>添加新星球</span>
+                            </button>
+                            <button 
+                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100"
+                                onClick={() => alert('消息中心')}
+                            >
+                                <i className="fas fa-envelope"></i>
+                                <span>消息中心</span>
+                            </button>
+                            <button 
+                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100"
+                                onClick={() => alert('收藏内容')}
+                            >
+                                <i className="fas fa-bookmark"></i>
+                                <span>收藏内容</span>
+                            </button>
+                            <button 
+                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100"
+                                onClick={() => alert('设置')}
+                            >
+                                <i className="fas fa-cog"></i>
+                                <span>设置</span>
+                            </button>
+                        </nav>
+                    </div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t">
+                        <div className="text-sm text-gray-500 text-center mb-1">社区动态</div>
+                        <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs inline-block">
+                            会员互动热度上升 22%，比上周增长明显
+                        </div>
+                        <div className="text-xs text-gray-500 text-center mt-1">可考虑发布更多互动话题</div>
+                    </div>
+                    
+                    <div className="absolute bottom-4 right-4">
+                        <button 
+                            className={`px-3 py-2 rounded text-white transition-colors ${showStatistics ? 'bg-blue-500' : 'bg-blue-500 hover:bg-blue-600'}`}
+                            onClick={() => setShowStatistics(!showStatistics)}
+                        >
+                            <i className="fas fa-chart-line mr-2"></i>
+                            展开统计
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderPlantCard = (plant) => (
+                <div key={plant.id} className={`bg-white rounded-lg shadow-md overflow-hidden mb-4 ${plant.id === plants.length + 1 ? 'border-2 border-blue-300' : ' '}`}>
+                    {plant.id === plants.length + 1 ? (
+                        <div className="w-full h-48 bg-gray-200 border-l-0 border-b-0 flex items-center justify-center">
+                            <span className="text-gray-500 font-medium">数据分析星球</span>
+                        </div>
+                    ) : (
+                        <img src={plant.image} alt={plant.name} className="w-full h-48 object-cover" />
+                    )}
+                    
+                    <div className="p-4">
+                        <h3 className="text-lg font-semibold mb-2">{plant.name}</h3>
+                        <p className="text-gray-600 mb-4 line-clamp-2">{plant.description}</p>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <span className="text-blue-500">{plant.members} 成员</span>
+                                {plant.topics.map((topic, index) => (
+                                    <span key={index} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                        {topic}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button 
+                                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
+                                    onClick={() => setShowStatistics && setCurrentPage('首页')}
+                                >
+                                    <i className="fas fa-eye mr-1"></i>
+                                    查看详情
+                                </button>
+                                {plant.id !== plants.length + 1 && (
+                                    <button 
+                                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition-colors"
+                                        onClick={() => setShowCreateModal(true)}
+                                    >
+                                        <i className="fas fa-edit mr-1"></i>
+                                        编辑
+                                    </button>
+                                )}
+                                {plant.id !== plants.length + 1 && (
+                                    <button 
+                                        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors"
+                                        onClick={() => handleDeleteClick(plant)}
+                                    >
+                                        <i className="fas fa-trash mr-1"></i>
+                                        删除
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderCreateModal = () => (
+                showCreateModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2">
+                                    <i className="fas fa-plus-circle text-blue-500"></i>
+                                    <h3 className="text-lg font-semibold">创建新星球</h3>
+                                </div>
+                                <button 
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">星球名称</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="输入星球名称，如：前端开发者社区"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">星球简介</label>
+                                    <textarea 
+                                        placeholder="描述这个星球的主要内容和特色"
+                                        rows="4"
+                                        className="w-full p-3 border border-gray-300 rounded-lg"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">星球标签</label>
+                                    <div className="flex flex-wrap gap-2 mb-3">
+                                        {[
+                                            '数据科学', '机器学习', 'Python', 'JavaScript',
+                                            'React', 'CSS', '产品设计',
+                                            '用户体验', '需求分析', '后端开发',
+                                            '算法', '云计算'
+                                        ].map((tag) => (
+                                            <span 
+                                                key={tag}
+                                                className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                                                    formData.tags.includes(tag) 
+                                                        ? 'bg-blue-500 text-white' 
+                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            type="text"
+                                            placeholder="添加自定义标签"
+                                            className="flex-1 p-2 border border-gray-300 rounded"
+                                        />
+                                        <button className="bg-gray-400 text-white px-3 py-2 rounded hover:bg-gray-500">
+                                            添加
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-3 mt-6">
+                                <button 
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleAddPlanet}
+                                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    创建星球
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const renderDeleteModal = () => (
+                showDeleteModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                            <div className="text-center">
+                                <div className="flex items-center justify-center gap-2 mb-4">
+                                    <i className="fas fa-exclamation-triangle text-red-500"></i>
+                                    <h3 className="text-lg font-semibold">删除星球</h3>
+                                </div>
+                                <p className="text-gray-600 mb-6">确定要删除"{plants.find(p => p.id === deleteTarget)?.name}"星球吗？此操作不可撤销。</p>
+                                <div className="flex gap-3">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleDeleteConfirm}
+                                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const renderMainContent = () => (
+                <div className="flex-1 p-6">
+                    <div className="bg-white rounded-lg shadow-sm mb-6">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <div className="flex items-center gap-2">
+                                <i className="fas fa-atom text-blue-500"></i>
+                                <h2 className="text-xl font-semibold">星球探索</h2>
+                            </div>
+                            <div className="relative">
+                                <button 
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                                    onClick={() => setCurrentPage('主题广场')}
+                                >
+                                    主题广场
+                                    <i className="fas fa-star"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                            <h3 className="font-semibold mb-1">在这里发现最新最热门的知识星球</h3>
+                            <p className="text-sm text-gray-600">汇聚数据科学、前端技术、产品思维等多样化的知识社群</p>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 mb-4">热门标签:</p>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {['全部', '数据科学', 'JavaScript', '产品设计', '机器学习', '前端开发', '后端开发', 'Vue.js', 'React', 'Node.js', '接口设计', '需求分析', '框架选择'].map((tag) => (
+                                <span key={tag} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                    {tag}
+                                </span>
+                            ))}
+                            {plants.map((plant) => plant.topics.map((topic) => (
+                                <span key={`${plant.id}-${topic}`} className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                    {topic}
+                                </span>
+                            )))}
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {plants.map(renderPlantCard)}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                                    <i className="fas fa-atom text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-semibold text-blue-600">知识星球社区</h1>
+                                    <p className="text-xs text-gray-500">汇聚前沿技术知识与实践</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                <nav className="flex gap-1">
+                                    <button 
+                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                            currentPage === '首页' ? 'bg-blue-500 text-white' : 'text-blue-600 hover:bg-blue-50'
+                                        }`}
+                                        onClick={() => setCurrentPage('首页')}
+                                    >
+                                        首页
+                                    </button>
+                                    <button 
+                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                            currentPage === '主题广场' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                        onClick={() => setCurrentPage('主题广场')}
+                                    >
+                                        主题广场
+                                    </button>
+                                    <button 
+                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                            currentPage === '我的星球' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                        onClick={() => setCurrentPage('我的星球')}
+                                    >
+                                        我的星球
+                                    </button>
+                                </nav>
+                                
+                                <div className="flex items-center gap-2">
+                                    <img 
+                                        src="https://picsum.photos/id/91/40/40" 
+                                        alt="张三" 
+                                        className="w-10 h-10 rounded-full"
+                                    />
+                                    <div className="text-sm">
+                                        {currentPage === '首页' && <i className="fas fa-bell text-blue-500 mr-1"></i>}
+                                        {currentPage === '主题广场' && <i className="fas fa-bell text-green-500 mr-1"></i>}
+                                        张三
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {renderSidebar()}
+                        {renderMainContent()}
+                    </div>
+
+                    {renderCreateModal()}
+                    {renderDeleteModal()}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KnowledgePlanetApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

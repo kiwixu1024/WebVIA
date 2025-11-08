@@ -1,0 +1,545 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8分钟健身训练表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [currentView, setCurrentView] = useState('home');
+            const [showAddModal, setShowAddModal] = useState(false);
+
+            const MainView = () => (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-teal-700 text-white px-6 py-3">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <i className="fas fa-dumbbell mr-2"></i>
+                                <span className="text-lg font-medium">8分钟健身训练表</span>
+                            </div>
+                            <div className="flex space-x-6">
+                                <button onClick={() => setCurrentView('home')} className="hover:text-teal-200">训练概览</button>
+                                <button onClick={() => setCurrentView('edit')} className="hover:text-teal-200">编辑计划</button>
+                                <button onClick={() => setCurrentView('stats')} className="hover:text-teal-200">数据统计</button>
+                                <button onClick={() => setCurrentView('help')} className="hover:text-teal-200">帮助中心</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white shadow-sm min-h-screen">
+                            <button 
+                                onClick={() => setShowAddModal(true)}
+                                className="w-full bg-red-400 text-white py-3 px-4 m-4 rounded-md hover:bg-red-500 flex items-center"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加训练
+                            </button>
+                            
+                            <div className="px-4">
+                                <button 
+                                    onClick={() => setCurrentView('home')}
+                                    className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center"
+                                >
+                                    <i className="fas fa-list mr-2"></i>
+                                    全部训练列表
+                                </button>
+                                <button className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center">
+                                    <i className="fas fa-play mr-2"></i>
+                                    快速启动
+                                </button>
+                                <button className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center">
+                                    <i className="fas fa-download mr-2"></i>
+                                    导出数据
+                                </button>
+                            </div>
+
+                            <div className="px-4 mt-8">
+                                <h3 className="font-medium mb-2">每日一动作</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    建议每天坚持完成一个新动作，逐步增加训练强度。坚持300个动作一般需要8个月，300个动作达到熟练一般需要2年。
+                                </p>
+                                
+                                <h3 className="font-medium mb-2 mt-6">运动小贴士</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    训练强度看重的是运动动作完整度、时间长度的保持，适量强度，不是力量越大越好，训练时间超过30秒一般为无氧，300个动作。
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            {/* Hero Image */}
+                            <div className="relative h-48">
+                                <img src="https://picsum.photos/id/1005/800/400" alt="健身背景" className="w-full h-full object-cover" />
+                                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-center">
+                                    <p>训练是最好的药物！ 8分钟高效燃脂训练</p>
+                                </div>
+                            </div>
+
+                            {/* Training Content */}
+                            <div className="p-6">
+                                <h2 className="text-xl font-medium mb-6">每分钟训练详情</h2>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* Training Cards */}
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第1分钟：体前屈拉伸</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">30s</span>
+                                            <span>难度：简单</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">拉伸腿部肌肉，身体前屈运动</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第2分钟：高抬腿</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">30s</span>
+                                            <span>难度：简单</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">原地高频，双膝稍后仰制</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第3分钟：俯卧撑</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">30s</span>
+                                            <span>难度：中等</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">标准俯卧撑动作</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第4分钟：平板支撑</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">60s</span>
+                                            <span>难度：困难</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">收紧核心肌群</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第5分钟：深蹲</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">45s</span>
+                                            <span>难度：中等</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">臀部下蹲到膝盖</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第6分钟：仰卧起坐</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">40s</span>
+                                            <span>难度：中等</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">控制节奏，避免颈部发力</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第7分钟：箭步蹲</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">45s</span>
+                                            <span>难度：中等</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">双腿交替支撑</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-medium">第8分钟：侧腹拉伸</h3>
+                                            <div className="flex space-x-2">
+                                                <button className="text-blue-500"><i className="fas fa-edit"></i></button>
+                                                <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                                            <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded text-xs mr-2">60s</span>
+                                            <span>难度：简单</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">全身伸展，缓解肌肉紧张</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 bg-white p-6 shadow-sm">
+                            <div className="mb-6">
+                                <h3 className="font-medium mb-2">训练统计</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">本周完成次数</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">5</span>
+                                            <span className="text-gray-400 text-sm">/ 连续进步 7天</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">消耗卡路里</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">320</span>
+                                            <span className="text-gray-400 text-sm">千卡</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">小目标达成</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">2/3</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="text-sm text-gray-600 mb-2">运动强度关系</div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="bg-gray-800 h-2 rounded-full" style={{width: '75%'}}></div>
+                                    </div>
+                                </div>
+                                <button className="w-full bg-red-400 text-white py-2 rounded-md mt-4 hover:bg-red-500">
+                                    <i className="fas fa-play mr-2"></i>
+                                    开始训练
+                                </button>
+                            </div>
+
+                            <div>
+                                <h3 className="font-medium mb-4">为什么选择8分钟训练？</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center text-white text-xs mr-3 mt-1">1</div>
+                                        <div>
+                                            <h4 className="font-medium text-sm">高效燃脂</h4>
+                                            <p className="text-xs text-gray-600">短时间内快速提升心率，高效燃烧脂肪。</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center text-white text-xs mr-3 mt-1">2</div>
+                                        <div>
+                                            <h4 className="font-medium text-sm">无器械训练</h4>
+                                            <p className="text-xs text-gray-600">利用自身体重，随时随地进行锻炼。</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs mr-3 mt-1">3</div>
+                                        <div>
+                                            <h4 className="font-medium text-sm">循环训练</h4>
+                                            <p className="text-xs text-gray-600">8分钟循环，易于坚持形成运动习惯。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-teal-700 text-white py-3 px-6">
+                        <div className="flex justify-between items-center text-sm">
+                            <span>© 2023 8分钟健身训练表 - 版本 v1.2.0</span>
+                            <div className="flex space-x-4">
+                                <a href="#" className="hover:text-teal-200">隐私政策</a>
+                                <a href="#" className="hover:text-teal-200">使用条款</a>
+                                <a href="#" className="hover:text-teal-200">联系我们</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const EditView = () => (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-teal-700 text-white px-6 py-3">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <i className="fas fa-dumbbell mr-2"></i>
+                                <span className="text-lg font-medium">8分钟健身训练表</span>
+                            </div>
+                            <div className="flex space-x-6">
+                                <button onClick={() => setCurrentView('home')} className="hover:text-teal-200">训练概览</button>
+                                <button onClick={() => setCurrentView('edit')} className="text-red-300">编辑计划</button>
+                                <button onClick={() => setCurrentView('stats')} className="hover:text-teal-200">数据统计</button>
+                                <button onClick={() => setCurrentView('help')} className="hover:text-teal-200">帮助中心</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white shadow-sm min-h-screen">
+                            <button 
+                                onClick={() => setShowAddModal(true)}
+                                className="w-full bg-red-400 text-white py-3 px-4 m-4 rounded-md hover:bg-red-500 flex items-center"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加训练
+                            </button>
+                            
+                            <div className="px-4">
+                                <button 
+                                    onClick={() => setCurrentView('home')}
+                                    className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center"
+                                >
+                                    <i className="fas fa-list mr-2"></i>
+                                    全部训练列表
+                                </button>
+                                <button className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center">
+                                    <i className="fas fa-play mr-2"></i>
+                                    快速启动
+                                </button>
+                                <button className="w-full text-left py-2 px-3 hover:bg-gray-100 flex items-center">
+                                    <i className="fas fa-download mr-2"></i>
+                                    导出数据
+                                </button>
+                            </div>
+
+                            <div className="px-4 mt-8">
+                                <h3 className="font-medium mb-2">每日一动作</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    建议每天坚持完成一个新动作，逐步增加训练强度。坚持300个动作一般需要8个月，300个动作达到熟练一般需要2年。
+                                </p>
+                                
+                                <h3 className="font-medium mb-2 mt-6">运动小贴士</h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    训练强度看重的是运动动作完整度、时间长度的保持，适量强度，不是力量越大越好，训练时间超过30秒一般为无氧，300个动作。
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <div className="bg-white rounded-lg shadow-sm">
+                                <div className="flex justify-between items-center p-4 border-b">
+                                    <h2 className="text-xl font-medium">编辑训练计划</h2>
+                                    <button className="bg-red-400 text-white px-4 py-2 rounded-md flex items-center">
+                                        <i className="fas fa-plus mr-2"></i>
+                                        新增训练
+                                    </button>
+                                </div>
+                                
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">分钟</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">训练名称</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">时长</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">休息时间</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">难度</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">备注</th>
+                                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            <tr>
+                                                <td className="px-4 py-3">1</td>
+                                                <td className="px-4 py-3">体前屈拉伸</td>
+                                                <td className="px-4 py-3">30s</td>
+                                                <td className="px-4 py-3">30s</td>
+                                                <td className="px-4 py-3">简单</td>
+                                                <td className="px-4 py-3">拉伸腿部肌肉，身体前屈运动</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">2</td>
+                                                <td className="px-4 py-3">高抬腿</td>
+                                                <td className="px-4 py-3">45s</td>
+                                                <td className="px-4 py-3">15s</td>
+                                                <td className="px-4 py-3">中等</td>
+                                                <td className="px-4 py-3">原地节奏，双膝稍后仰制</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">3</td>
+                                                <td className="px-4 py-3">俯卧撑</td>
+                                                <td className="px-4 py-3">40s</td>
+                                                <td className="px-4 py-3">20s</td>
+                                                <td className="px-4 py-3">中等</td>
+                                                <td className="px-4 py-3">保持背部腰部直线</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">4</td>
+                                                <td className="px-4 py-3">平板支撑</td>
+                                                <td className="px-4 py-3">50s</td>
+                                                <td className="px-4 py-3">10s</td>
+                                                <td className="px-4 py-3">困难</td>
+                                                <td className="px-4 py-3">收紧核心肌群</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">5</td>
+                                                <td className="px-4 py-3">深蹲</td>
+                                                <td className="px-4 py-3">45s</td>
+                                                <td className="px-4 py-3">15s</td>
+                                                <td className="px-4 py-3">中等</td>
+                                                <td className="px-4 py-3">臀部下蹲到膝盖</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">6</td>
+                                                <td className="px-4 py-3">仰卧起坐</td>
+                                                <td className="px-4 py-3">40s</td>
+                                                <td className="px-4 py-3">20s</td>
+                                                <td className="px-4 py-3">中等</td>
+                                                <td className="px-4 py-3">控制节奏，避免颈部发力</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">7</td>
+                                                <td className="px-4 py-3">箭步蹲</td>
+                                                <td className="px-4 py-3">45s</td>
+                                                <td className="px-4 py-3">15s</td>
+                                                <td className="px-4 py-3">中等</td>
+                                                <td className="px-4 py-3">双腿交替支撑</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3">8</td>
+                                                <td className="px-4 py-3">侧腹拉伸</td>
+                                                <td className="px-4 py-3">60s</td>
+                                                <td className="px-4 py-3">0s</td>
+                                                <td className="px-4 py-3">简单</td>
+                                                <td className="px-4 py-3">全身伸展，缓解肌肉紧张</td>
+                                                <td className="px-4 py-3">
+                                                    <button className="text-blue-500 mr-2"><i className="fas fa-edit"></i></button>
+                                                    <button className="text-red-500"><i className="fas fa-trash"></i></button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 bg-white p-6 shadow-sm">
+                            <div className="mb-6">
+                                <h3 className="font-medium mb-2">训练统计</h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">本周完成次数</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">5</span>
+                                            <span className="text-gray-400 text-sm">/ 连续进步 7天</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">消耗卡路里</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">320</span>
+                                            <span className="text-gray-400 text-sm">千卡</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">小目标达成</span>
+                                        <div className="flex items-center">
+                                            <span className="text-teal-500 mr-1">2/3</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <div className="text-sm text-gray-600 mb-2">运动强度关系</div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="bg-gray-800 h-2 rounded-full" style={{width: '75%'}}></div>
+                                    </div>
+                                </div>
+                                <button className="w-full bg-red-400 text-white py-2 rounded-md mt-4 hover:bg-red-500">
+                                    <i className="fas fa-play mr-2"></i>
+                                    开始训练
+                                </button>
+                            </div>
+
+                            <div>
+                                <h3 className="font-medium mb-4">为什么选择8分钟训练？</h3>
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="w-6 h-6 bg-red-400 rounded-full flex items-center justify-center text-white text-xs mr-3 mt-1">1</div>
+                                        <div>
+                                            <h4 className="font-medium text-sm">高效燃脂</h4>
+                                            <p className="text-xs text-gray-600">短时间内快速提升心率，高效燃烧脂肪。</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-6 h-6 bg-teal-400 rounded-full flex items-center justify-center text-white text-xs mr-3 mt-1">2</div>
+                                        <div>
+                                            <h4 className="font-medium text-sm">无器械训练</h4>
+                                            <p className="text-xs text-gray-600">利用自身体重，随时

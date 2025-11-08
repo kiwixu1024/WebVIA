@@ -1,0 +1,641 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运程协作平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('main');
+            const [showHelpPanel, setShowHelpPanel] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [projectToDelete, setProjectToDelete] = useState(null);
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    name: '移动应用开发',
+                    description: '为公司产品开发数据驱动应用，支持iOS和Android',
+                    author: '张三人',
+                    level: '中低优先级',
+                    progress: 45,
+                    color: 'blue'
+                },
+                {
+                    id: 2,
+                    name: '数据分析平台',
+                    description: '构建完整的数据分析平台，支持多维度数据展现和分析',
+                    author: '张三人',
+                    level: '高优先级',
+                    progress: 20,
+                    color: 'blue'
+                }
+            ]);
+
+            const [newProject, setNewProject] = useState({
+                name: '',
+                description: '',
+                priority: '中',
+                budget: '0',
+                teamType: '架构'
+            });
+
+            const handleNewProject = () => {
+                setCurrentView('newProject');
+            };
+
+            const handleHelp = () => {
+                setShowHelpPanel(true);
+            };
+
+            const handleEdit = (projectId) => {
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (project) => {
+                setProjectToDelete(project);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                setProjects(projects.filter(p => p.id !== projectToDelete.id));
+                setShowDeleteModal(false);
+                setProjectToDelete(null);
+            };
+
+            const saveNewProject = () => {
+                const newId = Math.max(...projects.map(p => p.id)) + 1;
+                const newProj = {
+                    id: newId,
+                    name: newProject.name || '新项目',
+                    description: newProject.description || '项目描述',
+                    author: '张三人',
+                    level: newProject.priority + '优先级',
+                    progress: parseInt(newProject.budget) || 0,
+                    color: 'blue'
+                };
+                setProjects([...projects, newProj]);
+                setCurrentView('main');
+                setNewProject({ name: '', description: '', priority: '中', budget: '0', teamType: '架构' });
+            };
+
+            if (currentView === 'newProject') {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        {/* Header */}
+                        <div className="bg-white border-b px-6 py-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
+                                        <span className="text-white text-xs">⚡</span>
+                                    </div>
+                                    <span className="font-semibold text-gray-800">运程协作平台</span>
+                                </div>
+                                <div className="flex items-center space-x-1 text-sm text-gray-500">
+                                    <i className="fas fa-home"></i>
+                                    <span>首页</span>
+                                    <span>·</span>
+                                    <span>项目管理</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
+                                    onClick={handleNewProject}
+                                >
+                                    <span>+</span>
+                                    <span>新建项目</span>
+                                </button>
+                                <button 
+                                    className="text-gray-600 hover:text-gray-800"
+                                    onClick={handleHelp}
+                                >
+                                    <i className="fas fa-question-circle"></i>
+                                    <span className="ml-1">帮助</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex">
+                            {/* Sidebar */}
+                            <div className="w-48 bg-white h-screen border-r">
+                                <div className="p-4">
+                                    <div className="mb-6">
+                                        <div className="flex items-center space-x-2 text-gray-600 mb-2">
+                                            <i className="fas fa-cog"></i>
+                                            <span className="text-sm">设置</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <div className="text-gray-600 text-sm mb-2">
+                                            <i className="fas fa-chart-bar mr-2"></i>
+                                            概览
+                                        </div>
+                                        <div className="bg-blue-50 text-blue-600 px-3 py-2 rounded text-sm border-l-3 border-blue-500">
+                                            <i className="fas fa-folder mr-2"></i>
+                                            一项目
+                                            <div className="ml-4 mt-1 text-blue-500">管理</div>
+                                        </div>
+                                        <div className="text-gray-600 text-sm py-2 px-3">
+                                            <i className="fas fa-users mr-2"></i>
+                                            团队成员
+                                        </div>
+                                        <div className="text-gray-600 text-sm py-2 px-3">
+                                            <i className="fas fa-bell mr-2"></i>
+                                            我的中心
+                                        </div>
+                                        <div className="text-gray-600 text-sm py-2 px-3">
+                                            <i className="fas fa-cog mr-2"></i>
+                                            设置
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="flex-1 p-6">
+                                <div className="bg-white rounded-lg p-6">
+                                    <h2 className="text-lg font-semibold mb-6">项目管理</h2>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">项目名称</label>
+                                            <input
+                                                type="text"
+                                                placeholder="输入项目名称"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                value={newProject.name}
+                                                onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">项目描述</label>
+                                            <textarea
+                                                placeholder="输入项目描述"
+                                                rows="4"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                value={newProject.description}
+                                                onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                                            />
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                                                <select 
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    value={newProject.priority}
+                                                    onChange={(e) => setNewProject({...newProject, priority: e.target.value})}
+                                                >
+                                                    <option value="中">中</option>
+                                                    <option value="高">高</option>
+                                                    <option value="低">低</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">访问量</label>
+                                                <input
+                                                    type="number"
+                                                    value={newProject.budget}
+                                                    onChange={(e) => setNewProject({...newProject, budget: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">喜好团队成员</label>
+                                            <div className="flex space-x-2">
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center">
+                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                                    架构
+                                                </span>
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center">
+                                                    <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                                    开发
+                                                </span>
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center">
+                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                                    UI设计
+                                                </span>
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center">
+                                                    <span className="w-2 h-2 bg-gray-500 rounded-full mr-2"></span>
+                                                    测试
+                                                </span>
+                                                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm flex items-center">
+                                                    <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                                                    运营
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-end space-x-3 pt-4">
+                                            <button 
+                                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                                                onClick={() => setCurrentView('main')}
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                                onClick={saveNewProject}
+                                            >
+                                                保存项目
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b px-6 py-3 flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs">⚡</span>
+                                </div>
+                                <span className="font-semibold text-gray-800">运程协作平台</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                                <i className="fas fa-home"></i>
+                                <span>首页</span>
+                                <span>·</span>
+                                <span>项目管理</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                            <button 
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-1"
+                                onClick={handleNewProject}
+                            >
+                                <span>+</span>
+                                <span>新建项目</span>
+                            </button>
+                            <button 
+                                className="text-gray-600 hover:text-gray-800"
+                                onClick={handleHelp}
+                            >
+                                <i className="fas fa-question-circle"></i>
+                                <span className="ml-1">帮助</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-48 bg-white h-screen border-r">
+                            <div className="p-4">
+                                <div className="mb-6">
+                                    <div className="flex items-center space-x-2 text-gray-600 mb-2">
+                                        <i className="fas fa-cog"></i>
+                                        <span className="text-sm">设置</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="text-gray-600 text-sm mb-2">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        概览
+                                    </div>
+                                    <div className="bg-blue-50 text-blue-600 px-3 py-2 rounded text-sm border-l-3 border-blue-500">
+                                        <i className="fas fa-folder mr-2"></i>
+                                        一项目
+                                        <div className="ml-4 mt-1 text-blue-500">管理</div>
+                                    </div>
+                                    <div className="text-gray-600 text-sm py-2 px-3">
+                                        <i className="fas fa-users mr-2"></i>
+                                        团队成员
+                                    </div>
+                                    <div className="text-gray-600 text-sm py-2 px-3">
+                                        <i className="fas fa-bell mr-2"></i>
+                                        我的中心
+                                    </div>
+                                    <div className="text-gray-600 text-sm py-2 px-3">
+                                        <i className="fas fa-cog mr-2"></i>
+                                        设置
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* User info at bottom */}
+                            <div className="absolute bottom-4 left-4 flex items-center space-x-2">
+                                <img src="https://picsum.photos/id/64/32/32" alt="用户头像" className="w-8 h-8 rounded-full" />
+                                <div>
+                                    <div className="text-sm font-medium">管理员</div>
+                                    <div className="text-xs text-gray-500">在线</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-semibold">项目进度展示</h2>
+                                    <span className="text-sm text-gray-500">共 3 个项目</span>
+                                </div>
+                                
+                                {/* Project Cards */}
+                                <div className="space-y-4">
+                                    {projects.map(project => (
+                                        <div key={project.id} className="bg-white rounded-lg p-6 border">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div>
+                                                    <h3 className="font-semibold text-gray-800 flex items-center">
+                                                        {project.name}
+                                                        <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">{project.level}</span>
+                                                    </h3>
+                                                    <p className="text-gray-600 text-sm mt-1">{project.description}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <button 
+                                                        className="text-gray-400 hover:text-gray-600"
+                                                        onClick={() => handleEdit(project.id)}
+                                                    >
+                                                        <i className="fas fa-edit"></i>
+                                                        <span className="ml-1">编辑</span>
+                                                    </button>
+                                                    <button 
+                                                        className="text-gray-400 hover:text-red-600"
+                                                        onClick={() => handleDelete(project)}
+                                                    >
+                                                        <i className="fas fa-trash"></i>
+                                                        <span className="ml-1">删除</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center space-x-3 mb-3">
+                                                <img src="https://picsum.photos/id/64/24/24" alt="作者头像" className="w-6 h-6 rounded-full" />
+                                                <span className="text-sm text-gray-600">{project.author}</span>
+                                                <span className="text-sm text-gray-600">·</span>
+                                                <span className="text-sm text-gray-600">学院</span>
+                                            </div>
+                                            
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1 mr-4">
+                                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                                        <div 
+                                                            className={`bg-${project.color}-500 h-2 rounded-full`} 
+                                                            style={{width: `${project.progress}%`}}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                                <span className="text-sm text-gray-600">进度: {project.progress}%</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Empty State */}
+                            <div className="bg-white rounded-lg p-8 text-center">
+                                <h3 className="font-semibold mb-4">项目管理</h3>
+                                <div className="text-center mb-6">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                        <i className="fas fa-plus text-gray-400 text-2xl"></i>
+                                    </div>
+                                    <p className="text-gray-500 mb-2">点击"添加新项目"按钮开始创建</p>
+                                    <p className="text-gray-400 text-sm">打造您的第一个项目</p>
+                                </div>
+                                <button 
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+                                    onClick={handleNewProject}
+                                >
+                                    + 添加新项目
+                                </button>
+                                <div className="mt-4 text-sm text-blue-500">
+                                    <i className="fas fa-lightbulb mr-1"></i>
+                                    提示: 使用快捷键管理，简化文本编辑流程
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Panel */}
+                        <div className="w-80 bg-white border-l p-6">
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold">团队数据分析</h3>
+                                    <a href="#" className="text-blue-500 text-sm">导出数据</a>
+                                </div>
+                                
+                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                    <div className="bg-blue-500 text-white p-3 rounded text-center">
+                                        <div className="text-sm">实际设计</div>
+                                    </div>
+                                    <div className="bg-gray-100 text-gray-600 p-3 rounded text-center">
+                                        <div className="text-sm">周报设计</div>
+                                    </div>
+                                    <div className="bg-gray-100 text-gray-600 p-3 rounded text-center">
+                                        <div className="text-sm">月报设计</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <h4 className="font-medium mb-2">团队成员活跃详情 (今日)</h4>
+                                    
+                                    {/* Chart */}
+                                    <div className="h-48 bg-gray-50 rounded p-4 relative">
+                                        <svg width="100%" height="100%" viewBox="0 0 280 160">
+                                            <polyline
+                                                fill="none"
+                                                stroke="#3B82F6"
+                                                strokeWidth="2"
+                                                points="20,120 60,100 100,80 140,110 180,70 220,60 260,40"
+                                            />
+                                            <circle cx="20" cy="120" r="3" fill="#3B82F6"/>
+                                            <circle cx="60" cy="100" r="3" fill="#3B82F6"/>
+                                            <circle cx="100" cy="80" r="3" fill="#3B82F6"/>
+                                            <circle cx="140" cy="110" r="3" fill="#3B82F6"/>
+                                            <circle cx="180" cy="70" r="3" fill="#3B82F6"/>
+                                            <circle cx="220" cy="60" r="3" fill="#3B82F6"/>
+                                            <circle cx="260" cy="40" r="3" fill="#3B82F6"/>
+                                        </svg>
+                                        
+                                        {/* Y-axis labels */}
+                                        <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500 py-2">
+                                            <span>6h</span>
+                                            <span>4h</span>
+                                            <span>2h</span>
+                                            <span>0h</span>
+                                        </div>
+                                        
+                                        {/* X-axis labels */}
+                                        <div className="absolute bottom-0 left-0 w-full flex justify-between text-xs text-gray-500 px-4">
+                                            <span>9:00</span>
+                                            <span>11:00</span>
+                                            <span>13:00</span>
+                                            <span>15:00</span>
+                                            <span>17:00</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-2 text-xs text-gray-500">
+                                        📍 相关前端结构结果统计 
+                                    </div>
+                                </div>
+                                
+                                <div className="text-xs text-gray-500">
+                                    未来数据颗粒更新新数据时间: 9/22/2025, 8:16:43 PM
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Help Panel */}
+                    {showHelpPanel && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-end z-50">
+                            <div className="bg-white w-96 h-full overflow-y-auto">
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="font-semibold text-lg">使用指南</h3>
+                                        <button 
+                                            className="text-gray-400 hover:text-gray-600"
+                                            onClick={() => setShowHelpPanel(false)}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        <div>
+                                            <div className="flex items-center mb-3">
+                                                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">1</div>
+                                                <h4 className="font-medium">如何添加项目</h4>
+                                            </div>
+                                            <div className="ml-11 text-sm text-gray-600 space-y-1">
+                                                <p>1. 点击页面右上角的"新建项目"按钮</p>
+                                                <p>2. 在表单中填入项目基本信息，填好默认设置</p>
+                                                <p>3. 选择所需的成员类型和状数据</p>
+                                                <p>4. 点击"保存项目"按钮完成添加</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center mb-3">
+                                                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">2</div>
+                                                <h4 className="font-medium">如何编辑开源</h4>
+                                            </div>
+                                            <div className="ml-11 text-sm text-gray-600 space-y-1">
+                                                <p>1. 在项目卡片右上角点击"编辑"按钮</p>
+                                                <p>2. 点击"编辑"按钮出现确认弹出框，修改需要的信息</p>
+                                                <p>3. 点击"确认"保存修改内容，点击确认入规范详处完成</p>
+                                                <p>4. 所有的关键信息的内容处理及完成过程</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center mb-3">
+                                                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">3</div>
+                                                <h4 className="font-medium">如何查看统计</h4>
+                                            </div>
+                                            <div className="ml-11 text-sm text-gray-600 space-y-1">
+                                                <p>1. 右侧自动显示相关项目数据分析统计信息</p>
+                                                <p>2. 点击"实际设计"可了解详进作户产项目信息设计</p>
+                                                <p>3. 点击"导出数据"可导出当前时间规报表</p>
+                                                <p>4. 根据数据改进项目进度安排到全页流程</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center mb-3">
+                                                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold mr-3">💡</div>
+                                                <h4 className="font-medium text-blue-600">小贴士</h4>
+                                            </div>
+                                            <div className="ml-11 text-sm text-gray-600 space-y-1">
+                                                <p>📊 使用页面数据分析工对项目进行精准管理</p>
+                                                <p>👥 选配置成员体验，了解组成配置项目</p>
+                                                <p>🔔 为重要的项目设置优先级及人员成功过程</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="border-t p-4 text-center text-xs text-gray-500">
+                                    如有其他问题，请联系系统管理员
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold">编辑项目</h3>
+                                    <button 
+                                        className="text-gray-400 hover:text-gray-600"
+                                        onClick={() => setShowEditModal(false)}
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                        <input
+                                            type="text"
+                                            defaultValue="网站重构项目"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                                        <textarea
+                                            rows="3"
+                                            defaultValue="重新公司官网，提升用户体验和性能表现"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="高">高</option>
+                                                <option value="中">中</option>
+                                                <option value="低">低</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">项目进度</label>
+                                            <input
+                                                type="number"
+                                                defaultValue="75"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-3 pt-4">
+                                        <button 
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                                            onClick={() => setShowEditModal(false)}
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            className="px-4 py-2 bg-blue-500

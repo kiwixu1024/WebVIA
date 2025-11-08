@@ -1,0 +1,381 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨读书感悟打卡圈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingCard, setEditingCard] = useState(null);
+            
+            const [cards, setCards] = useState([
+                {
+                    id: 1,
+                    title: "百年孤独",
+                    date: "2023-03-15",
+                    content: "爱与孤独交织，时间如环，故事永不褪色。",
+                    tags: ["#孤独", "#魔幻现实主义"],
+                    author: "悠然读者",
+                    likes: 15,
+                    comments: 5,
+                    mood: "😊"
+                },
+                {
+                    id: 2,
+                    title: "围城",
+                    date: "2023-04-02",
+                    content: "婚姻像城，城外的人想冲进去，城里的人想逃出来。",
+                    tags: ["#婚姻", "#人生"],
+                    author: "思考者",
+                    likes: 12,
+                    comments: 3,
+                    mood: "😊"
+                },
+                {
+                    id: 3,
+                    title: "活着",
+                    date: "2023-04-10",
+                    content: "苦难与希望同在，活着本身就是胜利。",
+                    tags: ["#生命", "#坚韧"],
+                    author: "生活家",
+                    likes: 24,
+                    comments: 8,
+                    mood: "😊"
+                }
+            ]);
+
+            const handleLike = (cardId) => {
+                setCards(cards.map(card => 
+                    card.id === cardId 
+                        ? { ...card, likes: card.likes + 1 }
+                        : card
+                ));
+            };
+
+            const handleAddCard = () => {
+                setShowAddModal(true);
+            };
+
+            const handleEditCard = (card) => {
+                setEditingCard(card);
+                setShowAddModal(true);
+            };
+
+            const handleDeleteCard = (card) => {
+                setEditingCard(card);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                setCards(cards.filter(card => card.id !== editingCard.id));
+                setShowDeleteModal(false);
+                setEditingCard(null);
+            };
+
+            const closeModal = () => {
+                setShowAddModal(false);
+                setEditingCard(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-yellow-50 flex">
+                    {/* Left Sidebar */}
+                    <div className="w-48 bg-white shadow-sm">
+                        <div className="p-4 border-b">
+                            <img src="https://picsum.photos/id/40/40/40" alt="avatar" className="w-10 h-10 rounded-full mr-3 float-left" />
+                            <h1 className="font-medium text-gray-800">读书感悟圈</h1>
+                        </div>
+                        <nav className="mt-4">
+                            <div className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer flex items-center">
+                                <i className="fas fa-home w-4 mr-3"></i>
+                                首页
+                            </div>
+                            <div className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer flex items-center">
+                                <i className="fas fa-bookmark w-4 mr-3"></i>
+                                打卡记录
+                            </div>
+                            <div className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer flex items-center">
+                                <i className="fas fa-chart-bar w-4 mr-3"></i>
+                                统计分析
+                            </div>
+                            <div className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer flex items-center">
+                                <i className="fas fa-question-circle w-4 mr-3"></i>
+                                帮助说明
+                            </div>
+                        </nav>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 p-6">
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h2 className="text-lg font-medium text-gray-800">读书感悟记录</h2>
+                                    <p className="text-sm text-gray-500 mt-1">记录每一次阅读的感悟与收获，让思考沉淀为智慧。</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={handleAddCard}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 flex items-center"
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>
+                                        添加新打卡
+                                    </button>
+                                    <input 
+                                        type="text" 
+                                        placeholder="搜索..." 
+                                        className="border border-gray-300 px-3 py-2 rounded text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Cards Grid */}
+                            <div className="grid grid-cols-2 gap-6">
+                                {cards.map(card => (
+                                    <div key={card.id} className="bg-white rounded-lg shadow-sm p-6 relative">
+                                        <div className="absolute top-4 right-4 flex gap-2">
+                                            <button 
+                                                onClick={() => handleEditCard(card)}
+                                                className="text-gray-400 hover:text-blue-500"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteCard(card)}
+                                                className="text-gray-400 hover:text-red-500"
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <h3 className="font-medium text-lg mb-3">{card.title}</h3>
+                                        
+                                        <div className="flex items-center text-sm text-gray-500 mb-3">
+                                            <i className="far fa-calendar mr-2"></i>
+                                            {card.date}
+                                            <span className="ml-auto">{card.mood}</span>
+                                        </div>
+                                        
+                                        <p className="text-gray-700 mb-4 leading-relaxed">{card.content}</p>
+                                        
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            {card.tags.map((tag, index) => (
+                                                <span key={index} className="text-xs text-blue-500 bg-blue-50 px-2 py-1 rounded">
+                                                    {tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center text-sm text-gray-500">
+                                            <span>{card.author}</span>
+                                            <div className="flex gap-4">
+                                                <button 
+                                                    onClick={() => handleLike(card.id)}
+                                                    className="flex items-center hover:text-red-500"
+                                                >
+                                                    <i className="far fa-heart mr-1"></i>
+                                                    {card.likes}
+                                                </button>
+                                                <div className="flex items-center">
+                                                    <i className="far fa-comment mr-1"></i>
+                                                    {card.comments}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Reading Resources Section */}
+                        <div className="bg-white rounded-lg shadow-sm p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <i className="fas fa-book-open text-blue-500 mr-3"></i>
+                                    <span className="font-medium">阅读资源推荐</span>
+                                </div>
+                                <i className="fas fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="w-80 bg-white shadow-sm p-6">
+                        <div className="mb-6">
+                            <h3 className="font-medium mb-4">我的阅读统计</h3>
+                            
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">累计打卡天数</span>
+                                    <span className="font-medium">45</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">本月打卡次数</span>
+                                    <span className="font-medium">12</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">最长连续天数</span>
+                                    <span className="font-medium">7</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <h3 className="font-medium mb-4">阅读小贴士</h3>
+                            <p className="text-sm text-gray-600 mb-2">每天坚持阅读1小时，一年可读12本书</p>
+                            <p className="text-sm text-gray-600 mb-2">养成笔记习惯提高理解能力</p>
+                            <p className="text-sm text-gray-600">根据多元智能理论，找到最适合自己的学习方式</p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-medium mb-4">圈子特色</h3>
+                            <p className="text-sm text-gray-600 mb-3">每日一句话，分享阅读感悟，互相鼓励</p>
+                            <p className="text-sm text-gray-600 mb-3">在这里，我们共同成长，让阅读成为生活的美好习惯</p>
+                            <img src="https://picsum.photos/id/29/200/120" alt="reading corner" className="rounded-lg w-full" />
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="fixed bottom-0 left-0 right-0 text-center text-xs text-gray-400 py-4">
+                        "阅读是一场心灵旅行，每一页都承载着不同的风景。"</n
+                    </div>
+
+                    {/* Add/Edit Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium">{editingCard ? '编辑打卡' : '新增打卡'}</h3>
+                                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">书名</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入书名..."
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            defaultValue={editingCard?.title || ""}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">日期</label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            defaultValue={editingCard?.date.split('-').reverse().join('/') || new Date().toISOString().split('T')[0]}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">读后感悟</label>
+                                        <textarea 
+                                            placeholder="写下你的感悟..."
+                                            rows="4"
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            defaultValue={editingCard?.content || ""}
+                                        ></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">标签</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="添加标签..."
+                                            className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
+                                        />
+                                        <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
+                                            添加
+                                        </button>
+                                        <div className="text-xs text-gray-500 mt-1">按住Ctrl键可以多选标签</div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">阅读心情</label>
+                                        <div className="flex justify-between items-center">
+                                            <button className="flex items-center text-orange-500">
+                                                <span className="mr-2">😊</span>
+                                                <span className="text-sm">不喜欢</span>
+                                            </button>
+                                            <button className="flex items-center text-orange-000">
+                                                <span className="mr-2">😐</span>
+                                                <span className="text-sm">一般</span>
+                                            </button>
+                                            <button className="flex items-center text-green-500">
+                                                <span className="mr-2">😃</span>
+                                                <span className="text-sm">喜欢</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button 
+                                        onClick={closeModal}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={closeModal}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <h3 className="text-lg font-medium mb-4">确认删除</h3>
+                                <p className="text-gray-600 mb-6">确定要删除这条打卡吗？此操作不可撤销。</p>
+                                
+                                <div className="flex justify-end gap-3">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                    >
+                                        确定删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

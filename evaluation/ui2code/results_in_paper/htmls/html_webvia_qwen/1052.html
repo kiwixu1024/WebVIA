@@ -1,0 +1,677 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function MessageBoard() {
+            const [messages, setMessages] = useState([
+                {
+                    id: 1,
+                    title: "React 状态管理最佳实践",
+                    author: "张开发",
+                    content: "在大型应用中，我发现Redux虽然模板代码较多，但是在团队协作中确实能提供更清晰的数据流动。有没有其他开发者来分享一下你们的最佳实践?",
+                    category: "技术讨论",
+                    date: "2023-09-15 14:30",
+                    tags: ["React", "状态管理", "Redux"],
+                    avatar: "https://picsum.photos/id/64/40/40"
+                },
+                {
+                    id: 2,
+                    title: "求推荐：前端性能优化工具",
+                    author: "李工程师",
+                    content: "最近项目上线下发首屏加载时间有点长，想找一些好用的前端性能分析和优化工具，有经验的同学可以推荐一下吗？",
+                    category: "求助咨询",
+                    date: "2023-09-16 09:45",
+                    tags: ["性能优化", "工具推荐"],
+                    avatar: "https://picsum.photos/id/65/40/40"
+                },
+                {
+                    id: 3,
+                    title: "分享：我的前端学习路线图",
+                    author: "王同学",
+                    content: "从0到1学习前端开发已经一年了，这里分享一下我的学习路线和一些有用的资源，希望对前端新手有所帮助！包括HTML/CSS基础、JavaScript进阶、框架选择等内容。",
+                    category: "经验分享",
+                    date: "2023-09-16 16:20",
+                    tags: ["学习路线", "前端入门", "资源分享"],
+                    avatar: "https://picsum.photos/id/91/40/40"
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                title: "",
+                author: "",
+                content: "",
+                category: "技术讨论",
+                tags: []
+            });
+
+            const [editingMessage, setEditingMessage] = useState(null);
+            const [editFormData, setEditFormData] = useState({
+                title: "",
+                author: "",
+                content: "",
+                tags: []
+            });
+
+            const [showConfirmDialog, setShowConfirmDialog] = useState(null);
+            const [confirmAction, setConfirmAction] = useState(null);
+
+            const [currentPage, setCurrentPage] = useState(1);
+            const itemsPerPage = 3;
+
+            const categories = ["技术讨论", "求助咨询", "经验分享"];
+            const hotTagGroups = [
+                ["#React", "#Vue", "#Angular", "#状态管理", "#性能优化", "#前端入门", "#工具推荐", "#学习路线"],
+                ["#GET", "#JSON", "#Compress", "#CSS", "#PoP", "#Ajax", "#Tailwind", "#Tailwind", "#TypeScript"]
+            ];
+
+            const filteredMessages = messages.filter(msg => {
+                if (editingMessage && editingMessage.id === msg.id) {
+                    return true;
+                }
+                if (formData.tags.length > 0) {
+                    return formData.tags.some(tag => msg.tags.includes(tag));
+                }
+                return true;
+            });
+
+            const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
+            const currentMessages = filteredMessages.slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage
+            );
+
+            const totalMessages = filteredMessages.length;
+            const tagStats = {
+                "技术讨论": filteredMessages.filter(m => m.category === "技术讨论").length,
+                "求助咨询": filteredMessages.filter(m => m.category === "求助咨询").length,
+                "经验分享": filteredMessages.filter(m => m.category === "经验分享").length
+            };
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+                if (editingMessage) {
+                    setEditFormData(prev => ({
+                        ...prev,
+                        [field]: value
+                    }));
+                }
+            };
+
+            const handleCategoryChange = (category) => {
+                setFormData(prev => ({
+                    ...prev,
+                    category
+                }));
+            };
+
+            const handleTagToggle = (tag) => {
+                setFormData(prev => ({
+                    ...prev,
+                    tags: prev.tags.includes(tag)
+                        ? prev.tags.filter(t => t !== tag)
+                        : [...prev.tags, tag]
+                }));
+            };
+
+            const handleAddMessage = () => {
+                if (!formData.title || !formData.author || !formData.content) return;
+
+                const newMessage = {
+                    id: Date.now(),
+                    title: formData.title,
+                    author: formData.author,
+                    content: formData.content,
+                    category: formData.category,
+                    date: new Date().toISOString().slice(0, 16).replace('T', ' ') + " 08:00",
+                    tags: formData.tags,
+                    avatar: "https://picsum.photos/id/66/40/40"
+                };
+
+                if (formData.tags.includes("React")) {
+                    setConfirmAction({ title: "确认添加留言" });
+                    setShowConfirmDialog("add");
+                } else {
+                    setMessages(prev => [newMessage, ...prev]);
+                    setCurrentPage(1);
+                }
+            };
+
+            const handleEdit = (message) => {
+                setEditingMessage(message);
+                setEditFormData(prev => ({
+                    title: message.title,
+                    author: message.author,
+                    content: message.content,
+                    tags: [...message.tags] // Array instead of string
+                }));
+            };
+
+            const handleSaveEdit = () => {
+                setMessages(prev => prev.map(msg => 
+                    msg.id === editingMessage.id ? { 
+                        ...msg, 
+                        title: editFormData.title, 
+                        author: editFormData.author, 
+                        content: editFormData.content,
+                        tags: editFormData.tags
+                    } : msg
+                ));
+                setEditingMessage(null);
+                setCurrentPage(1);
+            };
+
+            const handleCancelEdit = () => {
+                setEditingMessage(null);
+            };
+
+            const handleDelete = (message) => {
+                const confirmed = confirm("您确定要删除这条留言吗？此操作无法撤销。");
+                if (confirmed) {
+                    const updatedMessages = messages.filter(m => m.id !== message.id);
+                    
+                    if (formData.tags.includes("React")) {
+                        setConfirmAction({ title: "确认删除" });
+                        setShowConfirmDialog("delete");
+                    } else {
+                        setMessages(updatedMessages);
+                    }
+                }
+            };
+
+            const renderSidebarWidget = (title, children) => (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <div className="flex items-center mb-4">
+                        <i className="fas fa-chart-bar text-blue-500 mr-2"></i>
+                        <h3 className="text-gray-900 font-medium">{title}</h3>
+                    </div>
+                    {children}
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-blue-500 text-white px-6 py-4">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center">
+                                <img src="https://picsum.photos/id/64/40/40" alt="Avatar" className="w-10 h-10 rounded-full mr-3" />
+                                <h1 className="text-xl font-semibold">留言板</h1>
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="bg-white text-blue-500 px-4 py-2 rounded text-sm font-medium">留言广场</button>
+                                <button className="text-white px-4 py-2 rounded text-sm font-medium">我的留言</button>
+                                <button className="text-white px-4 py-2 rounded text-sm font-medium">留言统计</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
+                        {/* Left Sidebar */}
+                        <div className="col-span-3 space-y-6">
+                            {/* Edit/Write Form */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <div className="flex items-center mb-4">
+                                    <i className="fas fa-edit text-blue-500 mr-2"></i>
+                                    <h3 className="text-gray-900 font-medium">编辑留言</h3>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">标题</label>
+                                        <input
+                                            type="text"
+                                            placeholder="请输入标题(最多50字)"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            maxLength={50}
+                                            value={formData.title}
+                                            onChange={(e) => handleInputChange('title', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">作者</label>
+                                        <input
+                                            type="text"
+                                            placeholder="请输入您的名字"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={formData.author}
+                                            onChange={(e) => handleInputChange('author', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">留言内容</label>
+                                        <textarea
+                                            placeholder="请输入留言内容(最多500字)"
+                                            rows="6"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            maxLength={500}
+                                            value={formData.content}
+                                            onChange={(e) => handleInputChange('content', e.target.value)}
+                                        ></textarea>
+                                        <div className="text-xs text-gray-500 mt-1">
+                                            {formData.content.length}/500
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">分类</label>
+                                        <select
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={formData.category}
+                                            onChange={(e) => handleCategoryChange(e.target.value)}
+                                        >
+                                            {categories.map(category => (
+                                                <option key={category} value={category}>{category}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">标签</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['React', 'Vue', 'Angular', '状态管理', '性能优化', '前端入门', '工具推荐', '学习路线'].map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    className={`px-3 py-1 rounded-full text-sm ${
+                                                        formData.tags.includes(tag)
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    }`}
+                                                    onClick={() => handleTagToggle(tag)}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 font-medium"
+                                        onClick={handleAddMessage}
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>
+                                        添加留言
+                                    </button>
+                                </div>
+
+                                {editingMessage && (
+                                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                                        <h4 className="text-sm font-medium text-gray-900 mb-3">当前编辑的留言</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex items-start">
+                                                <img src="https://picsum.photos/id/66/40/40" alt="Avatar" className="w-10 h-10 rounded-full mr-3" />
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h5 className="font-medium text-gray-900">{editingMessage.title}</h5>
+                                                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{editingMessage.category}</span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-2">{editingMessage.author} · · {editingMessage.date}</p>
+                                                    <p className="text-sm text-gray-700">{editingMessage.content}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2 mt-4">
+                                                <button
+                                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                                                    onClick={handleSaveEdit}
+                                                >
+                                                    <i className="fas fa-save mr-1"></i>
+                                                    保存修改
+                                                </button>
+                                                <button
+                                                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+                                                    onClick={handleCancelEdit}
+                                                >
+                                                    取消
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Tips */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                                <div className="flex items-start">
+                                    <img src="https://picsum.photos/id/66/40/40" alt="Avatar" className="w-10 h-10 rounded-full mr-3" />
+                                    <div>
+                                        <h4 className="font-medium text-gray-900 mb-1">小贴士</h4>
+                                        <p className="text-sm text-gray-600">添加标签可以帮助其他用户更容易找到您的留言，分享技术问题时，请尽量提供详细的问题描述，这样才能得到更准确的帮助。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="col-span-6">
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <div className="flex items-center mb-6">
+                                    <i className="fas fa-list text-blue-500 mr-2"></i>
+                                    <h3 className="text-gray-900 font-medium">留言列表</h3>
+                                    <span className="ml-2 text-sm text-gray-500">共 {totalMessages} 条留言</span>
+                                </div>
+
+                                {filteredMessages.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        暂无留言，快来发第一条留言吧~
+                                    </div>
+                                ) : (
+                                    <>
+                                        {filteredMessages.map(message => (
+                                            <div key={message.id} className="border-b border-gray-200 pb-6 mb-6 last:border-b-0 last:mb-0">
+                                                <div className="flex items-start">
+                                                    <img src={message.avatar} alt="Avatar" className="w-10 h-10 rounded-full mr-4" />
+                                                    <div className="flex-1">
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center mb-2">
+                                                                    <h4 className="font-medium text-gray-900 mr-2">{message.title}</h4>
+                                                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{message.category}</span>
+                                                                </div>
+                                                                <p className="text-sm text-gray-600 mb-2">{message.author} · {message.date}</p>
+                                                                <p className="text-gray-700 leading-relaxed mb-3">{message.content}</p>
+                                                                <div className="flex items-center space-x-3">
+                                                                    {message.tags.map(tag => (
+                                                                        <span key={tag} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                                                            #{tag}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-3 mt-4">
+                                                            <button
+                                                                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                                                onClick={() => handleEdit(message)}
+                                                            >
+                                                                <i className="fas fa-edit mr-1"></i>
+                                                                编辑
+                                                            </button>
+                                                            <button
+                                                                className="flex items-center text-sm text-red-600 hover:text-red-800"
+                                                                onClick={() => handleDelete(message)}
+                                                            >
+                                                                <i className="fas fa-trash mr-1"></i>
+                                                                删除
+                                                            </button>
+                                                            <button
+                                                                className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                                                onClick={() => handleAddMessage()}
+                                                            >
+                                                                <i className="fas fa-share mr-1"></i>
+                                                                求助咨询
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {totalPages > 1 && (
+                                            <div className="flex items-center justify-center space-x-4 mt-6">
+                                                <button
+                                                    className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+                                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                >
+                                                    <i className="fas fa-chevron-left mr-1"></i>
+                                                    上一页
+                                                </button>
+                                                <span className="px-3 py-2 bg-blue-500 text-white text-sm">1/{totalPages}</span>
+                                                <button
+                                                    className="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+                                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                                >
+                                                    下一页
+                                                    <i className="fas fa-chevron-right ml-1"></i>
+                                                </button>
+                                                <button
+                                                    className="ml-4 px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+                                                    onClick={() => setCurrentPage(1)}
+                                                >
+                                                    刷新列表
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Operation Guide */}
+                            <div className="my-6">
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-info-circle text-blue-500 mr-2"></i>
+                                        <h3 className="text-gray-900 font-medium">操作指南</h3>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-start">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3"></div>
+                                            <div>
+                                                <div className="font-medium text-gray-900 text-sm">添加留言</div>
+                                                <div className="text-sm text-gray-600">在左侧表单填写您的留言信息，点击"添加留言"按钮提交。</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start">
+                                            <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3"></div>
+                                            <div>
+                                                <div className="font-medium text-gray-900 text-sm">编辑留言</div>
+                                                <div className="text-sm text-gray-600">点击留言下方的"编辑"按钮修改您的留言内容。</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start">
+                                            <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3"></div>
+                                            <div>
+                                                <div className="font-medium text-gray-900 text-sm">删除留言</div>
+                                                <div className="text-sm text-gray-600">点击留言下方的"删除"按钮可以删除不需要的留言。</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Online Features */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <div className="flex items-center mb-4">
+                                    <i className="fas fa-lightbulb text-blue-500 mr-2"></i>
+                                    <h3 className="text-gray-900 font-medium">线上留言板特色</h3>
+                                </div>
+                                <div className="bg-blue-50 rounded-lg p-4">
+                                    <p className="text-gray-700">
+                                        欢迎使用我们的线上留言板平台！这里是开发者们交流技术、分享经验的理想场所。我们提供实时互动功能，让您的问题和想法得到及时响应；多分类标签系统，帮助您精准定位内容和兴趣领域；数据统计可视化功能，直观展示留言分类和活跃度。无论是技术讨论、求职信息还是经验分享，这里都是您的专业社区。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="col-span-3 space-y-6">
+                            {/* Statistics */}
+                            {renderSidebarWidget("留言统计", (
+                                <>
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <div className="text-center mb-6">
+                                            <h3 className="text-lg font-semibold mb-2">总留言数</h3>
+                                            <div className="text-4xl font-bold text-gray-900">{totalMessages}</div>
+                                            <div className="text-sm text-gray-600 mt-1">分类统计</div>
+                                            {Object.entries(tagStats).map(([category, count]) => (
+                                                <div key={category} className="flex justify-between item-center">
+                                                    <span className="text-sm text-gray-600">{category}</span>
+                                                    <div className="flex items-center">
+                                                        <div className="w-16 h-2 bg-gray-200 rounded-full mr-2">
+                                                            <div 
+                                                                className="h-2 bg-blue-500 rounded-full" 
+                                                                style={{width: `${(count / 3) * 100}%`}}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-sm font-medium text-gray-900">{count}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {totalMessages > 2 && (
+                                            <div className="text-center">
+                                                <h4 className="font-medium text-gray-900 mb-2">类别占比</h4>
+                                                <div className="text-4xl mb-4">
+                                                    <i className="fas fa-chart-pie text-gray-400"></i>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-4 text-center">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">技术讨论</div>
+                                                        <div className="text-xs text-gray-600">2</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">求助咨询</div>
+                                                        <div className="text-xs text-gray-600">1</div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">经验分享</div>
+                                                        <div className="text-xs text-gray-600">1</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            ))}
+
+                            {/* 社区指南 */}
+                            {renderSidebarWidget("社区指南", (
+                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                    <div className="space-y-3">
+                                        {[
+                                            "✓ 尊重他人观点，友善交流",
+                                            "✓ 分享代码时请使用代码块格式",
+                                            "✓ 提问前先搜索是否有类似问题",
+                                            "✓ 标题简明扼要，内容详细具体",
+                                            "✓ 及时采纳有效的回答和建议"
+                                        ].map((tip, index) => (
+                                            <div key={index} className="flex items-start">
+                                                <i className="fas fa-check-circle text-green-500 mr-2 mt-1 text-sm"></i>
+                                                <span className="text-sm text-gray-700">{tip}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* 热门标签 */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                <h3 className="font-medium text-gray-900 mb-4">热门标签</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {hotTagGroups[0].map((tag, index) => (
+                                        <button
+                                            key={index}
+                                            className="text-xs text-gray-700 hover:text-blue-500"
+                                            style={{ backgroundColor: index % 2 === 0 ? '#e8f3c4' : '#e8e6f3' }}
+                                        >
+                                            {tag}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Confirmation Dialog */}
+                    {showConfirmDialog && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 text-center">
+                                <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                    <i className="fas fa-exclamation text-gray-600"></i>
+                                </div>
+                                <h4 className="text-lg font-semibold mb-2">{confirmAction?.title}</h4>
+                                <p className="text-gray-600 mb-6">{confirmAction?.title === "确认添加留言" ? "您确定要发布这条留言吗？发布后将立即显示在留言列表中。" : "您确定要删除这条留言吗？此操作无法撤销。"}</p>
+                                <div className="flex space-x-4">
+                                    <button
+                                        className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                                        onClick={() => {
+                                            setShowConfirmDialog(null);
+                                            setConfirmAction(null);
+                                        }}
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                        onClick={() => {
+                                            if (confirmAction?.title === "确认删除") {
+                                                setMessages(prev => prev.filter(msg => msg.id !== editingMessage.id));
+                                            }
+                                            setShowConfirmDialog(null);
+                                            setConfirmAction(null);
+                                        }}
+                                    >
+                                        {confirmAction?.title === "确认删除" ? "删除" : "确认"}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-gray-800 text-white mt-12">
+                        <div className="max-w-7xl mx-auto px-6 py-8">
+                            <div className="grid grid-cols-3 gap-8">
+                                <div>
+                                    <h4 className="font-semibold mb-4">关于我们</h4>
+                                    <p className="text-gray-300 text-sm">
+                                        线上留言板是一个为开发者提供交流平台的社区，我们致力于创建友好、专业的技术讨论环境。
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-4">联系方式</h4>
+                                    <div className="space-y-2 text-sm text-gray-300">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-envelope mr-2"></i>
+                                            contact@messageboard.com
+                                        </div>
+                                        <div className="flex items-center">
+                                            <i className="fas fa-phone mr-2"></i>
+                                            400-123-4567
+                                        </div>
+                                        <div className="flex items-center">
+                                            <i className="fas fa-users mr-2"></i>
+                                            MessageBoard_Official
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-4">友情链接</h4>
+                                    <div className="space-y-2 text-sm text-gray-300">
+                                        <div>技术社区</div>
+                                        <div>开发者大会</div>
+                                        <div>编程教程网</div>
+                                        <div>前端资源库</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
+                                © 2023 线上留言板 - 版权所有
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<MessageBoard />, document.getElementById('root'));
+    </script>
+</body>
+</html>

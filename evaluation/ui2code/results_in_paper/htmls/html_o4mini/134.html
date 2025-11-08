@@ -1,0 +1,395 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>植物养护日志</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <style>body { font-family: 'Noto Sans SC', sans-serif; }</style>
+</head>
+<body class="bg-gray-50">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    // Sample fixed images
+    const IMAGES = {
+      green: 'https://picsum.photos/id/1018/600/300',
+      sansevieria: 'https://picsum.photos/id/1027/600/300',
+      succulent: 'https://picsum.photos/id/1069/600/300',
+      default: 'https://picsum.photos/id/1074/600/300'
+    };
+
+    function DonutChart({ data }) {
+      // data: [{label, value, color}]
+      const total = data.reduce((sum, d) => sum + d.value, 0);
+      let offset = 0;
+      const segments = data.map((d, i) => {
+        const perc = (d.value / total) * 100;
+        const seg = (
+          <circle key={i}
+            r="32" cx="40" cy="40"
+            fill="transparent"
+            stroke={d.color}
+            strokeWidth="16"
+            strokeDasharray={`${perc} ${100 - perc}`}
+            strokeDashoffset={`${100 - offset}`}
+          />
+        );
+        offset += perc;
+        return seg;
+      });
+      return (
+        <svg width="80" height="80" className="block mx-auto">
+          {segments}
+        </svg>
+      );
+    }
+
+    function BarChart({ data }) {
+      // data: [{label, value, color}]
+      const max = Math.max(...data.map(d=>d.value));
+      return (
+        <div className="flex items-end h-32 space-x-2 px-2">
+          {data.map((d,i)=>
+            <div key={i} className="flex-1 text-center">
+              <div className="mx-auto bg-green-500" style={{ height: `${(d.value/max)*100}%`, width: '12px' }}></div>
+              <div className="text-xs mt-1">{d.label}</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [records, setRecords] = useState([
+        { id: 1, name: '绿萝', date:'2024-06-01', status:'健康', water:'200', light:'中等光照', content:'今日阳光充足，给绿萝浇了水，长势良好!', img: IMAGES.green },
+        { id: 2, name: '虎皮兰', date:'2024-06-03', status:'警告', water:'100', light:'弱光', content:'叶子有点发黄，可能缺水了。', img: IMAGES.sansevieria },
+        { id: 3, name: '多肉', date:'2024-06-05', status:'健康', water:'50', light:'强光', content:'多肉长势喜人，颜色非常漂亮!', img: IMAGES.succulent }
+      ]);
+      const [showAdd, setShowAdd] = useState(false);
+      const [showAdd2, setShowAdd2] = useState(false);
+      const [showEdit, setShowEdit] = useState(false);
+      const [showDel, setShowDel] = useState(false);
+      const [showDetail, setShowDetail] = useState(false);
+      const [form, setForm] = useState({name:'', date:'2025-09-23', status:'健康', water:'0', light:'中等光照', content:'', img: IMAGES.default});
+      const [curr, setCurr] = useState(null);
+
+      function handleAdd() {
+        const newRec = {...form, id: Date.now(), date: form.date, water:form.water};
+        setRecords([...records, newRec]);
+        setShowAdd(false);
+      }
+      function handleEdit() {
+        setRecords(records.map(r=>r.id===curr.id? {...curr}: r));
+        setShowEdit(false);
+      }
+      function handleDelete() {
+        setRecords(records.filter(r=>r.id!==curr.id));
+        setShowDel(false);
+      }
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-green-200 flex items-center px-6 h-16">
+            <i className="fas fa-leaf text-green-700 text-xl mr-2"></i>
+            <h1 className="text-xl font-semibold text-green-700">植物养护日志</h1>
+          </header>
+          {/* Main */}
+          <div className="flex flex-1">
+            {/* Sidebar */}
+            <nav className="w-48 bg-white border-r px-4 py-6 space-y-4 text-gray-700">
+              <div className="font-medium flex items-center space-x-2"><i className="fas fa-calendar-day"></i><span>今日记录</span></div>
+              <div className="flex items-center space-x-2"><i className="fas fa-history"></i><span>历史记录</span></div>
+              <div className="flex items-center space-x-2"><i className="fas fa-seedling"></i><span>植物库</span></div>
+              <div className="flex items-center space-x-2"><i className="fas fa-cog"></i><span>我的设置</span></div>
+            </nav>
+            {/* Content */}
+            <main className="flex-1 bg-white p-6">
+              <div className="bg-green-100 p-3 mb-4 text-center text-green-800">记录每一滴水，每一缕阳光，让绿意常在。</div>
+              <button onClick={()=>{setForm({name:'', date:'2025-09-23', status:'健康', water:'0', light:'中等光照', content:'', img:IMAGES.default});setShowAdd(true);} }
+                className="bg-green-400 hover:bg-green-500 text-white px-4 py-2 rounded mb-6">
+                ＋＋ 添加新日志
+              </button>
+              <div className="grid grid-cols-3 gap-6">
+                {records.map(r=>(
+                  <div key={r.id} className="bg-white shadow rounded relative">
+                    <img src={r.img} className="w-full h-40 object-cover rounded-t" />
+                    <div className="absolute top-2 right-2 flex space-x-2">
+                      <button onClick={()=>{setCurr(r);setShowEdit(true);}} className="bg-white p-1 rounded-full hover:bg-gray-100"><i className="fas fa-pen"></i></button>
+                      <button onClick={()=>{setCurr(r);setShowDel(true);}} className="bg-white p-1 rounded-full hover:bg-gray-100 text-red-600"><i className="fas fa-trash"></i></button>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold">{r.name}</h3>
+                      <div className="text-gray-500 text-sm flex items-center space-x-2 my-2">
+                        <i className="fas fa-calendar-alt"></i><span>{r.date}</span>
+                      </div>
+                      <p className="text-gray-700 text-sm mb-3">{r.content}</p>
+                      <div className="flex items-center space-x-4 text-gray-600 text-sm">
+                        <span><i className="fas fa-tint"></i> {r.water}ml</span>
+                        <span><i className="fas fa-sun"></i> {r.light}</span>
+                      </div>
+                      <div className="inline-block mt-3 px-2 py-1 border rounded text-xs"
+                        style={{ borderColor: r.status==='警告'? '#D97706':'#16A34A', color: r.status==='警告'? '#92400E':'#166534' }}>
+                        {r.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </main>
+            {/* Right Panel */}
+            <aside className="w-64 bg-white border-l p-6 space-y-6 text-center text-gray-700">
+              <div>
+                <h4 className="font-medium mb-2">植物类型分布</h4>
+                <DonutChart data={[
+                  {label:'绿萝',value:40,color:'#16A34A'},
+                  {label:'虎皮兰',value:30,color:'#D97706'},
+                  {label:'多肉',value:30,color:'#15803D'}
+                ]}/>
+                <div className="flex justify-around text-xs mt-2">
+                  <span className="flex items-center"><span className="block w-2 h-2 bg-green-500 rounded mr-1"></span>绿萝 40%</span>
+                  <span className="flex items-center"><span className="block w-2 h-2 bg-yellow-500 rounded mr-1"></span>虎皮兰 30%</span>
+                  <span className="flex items-center"><span className="block w-2 h-2 bg-green-700 rounded mr-1"></span>多肉 30%</span>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">每周浇水次数</h4>
+                <BarChart data={[
+                  {label:'周一',value:1},{label:'周二',value:3},{label:'周三',value:2},
+                  {label:'周四',value:1},{label:'周五',value:2},{label:'周六',value:1},{label:'周日',value:3}
+                ]}/>
+              </div>
+              <div className="bg-green-50 p-4 rounded">
+                <h4 className="font-medium mb-2">本月记录统计</h4>
+                <div className="text-3xl font-bold text-green-700">3</div>
+                <div className="text-sm text-gray-600">条养护记录</div>
+                <div className="text-3xl font-bold text-green-700 mt-2">3</div>
+                <div className="text-sm text-gray-600">种植物</div>
+              </div>
+              <button onClick={()=>setShowDetail(true)} className="bg-brown-600 hover:bg-brown-700 text-white px-4 py-2 rounded">查看详情</button>
+            </aside>
+          </div>
+          {/* Footer */}
+          <footer className="bg-green-200 text-gray-700 text-sm py-4 px-6">
+            <div>© 2024 植物养护日志 版权所有</div>
+            <div className="mt-2 space-x-4">
+              <span>小贴士：多肉植物冬季冻水应减少浇水频次</span>
+              <span>小贴士：绿萝喜湿温暖通风的环境</span>
+              <span>小贴士：虎皮兰耐旱，耐阴，适合放在室内养护</span>
+              <span>小贴士：定期给植物松土可以增加土壤透气性</span>
+            </div>
+            <div className="mt-2">联系我们：plantsupport@example.com</div>
+          </footer>
+
+          {/* Modals */}
+          {showAdd && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded w-2/3 max-w-lg p-6 relative">
+                <button onClick={()=>setShowAdd(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+                <h3 className="text-lg font-semibold mb-4">添加新植物记录</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm mb-1">植物名称</label>
+                    <input type="text" placeholder="请输入植物名称（例如：绿萝）" value={form.name}
+                      onChange={e=>setForm({...form,name:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">养护日期</label>
+                    <input type="date" value={form.date}
+                      onChange={e=>setForm({...form,date:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">植物状态</label>
+                    <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})}
+                      className="w-full border px-3 py-2 rounded">
+                      <option>健康</option>
+                      <option>病虫害</option>
+                      <option>警告</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">浇水量 (ml)</label>
+                    <input type="number" min="0" value={form.water}
+                      onChange={e=>setForm({...form,water:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">光照需求</label>
+                    <select value={form.light} onChange={e=>setForm({...form,light:e.target.value})}
+                      className="w-full border px-3 py-2 rounded">
+                      <option>弱光</option>
+                      <option>中等光照</option>
+                      <option>强光</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">养护内容</label>
+                    <textarea rows="3" placeholder="请输入养护内容..." value={form.content}
+                      onChange={e=>setForm({...form,content:e.target.value})}
+                      className="w-full border px-3 py-2 rounded"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">植物图片</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded p-4 text-center">
+                      <img src={form.img} className="mx-auto mb-2 w-40 h-20 object-cover rounded" />
+                      <div className="text-sm text-gray-600 mb-2">已选择默认图片</div>
+                      <button className="text-green-600">选择其他图片</button>
+                    </div>
+                  </div>
+                  <div className="text-right space-x-2">
+                    <button onClick={()=>setShowAdd(false)} className="px-4 py-2 bg-gray-200 rounded">取消</button>
+                    <button onClick={handleAdd} className="px-4 py-2 bg-green-500 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showEdit && curr && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded w-2/3 max-w-lg p-6 relative">
+                <button onClick={()=>setShowEdit(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+                <h3 className="text-lg font-semibold mb-4">编辑植物记录</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm mb-1">植物名称</label>
+                    <input type="text" value={curr.name}
+                      onChange={e=>setCurr({...curr,name:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">养护日期</label>
+                    <input type="date" value={curr.date}
+                      onChange={e=>setCurr({...curr,date:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">植物状态</label>
+                    <select value={curr.status} onChange={e=>setCurr({...curr,status:e.target.value})}
+                      className="w-full border px-3 py-2 rounded">
+                      <option>健康</option>
+                      <option>病虫害</option>
+                      <option>警告</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">浇水量 (ml)</label>
+                    <input type="number" value={curr.water}
+                      onChange={e=>setCurr({...curr,water:e.target.value})}
+                      className="w-full border px-3 py-2 rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">光照需求</label>
+                    <select value={curr.light} onChange={e=>setCurr({...curr,light:e.target.value})}
+                      className="w-full border px-3 py-2 rounded">
+                      <option>弱光</option>
+                      <option>中等光照</option>
+                      <option>强光</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">养护内容</label>
+                    <textarea rows="3" value={curr.content}
+                      onChange={e=>setCurr({...curr,content:e.target.value})}
+                      className="w-full border px-3 py-2 rounded"></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">植物图片</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded p-4 text-center">
+                      <img src={curr.img} className="mx-auto mb-2 w-40 h-20 object-cover rounded" />
+                      <div className="text-sm text-gray-600 mb-2">当前已选择图片</div>
+                      <button className="text-green-600">选择其他图片</button>
+                    </div>
+                  </div>
+                  <div className="text-right space-x-2">
+                    <button onClick={()=>setShowEdit(false)} className="px-4 py-2 bg-gray-200 rounded">取消</button>
+                    <button onClick={handleEdit} className="px-4 py-2 bg-green-500 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {showDel && curr && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded w-96 p-6 text-center relative">
+                <button onClick={()=>setShowDel(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+                <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                <h3 className="text-lg font-semibold mb-2">确定删除此记录吗?</h3>
+                <p className="text-gray-600 mb-6">您即将删除“{curr.name}”的养护记录。此操作不可撤销。</p>
+                <div className="space-x-4">
+                  <button onClick={()=>setShowDel(false)} className="px-4 py-2 bg-gray-200 rounded">取消</button>
+                  <button onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded">确认删除</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {showDetail && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded w-4/5 max-w-xl p-6 relative">
+                <button onClick={()=>setShowDetail(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+                <h3 className="text-lg font-semibold mb-4">详细统计数据</h3>
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 border">日期</th><th className="p-2 border">植物名称</th>
+                      <th className="p-2 border">状态</th><th className="p-2 border">浇水量</th><th className="p-2 border">光照</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.map((r,i)=>(
+                      <tr key={i}>
+                        <td className="p-2 border">{r.date}</td>
+                        <td className="p-2 border">{r.name}</td>
+                        <td className="p-2 border">{r.status}</td>
+                        <td className="p-2 border">{r.water}ml</td>
+                        <td className="p-2 border">{r.light}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-6 grid grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium mb-2">养护频率分析</h4>
+                    <p>您的植物养护记录显示：</p>
+                    <p>平均浇水频率：每3天一次</p>
+                    <p>最常养护植物：绿萝（8次）</p>
+                    <p>养护高峰期：周二、周日</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-2">植物健康状况</h4>
+                    <div className="mb-2"><span>绿萝健康状况</span>
+                      <div className="w-full bg-gray-200 h-3 rounded mt-1"><div className="bg-green-500 h-3 rounded" style={{width:'100%'}}></div></div>
+                      <span className="text-sm text-gray-600">100%</span>
+                    </div>
+                    <div className="mb-2"><span>虎皮兰健康状况</span>
+                      <div className="w-full bg-gray-200 h-3 rounded mt-1"><div className="bg-yellow-500 h-3 rounded" style={{width:'60%'}}></div></div>
+                      <span className="text-sm text-gray-600">60%</span>
+                    </div>
+                    <div className="mb-2"><span>多肉健康状况</span>
+                      <div className="w-full bg-gray-200 h-3 rounded mt-1"><div className="bg-green-700 h-3 rounded" style={{width:'90%'}}></div></div>
+                      <span className="text-sm text-gray-600">90%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 text-right space-x-2">
+                  <button className="px-4 py-2 bg-yellow-700 text-white rounded">导出数据</button>
+                  <button className="px-4 py-2 bg-green-600 text-white rounded">打印报告</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

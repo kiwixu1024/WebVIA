@@ -1,0 +1,600 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目路演信息</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [currentView, setCurrentView] = useState('overview');
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showProjectDetail, setShowProjectDetail] = useState(false);
+            const [selectedProjectForDetail, setSelectedProjectForDetail] = useState(null);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    name: 'AI智能助手平台',
+                    team: '创新科技团队',
+                    date: '2023-12-15',
+                    description: '基于大型语言模型的企业级智能助手平台，支持多场景定制化应用与部署。',
+                    category: '人工智能',
+                    members: ['张明', '李华', '王强'],
+                    tags: ['人工智能', '无']
+                },
+                {
+                    id: 2,
+                    name: '绿色能源管理系统',
+                    team: '可持续发展研究小组',
+                    date: '2023-12-20',
+                    description: '面向企业的绿色能源管理平台，通过IoT设备实现能源消耗实时监控与优化。',
+                    category: '清洁能源'
+                },
+                {
+                    id: 3,
+                    name: '区块链供应链溯源',
+                    team: '分布式技术实验室',
+                    date: '2023-12-25',
+                    description: '基于区块链技术的全链路供应链溯源系统，保障产品从源头到终端的全流程透明可信。',
+                    category: '区块链'
+                }
+            ]);
+
+            const [editProject, setEditProject] = useState({
+                id: null,
+                name: '',
+                team: '',
+                description: '',
+                date: '',
+                category: ''
+            });
+
+            const filteredProjects = projects.filter(project => 
+                project.name.includes(searchTerm) || 
+                project.category.includes(searchTerm)
+            );
+
+            const handleEdit = (project) => {
+                setEditProject({
+                    id: project.id,
+                    name: project.name,
+                    team: project.team,
+                    description: project.description,
+                    date: project.date,
+                    category: project.category
+                });
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (project) => {
+                setEditProject({
+                    id: project.id,
+                    name: project.name,
+                    team: project.team,
+                    description: project.description,
+                    date: project.date,
+                    category: project.category
+                });
+                setShowDeleteModal(true);
+            };
+
+            const handleViewDetails = (project) => {
+                setSelectedProjectForDetail(project);
+                setShowProjectDetail(true);
+            };
+
+            const handleAddProject = () => {
+                setEditProject({
+                    id: null,
+                    name: '',
+                    team: '',
+                    description: '',
+                    date: '',
+                    category: ''
+                });
+                setShowEditModal(true);
+            };
+
+            const handleSaveEdit = () => {
+                setProjects(prev => prev.map(p => 
+                    p.id === editProject.id ? editProject : p
+                ));
+                setShowEditModal(false);
+            };
+
+            const handleConfirmDelete = () => {
+                setProjects(prev => prev.filter(p => p.id !== editProject.id));
+                setShowDeleteModal(false);
+                setShowEditModal(false);
+            };
+
+            const handleExportPDF = () => {
+                console.log('Exporting to PDF...');
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-blue-600 text-white px-6 py-4">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <img src="https://picsum.photos/id/91/40/40" alt="Logo" className="w-10 h-10 rounded-lg" />
+                                <h1 className="text-xl font-semibold">项目路演信息</h1>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="text"
+                                    placeholder="搜索项目"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="px-3 py-2 rounded text-gray-800 w-48"
+                                />
+                                <button className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded text-white text-sm">
+                                    <i className="fas fa-arrow-right mr-1"></i>
+                                    新增项目
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-6 py-6">
+                        <div className="flex space-x-6">
+                            {/* Left Content */}
+                            <div className="flex-1">
+                                <div className="bg-white rounded-lg shadow-sm border">
+                                    <div className="p-6 border-b">
+                                        <div className="flex items-center justify-between">
+                                            <h2 className="text-lg font-semibold flex items-center">
+                                                <i className="fas fa-play-circle text-blue-500 mr-2"></i>
+                                                项目路演列表
+                                            </h2>
+                                            <span className="text-sm text-gray-500">共 {filteredProjects.length} 个项目</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="p-6 space-y-6">
+                                        {filteredProjects.map(project => (
+                                            <div key={project.id} className="border rounded-lg p-4">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-start space-x-3 mb-2">
+                                                            <img src="https://picsum.photos/id/1/80/80" alt={project.name} className="w-20 h-20 rounded-lg object-cover" />
+                                                            <div className="flex-1">
+                                                                <h3 className="text-lg font-semibold">{project.name}</h3>
+                                                                <div className="flex items-center text-sm text-gray-500 space-x-4 mt-1">
+                                                                    <span className="flex items-center">
+                                                                        <i className="fas fa-users mr-1"></i>
+                                                                        团队: {project.team}
+                                                                    </span>
+                                                                    <span className="flex items-center">
+                                                                        <i className="fas fa-calendar mr-1"></i>
+                                                                        路演日期: {project.date}
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-gray-600 mt-2">{project.description}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2 mt-3">
+                                                            {project.tags.map((tag, index) => (
+                                                                <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center space-x-3 ml-4">
+                                                        <button 
+                                                            onClick={() => handleEdit(project)}
+                                                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm flex items-center"
+                                                        >
+                                                            <i className="fas fa-edit mr-1"></i>
+                                                            编辑
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDelete(project)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm flex items-center"
+                                                        >
+                                                            <i className="fas fa-trash mr-1"></i>
+                                                            删除
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleViewDetails(project)}
+                                                            className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm flex items-center"
+                                                        >
+                                                            <i className="fas fa-eye mr-1"></i>
+                                                            查看详情
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Add Project Button */}
+                                    <div className="p-6 text-center">
+                                        <button 
+                                            onClick={handleAddProject}
+                                            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg flex items-center mx-auto"
+                                        >
+                                            <span className="mr-2">+</span>
+                                            添加项目
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Features Section */}
+                                <div className="bg-white rounded-lg shadow-sm border mt-6">
+                                    <div className="p-6">
+                                        <div className="flex items-center mb-4">
+                                            <i className="fas fa-star text-yellow-500 mr-2"></i>
+                                            <h3 className="text-lg font-semibold">特色</h3>
+                                        </div>
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <div className="flex items-start space-x-3">
+                                                <img src="https://picsum.photos/id/2/40/40" alt="特色 1" className="w-10 h-10 rounded object-cover" />
+                                                <div>
+                                                    <h4 className="font-medium">可一键导出路演报告</h4>
+                                                    <p className="text-sm text-gray-600">便于汇报和归档</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-80">
+                                <div className="bg-white rounded-lg shadow-sm border p-4">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-chart-bar text-orange-500 mr-2"></i>
+                                        <span className="font-semibold">数据统计</span>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium mb-2">路演项目统计</h4>
+                                            <canvas height="120" className="rounded-lg"></canvas>
+                                            <div className="text-xs text-gray-500 mt-2">
+                                                <div>数据更新于今日 09:30</div>
+                                                <div>近7天数据</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-orange-500">3</div>
+                                                <div className="text-sm text-gray-600">项目总数</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-orange-500">2</div>
+                                                <div className="text-sm text-gray-600">待审核</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-green-500">5</div>
+                                                <div className="text-sm text-gray-600">已完路演</div>
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-purple-500">12</div>
+                                                <div className="text-sm text-gray-600">关注人数</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="fixed top-0 right-0 w-96 h-full bg-white shadow-lg z-50 p-6">
+                        <div className="space-y-6">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="flex items-center mb-3">
+                                    <i className="fas fa-road text-blue-500 mr-2"></i>
+                                    <h3 className="font-semibold">项目列表</h3>
+                                </div>
+                                <p className="text-sm text-gray-600">每个项目需在提交前确认团队成员信息完整，否则审核不通过。--项目路演平台 版权所有 <span className="text-xs text-gray-500">© 2023 演行中心</span></p>
+                            </div>
+
+                            <button 
+                                onClick={() => setCurrentView('data')}
+                                className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                数据统计
+                            </button>
+
+                            <button 
+                                onClick={() => setCurrentView('help')}
+                                className="w-full bg-gray-200 text-gray-600 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                帮助中心
+                            </button>
+                        </div>
+
+                        {/* Help Center */}
+                        {currentView === 'help' && (
+                            <div className="mt-8">
+                                <h3 className="font-semibold mb-4">帮助中心</h3>
+                                <div className="space-y-2 text-sm">
+                                    <p className="cursor-pointer text-blue-500 hover:underline">如何添加项目</p>
+                                    <p className="cursor-pointer text-blue-500 hover:underline">如何导出路演报告</p>
+                                    <p className="cursor-pointer text-blue-500 hover:underline">常见问题</p>
+                                    <p className="cursor-pointer text-blue-500 hover:underline">联系客服</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold">编辑项目</h3>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium">项目名称*</label>
+                                        <input 
+                                            type="text" 
+                                            value={editProject.name}
+                                            onChange={(e) => setEditProject({...editProject, name: e.target.value})}
+                                            className="w-full p-2 border rounded-lg"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium">团队名称*</label>
+                                        <input 
+                                            type="text" 
+                                            value={editProject.team}
+                                            onChange={(e) => setEditProject({...editProject, team: e.target.value})}
+                                            className="w-full p-2 border rounded-lg"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium">项目简介*</label>
+                                        <textarea 
+                                            value={editProject.description}
+                                            onChange={(e) => setEditProject({...editProject, description: e.target.value})}
+                                            className="w-full p-2 border rounded-lg h-20"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium">路演日期*</label>
+                                        <input 
+                                            type="date" 
+                                            value={editProject.date}
+                                            onChange={(e) => setEditProject({...editProject, date: e.target.value})}
+                                            className="w-full p-2 border rounded-lg"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium">项目分类</label>
+                                        <select 
+                                            value={editProject.category}
+                                            onChange={(e) => setEditProject({...editProject, category: e.target.value})}
+                                            className="w-full p-2 border rounded-lg"
+                                        >
+                                            <option value="人工智能">人工智能</option>
+                                            <option value="清洁能源">清洁能源</option>
+                                            <option value="区块链">区块链</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveEdit}
+                                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold">确认删除该项目？</h3>
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <p className="mb-6 text-gray-600">此操作不可撤销！
+
+           {selectedProjectForDetail ? (
+                <div className="mt-6">
+                    <div className="flex items-start space-x-2 mb-4">
+                        <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">团队成员：</span>
+                        {selectedProjectForDetail.members.map((member, index) => (
+                            <span key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">
+                                {member}
+                                    {index < selectedProjectForDetail.members.length - 1 && 
+                                     <span className="bg-blue-100 text-blue-600 px-1 py-1 rounded text-xs">|</span>
+                                    }
+                            </span>
+                        ))}
+                    </div>
+                    <button 
+                        onClick={handleExportPDF}
+                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mr-2"
+                    >
+                        <i className="fas fa-download mr-2"></i>
+                        导出PDF
+                    </button>
+                </div>
+            ) : null}
+
+                                    {/* Project Detail Modal */}
+                                    {(currentView === 'detail' || showProjectDetail) && (
+                                        <div className="space-y-6">
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                                <h4 className="text-lg font-semibold mb-2 flex items-center">
+                                                    <i className="fas fa-info-circle text-blue-500 mr-2"></i>
+                                                    项目详情
+                                                </h4>
+                                                <div className="flex items-start space-x-4">
+                                                    <img src="https://picsum.photos/id/1/100/100" alt={selectedProjectForDetail?.name} className="w-20 h-20 rounded-lg object-cover" />
+                                                    <div>
+                                                        <h5 className="text-xl font-semibold">{selectedProjectForDetail?.name}</h5>
+                                                        <p className="text-sm text-gray-600">{selectedProjectForDetail?.team} <br /> {selectedProjectForDetail?.date}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <h6 className="font-medium">项目简介</h6>
+                                                        <p className="text-sm text-gray-600">{selectedProjectForDetail?.description}</p>
+                                                    </div>
+                                                    <div>
+                                                        <h6 className="font-medium">项目分类</h6>
+                                                        <p className="text-sm text-gray-600">{selectedProjectForDetail?.category}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h6 className="font-medium">基本信息</h6>
+                                                    <div className="grid grid-cols-2 gap-4 mt-3">
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">路演日期</p>
+                                                            <p className="font-medium">{selectedProjectForDetail?.date || '2023-12-15'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">项目分类</p>
+                                                            <p className="font-medium">{selectedProjectForDetail?.category || '人工智能'}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h6 className="font-medium">团队成员</h6>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {selectedProjectForDetail?.members ? (
+                                                            selectedProjectForDetail.members.map((member, index) => (
+                                                                <div key={index} className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">
+                                                                    {member}
+                                                                    {index < selectedProjectForDetail.members.length - 1 && <span className="bg-blue-100 text-blue-600 px-0.5 py-1.5 mx-1 text-xs">|</span>}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">张明</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h6 className="font-medium">相关文档</h6>
+                                                    <div className="mt-2 flex items-center space-x-3">
+                                                        <span className="text-blue-500">
+                                                            <i className="fas fa-file-powerpoint"></i>
+                                                        </span>
+                                                        <span>路演PPT</span>
+                                                        <span className="text-orange-500">
+                                                            <i className="fas fa-file-pdf"></i>
+                                                        </span>
+                                                        <span>技术白皮书</span>
+                                                        <span className="text-gray-500">
+                                                            <i className="fas fa-file"></i>
+                                                        </span>
+                                                        <span>财务预测</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <h6 className="font-medium">路演视频</h6>
+                                                    <div className="mt-3">
+                                                        <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                                            <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center mx-auto mb-2">
+                                                                <i className="fas fa-play text-white"></i>
+                                                            </div>
+                                                            <p className="text-sm text-gray-600">请使用 CCV 发放的视频链接等资源</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex space-x-3">
+                                                    <button 
+                                                        onClick={handleExportPDF}
+                                                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center mr-2"
+                                                    >
+                                                        <i className="fas fa-download mr-2"></i>
+                                                        导出PDF
+                                                    </button>
+                                                    <button className="bg-gray-600 text-white px-4 py-2 rounded flex items-center">
+                                                        <i className="fas fa-arrow-left mr-2"></i>
+                                                        返回
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Modal Background Click Close */}
+                                    <div 
+                                        className="fixed inset-0 z-40"
+                                        onClick={() => {
+                                            setCurrentView('overview');
+                                            setShowProjectDetail(false);
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

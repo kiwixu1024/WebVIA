@@ -1,0 +1,620 @@
+<html>
+<head>
+    <title>在线乐谱管理区</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const MusicManager = () => {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showAddingModal, setShowAddingModal] = useState(false);
+            const [showEditingModal, setShowEditingModal] = useState(false);
+            const [showDeletingModal, setShowDeletingModal] = useState(false);
+            const [selectedMusic, setSelectedMusic] = useState(null);
+            const [deletingMusic, setDeletingMusic] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState('所有类别');
+            const [categoryStates, setCategoryStates] = useState({
+                classical: false,
+               2ัก1: false, 
+                violin: false, 
+                piano: false, 
+                other: false
+            });
+
+            const [musicData, setMusicData] = useState([
+                {
+                    id: 1,
+                    name: '月光奏鸣曲',
+                    composer: '贝多芬',
+                    instrument: '钢琴',
+                    category: '古典',
+                    type: '独奏',
+                    tags: ['古典', '独奏', '现代'],
+                    categoryClass: 'bg-yellow-100 text-yellow-800'
+                },
+                {
+                    id: 2,
+                    name: '卡农',
+                    composer: '帕赫贝尔',
+                    instrument: '小提琴',
+                    category: '古典',
+                    type: '合奏',
+                    tags: ['古典', '合奏', '巴洛克'],
+                    categoryClass: 'bg-yellow-100 text-yellow-800'
+                },
+                {
+                    id: 3,
+                    name: '天空之城',
+                    composer: '久石让',
+                    instrument: '大提琴',
+                    category: '现代',
+                    type: '电影配乐',
+                    tags: ['现代', '电影', '动漫'],
+                    categoryClass: 'bg-gray-100 text-gray-800'
+                }
+            ]);
+
+            const categories = ['古典', '现代', '中国', '欧美', '爵士', '流行', '民族', '摇滚'];
+
+            const filteredMusic = musicData.filter(music => {
+                const matchesSearch = searchTerm === '' || 
+                    music.name.includes(searchTerm) || 
+                    music.composer.includes(searchTerm);
+                const matchesCategory = selectedCategory === '所有类别' || 
+                    (selectedCategory === '钢琴' && music.instrument === '钢琴') ||
+                    music.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            const handleSearch = (e) => {
+                setSearchTerm(e.target.value);
+            };
+
+            const handleDeleteClick = (music) => {
+                setDeletingMusic(music);
+                setShowDeletingModal(true);
+            };
+
+            const confirmDelete = () => {
+                setMusicData(musicData.filter(music => music.id !== deletingMusic.id));
+                setShowDeletingModal(false);
+                setDeletingMusic(null);
+            };
+
+            const openEditModal = (music) => {
+                setSelectedMusic(music);
+                setShowEditingModal(true);
+            };
+
+            const handleCategoryToggle = (category) => {
+                setCategoryStates(prev => ({
+                    ...prev,
+                    [category]: !prev[category]
+                }));
+            };
+
+            const canShow = searchTerm === '月光奏鸣曲' /* filteredMusic.length > 0 */;
+
+            return (
+                <div className="min-h-screen bg-stone-50">
+                    {/* Header */}
+                    <div className="bg-amber-800 text-white px-6 py-3 flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                            <div className="bg-yellow-500 p-2 rounded">
+                                <i className="fas fa-music text-amber-800"></i>
+                            </div>
+                            <span className="text-lg font-medium">在线乐谱管理区</span>
+                        </div>
+                        <div className="flex space-x-4">
+                            <button className="bg-amber-700 hover:bg-amber-600 px-3 py-1 rounded text-sm">概览</button>
+                            <button className="text-white hover:text-gray-200 px-3 py-1 text-sm">管理</button>
+                            <button className="text-white hover:text-gray-200 px-3 py-1 text-sm">统计</button>
+                            <button className="text-white hover:text-gray-200 px-3 py-1 text-sm">帮助</button>
+                        </div>
+                    </div>
+
+                    <div className="flex min-h-screen">
+                        {/* Sidebar */}
+                        <div className="w-80 bg-amber-800 text-white p-6 space-y-6">
+                            {/* Breadcrumb */}
+                            <div className="space-y-2">
+                                <div className="bg-amber-700 p-3 rounded">
+                                    <i className="fas fa-home mr-2"></i>
+                                    <span className="font-medium">功能导航</span>
+                                </div>
+                                <div className="p-2 hover:bg-amber-700 rounded cursor-pointer">
+                                    🔍 乐谱库
+                                </div>
+                                <div className="p-2 hover:bg-amber-700 rounded cursor-pointer">
+                                    ✕ 上传乐谱
+                                </div>
+                                <div className="p-2 hover:bg-amber-700 rounded cursor-pointer">
+                                    ▾ 分类筛选
+                                </div>
+                                <div className="p-2 hover:bg-amber-700 rounded cursor-pointer">
+                                    ❓ 帮助中心
+                                </div>
+                            </div>
+
+                            {/* Category Selection */}
+                            <div>
+                                <div className="bg-amber-700 p-2 rounded">
+                                    <i className="fas fa-filter mr-2"></i>
+                                    <span className="font-medium">乐器分类</span>
+                                </div>
+                                <div 
+                                    className="m-0 p-2 hover:bg-amber-700 rounded cursor-pointer flex items-center"
+                                    onClick={() => handleCategoryToggle('钢琴')}
+                                >
+                                    ▴ {categoryStates.classical ? '■钢琴→
+■小提琴
+■吉他
+■管弦乐' : '钢琴'}
+                                </div>
+                            </div>
+
+                            {/* Help Section */}
+                            <div>
+                                <div className="bg-amber-700 p-2 rounded">
+                                    <i className="fas fa-question-circle mr-2"></i>
+                                    <span className="font-medium">帮助中心</span>
+                                </div>
+                                <div className="text-sm text-amber-200 text-left p-3 bg-amber-900 rounded">
+                                    <p>如何上传乐谱？点击"上传乐谱"按钮并选择文件即可。</p>
+                                    <p>如何筛选乐谱？在左侧复选框中选择您想要的乐器类型，列表会自动更新。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <div className="max-w-6xl mx-auto">
+                                {/* Header Section */}
+                                <div className="text-center mb-8">
+                                    <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                                        在线乐谱管理区 — 您的数字化乐谱管家
+                                    </h1>
+                                    <p className="text-gray-600 text-sm">
+                                        在这里快速浏览、分类、管理您所有的乐谱资源，一键上传、编辑与共享。
+                                    </p>
+                                </div>
+
+                                {/* Search Section */}
+                                <div className="flex justify-center mb-8">
+                                    <div className="relative w-80">
+                                        <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input
+                                            type="text"
+                                            placeholder="搜索乐谱名称或作曲家..."
+                                            value={searchTerm}
+                                            onChange={handleSearch}
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Overview Section */}
+                                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="bg-amber-800 text-white p-2 rounded">
+                                                <i className="fas fa-globe"></i>
+                                            </div>
+                                            <h2 className="text-lg font-medium text-gray-800">乐谱概览</h2>
+                                        </div>
+                                        <button 
+                                            onClick={() => setShowAddingModal(true)}
+                                            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                                        >
+                                            <span>✚</span>
+                                            <span>新增乐谱</span>
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {filteredMusic.map(music => (
+                                            <div key={music.id} className="border border-gray-200 rounded-lg overflow-hidden bg-white relative">
+                                                <div className="relative">
+                                                    <img 
+                                                        src={music.id === 1 ? "https://picsum.photos/id/5/400/250" : "https://picsum.photos/id/200/400/250"} 
+                                                        alt={music.name}
+                                                        className="w-full h-48 object-cover"
+                                                    />
+                                                    <div className={`absolute top-2 left-2 w-6 h-6 ${music.categoryClass} rounded flex items-center justify-center`}>
+                                                        <span className={`text-xs font-medium ${music.categoryClass === 'bg-yellow-100 text-yellow-800' ? 'text-yellow-800' : 'text-gray-800'}`}>
+                                                            {music.category}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="p-4">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h3 className="font-medium text-gray-800 text-lg">{music.name}</h3>
+                                                        <span className="text-xs text-gray-500">{music.instrument}</span>
+                                                    </div>
+                                                    
+                                                    <p className="text-sm text-gray-600 mb-3">
+                                                        作曲家：{music.composer}
+                                                    </p>
+                                                    
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="flex space-x-2">
+                                                            {music.tags.map((tag, index) => (
+                                                                <span key={index} className={`text-xs px-2 py-1 rounded ${
+                                                                    music.categoryClass === 'bg-yellow-100 text-yellow-800' 
+                                                                    ? 'bg-yellow-100 text-yellow-800' 
+                                                                    : 'bg-gray-100 text-gray-800'
+                                                                }`}>
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex space-x-2">
+                                                            <button 
+                                                                onClick={() => openEditModal(music)}
+                                                                className="text-gray-500 hover:text-gray-700"
+                                                            >
+                                                                ❤ 编辑
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteClick(music)}
+                                                                className="text-red-500 hover:text-red-700"
+                                                            >
+                                                                ❌ 删除
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 p-6">
+                            {/* Add New Music Modal */}
+                            {showAddingModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-6">
+                                    <div className="bg-white rounded-lg max-w-md w-full p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-lg font-medium text-gray-800">新增乐谱</h3>
+                                            <button 
+                                                onClick={() => setShowAddingModal(false)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">乐谱名称</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">作曲家</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">乐器类型</label>
+                                                <select className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                                    <option>钢琴</option>
+                                                    <option>小提琴</option>
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">标签 (用逗号分隔)</label>
+                                                <input
+                                                    type="text"
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">上传文件</label>
+                                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                                    <div className="text-gray-400 mb-2">
+                                                        <i className="fas fa-cloud-upload-alt text-3xl"></i>
+                                                    </div>
+                                                    <p className="text-gray-500 text-sm flex items-center justify-center">
+                                                        点击或拖拽文件到这里
+                                                        <br />
+                                                        支持 PDF, JPG, PNG 格式
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex space-x-3 mt-6">
+                                            <button className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                                取消
+                                            </button>
+                                            <button className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded">
+                                                保存
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Edit Music Modal */}
+                            {showEditingModal && selectedMusic && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-6">
+                                    <div className="bg-white rounded-lg max-w-md w-full p-6">
+                                        <div className="flex justify-between items-center mb-6">
+                                            <h3 className="text-lg font-medium text-gray-800">编辑乐谱</h3>
+                                            <button 
+                                                onClick={() => setShowEditingModal(false)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">乐谱名称</label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedMusic.name}
+                                                    className="w-full p-2 border-2 border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">作曲家</label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedMusic.composer}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">乐器类型</label>
+                                                <select 
+                                                    value={selectedMusic.instrument}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                >
+                                                    {categories.map(category => (
+                                                        <option key={category} value={category}>{category}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">标签 (用逗号分隔)</label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedMusic.tags.join(', ')}
+                                                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex space-x-3 mt-6">
+                                            <button className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
+                                                取消
+                                            </button>
+                                            <button className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded">
+                                                保存
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Delete Confirmation Modal */}
+                            {showDeletingModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                    <div className="bg-white rounded-lg p-6 w-96 mx-4">
+                                        <div className="flex items-center mb-4">
+                                            <div className="bg-red-100 rounded-full p-2 mr-3">
+                                                <i className="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                                            </div>
+                                            <h3 className="text-lg font-medium text-gray-800">确定要删除乐谱吗？</h3>
+                                        </div>
+                                        <p className="text-gray-600 text-sm mb-6">
+                                            您将要删除乐谱 "{selectedMusic?.name || ''}"，此操作无法撤销。
+                                        </p>
+                                        <div className="flex space-x-3">
+                                            <button 
+                                                onClick={() => setShowDeletingModal(false)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={confirmDelete}
+                                                className="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded"
+                                            >
+                                                确定删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Statistics Section */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium text-gray-800">统计信息</h3>
+                                    <button className="bg-amber-700 text-white px-3 py-1 rounded text-xs">导出报告</button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="text-sm text-gray-600">总乐谱数</span>
+                                            <span className="text-xl font-bold text-amber-700">{musicData.length}</span>
+                                            <span className="text-sm text-gray-500">目标：150</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-amber-500 h-2 rounded-full" style={{width: `${Math.min((musicData.length / 150) * 100, 100)}%`}}></div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="grid grid-cols-2 gap-4 text-center">
+                                            <div>
+                                                <div className="text-2xl font-bold text-amber-700">15</div>
+                                                <div className="text-sm text-gray-500">月度新增</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-2xl font-bold text-amber-700">10</div>
+                                                <div className="text-sm text-gray-500">月度活跃</div>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">本月活跃数量</p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6">
+                                    <h4 className="font-medium text-gray-800 mb-3">新增乐谱月度统计</h4>
+                                    <div className="space-y-2">
+                                        {['1月', '2月', '3月', '4月', '5月', '6月'].map(month => (
+                                            <div key={month} className="flex items-center">
+                                                <div className="w-3 h-3 bg-amber-500 mr-2"></div>
+                                                <span className="text-sm text-gray-600">{month}</span>
+                                                <div className="flex-1 mx-2 h-4 bg-yellow-100 rounded-full">
+                                                    <div className={`h-4 ${month === '2月' ? 'w-20' : 'w-8'} ${month === '2月' ? 'bg-amber-500' : 'bg-amber-400'} rounded-full`}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mt-6">
+                                    <h4 className="font-medium text-gray-800 mb-3">乐器类型分布</h4>
+                                    <div className="space-y-2">
+                                        {categories.map(category => (
+                                            <div key={category} className="flex items-center">
+                                                <div className={`w-2 h-2 ${
+                                                    category === '钢琴' ? 'bg-amber-500' :
+                                                    category === '古典' ? 'bg-gray-400' : 
+                                                    category === '现代' ? 'bg-blue-500' :
+                                                    category === '中国' ? 'bg-orange-500' :
+                                                    category === '欧美' ? 'bg-green-500' :
+                                                    category === '爵士' ? 'bg-purple-500' : 'bg-red-500'
+                                                } rounded-full mr-2`}></div>
+                                                <span className="text-sm">{category}</span>
+                                                <span className="text-sm text-gray-500 ml-auto">1</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Category Selection Sidebar */}
+                    <div className="hidden md:block w-80">
+                        <div className="p-6 bg-amber-800 text-white">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-medium">筛选条件</h3>
+                                <button className="text-white hover:text-gray-200">
+                                    <i className="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.classical}
+                                            onChange={() => handleCategoryToggle('古典')}
+                                            className="mr-2"
+                                        />
+                                        <span>古典</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.2acks1}
+                                            onChange={() => handleCategoryToggle('2aks1')}
+                                            className="mr-2"
+                                        />
+                                        <span>2aks1</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.violin}
+                                            onChange={() => handleCategoryToggle('小提琴')}
+                                            className="mr-2"
+                                        />
+                                        <span>小提琴</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.piano}
+                                            onChange={() => handleCategoryToggle('钢琴')}
+                                            className="mr-2"
+                                        />
+                                        <span>钢琴</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.other}
+                                            onChange={() => handleCategoryToggle('吉他')}
+                                            className="mr-2"
+                                        />
+                                        <span>吉他</span>
+                                    </label>
+                                </div>
+                                <div className="flex items-center">
+                                    <label className="flex items-center">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={categoryStates.percussion}
+                                            onChange={() => handleCategoryToggle('管弦乐')}
+                                            className="mr-2"
+                                        />
+                                        <span>管弦乐</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<MusicManager />, document.getElementById('root'));
+    </script>
+</body>
+</html>

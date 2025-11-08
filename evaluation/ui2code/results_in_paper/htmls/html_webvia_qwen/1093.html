@@ -1,0 +1,708 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云存储管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        function App() {
+            const [showPhotoModal, setShowPhotoModal] = useState(false);
+            const [showVideoModal, setShowVideoModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingPhoto, setEditingPhoto] = useState(null);
+            const [deletingPhoto, setDeletingPhoto] = useState(null);
+            
+            const photos = [
+                {
+                    id: 1,
+                    title: 'Family_Vacation.jpg',
+                    date: '2023-06-10',
+                    tags: ['旅行', '家庭'],
+                    image: 'https://picsum.photos/id/1018/400/300'
+                },
+                {
+                    id: 2,
+                    title: 'Beach_Sunset.jpg',
+                    date: '2023-06-08',
+                    tags: ['旅行', '风景'],
+                    image: 'https://picsum.photos/id/1015/400/300'
+                },
+                {
+                    id: 3,
+                    title: 'Mountain_Hiking.jpg',
+                    date: '2023-06-05',
+                    tags: ['运动', '风景'],
+                    image: 'https://picsum.photos/id/1016/400/300'
+                },
+                {
+                    id: 4,
+                    title: 'Birthday_Cake.jpg',
+                    date: '2023-06-12',
+                    tags: ['生日', '家庭'],
+                    image: 'https://picsum.photos/id/1025/400/300'
+                },
+                {
+                    id: 5,
+                    title: 'Office_Party.jpg',
+                    date: '2023-06-07',
+                    tags: ['工作', '聚餐'],
+                    image: 'https://picsum.photos/id/1062/400/300'
+                }
+            ];
+            
+            const videos = [
+                {
+                    id: 1,
+                    title: 'Birthday_Party.mp4',
+                    date: '2023-06-12',
+                    tags: ['生日', '家庭'],
+                    image: 'https://picsum.photos/id/1015/600/300',
+                    duration: '2:30'
+                },
+                {
+                    id: 2,
+                    title: 'Vacation_Highlights.mp4',
+                    date: '2023-06-09',
+                    tags: ['旅行', '家庭'],
+                    image: 'https://picsum.photos/id/1074/600/300',
+                    duration: '5:12'
+                },
+                {
+                    id: 3,
+                    title: 'Cooking_Tutorial.mp4',
+                    date: '2023-06-06',
+                    tags: ['烹饪', '教程'],
+                    image: 'https://picsum.photos/id/1080/600/300',
+                    duration: '10:45'
+                }
+            ];
+            
+            const categories = [
+                { name: '旅行', count: 3 },
+                { name: '家庭', count: 4 },
+                { name: '生日', count: 2 },
+                { name: '工作', count: 1 },
+                { name: '聚会', count: 1 },
+                { name: '风景', count: 2 },
+                { name: '运动', count: 1 },
+                { name: '烹饪', count: 1 },
+                { name: '教程', count: 1 }
+            ];
+            
+            const getDurationTime = (minutes) => {
+                const h = Math.floor(minutes / 60);
+                const m = minutes % 60;
+                return `${h}:${m.toString().padStart(2, '0')}`;
+            };
+            
+            const handleEditPhoto = (photo) => {
+                setEditingPhoto(photo);
+                setShowEditModal(true);
+            };
+            
+            const handleDeletePhoto = (photo) => {
+                setDeletingPhoto(photo);
+                setShowDeleteModal(true);
+            };
+            
+            const confirmDelete = () => {
+                if (deletingPhoto) {
+                    // 移除照片
+                    Photos.splice(Photos.findIndex(p => p.id === deletingPhoto.id), 1);
+                }
+                setShowDeleteModal(false);
+                setDeletingPhoto(null);
+            };
+            
+            const saveEdit = () => {
+                // 保存文件
+                setShowEditModal(false);
+                setEditingPhoto(null);
+            };
+            
+            const cancelEdit = () => {
+                setShowEditModal(false);
+                setEditingPhoto(null);
+            };
+            
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-slate-700 text-white p-4">
+                        <div className="flex items-center">
+                            <img src="https://picsum.photos/id/1080/40/40" className="w-10 h-10 rounded-full mr-4" alt="avatar" />
+                            <div>
+                                <h1 className="text-xl font-bold">云存储管理系统</h1>
+                                <p className="text-sm text-gray-300">安全可靠的云存储解决方案</p>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-white p-4 min-h-screen">
+                            <div className="mb-6">
+                                <h2 className="text-blue-500 font-semibold mb-3 flex items-center">
+                                    <i className="fas fa-folder mr-2"></i>
+                                    我的图库
+                                </h2>
+                                <nav className="space-y-1">
+                                    <button 
+                                        onClick={() => {setShowPhotoModal(true); setShowVideoModal(false);}}
+                                        className="w-full text-left p-2 bg-blue-50 rounded hover:bg-blue-50 flex items-center text-blue-600"
+                                    >
+                                        <i className="fas fa-images mr-3"></i>
+                                        我的视频
+                                    </button>
+                                    <button 
+                                        onClick={() => {setShowVideoModal(true); setShowPhotoModal(false);}}
+                                        className="w-full text-left p-2 bg-gray-50 rounded hover:bg-gray-100 flex items-center text-gray-600"
+                                    >
+                                        <i className="fas fa-share-alt mr-3"></i>
+                                        分享中心
+                                    </button>
+                                    <button className="w-full text-left p-2 bg-gray-50 rounded hover:bg-gray-100 flex items-center text-gray-600">
+                                        <i className="fas fa-cog mr-3"></i>
+                                        设置
+                                    </button>
+                                </nav>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <img src="https://picsum.photos/id/1011/100/70" className="w-20 h-14 rounded mb-2" alt="avatar" />
+                                <p className="text-sm text-gray-600">已使用空间</p>
+                                <p className="text-sm text-gray-600">64.9 GB</p>
+                                <p className="text-xs text-gray-500 mt-1">总计：100 GB</p>
+                            </div>
+                            
+                            <div>
+                                <p className="text-xs text-gray-500 mb-2">操作指南</p>
+                                <div className="space-y-1 text-xs">
+                                    <div className="flex items-center text-blue-600"><i className="fas fa-question-circle mr-2"></i>如何备份文件？</div>
+                                    <div className="flex items-center text-blue-600"><i className="fas fa-question-circle mr-2"></i>如何分享给朋友？</div>
+                                    <div className="flex items-center text-blue-600"><i className="fas fa-question-circle mr-2"></i>常见问题FAQ</div>
+                                </div>
+                            </div>
+                        </aside>
+                        
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            {/* Navigation */}
+                            <div className="flex justify-center mb-6">
+                                <nav className="flex space-x-2 bg-white rounded">
+                                    <button className="px-4 py-2 text-sm font-medium text-blue-500 bg-blue-50">全部文件</button>
+                                    <button className="px-4 py-2 text-sm font-medium text-gray-500 bg-gray-50">相册管理</button>
+                                    <button className="px-4 py-2 text-sm font-medium text-gray-500 bg-gray-50">智能分类</button>
+                                    <button className="px-4 py-2 text-sm font-medium text-gray-500 bg-gray-50">回收站</button>
+                                </nav>
+                            </div>
+                            
+                            {/* Upload Buttons */}
+                            <div className="flex justify-center space-x-4 mb-6">
+                                <button 
+                                    onClick={() => setShowPhotoModal(true)}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded flex items-center"
+                                >
+                                    <i className="fas fa-plus mr-2"></i>添加照片
+                                </button>
+                                <button 
+                                    onClick={() => setShowVideoModal(true)}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded flex items-center"
+                                >
+                                    <i className="fas fa-upload mr-2"></i>上传视频
+                                </button>
+                            </div>
+                            
+                            {/* Photo Album */}
+                            <div className="mb-8">
+                                <h2 className="text-lg font-semibold mb-4 flex items-center">
+                                    <i className="fas fa-images mr-2"></i>
+                                    我的图库
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {/* Photo 1 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1018/400/300" className="w-full h-48 object-cover rounded-t-lg" alt="Family_Vacation.jpg" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">{editingPhoto?.title || 'Family_Vacation.jpg'}</h3>
+                                            <div className="text-sm text-gray-500 mb-1">{editingPhoto?.date || '2023-06-10'}</div>
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">{editingPhoto?.tags?.[0] || '旅行'}</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">{editingPhoto?.tags?.[1] || '家庭'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Photo 2 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1015/400/300" className="w-full h-48 object-cover rounded-t-lg" alt="Beach_Sunset.jpg" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Beach_Sunset.jpg</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-08</div>
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">旅行</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">风景</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Photo 3 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1016/400/300" className="w-full h-48 object-cover rounded-t-lg" alt="Mountain_Hiking.jpg" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Mountain_Hiking.jpg</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-05</div>
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">运动</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">风景</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Photo 4 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1025/400/300" className="w-full h-48 object-cover rounded-t-lg" alt="Birthday_Cake.jpg" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Birthday_Cake.jpg</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-12</div>
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">生日</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">家庭</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Photo 5 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1062/400/300" className="w-full h-48 object-cover rounded-t-lg" alt="Office_Party.jpg" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Office_Party.jpg</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-07</div>
+                                            <div className="flex flex-wrap gap-1">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">工作</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">聚餐</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Videos */}
+                            <div>
+                                <h2 className="text-lg font-semibold mb-4 flex items-center">
+                                    <i className="fas fa-play-circle mr-2"></i>
+                                    视频 (3)
+                                </h2>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {/* Video 1 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1015/600/300" className="w-full h-64 object-cover rounded-t-lg" alt="Birthday_Party.mp4" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Birthday_Party.mp4</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-12</div>
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">生日</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">家庭</span>
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                <i className="fas fa-play-circle text-gray-400 text-2xl mr-2"></i>
+                                                <span className="text-sm">{getDurationTime(142)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Video 2 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1074/600/300" className="w-full h-64 object-cover rounded-t-lg" alt="Vacation_Highlights.mp4" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Vacation_Highlights.mp4</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-09</div>
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">旅行</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">家庭</span>
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                <i className="fas fa-play-circle text-gray-400 text-2xl mr-2"></i>
+                                                <span className="text-sm">{getDurationTime(312)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Video 3 */}
+                                    <div className="bg-white rounded-lg shadow">
+                                        <img src="https://picsum.photos/id/1080/600/300" className="w-full h-64 object-cover rounded-t-lg" alt="Cooking_Tutorial.mp4" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">Cooking_Tutorial.mp4</h3>
+                                            <div className="text-sm text-gray-500 mb-1">2023-06-06</div>
+                                            <div className="flex flex-wrap gap-1 mb-3">
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">烹饪</span>
+                                                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">教程</span>
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                <i className="fas fa-play-circle text-gray-400 text-2xl mr-2"></i>
+                                                <span className="text-sm">{getDurationTime(645)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                        
+                        {/* Right Sidebar */}
+                        <aside className="w-72 bg-white p-4 min-h-screen">
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                                    <i className="fas fa-chart-bar mr-2"></i>
+                                    存储统计
+                                </h3>
+                                
+                                <div className="mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span>已使用空间</span>
+                                        <span className="text-blue-600 font-semibold">65%</span>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '65%'}}></div>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        <div>已用: 64.9 GB</div>
+                                        <div>总计: 100 GB</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center">
+                                        <img src="https://picsum.photos/id/1080/40/40" className="w-10 h-10 rounded-lg mx-auto mb-2" alt="photos" />
+                                        <div className="text-sm font-semibold">照片</div>
+                                        <div className="text-blue-600 font-bold">5 张</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <img src="https://picsum.photos/id/1041/40/40" className="w-10 h-10 rounded-lg mx-auto mb-2" alt="videos" />
+                                        <div className="text-sm font-semibold">视频</div>
+                                        <div className="text-red-600 font-bold">3 个</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6">
+                                    <p className="text-sm font-semibold mb-3">热门标签</p>
+                                    <div className="text-xs space-y-1">
+                                        {['旅行', '家庭', '生日', '工作', '聚会', '风景', '运动', '烹饪', '教程'].map((tag, index) => (
+                                            <div key={index} className="flex items-center">
+                                                <span className="text-blue-600 mr-2">{tag}</span>
+                                                <span className="text-gray-400 text-xs">{categories.find(c => c.name === tag)?.count || 1}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6">
+                                    <p className="text-sm font-semibold mb-3">最近上传趋势</p>
+                                    <div className="text-xs text-gray-500">
+                                        <div className="mb-2">
+                                            <div className="flex items-center justify-between text-xs mb-1">
+                                                <span>周一</span>
+                                                <span>周二</span>
+                                                <span>周三</span>
+                                                <span>周四</span>
+                                                <span>周五</span>
+                                                <span>周六</span>
+                                                <span>周日</span>
+                                            </div>
+                                            <div className="w-full h-3 bg-gray-200 rounded-full mb-1"></div>
+                                            <div className="w-full h-3 bg-green-400 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                    
+                    {/* Photo Upload Modal */}
+                    {showPhotoModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                                    <span className="flex items-center">
+                                        <i className="fas fa-plus-circle mr-2 text-blue-500"></i>
+                                        添加照片
+                                    </span>
+                                    <button 
+                                        onClick={() => setShowPhotoModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </h3>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">照片详情</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="为您的照片添加标题..."
+                                        className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                    <textarea 
+                                        placeholder="描述您的照片..."
+                                        rows="3"
+                                        className="w-full p-3 border border-gray-300 rounded mt-2 focus:outline-none focus:border-blue-500"
+                                    ></textarea>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2">上传照片</label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                        <div className="text-gray-400 mb-3">
+                                            <i className="fas fa-cloud-upload-alt text-4xl text-gray-400"></i>
+                                        </div>
+                                        <p className="text-gray-500 mb-1">点击或拖拽照片到此处</p>
+                                        <button className="text-blue-600 text-sm hover:underline">Choose File</button>
+                                        <span className="text-gray-400">No file chosen</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2">照片标签（可多选）</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            '旅行', '家庭', '生日', '工作', '聚会', '风景',
+                                            '运动', '烹饪', '教程'
+                                        ].map((tag, index) => (
+                                            <button 
+                                                key={index}
+                                                onClick={() => {
+                                                    setEditingPhoto && setEditingPhoto({
+                                                        ...editingPhoto,
+                                                        tags: editingPhoto.tags.includes(tag) 
+                                                        ? editingPhoto.tags.filter(t => t !== tag)
+                                                        : [...(editingPhoto.tags || []), tag]
+                                                    });
+                                                }}
+                                                className={`px-3 py-1 rounded text-sm ${
+                                                    (editingPhoto?.tags || []).includes(tag) 
+                                                        ? 'bg-blue-500 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={cancelEdit}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={saveEdit}
+                                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        上传
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Video Upload Modal */}
+                    {showVideoModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                                    <span className="flex items-center">
+                                        <i className="fas fa-upload mr-2 text-blue-500"></i>
+                                        上传视频
+                                    </span>
+                                    <button 
+                                        onClick={() => setShowVideoModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </h3>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">视频详情</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="为您的视频添加标题..."
+                                        className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    />
+                                    <textarea 
+                                        placeholder="描述您的视频..."
+                                        rows="3"
+                                        className="w-full p-3 border border-gray-300 rounded mt-2 focus:outline-none focus:border-blue-500"
+                                    ></textarea>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2">上传视频</label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                        <div className="text-gray-400 mb-3">
+                                            <i className="fas fa-upload text-4xl text-gray-400"></i>
+                                        </div>
+                                        <p className="text-gray-500 mb-1">点击或拖拽视频到此处</p>
+                                        <button className="text-blue-600 text-sm hover:underline">Choose File</button>
+                                        <span className="text-gray-400">No file chosen</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2">视频标签（可多选）</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            '旅行', '家庭', '生日', '工作', '聚会', '风景',
+                                            '运动', '烹饪', '教程'
+                                        ].map((tag, index) => (
+                                            <button 
+                                                key={index}
+                                                className={`px-3 py-1 rounded text-sm ${
+                                                    'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => setShowVideoModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setShowVideoModal(false);
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        上传
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Edit Modal */}
+                    {showEditModal && editingPhoto && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
+                                    <span className="flex items-center">
+                                        <i className="fas fa-pen mr-2 text-blue-500"></i>
+                                        编辑照片
+                                    </span>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </h3>
+                                
+                                <div className="mb-6">
+                                    <h4 className="text-base font-semibold mb-3">{editingPhoto.title}</h4>
+                                    <input 
+                                        type="text" 
+                                        defaultValue={editingPhoto.date}
+                                        className="w-full p-3 border border-gray-300 rounded mb-2"
+                                    />
+                                    <textarea 
+                                        defaultValue={editingPhoto.description}
+                                        rows="3" 
+                                        className="w-full p-3 border border-gray-300 rounded mb-4"
+                                    ></textarea>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium mb-2">照片标签（可多选）</label>
+                                    <div className="flex gap-2">
+                                        {editingPhoto.tags?.map((tag, index) => (
+                                            <button 
+                                                key={index}
+                                                className="px-3 py-1 bg-blue-100 text-blue-600 text-sm rounded"
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={cancelEdit}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={saveEdit}
+                                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && deletingPhoto && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center justify-center">
+                                    <i className="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                    确认删除
+                                </h3>
+                                
+                                <p className="text-gray-600 mb-6">您确定要删除"{deletingPhoto.title}"吗？此操作不可撤销。</p>
+                                
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

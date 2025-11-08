@@ -1,0 +1,497 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>节气日历</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heiti+SC&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Heiti SC", sans-serif;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex overflow-hidden bg-gray-50">
+    <div id="root" class="flex-1 flex flex-col"></div>
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      const categories = ["春季", "夏季", "秋季", "冬季"];
+      const catColor = {
+        "春季": { bg: "bg-green-50", text: "text-green-600" },
+        "夏季": { bg: "bg-red-50", text: "text-red-600" },
+        "秋季": { bg: "bg-yellow-50", text: "text-yellow-600" },
+        "冬季": { bg: "bg-blue-50", text: "text-blue-600" },
+      };
+
+      function App() {
+        const [terms, setTerms] = useState([
+          {
+            id: 1,
+            name: "立春",
+            date: "2023-02-04",
+            category: "春季",
+            imageUrl: "https://picsum.photos/id/1011/400/200",
+            description:
+              "立春是二十四节气中的第一个节气，标志着新一轮农耕活动的开始。立春时节，气温回升，万物复苏，大地呈现出勃勃生机。在这个时节，人们常会有踏青、赏花、迎新春的民俗。",
+          },
+          {
+            id: 2,
+            name: "惊蛰",
+            date: "2023-03-06",
+            category: "春季",
+            imageUrl: "https://picsum.photos/id/1025/400/200",
+            description:
+              "惊蛰是二十四节气中的第三个节气，表示天气回暖，春雷始鸣，惊醒了蛰伏在土中的昆虫。在这个节气，人们会吃梨、蟋蟀等食物，以祈求健康平安。",
+          },
+          {
+            id: 3,
+            name: "夏至",
+            date: "2023-06-21",
+            category: "夏季",
+            imageUrl: "https://picsum.photos/id/1081/400/200",
+            description:
+              "夏至是二十四节气中的第十个节气，此时太阳直射地面的角度达到一年中的最北点。传统习俗有吃夏至饼、饮绿豆汤、以清热解暑。",
+          },
+        ]);
+        const [view, setView] = useState("calendar"); // calendar or list
+        const [search, setSearch] = useState("");
+        const [showModal, setShowModal] = useState(false);
+        const [form, setForm] = useState({
+          name: "",
+          date: "",
+          category: "春季",
+          imageUrl: "https://picsum.photos/id/164/200/200",
+          description: "",
+        });
+
+        const filtered = terms.filter((t) =>
+          t.name.includes(search.trim())
+        );
+
+        const stats = {
+          total: terms.length,
+          distribution: {
+            "春季": terms.filter((t) => t.category === "春季").length,
+            "夏季": terms.filter((t) => t.category === "夏季").length,
+            "秋季": terms.filter((t) => t.category === "秋季").length,
+            "冬季": terms.filter((t) => t.category === "冬季").length,
+          },
+        };
+
+        function openModal() {
+          setForm({
+            name: "",
+            date: "",
+            category: "春季",
+            imageUrl: "https://picsum.photos/id/164/200/200",
+            description: "",
+          });
+          setShowModal(true);
+        }
+        function closeModal() {
+          setShowModal(false);
+        }
+        function handleSave() {
+          const next = {
+            id: Date.now(),
+            ...form,
+          };
+          setTerms((pre) => [...pre, next]);
+          setShowModal(false);
+        }
+
+        function delTerm(id) {
+          setTerms((pre) => pre.filter((t) => t.id !== id));
+        }
+
+        return (
+          <div className="flex h-full">
+            {/* left nav */}
+            <div className="w-60 bg-gradient-to-b from-pink-50 to-pink-100 px-4 py-6 flex-shrink-0">
+              <div className="text-xl font-bold text-pink-600 mb-8 flex items-center">
+                <i className="fas fa-calendar-alt mr-2"></i> 节气日历
+              </div>
+              <div className="space-y-2">
+                <button
+                  className={`w-full text-left px-3 py-2 rounded-lg font-medium ${
+                    view === "calendar"
+                      ? "bg-gradient-to-r from-red-400 to-pink-400 text-white"
+                      : "text-gray-700 hover:bg-pink-200"
+                  }`}
+                  onClick={() => setView("calendar")}
+                >
+                  日历视图
+                </button>
+                <button
+                  className={`w-full text-left px-3 py-2 rounded-lg font-medium ${
+                    view === "list"
+                      ? "bg-gradient-to-r from-red-400 to-pink-400 text-white"
+                      : "text-gray-700 hover:bg-pink-200"
+                  }`}
+                  onClick={() => setView("list")}
+                >
+                  列表视图
+                </button>
+                <button className="w-full text-left px-3 py-2 rounded-lg text-gray-700 hover:bg-pink-200">
+                  统计报表
+                </button>
+                <button className="w-full text-left px-3 py-2 rounded-lg text-gray-700 hover:bg-pink-200">
+                  帮助说明
+                </button>
+              </div>
+              <div className="mt-8 p-4 bg-white rounded-lg shadow-sm">
+                <div className="font-semibold text-gray-800 mb-2">小贴士</div>
+                <div className="text-sm text-gray-600">
+                  点击“添加节气条目”按钮可以记录您感兴趣的节气知识和生活建议。
+                </div>
+              </div>
+            </div>
+            {/* main area */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* header */}
+              <div className="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
+                <div className="flex items-center">
+                  <button
+                    className={`px-4 py-2 rounded-lg mr-4 font-medium ${
+                      view === "calendar"
+                        ? "bg-gradient-to-r from-red-400 to-pink-400 text-white"
+                        : "text-gray-700 hover:bg-pink-100"
+                    }`}
+                    onClick={() => setView("calendar")}
+                  >
+                    <i className="fas fa-calendar-day mr-1"></i> 日历视图
+                  </button>
+                  <button
+                    className={`px-4 py-2 rounded-lg mr-4 font-medium ${
+                      view === "list"
+                        ? "bg-gradient-to-r from-red-400 to-pink-400 text-white"
+                        : "text-gray-700 hover:bg-pink-100"
+                    }`}
+                    onClick={() => setView("list")}
+                  >
+                    <i className="fas fa-list mr-1"></i> 列表视图
+                  </button>
+                  <button className="px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-100 font-medium">
+                    <i className="fas fa-chart-pie mr-1"></i> 统计报表
+                  </button>
+                  <button className="px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-100 font-medium">
+                    <i className="fas fa-info-circle mr-1"></i> 主题介绍
+                  </button>
+                </div>
+                <div className="flex items-center">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="搜索节气..."
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <i className="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                  </div>
+                </div>
+              </div>
+              {/* content */}
+              <div className="flex flex-1 overflow-hidden">
+                {/* main content */}
+                <div className="flex-1 p-6 overflow-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-2xl font-semibold">节气日历</div>
+                    <button
+                      className="px-4 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-lg flex items-center"
+                      onClick={openModal}
+                    >
+                      <i className="fas fa-plus mr-2"></i> 添加节气条目
+                    </button>
+                  </div>
+                  {view === "calendar" && (
+                    <div className="grid grid-cols-3 gap-6">
+                      {filtered.map((t) => (
+                        <div
+                          key={t.id}
+                          className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col"
+                        >
+                          <div className="relative">
+                            <img
+                              src={t.imageUrl}
+                              className="w-full h-40 object-cover"
+                            />
+                            <span
+                              className={`absolute left-3 top-3 px-2 py-1 text-xs font-medium ${catColor[t.category].bg} ${catColor[t.category].text} rounded`}
+                            >
+                              {t.category}
+                            </span>
+                          </div>
+                          <div className="p-4 flex-1 flex flex-col">
+                            <div className="text-xl font-semibold mb-2">
+                              {t.name}
+                            </div>
+                            <div className="text-sm text-gray-500 mb-2">
+                              {t.date}
+                            </div>
+                            <div className="text-sm text-gray-700 flex-1">
+                              {t.description.length > 60
+                                ? t.description.slice(0, 60) + "..."
+                                : t.description}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {view === "list" && (
+                    <div className="overflow-auto">
+                      <button
+                        className="mb-4 px-4 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-lg flex items-center"
+                        onClick={openModal}
+                      >
+                        <i className="fas fa-plus mr-2"></i> 添加节气条目
+                      </button>
+                      <table className="min-w-full bg-white">
+                        <thead>
+                          <tr className="bg-gradient-to-r from-red-400 to-pink-400 text-white">
+                            <th className="px-4 py-2 text-left">节气名称</th>
+                            <th className="px-4 py-2 text-left">日期</th>
+                            <th className="px-4 py-2 text-left">分类</th>
+                            <th className="px-4 py-2 text-left">简介</th>
+                            <th className="px-4 py-2 text-left">操作</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {terms.map((t) => (
+                            <tr
+                              key={t.id}
+                              className="border-t hover:bg-gray-50"
+                            >
+                              <td className="px-4 py-3 flex items-center">
+                                <img
+                                  src={t.imageUrl}
+                                  className="w-8 h-8 object-cover rounded-full mr-2"
+                                />
+                                {t.name}
+                              </td>
+                              <td className="px-4 py-3">{t.date}</td>
+                              <td className="px-4 py-3">
+                                <span
+                                  className={`px-2 py-1 text-xs ${catColor[t.category].bg} ${catColor[t.category].text} rounded-full`}
+                                >
+                                  {t.category}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                {t.description.length > 30
+                                  ? t.description.slice(0, 30) + "..."
+                                  : t.description}
+                              </td>
+                              <td className="px-4 py-3 space-x-2">
+                                <button className="text-blue-500 hover:text-blue-700">
+                                  <i className="fas fa-edit"></i>
+                                </button>
+                                <button
+                                  className="text-red-500 hover:text-red-700"
+                                  onClick={() => delTerm(t.id)}
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  {/* bottom info in calendar view */}
+                  {view === "calendar" && (
+                    <div className="mt-6 p-4 bg-yellow-50 rounded-lg text-gray-700 text-sm">
+                      二十四节气是中国古代订立的一种用来指导农事的气候划分方法，是中国传统文化的瑰宝，被列入人类非物质文化遗产代表作名录。它将一年划分为24个节气，反映了太阳在黄道（天球上的太阳周年视运动轨迹）上的位置变化，以及由此引起的地球上时令、气候、物候等方面的变化规律。
+                    </div>
+                  )}
+                </div>
+                {/* right panel */}
+                <div className="w-80 bg-white p-6 border-l border-gray-200 overflow-auto">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-lg font-semibold mb-2">
+                        节气统计
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg mb-2">
+                        <div className="text-sm text-gray-500">
+                          总节气数量
+                        </div>
+                        <div className="text-2xl font-bold text-gray-800">
+                          {stats.total}
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="text-sm text-gray-500 mb-2">
+                          节气分布
+                        </div>
+                        <div className="space-y-2">
+                          {Object.entries(stats.distribution).map(
+                            ([cat, num]) => (
+                              <div key={cat} className="flex items-center">
+                                <div className="w-16 text-sm">{cat}</div>
+                                <div className="flex-1 bg-gray-200 h-2 rounded-full mx-2">
+                                  <div
+                                    className={`h-2 rounded-full ${
+                                      cat === "春季"
+                                        ? "bg-green-500"
+                                        : cat === "夏季"
+                                        ? "bg-red-500"
+                                        : cat === "秋季"
+                                        ? "bg-yellow-500"
+                                        : "bg-blue-500"
+                                    }`}
+                                    style={{
+                                      width:
+                                        stats.total > 0
+                                          ? (num / stats.total) * 100 + "%"
+                                          : "0%",
+                                    }}
+                                  ></div>
+                                </div>
+                                <div className="w-6 text-right text-sm">
+                                  {num}
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="text-sm text-gray-500 mb-1">下一个节气</div>
+                      <div className="text-xl font-bold text-blue-600">
+                        芒种
+                      </div>
+                      <div className="text-sm text-gray-500">还剩 10 天</div>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <div className="text-lg font-semibold mb-2">
+                        节气小贴士
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        根据传统养生理念，二十四节气寓含了丰富的生活智慧。您可以根据每个节气的养生方法、饮食建议和生活小窍门，让这个日历成为您的生活指南。
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* footer */}
+              <div className="px-6 py-4 text-center text-gray-500 text-sm border-t">
+                © 2023 节气节气日历 | 让生活更贴近自然的节奏
+              </div>
+            </div>
+            {/* modal */}
+            {showModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg w-96 shadow-lg p-6 relative">
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-xl font-semibold">添加新节气</div>
+                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="text-sm mb-1">节气名称</div>
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm mb-1">日期</div>
+                      <input
+                        type="date"
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        value={form.date}
+                        onChange={(e) =>
+                          setForm({ ...form, date: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <div className="text-sm mb-1">分类</div>
+                      <select
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        value={form.category}
+                        onChange={(e) =>
+                          setForm({ ...form, category: e.target.value })
+                        }
+                      >
+                        {categories.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <div className="text-sm mb-1">图标URL</div>
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        value={form.imageUrl}
+                        onChange={(e) =>
+                          setForm({ ...form, imageUrl: e.target.value })
+                        }
+                      />
+                      <div className="mt-2">
+                        <img
+                          src={form.imageUrl}
+                          className="w-12 h-12 object-cover rounded-full"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm mb-1">简介</div>
+                      <textarea
+                        className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                        rows="3"
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm({ ...form, description: e.target.value })
+                        }
+                      ></textarea>
+                    </div>
+                    <div className="flex justify-end space-x-4 mt-4">
+                      <button
+                        className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+                        onClick={closeModal}
+                      >
+                        取消
+                      </button>
+                      <button
+                        className="px-4 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded"
+                        onClick={handleSave}
+                      >
+                        保存
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

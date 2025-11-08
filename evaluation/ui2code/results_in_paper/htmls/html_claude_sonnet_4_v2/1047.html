@@ -1,0 +1,595 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物成长相册</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-cyan-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [showSearchResults, setShowSearchResults] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+
+            const handleSearch = () => {
+                if (searchQuery.trim()) {
+                    setShowSearchResults(true);
+                }
+            };
+
+            const handleSearchInput = (value) => {
+                setSearchQuery(value);
+                if (value.trim() === '') {
+                    setShowSearchResults(false);
+                }
+            };
+
+            const albums = [
+                {
+                    id: 1,
+                    title: "第一次亲密接触",
+                    date: "2023-01-15",
+                    category: "初识惊喜",
+                    description: "小狗温顺慧智，刚认识时就，一直想在沙发下。",
+                    image: "https://picsum.photos/id/237/300/200"
+                },
+                {
+                    id: 2,
+                    title: "学会使用猫砂",
+                    date: "2023-02-01",
+                    category: "初识惊喜",
+                    description: "经过一周的训练，小猫咪生在主动使用猫砂啦！",
+                    image: "https://picsum.photos/id/1025/300/200"
+                },
+                {
+                    id: 3,
+                    title: "第一次打疫苗",
+                    date: "2023-03-10",
+                    category: "成长之路",
+                    description: "今天小狗去宠物医院打了第一针疫苗，虽然很害怕但是很乖。",
+                    image: "https://picsum.photos/id/169/300/200"
+                },
+                {
+                    id: 4,
+                    title: "学会闭眼睡",
+                    date: "2023-04-20",
+                    category: "成长之路",
+                    description: "小猫学会闭眼睡了！睡眠，新充满惊喜成了享了趣味！",
+                    image: "https://picsum.photos/id/582/300/200"
+                },
+                {
+                    id: 5,
+                    title: "第一次户外散步",
+                    date: "2023-05-15",
+                    category: "成长之路",
+                    description: "今天带小狗外出散步了！撒脱，对一切都非常好奇。",
+                    image: "https://picsum.photos/id/200/300/200"
+                },
+                {
+                    id: 6,
+                    title: "一周岁生日",
+                    date: "2023-07-10",
+                    category: "成年时光",
+                    description: "我小宝贝满一周岁生日，速量了很多长成技能优优。",
+                    image: "https://picsum.photos/id/58/300/200"
+                }
+            ];
+
+            const renderNavigation = () => (
+                <nav className="bg-white border-b border-gray-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center">
+                                <div className="flex items-center space-x-2">
+                                    <span className="text-2xl">🐾</span>
+                                    <span className="text-xl font-semibold text-gray-900">宠物成长相册</span>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-8">
+                                <button 
+                                    onClick={() => {setCurrentPage('home'); setShowSearchResults(false);}}
+                                    className={`text-sm font-medium px-4 py-2 border-b-2 ${currentPage === 'home' ? 'text-pink-500 border-pink-500' : 'text-gray-600 border-transparent hover:text-gray-900'}`}
+                                >
+                                    相册首页
+                                </button>
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                                >
+                                    添加记录
+                                </button>
+                                <button 
+                                    onClick={() => {setCurrentPage('stats'); setShowSearchResults(false);}}
+                                    className={`text-sm font-medium ${currentPage === 'stats' ? 'text-pink-500' : 'text-gray-600 hover:text-gray-900'}`}
+                                >
+                                    统计报告
+                                </button>
+                                <button 
+                                    onClick={() => {setCurrentPage('help'); setShowSearchResults(false);}}
+                                    className={`text-sm font-medium ${currentPage === 'help' ? 'text-pink-500' : 'text-gray-600 hover:text-gray-900'}`}
+                                >
+                                    帮助说明
+                                </button>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="搜索相册..."
+                                        value={searchQuery}
+                                        onChange={(e) => handleSearchInput(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                        className="w-64 px-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                    />
+                                    <button onClick={handleSearch} className="absolute right-3 top-2.5">
+                                        <i className="fas fa-search text-gray-400"></i>
+                                    </button>
+                                </div>
+                                <div className="w-8 h-8 bg-gray-800 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+
+            const renderSidebar = () => (
+                <div className="w-64 bg-white rounded-lg shadow-sm p-6 h-fit">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">成长阶段</h3>
+                    <p className="text-sm text-gray-600 mb-6">按照不同期段对宠物的成长历程分类</p>
+                    
+                    <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                            <i className="fas fa-chevron-right text-xs text-gray-400"></i>
+                            <span className="text-sm text-gray-700">初识惊喜</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <i className="fas fa-chevron-right text-xs text-gray-400"></i>
+                            <span className="text-sm text-gray-700">成长之路</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <i className="fas fa-chevron-right text-xs text-gray-400"></i>
+                            <span className="text-sm text-gray-700">成年时光</span>
+                        </div>
+                        <div className="flex items-center space-x-2 mt-6">
+                            <i className="fas fa-plus text-sm text-gray-500"></i>
+                            <span className="text-sm text-gray-700">新增阶段</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 p-4 bg-red-50 rounded-lg">
+                        <h4 className="text-sm font-medium text-red-900 mb-2">小贴士</h4>
+                        <p className="text-xs text-red-800 leading-relaxed">
+                            按照不同的成长阶段设置阶梯项，
+                            帮助您快速整理宠物成长中的故事并记录生活精彩时刻。
+                        </p>
+                    </div>
+                </div>
+            );
+
+            const renderRightPanel = () => (
+                <div className="w-64 bg-white rounded-lg shadow-sm p-6 h-fit">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">宠物档案统计</h3>
+                    
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">图片总数</span>
+                            <span className="text-2xl font-bold text-pink-500">6</span>
+                        </div>
+
+                        <div className="space-y-3">
+                            <h4 className="text-sm font-medium text-gray-900">阶段分布</h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">初识惊喜</span>
+                                    <span className="text-gray-900">2 张</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">成长之路</span>
+                                    <span className="text-gray-900">3 张</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">成年时光</span>
+                                    <span className="text-gray-900">1 张</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <h4 className="text-sm font-medium text-gray-900">月份分布</h4>
+                            <div className="grid grid-cols-4 gap-2 text-xs">
+                                {[1,2,3,4].map(month => (
+                                    <div key={month} className="text-center">
+                                        <div className="text-gray-600">{month}月</div>
+                                        <div className="text-gray-900">1</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 text-xs">
+                                {[5,7].map(month => (
+                                    <div key={month} className="text-center">
+                                        <div className="text-gray-600">{month}月</div>
+                                        <div className="text-gray-900">1</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <h4 className="text-sm font-medium text-gray-900">最近添加</h4>
+                            <div className="space-y-2 text-xs">
+                                <div>
+                                    <div className="text-blue-600">一周岁生日</div>
+                                    <div className="text-gray-500">2023-07-10</div>
+                                </div>
+                                <div>
+                                    <div className="text-blue-600">第一次户外散步</div>
+                                    <div className="text-gray-500">2023-05-15</div>
+                                </div>
+                                <div>
+                                    <div className="text-blue-600">学会闭眼睡</div>
+                                    <div className="text-gray-500">2023-04-20</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 p-3 bg-blue-50 rounded-lg">
+                            <h4 className="text-sm font-medium text-blue-900 mb-1">温馨提示</h4>
+                            <p className="text-xs text-blue-800 leading-relaxed">
+                                定期整理照片，制作打一份是遇的成册文件，是避免丢失的有效方法。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderMainContent = () => {
+                if (currentPage === 'stats') {
+                    return (
+                        <div className="flex-1 bg-white rounded-lg shadow-sm p-8">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">统计报告</h2>
+                                <p className="text-gray-600">查看您的宠物相册统计数据</p>
+                            </div>
+
+                            <div className="text-center mb-8">
+                                <div className="mb-2">
+                                    <span className="text-lg text-gray-600">相册总数</span>
+                                </div>
+                                <div className="text-6xl font-bold text-blue-500 mb-6">6</div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">成长阶段分布</h3>
+                                    <div className="flex items-end space-x-4 h-40">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-12 bg-pink-400 h-20 rounded-t mb-2"></div>
+                                            <span className="text-xs text-gray-600">初识惊喜</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-12 bg-pink-500 h-32 rounded-t mb-2"></div>
+                                            <span className="text-xs text-gray-600">成长之路</span>
+                                        </div>
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-12 bg-pink-300 h-16 rounded-t mb-2"></div>
+                                            <span className="text-xs text-gray-600">成年时光</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">按月分布</h3>
+                                    <div className="flex items-end space-x-2 h-40">
+                                        {[10,11,12,1,2,3,4,5,6,7,8,9].map((month, index) => (
+                                            <div key={month} className="flex flex-col items-center">
+                                                <div className={`w-4 bg-blue-400 rounded-t mb-1 ${[0,1,2,3,4,5,7,8,9,10].includes(index) ? 'h-6' : 'h-12'}`}></div>
+                                                <span className="text-xs text-gray-600">{month}月</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">最近添加</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div>
+                                            <div className="font-medium text-gray-900">一周岁生日</div>
+                                            <div className="text-sm text-gray-500">2023-07-10</div>
+                                        </div>
+                                        <span className="text-blue-600 text-sm">成年时光</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div>
+                                            <div className="font-medium text-gray-900">第一次户外散步</div>
+                                            <div className="text-sm text-gray-500">2023-05-15</div>
+                                        </div>
+                                        <span className="text-blue-600 text-sm">成长之路</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div>
+                                            <div className="font-medium text-gray-900">学会闭眼睡</div>
+                                            <div className="text-sm text-gray-500">2023-04-20</div>
+                                        </div>
+                                        <span className="text-blue-600 text-sm">成长之路</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div>
+                                            <div className="font-medium text-gray-900">第一次打疫苗</div>
+                                            <div className="text-sm text-gray-500">2023-03-10</div>
+                                        </div>
+                                        <span className="text-blue-600 text-sm">成长之路</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        <div>
+                                            <div className="font-medium text-gray-900">学会使用猫砂</div>
+                                            <div className="text-sm text-gray-500">2023-02-01</div>
+                                        </div>
+                                        <span className="text-blue-600 text-sm">初识惊喜</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (currentPage === 'help') {
+                    return (
+                        <div className="flex-1 bg-white rounded-lg shadow-sm p-8">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">帮助说明</h2>
+                                <p className="text-gray-600">了解如何使用宠物成长相册功能</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="border-l-4 border-pink-400 pl-6 py-4">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">如何添加照片？</h3>
+                                    <p className="text-gray-600 leading-relaxed mb-2">
+                                        点击顶部导航栏的"添加记录"按钮，在弹出的表单中填写相关信息后提交，您可以这样键合适的成长阶段分类，并提
+                                        交照片目标和描述，以便更好回顾。
+                                    </p>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        添加成功后，新的记录会自动出现在相册首页，并更新相关数据。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-blue-400 pl-6 py-4">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">如何编辑和删除记录？</h3>
+                                    <p className="text-gray-600 leading-relaxed mb-2">
+                                        在每张照片卡片的底部，您可以找到"编辑"和"删除"按钮。点击"编辑"按钮打开编辑照片信息界面，修改后点击保存即可。
+                                    </p>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        点击"删除"按钮将永久删除该记录，删除后进行的记录将不可恢复，请谨慎操作。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-yellow-400 pl-6 py-4">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">如何查看统计和数据？</h3>
+                                    <p className="text-gray-600 leading-relaxed mb-2">
+                                        点击顶部导航栏的"统计报告"标签，可以查看您按日期和分类的照片数据。点击图表中的标签可以过滤查看对应段月
+                                        份的照片。
+                                    </p>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        您也可以通过左侧的成长阶段菜单来查看特定类别的照片记录，或使用搜索功能来查找相关。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-green-400 pl-6 py-4">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-3">如何创建新的成长阶段？</h3>
+                                    <p className="text-gray-600 leading-relaxed mb-2">
+                                        在左侧菜单的底部，点击"新增阶段"按钮，输入阶段名称和标签进行即可添加。
+                                    </p>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        新建的阶段将立即显示在成长阶段生列表，您可以在添加照片时选择新建的自定义阶段进行全新分类。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (showSearchResults) {
+                    return (
+                        <div className="flex-1 bg-white rounded-lg shadow-sm">
+                            <div className="p-8">
+                                <div className="mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">宠物相册</h2>
+                                    <p className="text-gray-600">在这里浏览您的宠物成长相册</p>
+                                </div>
+
+                                <div className="text-center py-20">
+                                    <div className="text-6xl text-gray-300 mb-4">📷</div>
+                                    <h3 className="text-xl font-medium text-gray-900 mb-2">暂无相册记录</h3>
+                                    <p className="text-gray-600 mb-6">点击"添加记录"按钮开始创建您的宠物相册</p>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-pink-500 text-white px-6 py-3 rounded-lg hover:bg-pink-600 transition-colors"
+                                    >
+                                        + 开始添加
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="flex-1 bg-white rounded-lg shadow-sm">
+                        <div className="p-8">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">宠物相册</h2>
+                                <p className="text-gray-600">在这里浏览您的宠物成长相册</p>
+                            </div>
+
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">主题色区</h3>
+                                <div className="grid grid-cols-3 gap-6 mb-8">
+                                    <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                                        <span className="text-2xl">📱</span>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">一键管理</h4>
+                                            <p className="text-sm text-gray-600">快速添加/编辑/删除所有有关记录</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                                        <span className="text-2xl">📊</span>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">多维统计</h4>
+                                            <p className="text-sm text-gray-600">自动生成报表，月份分类获取</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                                        <span className="text-2xl">❤️</span>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900">温馨回顾</h4>
+                                            <p className="text-sm text-gray-600">随时回顾，走进美好回忆</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6">
+                                {albums.map((album) => (
+                                    <div key={album.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                        <img src={album.image} alt={album.title} className="w-full h-48 object-cover" />
+                                        <div className="p-4">
+                                            <h4 className="font-medium text-gray-900 mb-1">{album.title}</h4>
+                                            <p className="text-sm text-gray-500 mb-2">{album.date}</p>
+                                            <p className="text-sm text-gray-600 mb-4">{album.description}</p>
+                                            <div className="flex space-x-2">
+                                                <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm">
+                                                    <i className="far fa-edit"></i>
+                                                    <span>编辑</span>
+                                                </button>
+                                                <button className="flex items-center space-x-1 text-red-600 hover:text-red-700 text-sm">
+                                                    <i className="far fa-trash-alt"></i>
+                                                    <span>删除</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const AddModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-w-lg">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">添加新记录</h3>
+                        
+                        <form className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">图片标题</label>
+                                <input
+                                    type="text"
+                                    placeholder="输入图片标题"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">拍摄日期</label>
+                                <input
+                                    type="text"
+                                    placeholder="mm/dd/yyyy"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">成长阶段</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500">
+                                    <option>初识惊喜</option>
+                                    <option>成长之路</option>
+                                    <option>成年时光</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">图片URL</label>
+                                <input
+                                    type="text"
+                                    placeholder="输入图片URL"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    或使用如 https://picsum.photos/id/数字/300/200 格式
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">图片描述</label>
+                                <textarea
+                                    placeholder="输入图片描述"
+                                    rows="3"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                ></textarea>
+                            </div>
+                        </form>
+
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600"
+                            >
+                                添加
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-cyan-50">
+                    {renderNavigation()}
+                    
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex space-x-8">
+                            {renderSidebar()}
+                            {renderMainContent()}
+                            {renderRightPanel()}
+                        </div>
+                    </div>
+
+                    <footer className="bg-white border-t border-gray-200 mt-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                            <div className="flex justify-between items-center text-sm text-gray-600">
+                                <span>© 2023 宠物成长相册 - 关爱每一个毛孩子的成长</span>
+                                <span>联系邮箱：petphoto@example.com</span>
+                                <span>Tip：定期整理照片，那些宝贵时刻~</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {showAddModal && <AddModal />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

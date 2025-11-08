@@ -1,0 +1,518 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱心捐赠平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [deleteProjectName, setDeleteProjectName] = useState('');
+
+            const projects = [
+                {
+                    id: 1,
+                    title: "希望之光的梦蓝金",
+                    subtitle: "帮助贫困地区的孩子们实现学习梦",
+                    category: "教育扶贫",
+                    raised: 12500,
+                    target: 20000,
+                    progress: 62,
+                    endDate: "2023-05-15",
+                    image: "https://picsum.photos/id/1084/300/200"
+                },
+                {
+                    id: 2,
+                    title: "温暖冬衣行动",
+                    subtitle: "为山区儿童送去冬日的温暖",
+                    category: "教育扶贫",
+                    raised: 8300,
+                    target: 15000,
+                    progress: 55,
+                    endDate: "2023-06-20",
+                    image: "https://picsum.photos/id/1005/300/200"
+                },
+                {
+                    id: 3,
+                    title: "乡村图书馆改造",
+                    subtitle: "为乡村学校建设更好的阅读环境",
+                    category: "教育扶贫",
+                    raised: 18000,
+                    target: 25000,
+                    progress: 72,
+                    endDate: "2023-04-10",
+                    image: "https://picsum.photos/id/24/300/200"
+                }
+            ];
+
+            const renderHomePage = () => (
+                <div>
+                    <div className="space-y-6">
+                        {projects.map(project => (
+                            <div key={project.id} className="bg-white rounded-lg p-6 shadow-sm">
+                                <div className="flex items-start space-x-4">
+                                    <img src={project.image} alt={project.title} className="w-48 h-32 object-cover rounded-lg" />
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h3 className="text-lg font-medium text-gray-900">{project.title}</h3>
+                                            <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">热门</span>
+                                        </div>
+                                        <p className="text-gray-600 text-sm mb-3">{project.subtitle}</p>
+                                        <div className="mb-3">
+                                            <div className="text-sm text-gray-500 mb-1">筹款进度</div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div className="bg-red-500 h-2 rounded-full" style={{width: `${project.progress}%`}}></div>
+                                            </div>
+                                            <div className="text-right text-sm text-gray-500 mt-1">{project.progress}%</div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <span className="text-sm text-gray-500">{project.category} / 目标金额</span>
+                                                <div className="text-red-500 font-medium">¥{project.raised.toLocaleString()} / ¥{project.target.toLocaleString()}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm text-gray-500">发布日期</div>
+                                                <div className="text-gray-700">{project.endDate}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex space-x-3 mt-4">
+                                            <button className="text-gray-500 hover:text-gray-700">
+                                                <i className="far fa-edit mr-1"></i>编辑项目
+                                            </button>
+                                            <button 
+                                                className="text-red-500 hover:text-red-700"
+                                                onClick={() => {
+                                                    setDeleteProjectName(project.title);
+                                                    setShowDeleteModal(true);
+                                                }}
+                                            >
+                                                <i className="far fa-trash-alt mr-1"></i>删除项目
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-8 bg-orange-50 p-4 rounded-lg">
+                        <p className="text-orange-600 text-center">
+                            <i className="fas fa-heart mr-2"></i>
+                            让爱心传递，让世界更美好。每一份捐款，都能照亮某个人的希望
+                            <i className="fas fa-heart ml-2"></i>
+                        </p>
+                    </div>
+                </div>
+            );
+
+            const renderStatsPage = () => (
+                <div>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-semibold">捐赠统计分析</h2>
+                        <div className="flex items-center space-x-4">
+                            <span className="text-sm text-gray-500">时间范围：</span>
+                            <select className="border rounded px-3 py-1 text-sm">
+                                <option>本月</option>
+                            </select>
+                            <span className="text-sm bg-gray-100 px-3 py-1 rounded">平台统计</span>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-8">
+                        <div className="bg-white rounded-lg p-6">
+                            <h3 className="text-lg font-medium mb-6">捐赠金额趋势图</h3>
+                            <div className="flex items-end justify-between h-48 space-x-2">
+                                <div className="bg-red-400 rounded-t" style={{height: '30%', width: '60px'}}></div>
+                                <div className="bg-red-400 rounded-t" style={{height: '60%', width: '60px'}}></div>
+                                <div className="bg-red-400 rounded-t" style={{height: '45%', width: '60px'}}></div>
+                                <div className="bg-red-400 rounded-t" style={{height: '75%', width: '60px'}}></div>
+                                <div className="bg-red-400 rounded-t" style={{height: '40%', width: '60px'}}></div>
+                                <div className="bg-red-400 rounded-t" style={{height: '65%', width: '60px'}}></div>
+                            </div>
+                            <div className="flex justify-between mt-2 text-xs text-gray-500">
+                                <span>第一周</span>
+                                <span>第二周</span>
+                                <span>第三周</span>
+                                <span>第四周</span>
+                                <span>第五周</span>
+                                <span>本周</span>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-6">
+                            <h3 className="text-lg font-medium mb-6">项目类型分布</h3>
+                            <div className="flex items-center justify-center h-48">
+                                <div className="relative w-32 h-32">
+                                    <svg className="w-32 h-32" viewBox="0 0 36 36">
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="#fee2e2" strokeWidth="2"/>
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="#fbbf24" strokeWidth="2" 
+                                               strokeDasharray="25 75" strokeDashoffset="25"/>
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="#f87171" strokeWidth="2" 
+                                               strokeDasharray="30 70" strokeDashoffset="0"/>
+                                        <circle cx="18" cy="18" r="16" fill="none" stroke="#3b82f6" strokeWidth="2" 
+                                               strokeDasharray="45 55" strokeDashoffset="55"/>
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-sm text-gray-600">项目分布</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-center space-x-4 mt-4 text-sm">
+                                <div className="flex items-center">
+                                    <div className="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
+                                    <span>教育 (45%)</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                                    <span>医疗 (30%)</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                                    <span>救灾 (25%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-8 text-center">
+                        <button className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600">
+                            <i className="fas fa-download mr-2"></i>导出数据
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const renderHelpPage = () => (
+                <div>
+                    <div className="bg-white rounded-lg p-6 mb-6">
+                        <h2 className="text-xl font-semibold mb-4">爱心捐赠平台 — 连接您与需要帮助的人</h2>
+                        <p className="text-gray-600 mb-4">
+                            爱心捐赠平台努力让建立一个透明、高效的公益桥梁，连接有爱心与需要帮助的群体。我们确保每一笔捐款都的透明可查，让每一个爱心都能够帮助到最需要的人。
+                        </p>
+                        <p className="text-gray-600 mb-4">
+                            平台定期发布项目进展，确保资金使用透明，让每一位捐助人都能够清楚了解自己的爱心去向。
+                        </p>
+                        <a href="#" className="text-red-500 hover:text-red-600">了解更多 ></a>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-6 mb-6">
+                        <h3 className="text-lg font-semibold mb-6">操作指南</h3>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="text-center">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-plus text-red-500"></i>
+                                </div>
+                                <h4 className="font-medium mb-2">如何发起项目</h4>
+                                <p className="text-sm text-gray-600">点击"发起捐款"按钮，填写项目详情、包含名称、描述、目标金额等操作，提交后进行审核时间通常为1天。</p>
+                                <a href="#" className="text-red-500 text-sm">查看详情 ></a>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-hand-holding-heart text-red-500"></i>
+                                </div>
+                                <h4 className="font-medium mb-2">如何捐赠</h4>
+                                <p className="text-sm text-gray-600">选择想要支持的项目，点击"立即捐助"，输入金额和信息内容，支付完成后项目负责人将及时回复致谢。</p>
+                                <a href="#" className="text-red-500 text-sm">查看详情 ></a>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-chart-line text-red-500"></i>
+                                </div>
+                                <h4 className="font-medium mb-2">如何查看数据</h4>
+                                <p className="text-sm text-gray-600">点击"数据分析"按钮，可查看平台详细使用情况、包含募捐趋势、运营情况，完全透明公开。</p>
+                                <a href="#" className="text-red-500 text-sm">查看详情 ></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-6">
+                        <h3 className="text-lg font-semibold mb-6">常见问题</h3>
+                        <div className="space-y-6">
+                            <div>
+                                <h4 className="font-medium mb-2">1. 捐赠资金可以开具发票吗？</h4>
+                                <p className="text-gray-600">是的，善款捐赠100元以上的可开具捐赠发票。请在您捐赠时，在"备注提醒请填"内备注你需要捐助且具体发票要求。</p>
+                            </div>
+                            <div>
+                                <h4 className="font-medium mb-2">2. 如何确认我的捐赠数据是否到账？</h4>
+                                <p className="text-gray-600">平台有专门个人资产发布实时展资料，您可以在个人信息页查看，您要进入指定项目获取详情监赠金使册第机械。同时，平台会发送对应账单，确保资金全部到账。</p>
+                            </div>
+                            <div>
+                                <h4 className="font-medium mb-2">3. 如果项目募集金额超过目标金额怎么办？</h4>
+                                <p className="text-gray-600">项目超额的金额将手执实项目内容技术投续程度的详款定义的标工会公益项目，项目负责方需要详细定义超额资金的处置要求，并将继续平台将系统。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const AddProjectModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-h-96 overflow-y-auto">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold">添加新项目</h3>
+                            <button onClick={() => setShowAddModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input type="text" placeholder="输入项目名称" className="w-full border rounded px-3 py-2" />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目描述</label>
+                                <textarea placeholder="请概括项目" className="w-full border rounded px-3 py-2 h-20 resize-none"></textarea>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">当前募集金额</label>
+                                    <input type="number" value="0" className="w-full border rounded px-3 py-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">目标金额</label>
+                                    <input type="number" value="10000" className="w-full border rounded px-3 py-2" />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">发布日期</label>
+                                    <input type="date" value="2025-09-23" className="w-full border rounded px-3 py-2" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">项目类型</label>
+                                    <select className="w-full border rounded px-3 py-2">
+                                        <option>教育</option>
+                                        <option>医疗</option>
+                                        <option>救灾</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目图片URL</label>
+                                <input type="url" value="https://picsum.photos/id/1084/300/200" className="w-full border rounded px-3 py-2" />
+                            </div>
+                            
+                            <div className="bg-red-50 p-3 rounded text-sm">
+                                <i className="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                <span className="text-red-600">小贴士：请填写真实有效的项目信息，虚假或不实人为解困应，详细说明项目背景是成功发布的重要步骤。</span>
+                            </div>
+                            
+                            <div className="flex space-x-3 pt-4">
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="flex-1 border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="flex-1 bg-red-500 text-white py-2 rounded hover:bg-red-600"
+                                >
+                                    提交并发布
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const DeleteConfirmModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-80">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold">确认删除</h3>
+                            <button onClick={() => setShowDeleteModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="text-center mb-6">
+                            <div className="text-red-500 text-4xl mb-3">
+                                <i className="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <p className="text-gray-700 mb-2">您确定删除项目 {deleteProjectName} ？</p>
+                            <p className="text-red-500 text-sm">此操作不可撤销</p>
+                        </div>
+                        
+                        <div className="flex space-x-3">
+                            <button 
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 bg-red-500 text-white py-2 rounded hover:bg-red-600"
+                            >
+                                确认删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex items-center justify-between h-16">
+                                <div className="flex items-center">
+                                    <i className="fas fa-heart text-red-500 text-xl mr-2"></i>
+                                    <h1 className="text-xl font-semibold text-gray-900">爱心捐赠平台</h1>
+                                </div>
+                                <div className="flex items-center space-x-6">
+                                    <a href="#" className="text-red-500 hover:text-red-600">捐赠项目</a>
+                                    <a href="#" className="text-gray-500 hover:text-gray-700">统计报表</a>
+                                    <a href="#" className="text-gray-500 hover:text-gray-700">帮助说明</a>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="grid grid-cols-5 gap-8">
+                            {/* Sidebar */}
+                            <div className="col-span-1">
+                                <nav className="space-y-2">
+                                    <button 
+                                        onClick={() => setCurrentPage('home')}
+                                        className={`w-full text-left px-4 py-2 rounded ${currentPage === 'home' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-100'}`}
+                                    >
+                                        <i className="fas fa-home mr-2"></i>首页
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('projects')}
+                                        className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                    >
+                                        <i className="fas fa-list mr-2"></i>项目
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('stats')}
+                                        className={`w-full text-left px-4 py-2 rounded ${currentPage === 'stats' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-100'}`}
+                                    >
+                                        <i className="fas fa-chart-bar mr-2"></i>统计报表
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('help')}
+                                        className={`w-full text-left px-4 py-2 rounded ${currentPage === 'help' ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-100'}`}
+                                    >
+                                        <i className="fas fa-question-circle mr-2"></i>帮助说明
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>添加项目
+                                    </button>
+                                </nav>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="col-span-3">
+                                {currentPage === 'home' && (
+                                    <div>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h2 className="text-xl font-semibold">爱心捐赠项目</h2>
+                                            <button 
+                                                onClick={() => setShowAddModal(true)}
+                                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                            >
+                                                <i className="fas fa-plus mr-2"></i>添加项目
+                                            </button>
+                                        </div>
+                                        {renderHomePage()}
+                                    </div>
+                                )}
+                                {currentPage === 'stats' && renderStatsPage()}
+                                {currentPage === 'help' && renderHelpPage()}
+                            </div>
+
+                            {/* Sidebar Stats */}
+                            <div className="col-span-1 space-y-6">
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-500">平台统计</div>
+                                        <div className="flex items-center justify-end mt-2">
+                                            <i className="fas fa-heart text-red-500 mr-2"></i>
+                                            <span className="text-sm text-gray-600">累计捐赠额</span>
+                                        </div>
+                                        <div className="text-2xl font-bold text-gray-900">¥38,800</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <i className="fas fa-project-diagram text-blue-500"></i>
+                                        <span className="text-sm text-gray-600">活跃项目数</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-gray-900">3</div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <i className="fas fa-users text-green-500"></i>
+                                        <span className="text-sm text-gray-600">本月新增捐赠数</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-gray-900">25</div>
+                                </div>
+                                
+                                <div className="bg-orange-50 rounded-lg p-4">
+                                    <div className="text-sm font-medium text-gray-700 mb-2">每日名言</div>
+                                    <p className="text-sm text-gray-600">"善良是最美好的，真正的情怀，是发现内心的美好" --</p>
+                                    <div className="text-right text-xs text-gray-500 mt-2">一周化蝶蛹</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t mt-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                            <div className="flex items-center justify-between">
+                                <div className="text-sm text-gray-500">
+                                    © 2023 爱心捐赠平台 All Rights Reserved
+                                </div>
+                                <div className="flex space-x-6 text-sm">
+                                    <a href="#" className="text-gray-500 hover:text-gray-700">联系我们</a>
+                                    <a href="#" className="text-gray-500 hover:text-gray-700">使用条款</a>
+                                    <a href="#" className="text-gray-500 hover:text-gray-700">隐私政策</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Modals */}
+                    {showAddModal && <AddProjectModal />}
+                    {showDeleteModal && <DeleteConfirmModal />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

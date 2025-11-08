@@ -1,0 +1,403 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数学难题挑战平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [categories, setCategories] = useState([
+                {
+                    id: 'algebra',
+                    name: '代数',
+                    icon: 'fas fa-times',
+                    expanded: false,
+                    children: []
+                },
+                {
+                    id: 'geometry',
+                    name: '几何',
+                    icon: 'fas fa-times',
+                    expanded: false,
+                    children: [
+                        { name: '平面几何', icon: 'fas fa-times' },
+                        { name: '立体几何', icon: 'fas fa-times' },
+                        { name: '解析几何', icon: 'fas fa-times' }
+                    ]
+                },
+                {
+                    id: 'probability',
+                    name: '概率与统计',
+                    icon: 'fas fa-times',
+                    expanded: false,
+                    children: []
+                },
+                {
+                    id: 'number-theory',
+                    name: '数论',
+                    icon: 'fas fa-times',
+                    expanded: false,
+                    children: []
+                }
+            ]);
+
+            const [showAddProblem, setShowAddProblem] = useState(false);
+            const [newProblem, setNewProblem] = useState({
+                title: '',
+                difficulty: '简单',
+                description: '',
+                exampleAnswer: ''
+            });
+
+            const [problems, setProblems] = useState([
+                {
+                    id: 101,
+                    title: '质数分解挑战',
+                    difficulty: '中等',
+                    description: '将给定的合数分解为质数的乘积，并证明你的分解是唯一的',
+                    description_long: '题目 #101: 质数分解挑战 学生学习质数分解的问题，了解质数的性质及其应用，这里是合数21的质数分解为3*7。',
+                    url: 'https://example.com/231937',
+                    category: '#代数',
+                    image: 0
+                },
+                {
+                    id: 102,
+                    title: '定积分速算',
+                    difficulty: '困难',
+                    description: '计算以下定积分：∫ (0→π) sin(x)cos(x)dx',
+                    description_long: '题目 #102: 定积分速算 大学微积分中常见的定积分计算题，涉及三角函数的积分计算。',
+                    url: 'https://example.com/466290',
+                    category: '#代数',
+                    image: 1
+                },
+                {
+                    id: 103,
+                    title: '排列组合实战',
+                    difficulty: '简单',
+                    description: '在10个人中选出一个3人委员会，有多少种不同的方法？',
+                    description_long: '题目 #103: 排列组合实战 探索组合计算的基本原理，训练计算排列组合的能力，用排列组合相关。',
+                    url: 'https://example.com/034881',
+                    category: '#代数',
+                    image: 2
+                }
+            ]);
+
+            const toggleCategory = (categoryId) => {
+                setCategories(categories.map(cat => 
+                    cat.id === categoryId 
+                        ? { ...cat, expanded: !cat.expanded }
+                        : cat
+                ));
+            };
+
+            const handleAddProblem = () => {
+                setShowAddProblem(true);
+            };
+
+            const handleShowDetails = () => {
+                // 触发查看详情操作
+            };
+
+            const handleSubmitProblem = () => {
+                const newId = Math.max(...problems.map(p => p.id)) + 1;
+                const newProblemData = {
+                    id: newId,
+                    title: newProblem.title,
+                    difficulty: newProblem.difficulty,
+                    description: newProblem.description,
+                    description_long: newProblem.description,
+                    url: `https://example.com/742079`,
+                    category: '#代数',
+                    image: newId % 3
+                };
+                setProblems([newProblemData, ...problems]);
+                setNewProblem({ title: '', difficulty: '简单', description: '', exampleAnswer: '' });
+                setShowAddProblem(false);
+            };
+
+            const toggleCategoryExpansion = (categoryId) => {
+                setCategories(categories.map(cat => 
+                    cat.id === categoryId 
+                        ? { ...cat, expanded: !cat.expanded }
+                        : cat
+                ));
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b px-6 py-4">
+                        <div className="flex justify-between items-center max-w-7xl mx-auto">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                                    <i className="fab fa-python text-white"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold text-gray-900">Math Challenge</h1>
+                                    <p className="text-sm text-gray-500">数学难题挑战平台</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <button 
+                                    onClick={handleAddProblem}
+                                    className="px-4 py-2 bg-orange-500 text-white rounded text-sm font-medium hover:bg-orange-600"
+                                >
+                                    + 添加新难题
+                                </button>
+                                <div className="flex items-center text-xs text-gray-600">
+                                    <i className="fas fa-clock mr-2"></i>
+                                    <i className="fas fa-chart-bar mr-2"></i>
+                                    <i className="fas fa-users mr-2"></i>
+                                    <i className="fas fa-fire mr-2"></i>
+                                    王者数学区挑战
+                                    <div className="text-sm text-gray-400">活动数据</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
+                        {/* Left Sidebar */}
+                        <div className="col-span-3">
+                            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                <h3 className="font-semibold mb-4 text-gray-900">题目分类</h3>
+                                <div className="space-y-2">
+                                    {categories.map(category => (
+                                        <div
+                                            key={category.id}
+                                            onClick={() => toggleCategoryExpansion(category.id)}
+                                            className={`flex items-center justify-between p-3 rounded cursor-pointer hover:bg-gray-50 ${category.expanded ? 'bg-gray-50' : ''}`}
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <i className={`${category.icon} ${category.expanded ? 'text-green-600' : 'text-gray-600'}`}></i>
+                                                <span className="font-medium text-gray-900">{category.name}</span>
+                                            </div>
+                                            <i className={`fas fa-chevron-${category.expanded ? 'up' : 'down'} text-gray-400`}></i>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <h3 className="font-semibold mb-4 text-gray-900">导入/导出</h3>
+                                <div className="space-y-3">
+                                    <button className="w-full text-left p-3 bg-gray-100 rounded border border-l-0 hover:bg-gray-200 flex items-center space-x-2">
+                                        <i className="fas fa-upload text-gray-600"></i>
+                                        <span className="text-gray-900">导入题目</span>
+                                    </button>
+                                    <button className="w-full text-left p-3 bg-gray-100 rounded border border-l-0 hover:bg-gray-200 flex items-center space-x-2">
+                                        <i className="fas fa-download text-gray-600"></i>
+                                        <span className="text-gray-900">导出题目</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="col-span-6">
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-lg font-semibold text-gray-900">题库总览</h2>
+                                    <button className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium hover:bg-blue-600">
+                                        <i className="fas fa-th mr-2"></i>
+                                        筛选问题
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {problems.map(problem => (
+                                        <div key={problem.id} className="border border-gray-200 rounded-lg p-4">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <h3 className="font-semibold text-gray-900 mb-2">题目 #{problem.id}: {problem.title}</h3>
+                                                    <div className="flex items-center space-x-2 text-sm">
+                                                        <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">{problem.difficulty}</span>
+                                                        <span className="text-gray-500">难度</span>
+                                                        <span className="text-gray-400">金陵未加入 {problem.id > 100 ? '277' : problem.id === 101 ? '256' : problem.id === 102 ? '198' : '312'} 人</span>
+                                                    </div>
+                                                </div>
+                                                <i className="fas fa-star text-yellow-500"></i>
+                                            </div>
+
+                                            <p className="text-gray-700 mb-4 text-sm">{problem.description}</p>
+
+                                            <div className="flex items-center justify-between">
+                                                <button className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 flex items-center space-x-1">
+                                                    <i className="fas fa-eye"></i>
+                                                    <span>查看详情</span>
+                                                </button>
+                                                <img src={problem.image === 0 ? "https://picsum.photos/id/10/60/60" : problem.image === 1 ? "https://picsum.photos/id/20/60/60" : "https://picsum.photos/id/30/60/60"} alt="Difficulty" className="w-12 h-12 rounded object-cover" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-8 bg-blue-50 rounded-lg p-4">
+                                    <h4 className="font-semibold text-blue-900 mb-2">小贴士</h4>
+                                    <p className="text-blue-800 text-sm">在编写题目时，可适当设置提示信息，帮助学习者思考关键步骤。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="col-span-3 space-y-6">
+                            {/* Statistics */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <h3 className="font-semibold mb-4 text-gray-900">数据统计</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-blue-100 rounded-lg p-4">
+                                        <div className="text-2xl font-bold text-blue-600">{problems.length}</div>
+                                        <div className="text-sm text-gray-600">{problems.length === 3 ? '总题数' : '已添加题数'}</div>
+                                    </div>
+                                    <div className="bg-green-100 rounded-lg p-4">
+                                        <div className="text-2xl font-bold text-green-600">24</div>
+                                        <div className="text-sm text-gray-600">已完成题数</div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 grid grid-cols-2 gap-4">
+                                    <div className="bg-yellow-100 rounded-lg p-4">
+                                        <div className="text-xl font-bold text-yellow-600">12:00</div>
+                                        <div className="text-sm text-gray-600">平均解题时间</div>
+                                    </div>
+                                    <div className="bg-purple-100 rounded-lg p-4">
+                                        <div className="text-xl font-bold text-purple-600">87%</div>
+                                        <div className="text-sm text-gray-600">正确率</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Random Image */}
+                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                <img src="https://picsum.photos/id/201/380/200" alt="Recent trend" className="w-full h-48 object-cover" />
+                                <h4 className="font-semibold mb-2 text-gray-900">最近一周挑战趋势</h4>
+                                <button className="text-xs text-blue-600 hover:text-blue-800 flex items-center">
+                                    查看详情 <i className="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+
+                            {/* Features */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <h4 className="font-semibold mb-4 text-gray-900">特色功能</h4>
+                                <div className="space-y-3">
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-sync-alt text-green-600"></i>
+                                        <span className="text-sm text-gray-700">实时数据同步</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-brain text-blue-600"></i>
+                                        <span className="text-sm text-gray-700">智能难度推荐</span>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-users text-purple-600"></i>
+                                        <span className="text-sm text-gray-700">多人协作编辑</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Problem Modal */}
+                    {showAddProblem && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-full mx-4">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="font-semibold text-gray-900">添加新难题</h3>
+                                    <button 
+                                        onClick={() => setShowAddProblem(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">题目标题 <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            value={newProblem.title}
+                                            onChange={(e) => setNewProblem({...newProblem, title: e.target.value})}
+                                            placeholder="请输入题目标题"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">难度</label>
+                                        <select
+                                            value={newProblem.difficulty}
+                                            onChange={(e) => setNewProblem({...newProblem, difficulty: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        >
+                                            <option value="简单">简单</option>
+                                            <option value="中等">中等</option>
+                                            <option value="困难">困难</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">题目描述 <span className="text-red-500">*</span></label>
+                                        <textarea
+                                            value={newProblem.description}
+                                            onChange={(e) => setNewProblem({...newProblem, description: e.target.value})}
+                                            placeholder="请输入题目描述"
+                                            rows="4"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">答案示例（可选）</label>
+                                        <textarea
+                                            value={newProblem.exampleAnswer}
+                                            onChange={(e) => setNewProblem({...newProblem, exampleAnswer: e.target.value})}
+                                            placeholder="请输入答案示例"
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button
+                                        onClick={() => setShowAddProblem(false)}
+                                        className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button
+                                        onClick={handleSubmitProblem}
+                                        className="flex-1 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        提交
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

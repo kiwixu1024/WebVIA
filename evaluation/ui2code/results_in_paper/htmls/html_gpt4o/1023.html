@@ -1,0 +1,157 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>爱心捐赠平台</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const App = () => {
+      const [activeTab, setActiveTab] = React.useState('donationProjects');
+      const [projects, setProjects] = React.useState([
+        { id: 1, title: '希冀之光助学基金', description: '帮助贫困地区的孩子们完成学业', imageUrl: 'https://picsum.photos/id/1002/300/200', raised: 12500, goal: 20000, progress: 62, date: '2023-05-15', category: '助学' },
+        { id: 2, title: '温暖冬衣行动', description: '为山区儿童送去冬日的温暖', imageUrl: 'https://picsum.photos/id/1003/300/200', raised: 8300, goal: 15000, progress: 55, date: '2023-06-20', category: '救灾' },
+        { id: 3, title: '乡村图书馆改造', description: '为乡村学校提供更好的阅读环境', imageUrl: 'https://picsum.photos/id/1004/300/200', raised: 18000, goal: 25000, progress: 72, date: '2023-04-10', category: '图书' },
+      ]);
+      const [showAddModal, setShowAddModal] = React.useState(false);
+      const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+      const [deleteProjectId, setDeleteProjectId] = React.useState(null);
+
+      const handleAddProject = (newProject) => {
+        setProjects([...projects, { id: Date.now(), ...newProject }]);
+      };
+
+      const handleDeleteProject = () => {
+        setProjects(projects.filter(project => project.id !== deleteProjectId));
+        setShowDeleteModal(false);
+        setDeleteProjectId(null);
+      };
+
+      return (
+        <div className="bg-gray-50 min-h-screen">
+          {/* Header */}
+          <header className="bg-white shadow-sm">
+            <nav className="container mx-auto px-6 py-4 flex items-center justify-between">
+              <h1 className="text-xl font-bold text-red-500 flex items-center">
+                <i className="fas fa-heart mr-2"></i> 爱心捐赠平台
+              </h1>
+            </nav>
+          </header>
+
+          <div className="container mx-auto px-6 pt-6 flex">
+            {/* Sidebar */}
+            <aside className="flex flex-col bg-white w-16 min-h-screen pt-6">
+              <button
+                className={`p-4 hover:bg-gray-100 ${activeTab === 'donationProjects' ? 'text-red-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab('donationProjects')}
+              >
+                <i className="fas fa-home"></i>
+              </button>
+              <button
+                className={`p-4 mt-4 hover:bg-gray-100 ${activeTab === 'statistics' ? 'text-red-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab('statistics')}
+              >
+                <i className="fas fa-chart-bar"></i>
+              </button>
+              <button
+                className={`p-4 mt-4 hover:bg-gray-100 ${activeTab === 'help' ? 'text-red-500' : 'text-gray-400'}`}
+                onClick={() => setActiveTab('help')}
+              >
+                <i className="fas fa-question-circle"></i>
+              </button>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1">
+              {activeTab === 'donationProjects' && (
+                <div>
+                  <header className="mb-4 flex items-center justify-between">
+                    <h2 className="text-xl font-bold">捐赠项目</h2>
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
+                      onClick={() => setShowAddModal(true)}
+                    >
+                      + 添加项目
+                    </button>
+                  </header>
+                  <div>
+                    {projects.map((project, index) => (
+                      <div key={project.id} className="bg-white p-4 mb-4 rounded shadow flex items-start">
+                        {/* Project Image */}
+                        <img
+                          className="w-32 h-20 object-cover rounded mr-4"
+                          src={project.imageUrl}
+                          alt={project.title}
+                        />
+                        {/* Project Details */}
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold">{project.title}</h3>
+                          <p className="text-sm text-gray-600">{project.description}</p>
+                          <div className="mt-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-red-500 font-bold">
+                                ¥{project.raised.toLocaleString()} / ¥{project.goal.toLocaleString()}
+                              </span>
+                              <span>{project.progress}%</span>
+                            </div>
+                            <div className="relative w-full h-2 bg-gray-200 mt-1 rounded-full">
+                              <div
+                                className="absolute left-0 top-0 h-full bg-pink-500 rounded-full"
+                                style={{ width: `${project.progress}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+                            <span>发布日期: {project.date}</span>
+                            <div className="flex items-center space-x-2">
+                              <button className="flex items-center text-gray-500 hover:text-gray-600">
+                                <i className="fas fa-edit mr-1"></i> 编辑项目
+                              </button>
+                              <button
+                                className="flex items-center text-red-500 hover:text-red-600"
+                                onClick={() => {
+                                  setDeleteProjectId(project.id);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <i className="fas fa-trash mr-1"></i> 删除项目
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'statistics' && (
+                <div>
+                  <h2 className="text-xl font-bold mb-4">捐赠统计分析</h2>
+                  {/* Add Statistics Content Here */}
+                </div>
+              )}
+
+              {activeTab === 'help' && (
+                <div>
+                  <h2 className="text-xl font-bold mb-4">帮助说明</h2>
+                  {/* Add Help Content Here */}
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

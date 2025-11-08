@@ -1,0 +1,579 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>摄影风格标签榜</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function App() {
+            const [activeNav, setActiveNav] = useState('全部风格');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [editingStyle, setEditingStyle] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState('人像');
+            const [notification, setNotification] = useState('');
+            
+            const styles = [
+                {
+                    id: 1,
+                    title: '高对比度黑白',
+                    keywords: '高对比、明暗对比强烈、黑白、沉稳',
+                    category: '人像',
+                    image: 'https://picsum.photos/id/0/400/300',
+                    tagStats: 9,
+                    ranking: 1
+                },
+                {
+                    id: 2,
+                    title: '复古胶片',
+                    keywords: '暖色调、颗粒感、柔和、怀旧',
+                    category: '风光',
+                    image: 'https://picsum.photos/id/1018/400/300',
+                    tagStats: 9,
+                    ranking: 2
+                },
+                {
+                    id: 3,
+                    title: '城市霓虹',
+                    keywords: '鲜艳、夜景、霓虹灯、反光',
+                    category: '街拍',
+                    image: 'https://picsum.photos/id/24/400/300',
+                    tagStats: 8,
+                    ranking: 3
+                },
+                {
+                    id: 4,
+                    title: '极简主义',
+                    keywords: '留白、简洁、几何、纯净',
+                    category: '商业',
+                    image: 'https://picsum.photos/id/237/400/300',
+                    tagStats: 7,
+                    ranking: 4
+                },
+                {
+                    id: 5,
+                    title: '梦幻色彩',
+                    keywords: '柔光、梦幻、粉色调、朦胧感',
+                    category: '人像',
+                    image: 'https://picsum.photos/id/169/400/300',
+                    tagStats: 6,
+                    ranking: 5
+                }
+            ];
+            
+            const categoryStats = [
+                { category: '人像', percentage: 45 },
+                { category: '风光', percentage: 30 },
+                { category: '街拍', percentage: 15 },
+                { category: '商业', percentage: 10 }
+            ];
+            
+            const ranking = [
+                { name: '高对比度黑白', score: 10 },
+                { name: '复古胶片', score: 9 },
+                { name: '城市霓虹', score: 8 },
+                { name: '极简主义', score: 7 },
+                { name: '梦幻色彩', score: 6 }
+            ];
+            
+            const [tags, setTags] = useState(styles);
+            const [newStyleName, setNewStyleName] = useState('');
+            const [newStyleKeywords, setNewStyleKeywords] = useState('');
+            const [editingKeywords, setEditingKeywords] = useState('');
+            const [editingTitle, setEditingTitle] = useState('');
+            const [editingImageUrl, setEditingImageUrl] = useState('https://picsum.photos/id/1/300/200');
+            const [selectedStyleIndex, setSelectedStyleIndex] = useState(null);
+            const [newCategory, setNewCategory] = useState('人像');
+            
+            const getFilteredStyles = () => {
+                let filtered = activeNav === '热门风格' ? tags.slice(1, 6) : tags;
+                
+                if (activeNav === '热门风格') {
+                    const top3 = tags.slice(1, 4);
+                    filtered = [filtered[0], ...top3];
+                }
+                
+                return filtered;
+            };
+            
+            const handleCategorySelect = (category) => {
+                setSelectedCategory(category);
+                setActiveNav('最新添加');
+            };
+            
+            const handleEditStyle = (index) => {
+                setEditingStyle({...tags[index], index});
+                setEditingTitle(tags[index].title);
+                setEditingKeywords(tags[index].keywords);
+                setEditingImageUrl(tags[index].image);
+                setSelectedStyleIndex(tags[index].id);
+                setShowEditModal(true);
+            };
+            
+            const handleSaveEdit = () => {
+                if (editingTitle && editingKeywords) {
+                    const updatedTags = tags.map(tag => 
+                        tag.id === editingStyle.id 
+                            ? { ...tag, title: editingTitle, keywords: editingKeywords }
+                            : tag
+                    );
+                    setTags(updatedTags);
+                    setShowEditModal(false);
+                    setNotification(`风格标签"${editingStyle.title}"更新成功！`);
+                    setTimeout(() => setNotification(''), 3000);
+                    setEditingStyle(null);
+                }
+            };
+            
+            const handleAddStyle = () => {
+                if (newStyleName && newStyleKeywords) {
+                    const newStyle = {
+                        id: tags.length + 1,
+                        title: newStyleName,
+                        keywords: newStyleKeywords,
+                        category: newCategory === '人像' ? '人像' : newCategory,
+                        image: 'https://picsum.photos/id/1/300/200',
+                        tagStats: 5,
+                        ranking: activeNav === '最新添加' ? 5 : 6
+                    };
+                    setTags([newStyle, ...tags]);
+                    setShowAddModal(false);
+                    setNotification(`风格标签"${newStyleName}"添加成功！`);
+                    setTimeout(() => setNotification(''), 3000);
+                    setNewStyleName('');
+                    setNewStyleKeywords('');
+                }
+            };
+            
+            const getTagStats = (tagTitle) => {
+                return tags.find(t => t.title === tagTitle)?.tagStats || 0;
+            };
+            
+            const getStyleStats = (styleTitle) => {
+                return tags.find(t => t.title === styleTitle)?.tagStats || 0;
+            };
+            
+            return (
+                <div className="min-h-screen bg-slate-800 text-white">
+                    {/* Header */}
+                    <header className="bg-black p-4">
+                        <div className="max-w-6xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center mr-3">
+                                    <i className="fas fa-building text-black"></i>
+                                </div>
+                                <span className="text-xl font-semibold">摄影风格标签榜</span>
+                            </div>
+                            <div className="flex space-x-6">
+                                <button 
+                                    onClick={() => setActiveNav('全部风格')}
+                                    className={`px-4 py-2 rounded ${activeNav === '全部风格' ? 'bg-yellow-500 text-black' : 'text-white hover:text-yellow-300'}`}
+                                >
+                                    榜单展示
+                                </button>
+                                <button className="text-white hover:text-yellow-300">我的收藏</button>
+                                <button className="text-white hover:text-yellow-300">风格趋势</button>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    {/* Navigation */}
+                    <nav className="bg-slate-700 p-4 border-b border-slate-600">
+                        <div className="max-w-6xl mx-auto flex space-x-4">
+                            <button 
+                                onClick={() => setActiveNav('全部风格')}
+                                className={`px-4 py-3 rounded ${activeNav === '全部风格' ? 'bg-yellow-500 text-black' : 'text-white hover:text-yellow-300'}`}
+                            >
+                                全部风格
+                            </button>
+                            <button 
+                                onClick={() => setActiveNav('热门风格')}
+                                className={`px-4 py-3 rounded ${activeNav === '热门风格' ? 'bg-yellow-500 text-black' : 'text-white hover:text-yellow-300'}`}
+                            >
+                                热门风格
+                            </button>
+                            <button 
+                                onClick={() => setActiveNav('最新添加')}
+                                className={`px-4 py-3 rounded ${activeNav === '最新添加' ? 'bg-yellow-500 text-black' : 'text-white hover:text-yellow-300'}`}
+                            >
+                                最新添加
+                            </button>
+                            
+                            <div className="flex items-center ml-auto space-x-6"></div>
+                        </div>
+                    </nav>
+                    
+                    {/* Notification */}
+                    {notification && (
+                        <div className="max-w-6xl mx-auto p-4" style={{color: '#d94039'}}>
+                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                                <i className="fas fa-check-circle mr-2"></i>
+                                {notification}
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="max-w-6xl mx-auto p-4 flex space-x-6">
+                        {/* Left Sidebar */}
+                        <div className="w-80 space-y-6">
+                            {/* Filters */}
+                            <div className="bg-slate-700 p-4 rounded-lg">
+                                <h3 className="text-yellow-400 font-semibold mb-4">筛选与搜索</h3>
+                                
+                                <div className="mb-4">
+                                    <label className="text-sm text-gray-300 block mb-2">风格分类</label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {['人像', '风光', '街拍', '商业', '复古', '其他'].map(category => (
+                                            <label key={category} className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="category"
+                                                    value={category}
+                                                    checked={selectedCategory === category}
+                                                    onChange={() => handleCategorySelect(category)}
+                                                    className="mr-2"
+                                                />
+                                                {category}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="text-sm text-gray-300 block mb-2">关键词搜索</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="搜索关键词..."
+                                        className="w-full bg-slate-600 border border-slate-500 rounded px-3 py-2"
+                                    />
+                                </div>
+                            </div>
+                            
+                            {/* Search Results */}
+                            <div className="bg-slate-700 p-4 rounded-lg">
+                                <h3 className="text-blue-400 font-semibold mb-4">搜索结果</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center p-2 bg-slate-600 rounded cursor-pointer hover:bg-slate-500">
+                                        <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs mr-3">高对比度</span>
+                                        <img src="https://picsum.photos/id/1/40/40" alt="风格" className="w-10 h-10 rounded mr-3" />
+                                        <div>
+                                            <div className="text-sm font-medium">风格滤镜</div>
+                                            <div className="text-xs text-gray-400">高对比度、色彩分级</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center p-2 bg-slate-600 rounded cursor-pointer hover:bg-slate-500">
+                                        <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs mr-3">降噪</span>
+                                        <img src="https://picsum.photos/id/2/40/40" alt="风格" className="w-10 h-10 rounded mr-3" />
+                                        <div>
+                                            <div className="text-sm font-medium">AI降噪</div>
+                                            <div className="text-xs text-gray-400">AI升级、降噪效果</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            <div className="bg-slate-800 p-6 rounded-lg border border-slate-600">
+                                <h2 className="text-xl font-semibold mb-4">探索当下最火的摄影风格标签</h2>
+                                <p className="text-gray-400 mb-6">从高对比度人像到梦幻胶片，每一种风格都能激发你的创作灵感！</p>
+                                
+                                {/* Cards Grid */}
+                                <div className="grid grid-cols-3 gap-6">
+                                    {getFilteredStyles().map((item, index) => (
+                                        <div key={item.id} className="bg-slate-700 rounded-lg overflow-hidden">
+                                            <div className="relative">
+                                                <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+                                                <div className="absolute top-2 left-2 w-7 h-7 bg-yellow-500 text-black rounded-full flex items-center justify-center text-sm font-bold">
+                                                    {index + 1}
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="font-semibold mb-2">{item.title}</h3>
+                                                <p className="text-sm text-gray-400 mb-2">关键词：{item.keywords}</p>
+                                                <p className="text-xs text-gray-500 mb-3">分类：{item.category}</p>
+                                                <div className="flex items-center justify-between text-xs text-gray-400">
+                                                    <span>标签统计：{getStyleStats(item.title)}</span>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => handleEditStyle(index)}
+                                                            className="bg-yellow-500 text-black px-2 py-1 rounded text-xs hover:bg-yellow-600"
+                                                        >
+                                                            编辑
+                                                        </button>
+                                                        <button className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+                                                            删除
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Right Sidebar */}
+                    <div className="w-80 bg-slate-700 p-4 border border-slate-600 rounded-lg">
+                        <div className="mb-6">
+                            <h3 className="text-green-400 font-semibold mb-4">风格热度排行榜 Top 5</h3>
+                            {ranking.map((item, index) => (
+                                <div 
+                                    key={index} 
+                                    className={`p-3 rounded-lg mb-2 ${index < 3 ? 'bg-yellow-100' : 'bg-gray-100'}`}
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm ${index < 3 ? 'bg-yellow-500' : 'bg-gray-500'}`}>
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <div className="font-medium text-sm">{item.name}</div>
+                                                <div className="text-xs text-gray-500">{item.score} 分</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div className="mb-6">
+                            <h3 className="text-blue-400 font-semibold mb-4">风格标签使用频率</h3>
+                            <div className="text-center mb-4">
+                                <div className="w-24 h-24 mx-auto mb-2" style={{background: 'conic-gradient(white 120deg, #f59e0b 360deg)', borderRadius: '50%'}}>
+                                    <div className="text-2xl font-bold">75%</div>
+                                </div>
+                            </div>
+                            <div className="mb-2">
+                                <div className="flex justify-between text-xs text-gray-400 mb-2">
+                                    <div>人物 (45%)</div>
+                                    <div>风光 (30%)</div>
+                                    <div>街拍 (15%)</div>
+                                    <div>其他 (10%)</div>
+                                </div>
+                                <div className="flex space-x-1 mb-1">
+                                    <div className="w-8 h-1 bg-yellow-500"></div>
+                                    <div className="w-8 h-1 bg-gray-400"></div>
+                                    <div className="w-8 h-1 bg-gray-400"></div>
+                                    <div className="w-8 h-1 bg-gray-400"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="text-xs text-gray-400 text-center">
+                            <div>数据来源：全站用户标签打标签统计，实时更新。</div>
+                        </div>
+                    </div>
+                    
+                    <div className="max-w-6xl mx-auto pb-8 pt-6">
+                        {/* Edit Modal */}
+                        {showEditModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-slate-800 p-6 rounded-lg w-96">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-xl font-semibold">编辑风格标签</h3>
+                                        <button 
+                                            onClick={() => setShowEditModal(false)}
+                                            className="text-gray-400 hover:text-white"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <p className="text-gray-400 text-sm mb-6">在此输入风格名称及关键词，为你的作品打上精准标签。</p>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">风格名称 *</label>
+                                            <input 
+                                                type="text"
+                                                value={editingTitle}
+                                                onChange={(e) => setEditingTitle(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="请输入风格名称"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">关键词 *</label>
+                                            <input 
+                                                type="text"
+                                                value={editingKeywords}
+                                                onChange={(e) => setEditingKeywords(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="示例如：高对比、颗粒感、暖色调（用逗号分隔）"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">所属分类</label>
+                                            <select 
+                                                value={selectedCategory}
+                                                onChange={(e) => {
+                                                    setSelectedCategory(e.target.value);
+                                                    setNewCategory(e.target.value);
+                                                }}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                            >
+                                                <option value="人像">人像</option>
+                                                <option value="风光">风光</option>
+                                                <option value="街拍">街拍</option>
+                                                <option value="商业">商业</option>
+                                                <option value="复古">复古</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">推荐指数 (9/10)</label>
+                                            <div className="w-full bg-slate-700 rounded h-2">
+                                                <div 
+                                                    className="bg-yellow-500 h-2 rounded" 
+                                                    style={{width: `${(9/10)*100}%`}}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">图片URL</label>
+                                            <input 
+                                                type="text"
+                                                value={editingImageUrl}
+                                                onChange={(e) => setEditingImageUrl(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="https://picsum.photos/id/1/300/200"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => setShowEditModal(false)}
+                                                className="flex-1 bg-slate-600 text-white py-2 rounded hover:bg-slate-500"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleSaveEdit}
+                                                className="flex-1 bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600"
+                                            >
+                                                保存并关闭
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Add Modal */}
+                        {showAddModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-slate-800 p-6 rounded-lg w-96">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-xl font-semibold">添加摄影风格</h3>
+                                        <button 
+                                            onClick={() => setShowAddModal(false)}
+                                            className="text-gray-400 hover:text-white"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <p className="text-gray-400 text-sm mb-6">在此输入风格名称及关键词，为你的作品打上精准标签。</p>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">风格名称 *</label>
+                                            <input 
+                                                type="text"
+                                                value={newStyleName}
+                                                onChange={(e) => setNewStyleName(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="请输入风格名称"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">关键词 *</label>
+                                            <input 
+                                                type="text"
+                                                value={newStyleKeywords}
+                                                onChange={(e) => setNewStyleKeywords(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="示例如：高对比、颗粒感、暖色调（用逗号分隔）"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">所属分类</label>
+                                            <select 
+                                                value={newCategory}
+                                                onChange={(e) => setNewCategory(e.target.value)}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                            >
+                                                <option value="人像">人像</option>
+                                                <option value="风光">风光</option>
+                                                <option value="街拍">街拍</option>
+                                                <option value="商业">商业</option>
+                                                <option value="复古">复古</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">推荐指数 (5/10)</label>
+                                            <div className="w-full bg-slate-700 rounded h-2">
+                                                <div 
+                                                    className="bg-yellow-500 h-2 rounded" 
+                                                    style={{width: '50%'}}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">图片URL</label>
+                                            <input 
+                                                type="text"
+                                                value={selectedStyleIndex ? tags[selectedStyleIndex-1]?.image : 'https://picsum.photos/id/2/300/200'}
+                                                onChange={(e) => {if (selectedStyleIndex) setEditingImageUrl(e.target.value); else setEditingImageUrl(e.target.value);}}
+                                                className="w-full bg-slate-700 border border-slate-500 rounded px-3 py-2 text-white"
+                                                placeholder="https://picsum.photos/id/1/300/200"
+                                            />
+                                        </div>
+                                        
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => setShowAddModal(false)}
+                                                className="flex-1 bg-slate-600 text-white py-2 rounded hover:bg-slate-500"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleAddStyle}
+                                                className="flex-1 bg-yellow-500 text-black py-2 rounded hover:bg-yellow-600"
+                                            >
+                                                保存并关闭
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

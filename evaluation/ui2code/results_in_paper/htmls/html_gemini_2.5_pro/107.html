@@ -1,0 +1,527 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>项目路演信息</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c7c7c7;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+
+<body class="bg-[#F0F2F5]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialProjects = [
+            {
+                id: 1,
+                title: 'AI智能助手平台',
+                team: '创新科技团队',
+                date: '2023-12-15',
+                description: '基于大模型重构的企业级智能助手平台，支持多场景定制化应用与部署。',
+                tag: '人工智能',
+                imageUrl: 'https://picsum.photos/id/10/80/80',
+            },
+            {
+                id: 2,
+                title: '绿色能源管理系统',
+                team: '可持续发展研究小组',
+                date: '2023-12-20',
+                description: '面向企业的绿色能源管理平台，通过IoT设备实现能源消耗实时监控与优化。',
+                tag: '清洁能源',
+                imageUrl: 'https://picsum.photos/id/20/80/80',
+            },
+            {
+                id: 3,
+                title: '区块链供应链溯源',
+                team: '分布式技术实验室',
+                date: '2023-12-25',
+                description: '基于区块链技术的全链路供应链溯源系统，保障产品从源头到终端的全流程透明可信。',
+                tag: '区块链',
+                imageUrl: 'https://picsum.photos/id/30/80/80',
+            },
+        ];
+
+        function App() {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [projects, setProjects] = useState(initialProjects);
+            
+            const [isEditModalOpen, setEditModalOpen] = useState(false);
+            const [editingProject, setEditingProject] = useState(null);
+
+            const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+            
+            const [isDetailsPanelOpen, setDetailsPanelOpen] = useState(false);
+            const [viewingProject, setViewingProject] = useState(null);
+
+            const [isAddModalOpen, setAddModalOpen] = useState(false);
+
+            const handleEditClick = (project) => {
+                setEditingProject(project);
+                setEditModalOpen(true);
+            };
+
+            const handleDeleteClick = () => {
+                setDeleteModalOpen(true);
+            };
+            
+            const handleDetailsClick = (project) => {
+                setViewingProject(project);
+                setDetailsPanelOpen(true);
+            };
+
+            const handleAddClick = () => {
+                setAddModalOpen(true);
+            };
+            
+            const closeModal = () => {
+                setEditModalOpen(false);
+                setDeleteModalOpen(false);
+                setAddModalOpen(false);
+            };
+
+            const closeDetailsPanel = () => {
+                setDetailsPanelOpen(false);
+            }
+
+            return (
+                <div className="min-h-screen text-gray-700">
+                    <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                    <div className="flex" style={{ height: 'calc(100vh - 64px)' }}>
+                        <LeftSidebar />
+                        <main className="flex-1 p-6 overflow-y-auto">
+                           <ProjectList 
+                                onEdit={handleEditClick}
+                                onDelete={handleDeleteClick}
+                                onDetails={handleDetailsClick}
+                                onAdd={handleAddClick}
+                                projects={projects}
+                            />
+                        </main>
+                        <RightSidebar />
+                    </div>
+                    <Footer />
+                    {isEditModalOpen && <EditModal project={editingProject} onClose={closeModal} />}
+                    {isDeleteModalOpen && <DeleteModal onClose={closeModal} />}
+                    {isAddModalOpen && <AddModal onClose={closeModal} />}
+                    <DetailsPanel project={viewingProject} isOpen={isDetailsPanelOpen} onClose={closeDetailsPanel} />
+                </div>
+            );
+        }
+
+        function Header({ searchTerm, setSearchTerm }) {
+            return (
+                <header className="bg-[#304A83] text-white flex items-center justify-between px-6 h-16 shadow-md z-20 relative">
+                    <div className="flex items-center">
+                        <div className="bg-blue-500 p-1.5 mr-3 rounded">
+                            <i className="fas fa-project-diagram text-lg"></i>
+                        </div>
+                        <h1 className="text-xl font-semibold">项目路演信息</h1>
+                    </div>
+                    <div className="flex items-center space-x-6">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="搜索项目"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="bg-[#496099] placeholder-gray-300 text-white rounded-md py-1.5 pl-4 pr-10 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
+                            <i className="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300"></i>
+                        </div>
+                        <i className="fas fa-bell text-xl cursor-pointer"></i>
+                        <img src="https://picsum.photos/id/50/32/32" alt="User Avatar" className="w-8 h-8 rounded-full cursor-pointer" />
+                    </div>
+                </header>
+            );
+        }
+
+        function LeftSidebar() {
+            return (
+                <aside className="w-64 bg-white p-4 flex flex-col justify-between" style={{ height: 'calc(100vh - 96px)' }}>
+                    <div>
+                        <h2 className="text-gray-500 text-sm font-bold px-4 mb-3">概览</h2>
+                        <nav>
+                            <ul>
+                                <li className="mb-1">
+                                    <a href="#" className="flex items-center px-4 py-2 text-blue-600 bg-blue-100 rounded-lg font-semibold border-l-4 border-blue-600">
+                                        <i className="fas fa-list-alt w-6"></i>
+                                        <span>项目列表</span>
+                                    </a>
+                                </li>
+                                <li className="mb-1">
+                                    <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                        <i className="fas fa-chart-bar w-6"></i>
+                                        <span>数据统计</span>
+                                    </a>
+                                </li>
+                                <li className="mb-1">
+                                    <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                        <i className="fas fa-question-circle w-6"></i>
+                                        <span>帮助中心</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div className="bg-blue-50 border-l-4 border-blue-300 p-3 text-sm text-gray-600 rounded-r-md">
+                        <h3 className="font-bold mb-1">提示</h3>
+                        <p>每个项目提交后需后台确认，确认后项目信息将展示在前台，请知悉。</p>
+                    </div>
+                </aside>
+            );
+        }
+
+        function ProjectList({ onEdit, onDelete, onDetails, onAdd, projects }) {
+            return (
+                <div className="space-y-5">
+                    <h2 className="text-2xl font-bold text-gray-800">项目路演列表</h2>
+                    
+                    {projects.map(project => (
+                        <ProjectCard key={project.id} project={project} onEdit={onEdit} onDelete={onDelete} onDetails={onDetails} />
+                    ))}
+
+                    <div className="text-center pt-4">
+                        <button onClick={onAdd} className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-md shadow-sm transition-colors">
+                            <i className="fas fa-plus mr-2"></i>
+                            添加项目
+                        </button>
+                    </div>
+
+                    <div className="bg-blue-50 p-4 border-l-4 border-blue-400 rounded-r-md text-gray-700">
+                        <h3 className="font-semibold text-blue-800">特色</h3>
+                        <p className="text-sm">可一键导出路演报告，便于汇报和归档。</p>
+                    </div>
+                </div>
+            );
+        }
+
+        function ProjectCard({ project, onEdit, onDelete, onDetails }) {
+            return (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex items-start gap-6">
+                    <img src={project.imageUrl} alt={project.title} className="w-20 h-20 rounded-md object-cover flex-shrink-0 mt-1" />
+                    <div className="flex-grow">
+                        <h3 className="text-xl font-bold text-gray-800">{project.title}</h3>
+                        <div className="text-sm text-gray-500 mt-1 mb-3">
+                            <span>团队：{project.team}</span>
+                            <span className="mx-3">|</span>
+                            <span>路演日期：{project.date}</span>
+                        </div>
+                        <p className="text-gray-600 mb-4">{project.description}</p>
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{project.tag}</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col space-y-2 items-end flex-shrink-0 w-32">
+                        <button onClick={() => onEdit(project)} className="w-full text-center py-1.5 px-4 text-sm font-semibold text-blue-600 bg-white border border-blue-500 rounded-md hover:bg-blue-50 shadow-sm">
+                            <i className="fas fa-edit mr-2"></i>编辑
+                        </button>
+                         <button onClick={onDelete} className="w-full text-center py-1.5 px-4 text-sm font-semibold text-red-600 bg-white border border-red-500 rounded-md hover:bg-red-50 shadow-sm">
+                             <i className="fas fa-trash-alt mr-2"></i>删除
+                        </button>
+                        <button onClick={() => onDetails(project)} className="w-full text-center py-1.5 px-4 text-sm font-semibold text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 shadow-sm mt-2">
+                             <i className="fas fa-eye mr-2"></i>查看详情
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function RightSidebar() {
+            return (
+                <aside className="w-80 bg-white p-6 border-l border-gray-200 overflow-y-auto" style={{ height: 'calc(100vh - 96px)' }}>
+                    <div className="space-y-8">
+                        <div>
+                            <h3 className="font-bold text-gray-800 mb-1">实时数据</h3>
+                            <p className="text-xs text-gray-400">数据更新于今日 09:30</p>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-3">路演项目统计</h4>
+                            <div className="flex justify-around items-end h-32">
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '70%' }}></div>
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '50%' }}></div>
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '85%' }}></div>
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '95%' }}></div>
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '60%' }}></div>
+                                <div className="w-6 bg-yellow-400 rounded-t-sm" style={{ height: '75%' }}></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-3">访问量趋势</h4>
+                            <div className="h-32 bg-gray-100 rounded-md flex items-center justify-center">
+                                <svg className="w-full h-full text-gray-400" viewBox="0 0 100 50" preserveAspectRatio="none">
+                                    <path d="M 0 40 Q 25 10, 50 30 T 100 20" stroke="currentColor" strokeWidth="2" fill="none" />
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-3">近7天数据</h4>
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                                <div className="bg-gray-50 p-3 rounded-md">
+                                    <p className="text-2xl font-bold text-blue-600">3</p>
+                                    <p className="text-sm text-gray-500">项目总数</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-md">
+                                    <p className="text-2xl font-bold text-orange-500">2</p>
+                                    <p className="text-sm text-gray-500">待审核</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-md">
+                                    <p className="text-2xl font-bold text-green-600">5</p>
+                                    <p className="text-sm text-gray-500">已完成路演</p>
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-md">
+                                    <p className="text-2xl font-bold text-purple-600">12</p>
+                                    <p className="text-sm text-gray-500">关注人数</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-700 mb-3">帮助中心</h4>
+                            <ul className="text-sm text-blue-600 space-y-2">
+                                <li><a href="#" className="hover:underline"><i className="fas fa-file-alt w-5"></i>如何快速创建项目</a></li>
+                                <li><a href="#" className="hover:underline"><i className="fas fa-flag-checkered w-5"></i>如何申请路演报告</a></li>
+                                <li><a href="#" className="hover:underline"><i className="fas fa-bug w-5"></i>常见问题</a></li>
+                                <li><a href="#" className="hover:underline"><i className="fas fa-headset w-5"></i>联系客服</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </aside>
+            );
+        }
+
+        function Footer() {
+            return (
+                <footer className="bg-white text-gray-500 text-sm flex items-center justify-between px-6 h-8 border-t border-gray-200 fixed bottom-0 w-full">
+                    <div>© 2023 项目路演平台 版权所有</div>
+                    <div className="space-x-4">
+                        <a href="#" className="hover:text-gray-700">版本v1.2.0</a>
+                        <a href="#" className="hover:text-gray-700">联系我们</a>
+                        <a href="#" className="hover:text-gray-700">隐私政策</a>
+                    </div>
+                </footer>
+            );
+        }
+
+        const Modal = ({ children, onClose, title }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-between items-center p-4 border-b">
+                        <h2 className="text-lg font-semibold">{title}</h2>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                            <i className="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    {children}
+                </div>
+            </div>
+        );
+
+        function EditModal({ project, onClose }) {
+            return (
+                <Modal title="编辑项目" onClose={onClose}>
+                    <div className="p-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称*</label>
+                            <input type="text" defaultValue={project.title} className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">团队名称*</label>
+                            <input type="text" defaultValue={project.team} className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目简介*</label>
+                            <textarea rows="3" defaultValue={project.description} className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">路演日期*</label>
+                                <div className="relative">
+                                    <input type="text" defaultValue="12/15/2023" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                                    <i className="fas fa-calendar-alt absolute right-3 top-2.5 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目分类</label>
+                                <select defaultValue={project.tag} className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-white">
+                                    <option>人工智能</option>
+                                    <option>清洁能源</option>
+                                    <option>区块链</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end p-4 bg-gray-50 border-t rounded-b-lg space-x-2">
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">保存</button>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function DeleteModal({ onClose }) {
+            return (
+                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={onClose}>
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm text-center p-8" onClick={e => e.stopPropagation()}>
+                        <i className="fas fa-exclamation-triangle text-5xl text-yellow-500 mb-4"></i>
+                        <h2 className="text-xl font-bold mb-2">确认删除该项目？</h2>
+                        <p className="text-gray-500 mb-6">此操作不可撤销</p>
+                        <div className="flex justify-center space-x-4">
+                            <button onClick={onClose} className="px-8 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                            <button onClick={onClose} className="px-8 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">确认删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function AddModal({ onClose }) {
+             return (
+                <Modal title="添加新项目" onClose={onClose}>
+                    <div className="p-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称*</label>
+                            <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">团队名称*</label>
+                            <input type="text" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">项目简介*</label>
+                            <textarea rows="3" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"></textarea>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">路演日期*</label>
+                                <div className="relative">
+                                    <input type="text" placeholder="mm/dd/yyyy" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border" />
+                                    <i className="fas fa-calendar-alt absolute right-3 top-2.5 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目分类</label>
+                                <select defaultValue="人工智能" className="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-white">
+                                    <option>人工智能</option>
+                                    <option>清洁能源</option>
+                                    <option>区块链</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end p-4 bg-gray-50 border-t rounded-b-lg space-x-2">
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-yellow-500 border border-transparent rounded-md hover:bg-yellow-600">提交</button>
+                    </div>
+                </Modal>
+            );
+        }
+
+        function DetailsPanel({ project, isOpen, onClose }) {
+            if (!project) return null;
+            
+            const panelClasses = `fixed top-0 right-0 w-full max-w-md h-full bg-white shadow-2xl z-40 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`;
+
+            return (
+                <div className={panelClasses}>
+                    <div className="flex flex-col h-full">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h2 className="text-lg font-semibold text-gray-800">项目详情</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><i className="fas fa-times text-xl"></i></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                            <div className="relative">
+                                <img src="https://picsum.photos/id/1011/400/200" className="w-full h-auto rounded-lg" alt={project.title} />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold">{project.title}</h3>
+                                <p className="text-sm text-gray-500">{project.team}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 border-b pb-1">项目简介</h4>
+                                <p className="text-sm text-gray-600">{project.description}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 border-b pb-1">基本信息</h4>
+                                <div className="text-sm space-y-1">
+                                    <p><span className="font-medium text-gray-500 w-20 inline-block">路演日期:</span> {project.date}</p>
+                                    <p><span className="font-medium text-gray-500 w-20 inline-block">项目分类:</span> {project.tag}</p>
+                                </div>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 border-b pb-1">团队成员</h4>
+                                <div className="flex space-x-4">
+                                    <div className="text-center">
+                                        <img src="https://picsum.photos/id/40/32/32" className="w-10 h-10 rounded-full mx-auto" />
+                                        <p className="text-xs mt-1">张明</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <img src="https://picsum.photos/id/41/32/32" className="w-10 h-10 rounded-full mx-auto" />
+                                        <p className="text-xs mt-1">李华</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <img src="https://picsum.photos/id/42/32/32" className="w-10 h-10 rounded-full mx-auto" />
+                                        <p className="text-xs mt-1">王强</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 border-b pb-1">相关文档</h4>
+                                <ul className="text-sm text-blue-600 space-y-2">
+                                    <li><a href="#" className="hover:underline"><i className="fas fa-file-powerpoint text-red-500 w-5"></i> 路演PPT</a></li>
+                                    <li><a href="#" className="hover:underline"><i className="fas fa-file-alt text-blue-500 w-5"></i> 技术白皮书</a></li>
+                                    <li><a href="#" className="hover:underline"><i className="fas fa-file-invoice-dollar text-green-500 w-5"></i> 财务预测</a></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-2 border-b pb-1">路演视频</h4>
+                                <div className="relative bg-black rounded-lg overflow-hidden">
+                                    <img src="https://picsum.photos/id/12/350/200" alt="Video thumbnail" className="w-full opacity-70" />
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <i className="fas fa-play-circle text-white text-5xl cursor-pointer opacity-80 hover:opacity-100"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-4 border-t flex justify-between">
+                            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 flex items-center">
+                                <i className="fas fa-download mr-2"></i>导出PDF
+                            </button>
+                            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                                <i className="fas fa-arrow-left mr-2"></i>返回
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8分钟健身训练表</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script type="text/babel">
+    const Tab = ({ activeTab, setActiveTab }) => {
+      const tabs = ["训练概览", "编辑计划", "数据统计", "帮助中心"];
+
+      return (
+        <nav className="flex items-center justify-end bg-teal-800 text-white p-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 ${
+                activeTab === tab ? "border-b-2 border-white" : "opacity-70"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
+      );
+    };
+
+    const Sidebar = () => {
+      return (
+        <aside className="w-64 bg-teal-900 text-white flex flex-col justify-between p-4">
+          <div>
+            <button className="bg-red-500 px-4 py-2 rounded mb-4">+ 添加训练</button>
+            <div className="mb-4">
+              <p>全部训练列表</p>
+              <p>快速通道</p>
+              <p>导出数据</p>
+            </div>
+            <div>
+              <hr className="border-teal-600" />
+              <p className="my-4 text-sm">每日一贴：</p>
+              <p>
+                健身需循序渐进，每周至少完成3次中强度训练，才能达到健康效果。
+              </p>
+              <p className="my-4 text-sm">运动小诀窍：</p>
+              <p>平衡膳食和健身计划对效果提升至关重要。</p>
+            </div>
+          </div>
+          <footer>
+            <p>© 2023 8分钟健身训练表 · 版本 v1.2.0</p>
+          </footer>
+        </aside>
+      );
+    };
+
+    const ContentTrainingOverview = ({ bgImage }) => {
+      return (
+        <div className="flex-1 p-4 bg-green-50">
+          <div className="mb-6">
+            <img
+              src={bgImage}
+              alt="Background"
+              className="w-full h-48 object-cover rounded"
+            />
+          </div>
+          <h2 className="text-lg font-bold mb-4">每分钟训练详情</h2>
+          <div className="space-y-4">
+            <TrainingItem
+              title="第1分钟：休闲拉伸"
+              duration="30s"
+              intensity="简单"
+              notes="控制呼吸, 保持身体放松"
+            />
+            <TrainingItem
+              title="第2分钟：高抬腿"
+              duration="45s"
+              intensity="中等"
+              notes="保持节奏，双臂配合运动"
+            />
+            {/* Additional training items */}
+          </div>
+        </div>
+      );
+    };
+
+    const TrainingItem = ({ title, duration, intensity, notes }) => {
+      return (
+        <div className="flex items-center justify-between p-4 bg-white shadow rounded">
+          <div>
+            <h3 className="font-bold">{title}</h3>
+            <p>{duration}</p>
+            <p>{intensity}</p>
+            <p>{notes}</p>
+          </div>
+          <div className="space-x-2">
+            <button className="bg-blue-500 px-2 py-1 rounded text-white">编辑</button>
+            <button className="bg-red-500 px-2 py-1 rounded text-white">删除</button>
+          </div>
+        </div>
+      );
+    };
+
+    const ContentEditPlan = () => {
+      return (
+        <div className="flex-1 p-4 bg-green-50">
+          <h2 className="text-lg font-bold mb-4">编辑训练计划</h2>
+          {/* List with editable plans */}
+        </div>
+      );
+    };
+
+    const ContentStatistics = () => {
+      return (
+        <div className="flex-1 p-4 bg-green-50">
+          <h2 className="text-lg font-bold mb-4">训练数据统计</h2>
+          {/* Add your statistics content here */}
+        </div>
+      );
+    };
+
+    const ContentHelpCenter = () => {
+      return (
+        <div className="flex-1 p-4 bg-green-50">
+          <h2 className="text-lg font-bold mb-4">帮助中心</h2>
+          {/* Add HelpCenter content */}
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [activeTab, setActiveTab] = React.useState("训练概览");
+      const [bgImage, setBgImage] = React.useState(
+        "https://picsum.photos/id/1/960/150"
+      );
+
+      const renderContent = () => {
+        switch (activeTab) {
+          case "训练概览":
+            return <ContentTrainingOverview bgImage={bgImage} />;
+          case "编辑计划":
+            return <ContentEditPlan />;
+          case "数据统计":
+            return <ContentStatistics />;
+          case "帮助中心":
+            return <ContentHelpCenter />;
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="flex h-screen">
+          <Sidebar />
+          <div className="flex-1 flex flex-col">
+            <Tab activeTab={activeTab} setActiveTab={setActiveTab} />
+            {renderContent()}
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>

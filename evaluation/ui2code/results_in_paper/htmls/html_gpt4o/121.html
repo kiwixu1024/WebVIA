@@ -1,0 +1,218 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>节气日历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [view, setView] = useState('calendar');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [seasonsData, setSeasonsData] = useState([
+                { id: 1, name: '立春', date: '2023-02-04', season: '春季', image: 'https://picsum.photos/id/1025/200/200', description: '立春二十四节气中的第一个节气，标志着新一年农耕活动的开始。立春节气，“立”是开始，“春”是希望，万物更新，大地回暖，杨柳吐翠嫩芽。在这个时节，万物开始新生，更替，迎接新一年的生机无限。' },
+                { id: 2, name: '惊蛰', date: '2023-03-06', season: '春季', image: 'https://picsum.photos/id/121/200/200', description: '惊蛰是二十四节气中的第三个节气，表示天气回暖，春雷响动，惊醒了休眠在土中的昆虫。在这个节气，人们注意发芽、除害甜菜等工作，以保持好的品质和健康气候。' },
+                { id: 3, name: '夏至', date: '2023-06-21', season: '夏季', image: 'https://picsum.photos/id/258/200/200', description: '夏至是二十四节气中的第十个节气，此时太阳直射地面的位置来到一年中的最北端。传统讲究防暑消暑，吃冬瓜汤、西红柿鸡蛋汤，讲究补充水分等。' },
+            ]);
+            const [newSeason, setNewSeason] = useState({
+                name: '',
+                date: '',
+                season: '春季',
+                image: '',
+                description: ''
+            });
+
+            const addSeason = () => {
+                setSeasonsData([...seasonsData, { ...newSeason, id: seasonsData.length + 1 }]);
+                setNewSeason({ name: '', date: '', season: '春季', image: '', description: '' });
+                setView('calendar');
+            };
+
+            const renderCalendarView = () => (
+                <div>
+                    <header class="flex justify-between items-center bg-white p-4 shadow-md">
+                        <div class="text-xl font-bold">节气日历</div>
+                        <div>
+                            <input
+                                type="text"
+                                placeholder="搜索节气..."
+                                class="border rounded-md p-2"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </header>
+                    <main class="p-4 bg-gray-100">
+                        <button
+                            class="bg-pink-500 text-white py-2 px-4 rounded-md"
+                            onClick={() => setView('add')}
+                        >
+                            添加节气条目
+                        </button>
+                        <div class="mt-4 grid gap-4 grid-cols-4">
+                            {seasonsData
+                                .filter((season) =>
+                                    season.name.includes(searchQuery)
+                                )
+                                .map((season) => (
+                                    <div
+                                        key={season.id}
+                                        class="bg-white shadow rounded-md overflow-hidden"
+                                    >
+                                        <img
+                                            src={season.image}
+                                            alt={season.name}
+                                            class="w-full h-48 object-cover"
+                                        />
+                                        <div class="p-4">
+                                            <div class="font-bold text-lg flex">
+                                                <span
+                                                    class={`text-sm py-1 px-2 rounded-full ${
+                                                        season.season === '春季'
+                                                            ? 'bg-green-200 text-green-700'
+                                                            : season.season === '夏季'
+                                                            ? 'bg-red-200 text-red-700'
+                                                            : 'bg-yellow-200 text-yellow-700'
+                                                    }`}
+                                                >
+                                                    {season.season}
+                                                </span>
+                                            </div>
+                                            <div class="text-gray-900 text-lg mb-2">
+                                                {season.name}
+                                            </div>
+                                            <div class="text-gray-600 text-sm">
+                                                {season.date}
+                                            </div>
+                                            <div class="text-gray-600 text-sm">
+                                                {season.description}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    </main>
+                </div>
+            );
+
+            const renderAddSeasonView = () => (
+                <div class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-75 flex items-center justify-center">
+                    <div class="bg-white rounded-md w-1/2 p-4 relative">
+                        <h2 class="text-xl font-bold mb-4">添加新节气</h2>
+                        <form>
+                            <div class="mb-4">
+                                <label class="block mb-1">节气名称</label>
+                                <input
+                                    type="text"
+                                    class="border rounded-md w-full p-2"
+                                    value={newSeason.name}
+                                    onChange={(e) =>
+                                        setNewSeason({
+                                            ...newSeason,
+                                            name: e.target.value
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div class="mb-4">
+                                <label class="block mb-1">日期</label>
+                                <input
+                                    type="text"
+                                    placeholder="MM/DD/YYYY"
+                                    class="border rounded-md w-full p-2"
+                                    value={newSeason.date}
+                                    onChange={(e) =>
+                                        setNewSeason({
+                                            ...newSeason,
+                                            date: e.target.value
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div class="mb-4">
+                                <label class="block mb-1">分类</label>
+                                <select
+                                    class="border rounded-md w-full p-2"
+                                    value={newSeason.season}
+                                    onChange={(e) =>
+                                        setNewSeason({
+                                            ...newSeason,
+                                            season: e.target.value
+                                        })
+                                    }
+                                >
+                                    <option value="春季">春季</option>
+                                    <option value="夏季">夏季</option>
+                                    <option value="秋季">秋季</option>
+                                    <option value="冬季">冬季</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block mb-1">图片URL</label>
+                                <input
+                                    type="text"
+                                    class="border rounded-md w-full p-2"
+                                    value={newSeason.image}
+                                    onChange={(e) =>
+                                        setNewSeason({
+                                            ...newSeason,
+                                            image: e.target.value
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div class="mb-4">
+                                <label class="block mb-1">简介</label>
+                                <textarea
+                                    class="border rounded-md w-full p-2"
+                                    value={newSeason.description}
+                                    onChange={(e) =>
+                                        setNewSeason({
+                                            ...newSeason,
+                                            description: e.target.value
+                                        })
+                                    }
+                                ></textarea>
+                            </div>
+                            <div class="flex justify-end space-x-4">
+                                <button
+                                    type="button"
+                                    class="bg-gray-500 text-white py-2 px-4 rounded-md"
+                                    onClick={() => setView('calendar')}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    type="button"
+                                    class="bg-pink-500 text-white py-2 px-4 rounded-md"
+                                    onClick={addSeason}
+                                >
+                                    保存
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div>
+                    {view === 'calendar'
+                        ? renderCalendarView()
+                        : renderAddSeasonView()}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

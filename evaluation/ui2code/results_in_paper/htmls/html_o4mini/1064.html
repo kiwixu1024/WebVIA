@@ -1,0 +1,243 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>经典微视频回放墙</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="h-screen flex flex-col bg-gray-100">
+  <!-- Navbar -->
+  <header class="flex items-center justify-between bg-blue-500 text-white px-6 py-4">
+    <div class="flex items-center space-x-2">
+      <i class="fas fa-film text-xl"></i>
+      <span class="text-lg font-semibold">经典微视频回放墙</span>
+    </div>
+    <nav class="flex items-center space-x-6">
+      <a href="#" class="flex items-center space-x-1 text-white bg-blue-600 px-3 py-1 rounded">
+        <i class="fas fa-home"></i><span>首页</span>
+      </a>
+      <a href="#" class="hover:underline">我的收藏</a>
+      <a href="#" class="hover:underline">数据统计</a>
+      <a href="#" class="hover:underline">帮助</a>
+    </nav>
+    <div class="flex items-center space-x-3">
+      <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded">导入数据</button>
+      <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded">导出报告</button>
+      <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1 rounded">清空回收站</button>
+    </div>
+  </header>
+  <!-- Content -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-48 bg-white border-r">
+      <ul class="mt-6 space-y-2">
+        <li class="px-4 py-2 bg-blue-100 text-blue-600 flex items-center"><i class="fas fa-video mr-2"></i>视频展示</li>
+        <li class="px-4 py-2 hover:bg-gray-100 flex items-center"><i class="fas fa-plus mr-2"></i>新增/编辑</li>
+        <li class="px-4 py-2 hover:bg-gray-100 flex items-center"><i class="fas fa-recycle mr-2"></i>回收主题</li>
+        <li class="px-4 py-2 hover:bg-gray-100 flex items-center"><i class="fas fa-cog mr-2"></i>设置</li>
+      </ul>
+    </aside>
+    <!-- Main -->
+    <main class="flex-1 flex overflow-hidden">
+      <!-- Video list -->
+      <section class="flex-1 p-6 overflow-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold">视频展示区</h2>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"><i class="fas fa-plus mr-1"></i>新增视频</button>
+        </div>
+        <div id="video-grid" class="grid grid-cols-3 gap-6"></div>
+        <div class="mt-12 text-gray-500 text-sm">
+          © 2023 经典微视频回放墙，保留所有权利。<br/>
+          本工具仅在平台内部使用并展示内容，不得对外传播
+        </div>
+      </section>
+      <!-- Right panel -->
+      <aside class="w-64 bg-white border-l p-6 overflow-auto">
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold mb-2">统计数据</h3>
+          <div class="bg-gray-50 p-4 rounded">
+            <div class="flex justify-between mb-2">
+              <span>视频总数</span><span id="total-count">0</span>
+            </div>
+            <div class="flex justify-between mb-4">
+              <span>累计播放量</span><span id="total-plays">0 次</span>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm mb-1"><span>分类分布</span></div>
+              <div id="category-list" class="space-y-2 mt-2"></div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold mb-2">推荐主题</h3>
+          <ul class="space-y-2">
+            <li class="bg-blue-100 text-blue-700 px-3 py-2 rounded">老电影记忆<br/><span class="text-xs text-gray-600">探究20世纪50~80年代的经典影片</span></li>
+            <li class="bg-yellow-100 text-yellow-700 px-3 py-2 rounded">广告变迁史<br/><span class="text-xs text-gray-600">从平面广告到数字时代的广告演变</span></li>
+            <li class="bg-green-100 text-green-700 px-3 py-2 rounded">城市记忆计划<br/><span class="text-xs text-gray-600">记录城市发展变迁的系列微视频</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-2">使用小贴士</h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>点击视频卡片即可全屏播放视频</li>
+            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>使用筛选和排序功能快速找到目标视频</li>
+            <li><i class="fas fa-check-circle text-green-500 mr-2"></i>定期备份您的视频数据很重要</li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Modal container -->
+  <div id="modal-root"></div>
+
+  <!-- React + Babel -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const initialVideos = [
+        {
+          id: 1,
+          title: '复古瞬间',
+          tags: ['怀旧', '经典'],
+          desc: '回顾上世纪80年代的街头即景，记录那个时代的风貌与情感。过往镜头，我们可看到那年人们的生活百态。',
+          plays: 1523,
+          time: '3:45',
+          img: 'https://picsum.photos/id/1015/400/200'
+        },
+        {
+          id: 2,
+          title: '城市记忆',
+          tags: ['城市', '变迁'],
+          desc: '从20世纪90年代至今，记录城市面貌的巨大变迁。高楼大厦拔地而起，马路拓宽，却保留那些值得怀念的角落。',
+          plays: 892,
+          time: '3:45',
+          img: 'https://picsum.photos/id/1020/400/200'
+        },
+        {
+          id: 3,
+          title: '经典广告集锦',
+          tags: ['广告', '创意'],
+          desc: '那些年我们难以忘怀的电视广告，承载了太多共同的记忆。从脚白金到系列夹片，每一帧都唤回回忆。',
+          plays: 2156,
+          time: '3:45',
+          img: 'https://picsum.photos/id/1030/400/200'
+        },
+        {
+          id: 4,
+          title: '音乐故事',
+          tags: ['音乐', '历史'],
+          desc: '探秘经典音乐背后的故事，那些熟悉的旋律如何诞生，又如何影响了一代人的成长与情感。',
+          plays: 1082,
+          time: '3:45',
+          img: 'https://picsum.photos/id/1040/400/200'
+        },
+        {
+          id: 5,
+          title: '历史瞬间',
+          tags: ['历史', '纪实'],
+          desc: '重大历史事件的珍贵影像资料，让我们重温那些改变世界的瞬间，感受历史的厚重与震撼。',
+          plays: 3678,
+          time: '3:45',
+          img: 'https://picsum.photos/id/1050/400/200'
+        }
+      ];
+
+      const [videos, setVideos] = useState(initialVideos);
+      const [modal, setModal] = useState({ open: false, video: null });
+
+      const openModal = (video) => setModal({ open: true, video });
+      const closeModal = () => setModal({ open: false, video: null });
+      const confirmDelete = () => {
+        setVideos(videos.filter(v => v.id !== modal.video.id));
+        closeModal();
+      };
+
+      const totalCount = videos.length;
+      const totalPlays = videos.reduce((sum, v) => sum + v.plays, 0);
+
+      // category distribution by first tag
+      const catCount = {};
+      videos.forEach(v => {
+        const cat = v.tags[0];
+        catCount[cat] = (catCount[cat] || 0) + 1;
+      });
+      const categories = Object.entries(catCount);
+
+      return (
+        <>
+          {/* Video grid */}
+          {React.useEffect(() => {
+            document.getElementById('total-count').innerText = totalCount;
+            document.getElementById('total-plays').innerText = totalPlays + ' 次';
+            const catList = document.getElementById('category-list');
+            catList.innerHTML = '';
+            categories.forEach(([cat, cnt]) => {
+              const div = document.createElement('div');
+              div.className = 'space-y-1';
+              div.innerHTML = \`
+                <div class="flex justify-between text-sm"><span>\${cat}</span><span>\${cnt}</span></div>
+                <div class="bg-blue-200 h-2 rounded"><div class="bg-blue-500 h-2 rounded" style="width:\${(cnt / Math.max(...categories.map(c=>c[1])))*100}%"></div></div>
+              \`;
+              catList.appendChild(div);
+            });
+          })}
+
+          <div className="grid grid-cols-3 gap-6" id="grid">
+            {videos.map(v => (
+              <div key={v.id} className="bg-white rounded-lg shadow overflow-hidden relative">
+                <img src={v.img} alt={v.title} className="w-full h-40 object-cover" />
+                <div className="absolute top-2 right-2 flex space-x-2">
+                  <button className="text-blue-500 bg-white p-1 rounded hover:bg-gray-100"><i className="fas fa-edit"></i></button>
+                  <button onClick={() => openModal(v)} className="text-red-500 bg-white p-1 rounded hover:bg-gray-100"><i className="fas fa-trash"></i></button>
+                </div>
+                <div className="p-4">
+                  <div className="mb-2 space-x-1">
+                    {v.tags.map((t,i) => (
+                      <span key={i} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">#{t}</span>
+                    ))}
+                  </div>
+                  <h4 className="font-semibold mb-1">{v.title}</h4>
+                  <p className="text-gray-600 text-sm mb-3">{v.desc}</p>
+                  <div className="flex justify-between items-center text-gray-500 text-sm">
+                    <span><i className="fas fa-play mr-1"></i>{v.plays} 次播放</span>
+                    <span><i className="far fa-clock mr-1"></i>{v.time}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {modal.open && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-lg w-96">
+                <div className="p-6 text-center">
+                  <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-4"></i>
+                  <h3 className="text-lg font-semibold mb-2">确认删除</h3>
+                  <p className="text-gray-600 mb-6">您确定要删除“{modal.video.title}”这个视频吗？此操作无法撤销。</p>
+                  <div className="flex justify-center space-x-4">
+                    <button onClick={closeModal} className="px-4 py-1 bg-gray-100 text-gray-700 rounded">取消</button>
+                    <button onClick={confirmDelete} className="px-4 py-1 bg-red-500 text-white rounded">确认删除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('video-grid'));
+  </script>
+</body>
+</html>

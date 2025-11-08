@@ -1,0 +1,613 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新员工入职手册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('入站流程');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [modalContent, setModalContent] = useState(null);
+            const [filteredContent, setFilteredContent] = useState(null);
+
+            const contentSections = {
+                '入站流程': {
+                    title: '入站流程',
+                    pages: [
+                        {
+                            id: 1,
+                            title: '快速入站',
+                            icon: 'fas fa-rocket text-orange-500',
+                            description: '3天内完成所有入站手续，5天内熟悉工作环境和团队',
+                            chapters: [
+                                {
+                                    title: '第一周：公司概况介绍',
+                                    type: '必修',
+                                    department: '全部',
+                                    icon: 'fas fa-users text-gray-400',
+                                    description: '了解公司的历史、愿景，使命和价值观，参观办公区域，认识各部主管和同事',
+                                    badge: 'Orientation'
+                                },
+                                {
+                                    title: '第二周：部门流程培训',
+                                    type: '必修',
+                                    department: '技术部',
+                                    icon: 'fas fa-list text-gray-400',
+                                    description: '深入了解部门工作流程，使用工具和日常任务，与同事配
+合完成指定的小型项目',
+                                    badge: 'training'
+                                },
+                                {
+                                    title: '第三周：岗位职责训练',
+                                    type: '可选',
+                                    department: '市场部',
+                                    icon: 'fas fa-bullseye text-gray-400',
+                                    description: '实际操作岗位日常务工作，了解绩效考核标准和晋升通道，参与实际
+项目讨论和决策',
+                                    badge: 'practice'
+                                }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            title: '一站式学习',
+                            icon: 'fas fa-book text-orange-500',
+                            description: '集培训、考核、问答于一体的综合学习平台',
+                            chapters: [
+                                {
+                                    title: '第一周：公司概况介绍',
+                                    type: '必修',
+                                    department: '全部',
+                                    icon: 'fas fa-users text-gray-400',
+                                    description: '了解公司的历史、愿景，使命和价值观，参观办公区域，认识各部主管和同事',
+                                    badge: 'orientation'
+                                },
+                                {
+                                    title: '第二周：部门流程培训',
+                                    type: '必修',
+                                    department: '技术部',
+                                    icon: 'fas fa-list text-gray-400',
+                                    description: '深入了解部门工作流程，使用工具和日常任务，与同事配
+合完成指定的小型项目',
+                                    badge: 'training'
+                                },
+                                {
+                                    title: '第三周：岗位职责训练',
+                                    type: '可选',
+                                    department: '市场部',
+                                    icon: 'fas fa-bullseye text-gray-400',
+                                    description: '实际操作岗位日常务工作，了解绩效考核标准和晋升通道，参与实际
+项目讨论和决策',
+                                    badge: 'practice'
+                                }
+                            ]
+                        },
+                        {
+                            id: 3,
+                            title: '专属打卡',
+                            icon: 'fas fa-calendar-check text-orange-500',
+                            description: '记录入站每一步，实时跟踪学习进度和成果',
+                            chapters: []
+                        }
+                    ]
+                },
+                '企业文化': {
+                    title: '企业文化',
+                    pages: [
+                        {
+                            id: 1,
+                            title: '第一周：公司概况介绍',
+                            type: '必修',
+                            department: '全部',
+                            icon: 'fas fa-users text-gray-400',
+                            description: '了解公司的历史、愿景，使命和价值观，参观办公区域，认识各部主管和同事',
+                            badge: 'orientation'
+                        },
+                        {
+                            title: '第二周：部门流程培训',
+                            type: '必修',
+                            department: '技术部',
+                            icon: 'fas fa-list text-gray-400',
+                            description: '深入了解部门工作流程，使用工具和日常任务，与同事配
+合完成指定的小型项目',
+                            badge: 'training'
+                        },
+                        {
+                            title: '第三周：岗位职责训练',
+                            type: '可选',
+                            department: '市场部',
+                            icon: 'fas fa-bullseye text-gray-400',
+                            description: '实际操作岗位日常务工作，了解绩效考核标准和晋升通道，参与实际
+项目讨论和决策',
+                            badge: 'practice'
+                        }
+                    ]
+                },
+                '福利待遇': {
+                    title: '福利待遇',
+                    pages: [
+                        {
+                            id: 1,
+                            title: '第一周：公司概况介绍',
+                            type: '必修',
+                            department: '全部',
+                            icon: 'fas fa-users text-gray-400',
+                            description: '了解公司的历史、愿景，使命和价值观，参观办公区域，认识各部主管和同事',
+                            badge: 'orientation'
+                        },
+                        {
+                            title: '第二周：部门流程培训',
+                            type: '必修',
+                            department: '技术部',
+                            icon: 'fas fa-list text-gray-400',
+                            description: '深入了解部门工作流程，使用工具和日常任务，与同事配
+合完成指定的小型项目',
+                            badge: 'training'
+                        },
+                        {
+                            title: '第三周：岗位职责训练',
+                            type: '可选',
+                            department: '市场部',
+                            icon: 'fas fa-bullseye text-gray-400',
+                            description: '实际操作岗位日常务工作，了解绩效考核标准和晋升通道，参与实际
+项目讨论和决策',
+                            badge: 'practice'
+                        }
+                    ]
+                },
+                '常见问题': {
+                    title: '常见问题',
+                    pages: [
+                        {
+                            id: 1,
+                            title: '第一周：公司概况介绍',
+                            type: '必修',
+                            department: '全部',
+                            icon: 'fas fa-users text-gray-400',
+                            description: '了解公司的历史、愿景，使命和价值观，参观办公区域，认识各部主管和同事',
+                            badge: 'orientation'
+                        },
+                        {
+                            title: '第二周：部门流程培训',
+                            type: '必修',
+                            department: '技术部',
+                            icon: 'fas fa-list text-gray-400',
+                            description: '深入了解部门工作流程，使用工具和日常任务，与同事配
+合完成指定的小型项目',
+                            badge: 'training'
+                        },
+                        {
+                            title: '第三周：岗位职责训练',
+                            type: '可选',
+                            department: '市场部',
+                            icon: 'fas fa-bullseye text-gray-400',
+                            description: '实际操作岗位日常务工作，了解绩效考核标准和晋升通道，参与实际
+项目讨论和决策',
+                            badge: 'practice'
+                        }
+                    ]
+                }
+            };
+
+            const handleNavClick = (section) => {
+                setActiveTab(section);
+                if (section !== '添加新模块') {
+                    setFilteredContent(null);
+                }
+            };
+
+            const handleSearch = () => {
+                if (searchTerm.trim()) {
+                    // 后端逻辑会处理搜索相关操作
+                    console.log('搜索:', searchTerm);
+                }
+            };
+
+            const handleAddModule = () => {
+                const newModule = {
+                    id: Date.now(),
+                    title: '模块标题',
+                    icon: 'fas fa-check-circle text-gray-400',
+                    description: '模块内容',
+                    badge: '必修模块'
+                };
+                setModalContent(newModule);
+                setShowModal(true);
+            };
+
+            const handleCommonQuestion = () => {
+                setActiveTab('常见问题');
+            };
+
+            const handleLearnMore = () => {
+                setActiveTab('入站流程');
+            };
+
+            const getFilteredContent = () => {
+                if (!searchTerm) return null;
+                
+                const currentSection = contentSections[activeTab];
+                const filtered = currentSection.pages.filter(page =>
+                    page.title.includes(searchTerm) || 
+                    page.department.includes(searchTerm) ||
+                    page.description.includes(searchTerm)
+                );
+                
+                return {
+                    searchTerm,
+                    matchCount: filtered.length
+                };
+            };
+
+            const renderContent = () => {
+                const currentSection = contentSections[activeTab];
+                let content = null;
+
+                if (filteredContent) {
+                    const { searchTerm, matchCount } = filteredContent;
+                    content = (
+                        <div className="bg-white rounded-lg shadow-sm p-8">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h2 className="flex items-center text-xl font-semibold text-gray-800 mb-1">
+                                        <i className="fas fa-calendar-alt mr-2"></i>
+                                        {currentSection.title}
+                                    </h2>
+                                    <p className="text-gray-600">共找到 {matchCount} 个相关模块</p>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <i className="fas fa-search text-orange-500 cursor-pointer text-lg" onClick={() => setSearchTerm('')}></i>
+                                    <i className="fas fa-search text-gray-400 cursor-pointer text-lg"></i>
+                                </div>
+                            </div>
+                            <div className="min-h-64 bg-gray-50 flex flex-col items-center justify-center text-gray-500">
+                                <i className="fas fa-search text-4xl mb-4"></i>
+                                <p>没有找到符合条件的内容</p>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    content = (
+                        <div className="bg-white rounded-lg shadow-sm">
+                            <div className="flex items-center justify-between p-4 border-b">
+                                <div>
+                                    <h1 className="text-xl font-semibold text-gray-800">欢迎加入我们</h1>
+                                    <p className="text-gray-600">开始你的新旅程，成为团队的一员</p>
+                                </div>
+                                <div className="space-x-2">
+                                    <i className="fas fa-list text-orange-500"></i>
+                                    <i className="fas fa-download text-gray-400"></i>
+                                </div>
+                            </div>
+                            
+                            <div className="p-6">
+                                <h2 className="flex items-center text-xl font-semibold text-gray-800 mb-6">
+                                    <i className="fas fa-calendar-alt mr-2 text-orange-500"></i>
+                                    {currentSection.title}
+                                </h2>
+                                
+                                {currentSection.pages.map((page, index) => (
+                                    <div key={page.id} className="bg-gray-50 rounded-lg p-6 mb-6">
+                                        <div className="flex items-start space-x-4">
+                                            <img 
+                                                src={`https://picsum.photos/id/${30 + index}/320/180`} 
+                                                alt="" 
+                                                className="w-80 h-48 object-cover rounded-lg"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h3 className="text-lg font-semibold text-gray-800">{page.title}</h3>
+                                                    <span className={`px-2 py-1 rounded text-xs text-white ${
+                                                        page.type === '必修' ? 'bg-red-500' : 'bg-blue-500'
+                                                    }`}>
+                                                        {page.type}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center mb-2">
+                                                    <i className={`fas ${page.icon} text-sm text-gray-600`}></i>
+                                                    <span className="ml-2 text-sm text-gray-600">所属部门：{page.department}</span>
+                                                </div>
+                                                <p className="text-gray-600 mb-3">{page.description}</p>
+                                                <div className="flex items-center">
+                                                    <span className="inline-block bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                                        {page.badge}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+
+                return content;
+            };
+
+            const renderFooter = () => (
+                <footer className="mt-8 bg-white border-t py-6">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center">
+                                <img src="https://picsum.photos/id/75/60/40" alt="Logo" className="w-12 h-8 mr-3 rounded" />
+                                <span className="font-semibold text-gray-800">新员工 入职手册</span>
+                            </div>
+                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                <span className="flex items-center">
+                                    <i className="fas fa-clock mr-1"></i>
+                                    2023 © 版权所有
+                                </span>
+                                <span className="flex items-center">
+                                    <i className="fas fa-question-circle mr-1"></i>
+                                    使用指南
+                                </span>
+                                <button onClick={handleLearnMore} className="flex items-center text-blue-600 hover:text-blue-800">
+                                    <i className="fas fa-info-circle mr-1"></i>
+                                    关于我们
+                                </button>
+                                <span className="flex items-center text-gray-600">
+                                    <i className="fas fa-envelope mr-1"></i>
+                                    联系我们
+                                </span>
+                                <a href="#" className="flex items-center text-blue-600 hover:text-blue-800">
+                                    <i className="fas fa-shield-alt mr-1"></i>
+                                    隐私政策
+                                </a>
+                            </div>
+                        </div>
+                        <div className="flex items-center mt-2 text-xs text-blue-600">
+                            <i className="fas fa-chevron-down mr-1"></i>
+                            使用指南
+                        </div>
+                    </div>
+                </footer>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Search Bar */}
+                    <div className="bg-white border-b border-gray-200 px-6 py-3">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center space-x-6">
+                                <select className="border border-gray-300 rounded px-3 py-2 text-sm">
+                                    <option>选择文件类型</option>
+                                </select>
+                                <select className="border border-gray-300 rounded px-3 py-2 text-sm">
+                                    <option>选择日期</option>
+                                </select>
+                                <input 
+                                    type="text" 
+                                    placeholder="搜索手册内容..."
+                                    className="border border-gray-300 rounded px-4 py-2 text-sm w-80"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <button className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600">
+                                    <i className="fas fa-paperclip mr-1"></i>
+                                    导入PDF
+                                </button>
+                                <i className="fas fa-download text-gray-400"></i>
+                                <span className="text-xs text-gray-600 ml-2">Excel</span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <i className="fas fa-rocket text-orange-500"></i>
+                                <i className="fas fa-play text-orange-500"></i>
+                                <button onClick={handleAddModule} className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600">
+                                    <i className="fas fa-plus mr-1"></i>
+                                    添加新模块
+                                </button>
+                                <button className="bg-gray-500 text-white px-4 py-2 rounded text-sm">
+                                    <i className="fas fa-user mr-1"></i>
+                                    已登录
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="flex space-x-6">
+                            {/* Sidebar */}
+                            <div className="w-64 bg-white border-r border-gray-200 h-fit">
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-gray-800 mb-4">目录</h3>
+                                    <div className="space-y-2">
+                                        <div 
+                                            className={`flex items-center space-x-3 px-3 py-2 rounded cursor-pointer ${
+                                                activeTab === '公司简介' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                            onClick={() => handleNavClick('公司简介')}
+                                        >
+                                            <i className="fas fa-building"></i>
+                                            <span>公司简介</span>
+                                        </div>
+                                        <div 
+                                            className={`flex items-center space-x-3 px-3 py-2 rounded cursor-pointer ${
+                                                activeTab === '政策制度' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                            onClick={() => handleNavClick('政策制度')}
+                                        >
+                                            <i className="fas fa-cog"></i>
+                                            <span>政策制度</span>
+                                        </div>
+                                        <div 
+                                            className={`flex items-center space-x-3 px-3 py-2 rounded cursor-pointer ${
+                                                activeTab === '培训计划' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                            onClick={() => handleNavClick('培训计划')}
+                                        >
+                                            <i className="fas fa-clipboard-list"></i>
+                                            <span>培训计划</span>
+                                        </div>
+                                        <div 
+                                            className={`flex items-center space-x-3 px-3 py-2 rounded cursor-pointer ${
+                                                activeTab === '常见问题' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}
+                                            onClick={handleCommonQuestion}
+                                        >
+                                            <i className="fas fa-question-circle"></i>
+                                            <span>常见问题</span>
+                                        </div>
+                                        <div className="flex items-center space-x-3 px-3 py-2 rounded cursor-pointer text-gray-600 hover:bg-gray-50">
+                                            <i className="fas fa-question-circle"></i>
+                                            <span>帮助中心</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="mt-6 p-4 bg-blue-50">
+                                    <div className="flex items-center mb-3">
+                                        <i className="fas fa-tip-exclamation text-blue-600 mr-2"></i>
+                                        <span className="font-medium text-blue-800">小贴士</span>
+                                    </div>
+                                    <p className="text-sm text-blue-700">
+                                        新员工应在入站后一周内完成所有必要模块的学习，有问题可随时联
+系HR部门寻求帮助。
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Main Content Area */}
+                            <div className="flex-1 bg-white">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h1 className="flex items-center text-2xl font-semibold text-gray-800">{currentSection.title}</h1>
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-600">共 {currentSection.pages.length} 个学习模块</div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-6 mb-6">
+                                    {renderContent()}
+                                </div>
+
+                                <div className="relative">
+                                    <div className="bg-white rounded-lg overflow-hidden">
+                                        <img src={`https://picsum.photos/id/24/1200/300`} alt="Banner" className="w-full h-48 object-cover" />
+                                        <div className="p-6">
+                                            <h2 className="flex items-center text-xl font-semibold text-gray-800 mb-2">
+                                                <i className="fas faätz text-orange-500 mr-2"></i>为什么要学习入职手册？
+                                            </h2>
+                                            <p className="text-gray-600">完整学习每个区块内容，并且到完成考试，否则你的帐号会过期，请尽快完成学习任务。</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-center">
+                                    <div className="flex space-x-2">
+                                        <i className="fas fa-eye text-gray-400"></i>
+                                        <i className="fas fa-eye-slash text-gray-400"></i>
+                                        <i className="fas fa-clipboard-list text-gray-400"></i>
+                                        <i className="fas fa-crown text-gray-400"></i>
+                                        <i className="fas fa-layer-group text-gray-400"></i>
+                                    </div>
+                                </div>
+
+                                {renderFooter()}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal */}
+                    {showModal && modalContent && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-lg">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="flex items-center text-lg font-semibold text-blue-600">
+                                        <i className="fas fa-plus mr-2"></i>
+                                        添加新模块
+                                    </h3>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            模块标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            placeholder="模块标题"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            模块类型 <span className="text-red-500">*</span>
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>入职培训</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            所属部门 <span className="text-red-500">*</span>
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>全部部门</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">模块内容</label>
+                                        <textarea 
+                                            className="w-full border border-gray-300 rounded px-3 py-2 h-32"
+                                            placeholder="模块内容"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="flex items-center mb-4">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={true}
+                                            readOnly
+                                        />
+                                        <span className="ml-2 text-sm text-gray-600">必修模块</span>
+                                    </div>
+                                    
+                                    <div className="flex space-x-3 pt-4">
+                                        <button 
+                                            onClick={() => setShowModal(false)}
+                                            className="flex-1 bg-gray-200 text-gray-800 py-2 rounded hover:bg-gray-300"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={() => setShowModal(false)}
+                                            className="flex-1 bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
+                                        >
+                                            保存
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

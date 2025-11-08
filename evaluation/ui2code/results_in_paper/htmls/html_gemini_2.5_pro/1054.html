@@ -1,0 +1,406 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>数字手账日历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* A good modern sans-serif font */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialCalendarData = [
+            { id: 1, month: '2024年五月', todos: 12, done: 8, updated: '3天前' },
+            { id: 2, month: '2024年六月', todos: 15, done: 5, updated: '3天前' },
+            { id: 3, month: '2024年七月', todos: 10, done: 3, updated: '3天前' },
+        ];
+
+        // --- Modal Components ---
+
+        const AddEventModal = ({ onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-800">添加新日程</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                            <i className="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                            <div className="relative">
+                                <input type="text" placeholder="mm/dd/yyyy" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">时间</label>
+                             <div className="relative">
+                                <input type="text" placeholder="--:--" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-clock text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                            <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option>选择标签</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+                            <textarea rows="3" placeholder="请输入日程内容..." className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 rounded-b-lg">
+                        <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none">保存</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const EditEventModal = ({ card, onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-800">编辑日程</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                            <i className="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                            <div className="relative">
+                                <input type="text" defaultValue="mm/dd/yyyy" className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm" readOnly/>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">时间</label>
+                             <div className="relative">
+                                <input type="text" defaultValue="09:00 AM" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-clock text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                            <select defaultValue="工作" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option>选择标签</option>
+                                <option>工作</option>
+                                <option>生活</option>
+                                <option>学习</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+                            <textarea rows="3" defaultValue="2024年五月的日程安排" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 rounded-b-lg">
+                        <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none">保存更改</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const DeleteConfirmModal = ({ card, onClose, onConfirm }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 text-center p-6">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                         <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mt-5">确认删除</h3>
+                    <div className="mt-2 text-sm text-gray-500">
+                        <p>确认删除{card.month}的月手账？此操作无法撤销。</p>
+                    </div>
+                    <div className="mt-6 flex justify-center space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            取消
+                        </button>
+                        <button onClick={onConfirm} className="px-6 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
+                            确认删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const EditStatsModal = ({ onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                    <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-800">编辑统计周期</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                            <i className="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div className="p-6 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
+                            <div className="relative">
+                                <input type="text" defaultValue="05/01/2024" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
+                             <div className="relative">
+                                <input type="text" defaultValue="05/31/2024" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <i className="far fa-calendar-alt text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3 rounded-b-lg">
+                        <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">关闭</button>
+                        <button onClick={onClose} className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 focus:outline-none">应用</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+
+        // --- UI Components ---
+        const Header = () => (
+            <header className="bg-white border-b border-gray-200">
+                <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <div className="flex items-center space-x-8">
+                        <h1 className="text-xl font-bold text-gray-800">数字手账日历</h1>
+                        <nav className="flex items-center space-x-6 text-sm">
+                            <a href="#" className="font-semibold text-blue-600">首页</a>
+                            <a href="#" className="text-gray-500 hover:text-blue-600">我的手账</a>
+                            <a href="#" className="text-gray-500 hover:text-blue-600">统计报表</a>
+                            <a href="#" className="text-gray-500 hover:text-blue-600">帮助说明</a>
+                        </nav>
+                    </div>
+                    <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
+                        登录/注册
+                    </button>
+                </div>
+            </header>
+        );
+
+        const Sidebar = ({ onOpenModal }) => (
+            <aside className="w-64 flex-shrink-0 pr-8">
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-3">操作菜单</h3>
+                        <ul className="space-y-2">
+                            <li><a href="#" onClick={(e) => {e.preventDefault(); onOpenModal('add')}} className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-blue-600 text-white"><i className="fas fa-plus w-6 text-center"></i>添加日程</a></li>
+                            <li><a href="#" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"><i className="fas fa-upload w-6 text-center"></i>导入模板</a></li>
+                            <li><a href="#" className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"><i className="fas fa-palette w-6 text-center"></i>自定义主题配色</a></li>
+                        </ul>
+                    </div>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <i className="fas fa-info-circle text-blue-500"></i>
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-blue-800">小贴士</h3>
+                                <div className="mt-2 text-sm text-blue-700">
+                                    <p>添加日程后，可以在统计设置里看您的计划完成情况，助您养成高效习惯。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        );
+
+        const CalendarCard = ({ card, onOpenModal }) => {
+            const completion = Math.round((card.done / card.todos) * 100);
+            return (
+                <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="font-semibold text-gray-800">{card.month}</h3>
+                        <div className="flex space-x-3 text-gray-400">
+                            <button onClick={() => onOpenModal('edit', card.id)} className="hover:text-blue-600"><i className="fas fa-pencil-alt"></i></button>
+                            <button onClick={() => onOpenModal('delete', card.id)} className="hover:text-red-600"><i className="far fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    <div className="flex justify-between text-sm mb-3">
+                        <span className="text-gray-500">待办事项</span>
+                        <span className="font-medium text-gray-800">{card.todos}个</span>
+                    </div>
+                    <div className="flex justify-between text-sm mb-4">
+                        <span className="text-gray-500">已完成</span>
+                        <span className="font-medium text-green-600">{card.done}个</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${completion}%` }}></div>
+                    </div>
+                    <div className="text-right text-xs text-gray-500 mb-4">
+                        完成: {completion}%
+                    </div>
+                    <div className="mt-auto border-t border-gray-100 pt-3 flex justify-between items-center text-xs">
+                        <span className="text-gray-400">更新于 {card.updated}</span>
+                        <a href="#" className="font-semibold text-blue-600 hover:text-blue-700">查看详情 →</a>
+                    </div>
+                </div>
+            );
+        };
+        
+        const AddCalendarCard = () => (
+             <div className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col justify-center items-center text-center p-5 hover:border-blue-500 hover:bg-gray-100 cursor-pointer">
+                <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center mb-4">
+                    <i className="fas fa-plus text-gray-400 text-xl"></i>
+                </div>
+                <p className="font-semibold text-blue-600">添加新手账</p>
+                <p className="text-xs text-gray-500 mt-1">点击创建新的月度手账日历</p>
+            </div>
+        );
+
+        const RightSidebar = ({ onOpenModal }) => (
+            <aside className="w-80 flex-shrink-0 pl-8 space-y-6">
+                <div>
+                    <div className="flex justify-between items-center mb-1">
+                        <h3 className="font-semibold text-gray-800">统计概览</h3>
+                        <a href="#" onClick={(e) => {e.preventDefault(); onOpenModal('stats')}} className="text-sm text-blue-600 hover:underline">编辑统计周期</a>
+                    </div>
+                    <p className="text-sm text-gray-500">直观反馈你的计划完成情况，助你养成高效习惯。</p>
+                </div>
+                <div className="bg-blue-50/50 rounded-lg p-5">
+                    <h4 className="font-medium text-gray-800 text-sm mb-3">任务完成率</h4>
+                    <img src="https://picsum.photos/id/1074/300/200" alt="Task completion" className="rounded-md mb-4 aspect-[3/2] object-cover" />
+                    <div className="flex justify-center space-x-6 text-xs text-gray-600">
+                        <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-blue-600 mr-2"></span>已完成 (67%)</div>
+                        <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-blue-200 mr-2"></span>待办 (33%)</div>
+                    </div>
+                </div>
+                 <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+                    <h4 className="font-medium text-gray-800 text-sm mb-3">近期任务趋势</h4>
+                    <div className="relative">
+                        <img src="https://picsum.photos/id/1015/300/200" alt="Recent tasks" className="rounded-md aspect-[3/2] object-cover" />
+                        <div className="absolute inset-0 bg-black bg-opacity-20 rounded-md flex items-end">
+                            <p className="text-white text-sm font-medium p-3">过去7天内任务完成趋势</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+                    <h4 className="font-medium text-gray-800 text-sm mb-3">标签使用频次</h4>
+                    <div className="space-y-3 text-sm">
+                        <div className="flex items-center">
+                            <span className="w-12 text-gray-600">工作</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2.5 mx-2">
+                                <div className="bg-blue-500 h-2.5 rounded-full" style={{width: '75%'}}></div>
+                            </div>
+                            <span className="w-8 text-right text-gray-500">75%</span>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="w-12 text-gray-600">学习</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2.5 mx-2">
+                                <div className="bg-green-500 h-2.5 rounded-full" style={{width: '60%'}}></div>
+                            </div>
+                            <span className="w-8 text-right text-gray-500">60%</span>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="w-12 text-gray-600">生活</span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2.5 mx-2">
+                                <div className="bg-orange-400 h-2.5 rounded-full" style={{width: '45%'}}></div>
+                            </div>
+                            <span className="w-8 text-right text-gray-500">45%</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        );
+
+        const Footer = () => (
+            <footer className="bg-white mt-auto">
+                 <div className="max-w-screen-xl mx-auto px-6 py-4 text-xs text-gray-500 flex justify-between items-center border-t">
+                    <span>© 2024 数字手账日历 | 版本 v1.0.3</span>
+                    <div className="space-x-4">
+                        <span className="text-gray-400">首次使用？点击帮助中心，马上开启你的数字手账之旅。</span>
+                        <a href="#" className="text-blue-600 hover:underline">帮助中心</a>
+                        <a href="#" className="text-blue-600 hover:underline">联系我们</a>
+                    </div>
+                </div>
+            </footer>
+        )
+
+
+        // --- App Component ---
+        const App = () => {
+            const [calendarData, setCalendarData] = useState(initialCalendarData);
+            const [modalType, setModalType] = useState(null);
+            const [activeCardId, setActiveCardId] = useState(null);
+
+            const handleOpenModal = (type, cardId = null) => {
+                setModalType(type);
+                setActiveCardId(cardId);
+            };
+
+            const handleCloseModal = () => {
+                setModalType(null);
+                setActiveCardId(null);
+            };
+            
+            const handleDeleteConfirm = () => {
+                setCalendarData(prevData => prevData.filter(card => card.id !== activeCardId));
+                handleCloseModal();
+            };
+            
+            const activeCard = calendarData.find(card => card.id === activeCardId);
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Header />
+                    <main className="flex-grow w-full max-w-screen-xl mx-auto px-6 py-8">
+                        <div className="flex">
+                            <Sidebar onOpenModal={handleOpenModal} />
+                            <div className="flex-1">
+                                <div className="mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-900">我的手账日历</h2>
+                                    <p className="text-sm text-gray-500 mt-1">点击任意月卡片，即可快速编辑或新增该月日程。</p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                   {calendarData.map(card => (
+                                       <CalendarCard key={card.id} card={card} onOpenModal={handleOpenModal} />
+                                   ))}
+                                   <AddCalendarCard />
+                                </div>
+                            </div>
+                            <RightSidebar onOpenModal={handleOpenModal} />
+                        </div>
+                    </main>
+                    <Footer />
+
+                    {modalType === 'add' && <AddEventModal onClose={handleCloseModal} />}
+                    {modalType === 'edit' && activeCard && <EditEventModal card={activeCard} onClose={handleCloseModal} />}
+                    {modalType === 'delete' && activeCard && <DeleteConfirmModal card={activeCard} onClose={handleCloseModal} onConfirm={handleDeleteConfirm} />}
+                    {modalType === 'stats' && <EditStatsModal onClose={handleCloseModal} />}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body>
+</html>

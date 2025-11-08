@@ -1,0 +1,404 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>婚礼仪式流程编辑器</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    const { useState, useCallback, useEffect } = React;
+
+    const initialItems = [
+      {
+        id: 1,
+        time: '10:00',
+        icon: 'fas fa-heart',
+        title: '新人进场',
+        description: '新人携手进入婚礼现场, 伴随着婚礼进行曲',
+        duration: 20,
+        endTime: '10:20',
+        color: 'bg-rose-100',
+        iconBg: 'bg-rose-200',
+        iconColor: 'text-rose-500',
+      },
+      {
+        id: 2,
+        time: '10:20',
+        icon: 'fas fa-id-card',
+        title: '证婚环节',
+        description: '请证婚人宣读证婚词, 新人交换誓言',
+        duration: 20,
+        endTime: '10:40',
+        color: 'bg-rose-100',
+        iconBg: 'bg-rose-200',
+        iconColor: 'text-rose-500',
+      },
+      {
+        id: 3,
+        time: '10:40',
+        icon: 'fas fa-ring',
+        title: '交换戒指',
+        description: '新郎为新娘戴上戒指, 新娘为新郎戴上戒指',
+        duration: 15,
+        endTime: '10:55',
+        color: 'bg-rose-100',
+        iconBg: 'bg-rose-200',
+        iconColor: 'text-rose-500',
+      },
+    ];
+    
+    // Modal Component
+    function ProcessModal({ onClose, itemToEdit }) {
+        const isEditing = !!itemToEdit;
+        const [name, setName] = useState(isEditing ? itemToEdit.title : '');
+        const [duration, setDuration] = useState(isEditing ? itemToEdit.duration : 15);
+        const [description, setDescription] = useState(isEditing ? itemToEdit.description : '');
+        const [selectedIcon, setSelectedIcon] = useState(isEditing ? itemToEdit.icon : 'fas fa-ring');
+        const [selectedColor, setSelectedColor] = useState(isEditing ? itemToEdit.color : 'bg-rose-100');
+
+        const icons = [
+            { id: 'fas fa-ring', name: '戒指' },
+            { id: 'fas fa-heart', name: '爱心' },
+            { id: 'fas fa-camera', name: '相机' },
+            { id: 'fas fa-gamepad', name: '游戏' },
+            { id: 'fas fa-feather-alt', name: '羽毛笔' },
+            { id: 'fas fa-music', name: '音乐' },
+            { id: 'fas fa-id-card', name: '誓词' },
+            { id: 'fas fa-glass-cheers', name: '礼炮' },
+            { id: 'fas fa-gift', name: '礼物' },
+        ];
+        
+        const colors = ['bg-purple-200', 'bg-pink-200', 'bg-yellow-200', 'bg-rose-200', 'bg-rose-100'];
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <i className="fas fa-times"></i>
+                    </button>
+                    <h2 className="text-xl font-semibold mb-6">{isEditing ? '编辑流程步骤' : '添加流程步骤'}</h2>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">步骤名称 <span className="text-red-500">*</span></label>
+                            <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-pink-500 focus:border-pink-500"/>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">图标</label>
+                            <div className="grid grid-cols-5 gap-4">
+                                {icons.map(icon => (
+                                    <div key={icon.id} onClick={() => setSelectedIcon(icon.id)} className={`flex flex-col items-center p-2 rounded-md cursor-pointer ${selectedIcon === icon.id ? 'bg-pink-100 ring-2 ring-pink-400' : 'bg-gray-100'}`}>
+                                        <i className={`${icon.id} text-2xl ${selectedIcon === icon.id ? 'text-pink-500' : 'text-gray-500'}`}></i>
+                                        <span className="text-xs mt-1 text-gray-600">{icon.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">持续时长(分钟)</label>
+                            <input type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-pink-500 focus:border-pink-500"/>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                            <textarea value={description} onChange={e => setDescription(e.target.value)} rows="3" className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-pink-500 focus:border-pink-500"></textarea>
+                        </div>
+                        <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-1">卡片颜色</label>
+                           <div className="flex space-x-2">
+                               {colors.map(color => (
+                                   <div key={color} onClick={() => setSelectedColor(color)} className={`w-6 h-6 rounded-full cursor-pointer ${color} ${selectedColor === color ? 'ring-2 ring-offset-2 ring-pink-500' : ''}`}></div>
+                               ))}
+                           </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex justify-end space-x-3">
+                        <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                        <button onClick={onClose} className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600">保存</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    // Process View
+    function ProcessView({ items, onAdd, onEdit }) {
+      return (
+        <div className="w-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">婚礼仪式流程</h2>
+            <button onClick={onAdd} className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-2 px-4 rounded-lg flex items-center space-x-2">
+              <i className="fas fa-plus"></i>
+              <span>添加流程</span>
+            </button>
+          </div>
+          <p className="text-gray-500 mb-8">在这里新增婚礼仪式流程, 支持自定义文案和时长。点击“添加流程”按钮开始创建您的完美婚礼流程。</p>
+          
+          <div className="space-y-4">
+            {items.map(item => (
+              <div key={item.id} className={`${item.color} p-4 rounded-xl shadow-sm`}>
+                <div className="flex items-start space-x-4">
+                  <div className="text-center">
+                    <p className="font-bold text-gray-700">{item.time}</p>
+                    <div className={`mt-2 w-10 h-10 ${item.iconBg} rounded-full flex items-center justify-center`}>
+                      <i className={`${item.icon} ${item.iconColor} text-xl`}></i>
+                    </div>
+                  </div>
+                  <div className="flex-grow">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-lg font-bold text-gray-800">{item.title}</h3>
+                      <div className="flex space-x-3 text-gray-500">
+                        <button onClick={() => onEdit(item)} className="hover:text-gray-800"><i className="fas fa-pencil-alt"></i></button>
+                        <button className="hover:text-gray-800"><i className="fas fa-trash-alt"></i></button>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 mt-1">{item.description}</p>
+                    <div className="flex items-center mt-3 text-sm text-gray-500">
+                      <span>时长: {item.duration}分钟</span>
+                      <input type="range" min="0" max="100" value="50" className="w-full mx-4 h-1.5 bg-yellow-400 rounded-lg appearance-none cursor-pointer range-sm" disabled />
+                      <span>结束时间: {item.endTime}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-gray-400 mt-8">规划每一个流程，让婚礼更完美</p>
+        </div>
+      );
+    }
+
+    // Statistics View
+    function StatisticsView() {
+      const StatCircle = ({ value, label, color }) => (
+        <div className="flex flex-col items-center">
+          <div className={`w-32 h-32 rounded-full border-8 ${color} flex items-center justify-center`}>
+            <span className="text-3xl font-bold text-gray-700">{value}</span>
+          </div>
+          <p className="mt-3 text-gray-600 font-semibold">{label}</p>
+        </div>
+      );
+
+      return (
+        <div className="w-full">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">流程统计</h2>
+          <p className="text-gray-500 mb-8">实时监控流程进度, 避免现场混乱。通过以下统计数据了解您的婚礼仪式安排情况。</p>
+          
+          <div className="bg-white rounded-xl p-8 flex justify-around items-center">
+            <StatCircle value="3" label="总流程数" color="border-pink-300" />
+            <StatCircle value="0" label="已完成数" color="border-gray-300" />
+            <div>
+                <div className="flex flex-col items-center">
+                    <div className="w-32 h-32 rounded-full border-8 border-yellow-300 flex items-center justify-center">
+                        <span className="text-3xl font-bold text-gray-700">55<span className="text-lg ml-1">分钟</span></span>
+                    </div>
+                    <p className="mt-3 text-gray-600 font-semibold">预计总时长</p>
+                </div>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <button className="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full hover:bg-gray-50">
+                <i className="fas fa-sync-alt mr-2"></i>刷新统计
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    // Theme View
+    function ThemeView() {
+      const SchemeButton = ({ children, color, selected }) => (
+          <button className={`py-2 px-6 rounded-md border ${selected ? 'border-yellow-500 bg-yellow-100 text-yellow-700' : 'bg-white border-gray-300'}`}>{children}</button>
+      );
+      const OptionButton = ({ children, selected }) => (
+          <button className={`py-2 px-8 rounded-full ${selected ? 'bg-pink-500 text-white' : 'bg-white border border-gray-300'}`}>{children}</button>
+      );
+      
+      return (
+        <div className="w-full">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">主题定制</h2>
+          <p className="text-gray-500 mb-8">选择适合您的婚礼风格的主题配色和字体, 您也可以根据自己的喜好进行定制。</p>
+
+          <div className="space-y-8">
+              <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">配色方案</h3>
+                  <div className="flex space-x-4">
+                      <SchemeButton color="pink" selected>浪漫粉</SchemeButton>
+                      <SchemeButton color="yellow">金色年华</SchemeButton>
+                      <SchemeButton color="cream">奶油白</SchemeButton>
+                  </div>
+              </div>
+              <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">字体选择</h3>
+                  <div className="flex space-x-4">
+                      <OptionButton>宋体</OptionButton>
+                      <OptionButton selected>思源宋体</OptionButton>
+                  </div>
+              </div>
+               <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-3">图标风格</h3>
+                  <div className="flex space-x-4">
+                      <OptionButton selected>扁平风格</OptionButton>
+                      <OptionButton>线性风格</OptionButton>
+                  </div>
+              </div>
+          </div>
+          
+          <div className="mt-12 pt-8 border-t border-gray-200 flex space-x-4">
+             <button className="bg-pink-500 text-white font-semibold py-2 px-8 rounded-lg hover:bg-pink-600">应用主题</button>
+             <button className="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-50">重置默认</button>
+          </div>
+        </div>
+      );
+    }
+
+    // Main App Component
+    function App() {
+      const [activeView, setActiveView] = useState('process');
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [editingItem, setEditingItem] = useState(null);
+
+      const handleNavClick = useCallback((view) => {
+        setActiveView(view);
+      }, []);
+
+      const handleOpenAddModal = () => {
+        setEditingItem(null);
+        setIsModalOpen(true);
+      };
+
+      const handleOpenEditModal = (item) => {
+        setEditingItem(item);
+        setIsModalOpen(true);
+      };
+      
+      const handleCloseModal = () => {
+        setIsModalOpen(false);
+      };
+
+      const navItems = [
+        { id: 'process', icon: 'fas fa-list-ul', label: '仪式流程管理' },
+        { id: 'statistics', icon: 'fas fa-chart-pie', label: '流程统计' },
+        { id: 'theme', icon: 'fas fa-palette', label: '主题定制' },
+        { id: 'help', icon: 'fas fa-question-circle', label: '帮助中心' },
+      ];
+
+      return (
+        <div className="min-h-screen bg-[#FBF9F6]">
+          {isModalOpen && <ProcessModal onClose={handleCloseModal} itemToEdit={editingItem} />}
+          <header className="fixed top-0 left-0 right-0 h-16 bg-white bg-opacity-80 backdrop-blur-sm shadow-sm z-10 flex items-center justify-between px-8">
+            <h1 className="text-xl font-bold text-gray-800">婚礼仪式流程编辑器</h1>
+            <div className="flex items-center space-x-4">
+              <button className="bg-pink-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-pink-600">预览效果</button>
+              <button className="bg-white border border-gray-300 text-gray-700 px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-50">详细说明</button>
+            </div>
+          </header>
+
+          <div className="flex pt-16" style={{height: 'calc(100vh - 4rem)'}}>
+            {/* Left Sidebar */}
+            <aside className="w-64 bg-[#FFF8F8] flex-shrink-0 p-6 flex flex-col">
+              <div className="flex flex-col items-center mb-10">
+                <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center">
+                  <i className="fas fa-heart text-3xl text-pink-400"></i>
+                </div>
+                <span className="font-semibold text-pink-500 mt-3">浪漫婚礼策划</span>
+              </div>
+              <nav className="space-y-2">
+                {navItems.map(item => (
+                  <a key={item.id} href="#" onClick={(e) => { e.preventDefault(); handleNavClick(item.id); }}
+                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium ${activeView === item.id ? 'bg-pink-100 text-pink-600 border-l-4 border-pink-500' : 'text-gray-600 hover:bg-pink-50'}`}>
+                    <i className={`${item.icon} w-5 text-center`}></i>
+                    <span>{item.label}</span>
+                  </a>
+                ))}
+              </nav>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-grow p-8 overflow-y-auto">
+                <div className="max-w-4xl mx-auto">
+                    {activeView === 'process' && <ProcessView items={initialItems} onAdd={handleOpenAddModal} onEdit={handleOpenEditModal}/>}
+                    {activeView === 'statistics' && <StatisticsView />}
+                    {activeView === 'theme' && <ThemeView />}
+                </div>
+            </main>
+
+            {/* Right Sidebar */}
+            <aside className="w-80 bg-white flex-shrink-0 p-6 border-l border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-6">婚礼流程统计</h3>
+              <div className="space-y-4">
+                  <div className="bg-stone-50 p-4 rounded-lg flex justify-between items-center">
+                      <span className="text-gray-600">总流程数</span>
+                      <span className="font-bold text-gray-800 text-lg">3</span>
+                  </div>
+                  <div className="bg-stone-50 p-4 rounded-lg flex justify-between items-center">
+                      <span className="text-gray-600">已完成流程</span>
+                      <span className="font-bold text-gray-800 text-lg">0/3</span>
+                  </div>
+                  <div className="bg-stone-50 p-4 rounded-lg flex justify-between items-center">
+                      <span className="text-gray-600">预计总时长</span>
+                      <span className="font-bold text-gray-800 text-lg">55 分钟</span>
+                  </div>
+              </div>
+              <div className="mt-8 flex flex-col items-center">
+                 <div className="relative w-40 h-40">
+                    <svg className="w-full h-full" viewBox="0 0 36 36">
+                        <path className="text-gray-200" strokeWidth="3" fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path className="text-pink-400" strokeWidth="3" strokeLinecap="round" fill="none"
+                              strokeDasharray="91, 100"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-3xl font-bold text-gray-800">55</span>
+                        <span className="text-sm text-gray-500">总时长 (分钟)</span>
+                    </div>
+                 </div>
+                 <p className="text-xs text-gray-400 mt-4 text-center">实时监控流程进度, 避免现场混乱</p>
+              </div>
+              <div className="mt-8">
+                <h4 className="font-semibold text-gray-700 mb-3">提醒</h4>
+                <ul className="space-y-2 text-sm text-gray-500">
+                    <li className="flex items-start">
+                        <i className="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                        <span>每个流程步骤建议控制在15-30分钟</span>
+                    </li>
+                    <li className="flex items-start">
+                        <i className="fas fa-info-circle text-blue-500 mt-1 mr-2"></i>
+                        <span>整个婚礼仪式建议控制在2小时内</span>
+                    </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+          <footer className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex items-center justify-between px-8">
+              <p className="text-xs text-gray-400">使用撤销/重做快速修改编辑, 保存后可随时导出分享</p>
+              <div className="flex items-center space-x-6 text-gray-600">
+                  <button className="flex items-center space-x-1 hover:text-gray-900"><i className="fas fa-undo"></i><span className="text-sm">撤销</span></button>
+                  <button className="flex items-center space-x-1 hover:text-gray-900"><i className="fas fa-redo"></i><span className="text-sm">重做</span></button>
+                  <button className="flex items-center space-x-1 hover:text-gray-900"><i className="fas fa-save"></i><span className="text-sm">保存草稿</span></button>
+                  <button className="flex items-center space-x-1 hover:text-gray-900"><i className="fas fa-file-pdf"></i><span className="text-sm">导出PDF</span></button>
+                  <button className="flex items-center space-x-1 hover:text-gray-900"><i className="fas fa-print"></i><span className="text-sm">打印</span></button>
+              </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,625 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽毛球俱乐部赛事管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Ubuntu', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        function App() {
+            const [currentView, setCurrentView] = useState('main');
+            const [showHelp, setShowHelp] = useState(false);
+            const [editingActivity, setEditingActivity] = useState(null);
+            const [deletingActivity, setDeletingActivity] = useState(null);
+            const [showHelpInModal, setShowHelpInModal] = useState(false);
+            
+            const activities = [
+                {
+                    id: 1,
+                    name: '春季友谊赛',
+                    date: '2024-06-15',
+                    time: '10:00-12:00',
+                    location: '羽毛球馆1号场',
+                    maxParticipants: 20,
+                    participants: 16,
+                    type: '友谊赛',
+                    badge: '绿色'
+                },
+                {
+                    id: 2,
+                    name: '周末提升课',
+                    date: '2024-06-17',
+                    time: '14:00-16:00',
+                    location: '羽毛球馆2号场',
+                    maxParticipants: 12,
+                    participants: 8,
+                    type: '培训课',
+                    badge: '绿色'
+                }
+            ];
+            
+            const [modalForm, setModalForm] = useState({
+                name: '请输入活动名称',
+                date: '',
+                location: '选择场地',
+                startTime: '',
+                endTime: '',
+                maxParticipants: 20,
+                type: '友谊赛'
+            });
+            
+            const [filteredActivities, setFilteredActivities] = useState(activities);
+            const [filters, setFilters] = useState({
+                searchName: '',
+                location: '',
+                maxParticipants: '全部人数'
+            });
+            
+            const handleHelpClick = () => {
+                setShowHelp(!showHelp);
+                if (currentView === 'main') {
+                    setCurrentView('help');
+                }
+            };
+            
+            const handleEditActivity = (activity) => {
+                setEditingActivity({ ...activity });
+                setCurrentView('edit');
+            };
+            
+            const handleDeleteActivity = (activity) => {
+                setDeletingActivity(activity);
+                setCurrentView('delete');
+            };
+            
+            const handleSubmitEdit = () => {
+                // Update activity in state
+            };
+            
+            const handleCancelEdit = () => {
+                setEditingActivity(null);
+                setCurrentView('main');
+            };
+            
+            const handleConfirmDelete = () => {
+                if (deletingActivity) {
+                    const updatedActivities = activities.filter(a => a.id !== deletingActivity.id);
+                    setFilteredActivities(updatedActivities);
+                    setActivities(updatedActivities);
+                }
+                setDeletingActivity(null);
+                setCurrentView('main');
+            };
+            
+            const handleNewActivity = () => {
+                setModalForm({
+                    name: '请输入活动名称',
+                    date: '',
+                    location: '选择场地',
+                    startTime: '',
+                    endTime: '',
+                    maxParticipants: 20,
+                    type: '友谊赛'
+                });
+                setCurrentView('add');
+            };
+            
+            const handleCancelModal = () => {
+                setModalForm({
+                    name: '请输入活动名称',
+                    date: '',
+                    location: '选择场地',
+                    startTime: '',
+                    endTime: '',
+                    maxParticipants: 20,
+                    type: '友谊赛'
+                });
+                if (currentView === 'help') {
+                    setShowHelp(false);
+                }
+                setCurrentView('main');
+                setShowHelp(false);
+                setShowHelpInModal(false);
+            };
+            
+            const handleCompleteAdd = () => {
+                // Create new activity
+            };
+            
+            const renderMainContent = () => {
+                let content;
+                
+                if (currentView === 'help') {
+                    content = (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-semibold text-gray-800">帮助说明</h2>
+                                <button onClick={handleHelpClick} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center text-sm">
+                                    <i className="fas fa-question-circle mr-2"></i>
+                                    帮助说明
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-lg font-medium text-green-600 mb-3">
+                                        <i className="fas fa-eye mr-2"></i>
+                                        【展示区】
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">查看所有活动情况，支持点击卡片快速编辑或删除。</p>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• 点击卡片右上角编辑按钮可修改活动信息</li>
+                                        <li>• 点击卡片左上角删除按钮可移除该活动</li>
+                                        <li>• 活动卡片显示名称、时间、场地和参与人数等关键信息</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-medium text-green-600 mb-3">
+                                        <i className="fas fa-edit mr-2"></i>
+                                        【编辑区】
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">在此修改活动详情并保存，数据即时生效。</p>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• 修改活动名称、日期、时间、场地、人数上限和类型</li>
+                                        <li>• 点击保存修改按钮提交更改</li>
+                                        <li>• 点击取消按钮放弃更改</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-medium text-green-600 mb-3">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        【统计区】
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">查看场地使用率与参与趋势，点击"导出报表"获取 PDF/Excel 文件。</p>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• 圆环图展示今日场地使用率</li>
+                                        <li>• 折线图展示最近7天参与人数变化趋势</li>
+                                        <li>• 点击导出报表按钮下载详细统计数据</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-medium text-green-600 mb-3">
+                                        <i className="fas fa-sitemap mr-2"></i>
+                                        【操作区】
+                                    </h3>
+                                    <p className="text-gray-600 mb-4">使用功能按钮按钮快捷各项业务功能。</p>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                        <li>• 点击"新建活动"按钮快速创建赛事活动</li>
+                                        <li>• 点击批量导入按钮从Excel导入多个活动</li>
+                                        <li>• 点击导出全部数据按钮备份所有活动信息</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                } else if (currentView === 'edit') {
+                    content = (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">编辑活动</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">活动名称</label>
+                                    <input 
+                                        type="text" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        value={editingActivity?.name || ''}
+                                        readOnly
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">日期</label>
+                                    <input 
+                                        type="date" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        defaultValue="2024-06-15"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">开始时间</label>
+                                    <input 
+                                        type="time" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        defaultValue="10:00"
+                                        readOnly
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">结束时间</label>
+                                    <input 
+                                        type="time" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        defaultValue="12:00"
+                                        readOnly
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">参与者上限</label>
+                                    <input 
+                                        type="number" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        defaultValue="20"
+                                        readOnly
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-6">
+                                <label className="block text-sm font-medium mb-2">活动类型</label>
+                                <select className="w-full border border-gray-300 rounded-md px-3 py-2">
+                                    <option>友谊赛</option>
+                                </select>
+                            </div>
+                            <div className="mt-4">
+                                <button 
+                                    onClick={handleCancelEdit}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mb-4"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleSubmitEdit}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    保存修改
+                                </button>
+                            </div>
+                        </div>
+                    );
+                } else if (currentView === 'delete') {
+                    content = (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-md p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4">确认删除</h3>
+                                <p className="text-gray-600 mb-6">您确定要删除活动'{deletingActivity?.name}'吗？此操作无法撤销。</p>
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={handleCancelEdit}
+                                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleConfirmDelete}
+                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                } else if (currentView === 'add') {
+                    content = (
+                        <div className="bg-white rounded-lg shadow-md p-6">
+                            <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">添加新活动</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">活动名称</label>
+                                    <input 
+                                        type="text" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        placeholder="请输入活动名称"
+                                        value={modalForm.name}
+                                        onChange={(e) => setModalForm({...modalForm, name: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">日期</label>
+                                    <input 
+                                        type="date" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        placeholder="mm/dd/yyyy"
+                                        value={modalForm.date}
+                                        onChange={(e) => setModalForm({...modalForm, date: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">场地</label>
+                                    <select className="w-full border border-gray-300 rounded-md px-3 py-2">
+                                        <option>选择场地</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">开始时间</label>
+                                    <input 
+                                        type="time" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        placeholder="--:-- --"
+                                        value={modalForm.startTime}
+                                        onChange={(e) => setModalForm({...modalForm, startTime: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">结束时间</label>
+                                    <input 
+                                        type="time" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        placeholder="--:-- --"
+                                        value={modalForm.endTime}
+                                        onChange={(e) => setModalForm({...modalForm, endTime: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">参与上限</label>
+                                    <input 
+                                        type="number" 
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                        defaultValue="20"
+                                        value={modalForm.maxParticipants}
+                                        onChange={(e) => setModalForm({...modalForm, maxParticipants: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-6">
+                                <label className="block text-sm font-medium mb-2">活动类型</label>
+                                <select className="w-full border border-gray-300 rounded-md px-3 py-2">
+                                    <option>友谊赛</option>
+                                </select>
+                            </div>
+                            <div className="mt-4">
+                                <button 
+                                    onClick={handleCancelModal}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mb-4"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleCompleteAdd}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    ✓ 创建活动
+                                </button>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    content = (
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-lg shadow-md p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-semibold text-gray-800">活动管理</h2>
+                                    <div className="flex gap-2">
+                                        <button onClick={handleNewActivity} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center text-sm">
+                                            <i className="fas fa-plus mr-2"></i>
+                                            添加活动
+                                        </button>
+                                        <button onClick={handleNewActivity} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center text-sm">
+                                            <i className="fas fa-question-circle mr-2"></i>
+                                            <span className="mr-2"></span>帮助说明
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="font-medium text-gray-600 mb-3">活动列表</div>
+                                
+                                <div className="space-y-4">
+                                    {filteredActivities.map(activity => (
+                                        <div key={activity.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                            <div>
+                                                <div className="font-medium text-gray-800">
+                                                    {activity.name}
+                                                    <div className="text-sm text-green-600">{activity.type}</div>
+                                                </div>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    时间：{activity.date} {activity.time}
+                                                </div>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    场地：{activity.location}
+                                                </div>
+                                                <div className="text-sm text-gray-600 mt-1">
+                                                    参与人数：{activity.maxParticipants - activity.participants} / {activity.maxParticipants}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => handleEditActivity(activity)}
+                                                    className="text-blue-500 hover:text-blue-700 text-sm"
+                                                >
+                                                    <i className="fas fa-edit mr-1"></i>
+                                                    编辑
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteActivity(activity)}
+                                                    className="text-red-500 hover:text-red-700 text-sm"
+                                                >
+                                                    <i className="fas fa-trash mr-1"></i>
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="text-sm text-gray-600 mt-4">
+                                    共 {filteredActivities.length} 个活动，已安排 {filteredActivities.reduce((sum, a) => sum + (a.maxParticipants - a.participants), 0)} 人次
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="bg-white rounded-lg shadow-md p-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">编辑活动</h3>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg shadow-md p-6">
+                                    <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">活动统计</h3>
+                                    <div className="text-center mb-4">
+                                        <div className="text-sm text-gray-600 mb-2">今日场地使用率</div>
+                                        <div className="relative w-24 h-24 mx-auto mb-4">
+                                            <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 120 120">
+                                                <circle cx="60" cy="60" r="50" stroke="#e5e7eb" strokeWidth="8" fill="none"/>
+                                                <circle cx="60" cy="60" r="50" stroke="#10b981" strokeWidth="8" fill="none" strokeDasharray="314 946"/>
+                                            </svg>
+                                        </div>
+                                        <div className="text-2xl font-bold text-green-600 mb-1">75%</div>
+                                        <div className="flex justify-center gap-4 text-xs">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+                                                已使用
+                                            </div>
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-gray-300 rounded-full mr-1"></div>
+                                                未使用
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="font-medium text-gray-600 mb-3">近7天参与人数趋势</div>
+                                    <div className="relative h-32">
+                                        <svg className="w-full h-full" viewBox="0 0 600 150">
+                                            <polyline points="30,80 80,60 130,70 180,90 230,80 280,90 330,60" fill="none" stroke="#8b5cf6" strokeWidth="2"/>
+                                            <text x="15" y="140" textAnchor="start" className="text-xs fill-gray-600">7天前</text>
+                                            <text x="65" y="140" textAnchor="start" className="text-xs fill-gray-600">6天前</text>
+                                            <text x="115" y="140" textAnchor="start" className="text-xs fill-gray-600">5天前</text>
+                                            <text x="165" y="140" textAnchor="start" className="text-xs fill-gray-600">4天前</text>
+                                            <text x="215" y="140" textAnchor="start" className="text-xs fill-gray-600">3天前</text>
+                                            <text x="265" y="140" textAnchor="start" className="text-xs fill-gray-600">2天前</text>
+                                            <text x="315" y="140" textAnchor="start" className="text-xs fill-gray-600">今天</text>
+                                            
+                                            <line x1="30" y1="80" x2="80" y2="60" stroke="#8b5cf6" strokeWidth="1"/>
+                                            <line x1="80" y1="60" x2="130" y2="70" stroke="#10b981" strokeWidth="1"/>
+                                            <line x1="130" y1="70" x2="180" y2="90" stroke="#10b981" strokeWidth="1"/>
+                                            <line x1="180" y1="90" x2="230" y2="80" stroke="#8b5cf6" strokeWidth="1"/>
+                                            <line x1="230" y1="80" x2="280" y2="90" stroke="#10b981" strokeWidth="1"/>
+                                            <line x1="280" y1="90" x2="330" y2="60" stroke="#8b5cf6" strokeWidth="1"/>
+                                            <line x1="330" y1="60" x2="380" y2="90" stroke="#8b5cf6" strokeWidth="1"/>
+                                            <line x1="380" y1="90" x2="430" y2="80" stroke="#10b981" strokeWidth="1"/>
+                                            <line x1="430" y1="80" x2="480" y2="90" stroke="#10b981" strokeWidth="1"/>
+                                            <line x1="480" y1="90" x2="530" y2="60" stroke="#8b5cf6" strokeWidth="1"/>
+                                        </svg>
+                                    </div>
+                                    <button onClick={handleCancelModal} className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg mt-4">
+                                        <i className="fas fa-download mr-2"></i>
+                                        导出报表
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div className="container mx-auto p-6">
+                        {header}
+                        
+                        <div className="flex flex-col lg:flex-row gap-6">
+                            <div className="flex-1 space-y-6">
+                                {mainContent}
+                            </div>
+                            
+                            <div className="w-full lg:w-80 space-y-6">
+                                {helpContent}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+            
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <header className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
+                                    <i className="fas fa-table-tennis text-white"></i>
+                                </div>
+                                <span className="text-xl font-semibold text-gray-800">羽毛球俱乐部赛事管理系统</span>
+                            </div>
+                            <nav className="flex space-x-6">
+                                <button 
+                                    onClick={handleCancelModal}
+                                    className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                >
+                                    <i className="fas fa-users"></i>
+                                    <span>成员管理</span>
+                                </button>
+                                <button 
+                                    onClick={handleCancelModal}
+                                    className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                >
+                                    <i className="fas fa-chart-bar"></i>
+                                    <span>统计报表</span>
+                                </button>
+                                <button 
+                                    onClick={handleCancelModal}
+                                    className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                                >
+                                    <i className="fas fa-cog"></i>
+                                    <span>系统设置</span>
+                                </button>
+                            </nav>
+                        </div>
+                    </header>
+                    
+                    {renderMainContent()}
+                    
+                    <footer className="bg-white border-t border-gray-200 px-6 py-4 mt-12">
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                            <div>Tip: 为了保证最佳体验，请使用 Chrome 浏览器且分辨率不低于 1366×768。</div>
+                            <div>
+                                更多帮助请点击右上角帮助按钮或联系管理员 support@badminton.com。
+                            </div>
+                        </div>
+                    </footer>
+                    
+                    {content}
+                    
+                    {showHelp && (
+                        <button 
+                            onClick={handleCancelModal}
+                            className="fixed bottom-4 right-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                        >
+                            <i className="fas fa-plus mr-2"></i>
+                            新建活动
+                        </button>
+                    )}
+                    
+                    {currentView === 'add' && !showHelp && (
+                        <div className="fixed bottom-4 right-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                            <i className="fas fa-plus mr-2"></i>
+                            新建活动
+                        </div>
+                    )}
+                    
+                    {(deletingActivity || currentView === 'add') && !showHelp && (
+                        <div className="fixed bottom-4 right-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                            <i className="fas fa-clipboard-list mr-2"></i>
+                            批量导入
+                        </div>
+                    )}
+                    
+                    {(deletingActivity || currentView === 'add') && !showHelp && (
+                        <div className="fixed bottom-4 right-48 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                            <i className="fas fa-download mr-2"></i>
+                            帮助说明
+                        </div>
+                    )}
+                    
+                    {(deletingActivity || currentView === 'add') && !showHelp && (
+                        <div className="fixed bottom-4 right-4 bg-black hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                            <i className="fas fa-download mr-2"></i>
+                            导出全部数据
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

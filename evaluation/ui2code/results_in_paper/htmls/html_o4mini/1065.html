@@ -1,0 +1,310 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>梦想许愿池</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen overflow-hidden">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const initialWishes = [
+        { id: 1, title: "学习React", desc: "掌握React框架，能够独立开发前端应用", category: "学习", date: "2023-12-31", priority: 3, progress: 35 },
+        { id: 2, title: "减重10公斤", desc: "通过健康饮食和规律运动减轻体重", category: "健康", date: "2023-10-15", priority: 4, progress: 60 },
+        { id: 3, title: "升职加薪", desc: "在公司获得晋升和薪资提升", category: "职业", date: "2023-12-01", priority: 3, progress: 70 }
+      ];
+      const latestWishes = [
+        { id: 4, title: "写一本书", desc: "完成一部小说创作并尝试出版", category: "其他", date: "2024-06-30", priority: 2, progress: 10 },
+        { id: 3, title: "升职加薪", desc: "在公司获得晋升和薪资提升", category: "职业", date: "2023-12-01", priority: 3, progress: 70 },
+        { id: 5, title: "学习钢琴", desc: "能够熟练演奏至少5首古典乐曲", category: "学习", date: "2024-03-01", priority: 1, progress: 15 },
+        { id: 2, title: "减重10公斤", desc: "通过健康饮食和规律运动减轻体重", category: "健康", date: "2023-10-15", priority: 4, progress: 60 },
+        { id: 6, title: "环游世界", desc: "去访问至少10个国家，体验不同文化", category: "旅行", date: "2025-06-30", priority: 2, progress: 20 },
+        { id: 1, title: "学习React", desc: "掌握React框架，能够独立开发前端应用", category: "学习", date: "2023-12-31", priority: 3, progress: 35 }
+      ];
+
+      const [wishes, setWishes] = useState(initialWishes);
+      const [currentTab, setCurrentTab] = useState("精选");
+      const [showAdd, setShowAdd] = useState(false);
+      const [showEdit, setShowEdit] = useState(false);
+      const [editingWish, setEditingWish] = useState(null);
+      const [showDelete, setShowDelete] = useState(false);
+      const [deletingWish, setDeletingWish] = useState(null);
+      const [showHelp, setShowHelp] = useState(false);
+
+      const allWishes = currentTab === "最新" ? latestWishes : wishes;
+
+      const categoryColors = {
+        学习: "bg-pink-300",
+        健康: "bg-teal-200",
+        职业: "bg-green-200",
+        其他: "bg-purple-200",
+        旅行: "bg-yellow-200"
+      };
+
+      function openEdit(w) {
+        setEditingWish({ ...w });
+        setShowEdit(true);
+      }
+      function openDelete(w) {
+        setDeletingWish(w);
+        setShowDelete(true);
+      }
+      function confirmDelete() {
+        setWishes(wishes.filter(w => w.id !== deletingWish.id));
+        setShowDelete(false);
+      }
+      function saveEdit() {
+        setWishes(wishes.map(w => w.id === editingWish.id ? editingWish : w));
+        setShowEdit(false);
+      }
+      function addWish() {
+        const newId = Date.now();
+        setWishes([...wishes, { ...editingWish, id: newId }]);
+        setShowAdd(false);
+      }
+
+      return (
+        <div className="flex h-full">
+          {/* 左侧导航 */}
+          <div className="w-64 bg-gradient-to-b from-pink-500 to-yellow-400 flex flex-col justify-between text-white">
+            <div>
+              <div className="p-6 text-2xl font-bold">梦想许愿池</div>
+              <nav>
+                <div className="flex items-center px-6 py-3 bg-pink-600">
+                  <i className="fas fa-home mr-2"></i><span>首页</span>
+                </div>
+                <div className="flex items-center px-6 py-3 hover:bg-pink-600 cursor-pointer">
+                  <i className="fas fa-star mr-2"></i><span>我的愿望</span>
+                </div>
+                <div className="flex items-center px-6 py-3 hover:bg-pink-600 cursor-pointer">
+                  <i className="fas fa-hotel mr-2"></i><span>愿望墙</span>
+                </div>
+                <div className="flex items-center px-6 py-3 hover:bg-pink-600 cursor-pointer">
+                  <i className="fas fa-chart-bar mr-2"></i><span>许愿统计</span>
+                </div>
+              </nav>
+            </div>
+            <div className="p-6 text-sm">
+              <div>已实现 0 个愿望</div>
+              <div>共计 6 个梦想在坚持</div>
+            </div>
+          </div>
+          {/* 右侧内容 */}
+          <div className="flex-1 flex flex-col">
+            {/* 顶部标签和 banner */}
+            <div className="flex items-center px-8 py-4 bg-white border-b">
+              {["精选","热榜","最新"].map(tab => (
+                <div key={tab} onClick={() => setCurrentTab(tab)}
+                  className={"mr-8 pb-2 cursor-pointer "+(currentTab===tab?"border-b-2 border-pink-500 text-pink-500":"text-gray-600")}>
+                  {tab}
+                </div>
+              ))}
+            </div>
+            <div className="bg-gray-600 text-white text-center py-6 px-8">
+              <div>在这里，汇聚你的每一个小梦想，让愿望萌芽、结实、飞向天空。</div>
+              <div>梦想许愿池，助你看见未来。</div>
+            </div>
+            {/* 主内容区 */}
+            <div className="flex-1 px-8 py-6 bg-gray-100 overflow-auto flex">
+              <div className="flex-1">
+                <div className="mb-4 space-x-2">
+                  <button onClick={()=>{ setShowAdd(true); setEditingWish({ title:"",desc:"",category:"学习",date:"",priority:1,progress:0 }); }}
+                    className="px-4 py-2 bg-red-500 text-white rounded"><i className="fas fa-plus mr-1"></i>添加愿望</button>
+                  <button className="px-4 py-2 bg-gray-300 text-gray-700 rounded"><i className="fas fa-trash-alt mr-1"></i>批量删除</button>
+                </div>
+                <div className="grid grid-cols-3 gap-6">
+                  {allWishes.map(w => (
+                    <div key={w.id} className="bg-white rounded shadow p-4 relative">
+                      <div className={`absolute top-4 right-4 px-2 py-1 text-sm rounded ${categoryColors[w.category] || 'bg-gray-200'}`}>{w.category}</div>
+                      <h3 className="text-lg font-bold">{w.title}</h3>
+                      <p className="text-gray-600 text-sm my-2">{w.desc}</p>
+                      <div className="text-sm text-gray-500">目标日期: {w.date} &nbsp;&nbsp; 优先级: {["很低","较低","中等","较高","很高"][w.priority]}</div>
+                      <div className="mt-2 text-sm text-gray-500">完成进度:</div>
+                      <div className="w-full bg-gray-200 h-2 rounded mt-1">
+                        <div className="bg-green-400 h-2 rounded" style={{width: w.progress + '%'}}></div>
+                      </div>
+                      <div className="flex justify-end space-x-2 mt-3 text-gray-500">
+                        <button onClick={()=>openEdit(w)}><i className="fas fa-edit"></i></button>
+                        <button onClick={()=>openDelete(w)}><i className="fas fa-trash-alt"></i></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* 右侧统计 */}
+              <div className="w-80 ml-6">
+                <div className="bg-white rounded shadow p-4 mb-6">
+                  <h4 className="font-bold mb-2">愿望统计</h4>
+                  <div className="text-2xl font-bold">6 个愿望</div>
+                  <div className="my-4">
+                    <img src="https://picsum.photos/id/1011/200/200" alt="饼图"/>
+                  </div>
+                  <div className="text-sm">
+                    <div className="flex items-center"><span className="inline-block w-3 h-3 bg-pink-300 mr-1"></span>学习</div>
+                    <div className="flex items-center"><span className="inline-block w-3 h-3 bg-green-200 mr-1"></span>职业</div>
+                    <div className="flex items-center"><span className="inline-block w-3 h-3 bg-teal-200 mr-1"></span>健康</div>
+                    <div className="flex items-center"><span className="inline-block w-3 h-3 bg-yellow-200 mr-1"></span>旅行</div>
+                    <div className="flex items-center"><span className="inline-block w-3 h-3 bg-purple-200 mr-1"></span>其他</div>
+                  </div>
+                  <div className="mt-2 text-gray-500 text-xs">学习类别愿望占比最高</div>
+                </div>
+                <div className="bg-white rounded shadow p-4 mb-6">
+                  <h4 className="font-bold mb-2">愿望趋势</h4>
+                  <div className="my-4">
+                    <img src="https://picsum.photos/id/1012/260/120" alt="折线图"/>
+                  </div>
+                  <div className="text-sm text-gray-500">过去6个月新增愿望变化</div>
+                </div>
+                <div className="bg-white rounded shadow p-4">
+                  <h4 className="font-bold mb-2">小贴士</h4>
+                  <div className="text-sm text-gray-600">Tip: 给你的愿望设置一个小目标，更容易实现哦！坚持一段时间后，回顾进度很有成就感。</div>
+                </div>
+              </div>
+            </div>
+            {/* 底部 */}
+            <div className="bg-teal-400 text-white text-center py-4">© 2023 梦想许愿池 | 让每个愿望都有实现的可能</div>
+          </div>
+          {/* 添加愿望弹窗 */}
+          {showAdd && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded p-6 w-96">
+                <h3 className="text-lg font-bold mb-4">添加新愿望</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm">愿望标题</label>
+                    <input className="w-full border rounded px-2 py-1" value={editingWish.title} onChange={e=>setEditingWish({...editingWish,title:e.target.value})}/>
+                  </div>
+                  <div>
+                    <label className="block text-sm">描述</label>
+                    <textarea className="w-full border rounded px-2 py-1" rows="3" value={editingWish.desc} onChange={e=>setEditingWish({...editingWish,desc:e.target.value})}></textarea>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1">
+                      <label className="block text-sm">类别</label>
+                      <select className="w-full border rounded px-2 py-1" value={editingWish.category} onChange={e=>setEditingWish({...editingWish,category:e.target.value})}>
+                        <option>学习</option>
+                        <option>职业</option>
+                        <option>健康</option>
+                        <option>旅行</option>
+                        <option>其他</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm">目标日期</label>
+                      <input type="date" className="w-full border rounded px-2 py-1" value={editingWish.date} onChange={e=>setEditingWish({...editingWish,date:e.target.value})}/>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm">优先级 ({editingWish.priority})</label>
+                    <input type="range" min="1" max="5" className="w-full" value={editingWish.priority} onChange={e=>setEditingWish({...editingWish,priority: +e.target.value})}/>
+                    <div className="flex justify-between text-xs text-gray-500"><span>很低</span><span>较低</span><span>中等</span><span>较高</span><span>很高</span></div>
+                  </div>
+                  <div>
+                    <label className="block text-sm">进度 ({editingWish.progress}%)</label>
+                    <input type="range" min="0" max="100" className="w-full" value={editingWish.progress} onChange={e=>setEditingWish({...editingWish,progress: +e.target.value})}/>
+                    <div className="flex justify-between text-xs text-gray-500"><span>0%</span><span>50%</span><span>100%</span></div>
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <button onClick={()=>setShowAdd(false)} className="px-4 py-1 border rounded">取消</button>
+                    <button onClick={addWish} className="px-4 py-1 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* 编辑愿望弹窗 */}
+          {showEdit && editingWish && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded p-6 w-96">
+                <h3 className="text-lg font-bold mb-4">编辑愿望</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm">愿望标题</label>
+                    <input className="w-full border rounded px-2 py-1" value={editingWish.title} onChange={e=>setEditingWish({...editingWish,title:e.target.value})}/>
+                  </div>
+                  <div>
+                    <label className="block text-sm">描述</label>
+                    <textarea className="w-full border rounded px-2 py-1" rows="3" value={editingWish.desc} onChange={e=>setEditingWish({...editingWish,desc:e.target.value})}></textarea>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1">
+                      <label className="block text-sm">类别</label>
+                      <select className="w-full border rounded px-2 py-1" value={editingWish.category} onChange={e=>setEditingWish({...editingWish,category:e.target.value})}>
+                        <option>学习</option>
+                        <option>职业</option>
+                        <option>健康</option>
+                        <option>旅行</option>
+                        <option>其他</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm">目标日期</label>
+                      <input type="date" className="w-full border rounded px-2 py-1" value={editingWish.date} onChange={e=>setEditingWish({...editingWish,date:e.target.value})}/>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm">优先级 ({editingWish.priority})</label>
+                    <input type="range" min="1" max="5" className="w-full" value={editingWish.priority} onChange={e=>setEditingWish({...editingWish,priority: +e.target.value})}/>
+                    <div className="flex justify-between text-xs text-gray-500"><span>很低</span><span>较低</span><span>中等</span><span>较高</span><span>很高</span></div>
+                  </div>
+                  <div>
+                    <label className="block text-sm">进度 ({editingWish.progress}%)</label>
+                    <input type="range" min="0" max="100" className="w-full" value={editingWish.progress} onChange={e=>setEditingWish({...editingWish,progress: +e.target.value})}/>
+                    <div className="flex justify-between text-xs text-gray-500"><span>0%</span><span>50%</span><span>100%</span></div>
+                  </div>
+                  <div className="flex justify-end space-x-2 mt-4">
+                    <button onClick={()=>setShowEdit(false)} className="px-4 py-1 border rounded">取消</button>
+                    <button onClick={saveEdit} className="px-4 py-1 bg-gradient-to-r from-pink-500 to-yellow-400 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* 删除确认弹窗 */}
+          {showDelete && deletingWish && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white rounded p-6 w-80 text-center">
+                <h3 className="text-lg font-bold mb-2">确认删除</h3>
+                <p className="text-gray-600 mb-4">确认删除该愿望吗？此操作无法撤销。</p>
+                <div className="flex justify-center space-x-4">
+                  <button onClick={()=>setShowDelete(false)} className="px-4 py-1 border rounded">取消</button>
+                  <button onClick={confirmDelete} className="px-4 py-1 bg-red-500 text-white rounded">确认</button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* 帮助侧边栏 */}
+          <button onClick={()=>setShowHelp(true)}
+            className="fixed bottom-6 right-6 bg-pink-500 text-white p-4 rounded-full shadow-lg hover:bg-pink-600">
+            <i className="fas fa-question"></i>
+          </button>
+          {showHelp && (
+            <div className="fixed inset-0 flex">
+              <div className="ml-auto w-80 bg-white shadow-xl h-full p-6 overflow-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-lg">帮助中心</h3>
+                  <button onClick={()=>setShowHelp(false)}><i className="fas fa-times"></i></button>
+                </div>
+                <div className="space-y-2">
+                  <div><i className="fas fa-chevron-down mr-2"></i>如何添加愿望</div>
+                  <div><i className="fas fa-chevron-down mr-2"></i>如何编辑/删除</div>
+                  <div><i className="fas fa-chevron-down mr-2"></i>如何查看统计</div>
+                </div>
+              </div>
+              <div className="flex-1" onClick={()=>setShowHelp(false)}></div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

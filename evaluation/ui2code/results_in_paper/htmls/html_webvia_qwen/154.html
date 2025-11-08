@@ -1,0 +1,708 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健身餐管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [recipes, setRecipes] = useState([
+                {
+                    id: 1,
+                    name: "高蛋白鸡胸肉沙拉",
+                    energy: 350,
+                    protein: 40,
+                    carbs: 25,
+                    fat: 15,
+                    category: "沙拉",
+                    tags: ["高蛋白", "低脂", "素食"],
+                    image: "https://picsum.photos/id/312/400/300",
+                    note: "适合健身后食用，补充蛋白质"
+                },
+                {
+                    id: 2,
+                    name: "牛油果三文鱼饭",
+                    energy: 420,
+                    protein: 30,
+                    carbs: 45,
+                    fat: 20,
+                    category: "主食",
+                    tags: ["高蛋白", "健康脂肪", "蔬菜"],
+                    image: "https://picsum.photos/id/431/400/300",
+                    note: "混合食材营养，提供优质蛋白质"
+                },
+                {
+                    id: 3,
+                    name: "希腊酸奶水果碗",
+                    energy: 280,
+                    protein: 20,
+                    carbs: 35,
+                    fat: 8,
+                    category: "早餐",
+                    tags: ["低脂", "高纤维", "健康脂肪"],
+                    image: "https://picsum.photos/id/436/400/300",
+                    note: "新鲜水果搭配酸奶，营养均衡"
+                }
+            ]);
+
+            const [editingRecipe, setEditingRecipe] = useState(null);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [editImageUrl, setEditImageUrl] = useState("");
+
+            const [formData, setFormData] = useState({
+                name: "",
+                tags: [],
+                energy: "",
+                protein: "",
+                carbs: "",
+                fat: "",
+                note: "",
+                category: "沙拉"
+            });
+
+            useEffect(() => {
+                if (editingRecipe) {
+                    setFormData({
+                        name: editingRecipe.name,
+                        tags: editingRecipe.tags,
+                        energy: editingRecipe.energy.toString(),
+                        protein: editingRecipe.protein.toString(),
+                        carbs: editingRecipe.carbs.toString(),
+                        fat: editingRecipe.fat.toString(),
+                        note: editingRecipe.note,
+                        category: editingRecipe.category
+                    });
+                }
+            }, [editingRecipe]);
+
+            const handleEdit = (recipe) => {
+                setEditingRecipe(recipe);
+                setFormData({
+                    name: recipe.name,
+                    tags: recipe.tags,
+                    energy: recipe.energy.toString(),
+                    protein: recipe.protein.toString(),
+                    carbs: recipe.carbs.toString(),
+                    fat: recipe.fat.toString(),
+                    note:(recipe.note || "适合健身后食用，补充蛋白质"),
+                    category: recipe.category
+                });
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (recipe) => {
+                setEditingRecipe(recipe);
+                setShowDeleteModal(true);
+            };
+
+            const handleSaveChanges = () => {
+                if (formData.name) {
+                    const recipe = {
+                        ...editingRecipe,
+                        ...formData,
+                        energy: parseInt(formData.energy),
+                        protein: parseInt(formData.protein),
+                        carbs: parseInt(formData.carbs),
+                        fat: parseInt(formData.fat)
+                    };
+                    setRecipes(recipes.map(r => r.id === editingRecipe.id ? recipe : r));
+                    setShowEditModal(false);
+                    setEditingRecipe(null);
+                }
+            };
+
+            const handleConfirmDelete = () => {
+                setRecipes(recipes.filter(r => r.id !== editingRecipe.id));
+                setShowDeleteModal(false);
+                setEditingRecipe(null);
+            };
+
+            const handleCancel = () => {
+                setShowEditModal(false);
+                setEditingRecipe(null);
+            };
+
+            const handleAddRecipe = () => {
+                setShowAddModal(true);
+            };
+
+            const handleSaveAdd = () => {
+                if (formData.name) {
+                    const newRecipe = {
+                        id: Date.now(),
+                        ...formData,
+                        energy: parseInt(formData.energy),
+                        protein: parseInt(formData.protein),
+                        carbs: parseInt(formData.carbs),
+                        fat: parseInt(formData.fat),
+                        image: editImageUrl || "http://picsum.photos/id/172/400/300",
+                        note: formData.note || ""
+                    };
+                    setRecipes([...recipes, newRecipe]);
+                    setShowAddModal(false);
+                    setFormData({
+                        name: "",
+                        tags: [],
+                        energy: "",
+                        protein: "",
+                        carbs: "",
+                        fat: "",
+                        note: "",
+                        category: "沙拉"
+                    });
+                }
+            };
+
+            const handleCancelAdd = () => {
+                setShowAddModal(false);
+                setFormData({
+                    name: "",
+                    tags: [],
+                    energy: "",
+                    protein: "",
+                    carbs: "",
+                    fat: "",
+                    note: "",
+                    category: "沙拉"
+                });
+            };
+
+            const water = {
+                name: "高蛋白鸡胸肉沙拉",
+                energy: "350 卡路里",
+                protein: "40g",
+                carbs: "25g",
+                    fat: "15g",
+                    category: "沙拉",
+                    type: "测试食谱",
+                    tags: ["高蛋白", "低脂", "素食"],
+                    image: "https://picsum.photos/id/312/400/300",
+                    note: "适合健身后食用，补充蛋白质"
+                };
+
+            const computeNutritionPercentage = (recipe) => {
+                const totalProtein = recipes.reduce((sum, r) => sum + r.protein, 0);
+                const totalCarb = recipes.reduce((sum, r) => sum + r.carbs, 0);
+                const totalFat = recipes.reduce((sum, r) => sum + r.fat, 0);
+                const totalEnergy = recipes.reduce((sum, r) => sum + r.energy, 0);
+
+                return {
+                    protein: Math.round((recipe.protein / totalProtein) * 100),
+                    carbs: Math.round((recipe.carbs / totalCarb) * 100),
+                    fat: Math.round((recipe.fat / totalFat) * 100)
+                };
+            };
+
+            if (formData.name === "测试食谱名称") {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        {/* Header */}
+                        <header className="bg-white shadow-sm border-b">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="flex justify-between items-center h-16">
+                                    <div className="flex items-center">
+                                        <i className="fas fa-dumbbell text-blue-600 text-xl mr-2"></i>
+                                        <h1 className="text-lg font-semibold text-gray-900">健身餐管理</h1>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-gray-600 cursor-pointer">系统推荐</span>
+                                        <span className="text-gray-600 cursor-pointer">收藏夹</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                {/* Main Content */}
+                                <div className="lg:col-span-2">
+                                    {/* Hero Banner */}
+                                    <div className="bg-gradient-to-r from-red-500 via-pink-500 to-blue-600 rounded-xl p-6 mb-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-black opacity-10"></div>
+                                        <div className="relative flex items-center">
+                                            <img 
+                                                src="https://picsum.photos/id/2/300/200" 
+                                                alt="水与叶子" 
+                                                className="w-40 h-32 object-cover rounded-lg opacity-50"
+                                                style={{top: "-20px", left: "20%", filter: "brightness(0.5)"}}
+                                            />
+                                            <img 
+                                                src="https://picsum.photos/id/49/300/200" 
+                                                alt="物件" 
+                                                className="w-40 h-32 object-cover rounded-lg opacity-50"
+                                                style={{top: "-30px", right: "30%", filter: "brightness(0.5)"}}
+                                            />
+                                            <img 
+                                                src="https://picsum.photos/id/48/300/200" 
+                                                alt="蓝色物体" 
+                                                className="w-40 h-32 object-cover rounded-lg opacity-50"
+                                                style={{bottom: "-30px", left: "70%", filter: "brightness(0.5)"}}
+                                            />
+                                            <img 
+                                                src="https://picsum.photos/id/47/200/150" 
+                                                alt="水生植物" 
+                                                className="w-32 h-24 object-cover rounded-lg opacity-60 -mt-12 -ml-12"
+                                                style={{filter: "brightness(0.6)", top: "20%", left: "40%", transform: "rotate(45deg)"}}
+                                            />
+                                            <div className="bg-orange-400 w-20 h-16 rounded-lg absolute top-6 right-10"></div>
+                                            <div className="bg-yellow-400 w-20 h-15 rounded-lg absolute top-3 right-8"></div>
+                                            <div className="bg-red-600 w-16 h-12 rounded-lg absolute bottom-12 right-20"></div>
+                                            
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center">
+                                                <h2 className="text-2xl font-bold mb-2">打造专属健身食谱</h2>
+                                                <p className="text-lg opacity-90">平衡营养，健康美味，科学搭配，在线管理你的健身餐之旅</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Recipe Collection */}
+                                    <div className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="flex items-center mb-6">
+                                            <i className="fas fa-book text-blue-600 mr-2"></i>
+                                            <h3 className="text-lg font-semibold text-gray-900">我的食谱集</h3>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {/* Recipe Card */}
+                                            <div className="bg-white border rounded-lg shadow-md overflow-hidden">
+                                                {(formData.name === "测试食谱名称" ? water : recipes[0]) && (
+                                                    <div className="relative">
+                                                        <img 
+                                                            src={(formData.name === "测试食谱名称" ? water.image : recipes[0].image)} 
+                                                            alt={(formData.name === "测试食谱名称" ? water.name : recipes[0].name)} 
+                                                            className="w-full h-56 object-cover cursor-pointer" 
+                                                            onClick={() => editingRecipe ? handleEdit({ ...recipes[0], ...formData }) : handleEdit(recipes[0])}
+                                                        />
+                                                        <span className="absolute top-4 right-4 text-white bg-black bg-opacity-60 px-2 py-1 rounded text-sm cursor-pointer">
+                                                            收藏架
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                <div className="p-4">
+                                                    <h4 className="text-lg font-medium text-blue-600 mb-3 flex items-center">
+                                                        {formData.name === "测试食谱名称" ? water.name : recipes[0].name}
+                                                    </h4>
+                                                    <div className="mb-4">
+                                                        <div className="flex justify-between mb-2">
+                                                            <span className="text-sm text-gray-600">{formData.name === "测试食谱名称" ? water.energy : recipes[0].energy} 卡路里</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center mb-4">
+                                                        <img src="https://picsum.photos/id/1/44/32" alt="蛋白" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">{formData.name === "测试食谱名称" ? water.protein : recipes[0].protein}g</span>
+                                                        <img src="https://picsum.photos/id/2/44/32" alt="碳水" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">{formData.name === "测试食谱名称" ? water.carbs : recipes[0].carbs}g</span>
+                                                        <img src="https://picsum.photos/id/3/44/32" alt="脂肪" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700">{formData.name === "测试食谱名称" ? water.fat : recipes[0].fat}g</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 mt-4">
+                                                        {formData.name === "测试食谱名称" ? water.tags : recipes[0].tags.map(tag => (
+                                                            <span key={tag} className={`px-2 py-1 text-xs rounded-full ${
+                                                                tag === "高蛋白" ? "bg-blue-100 text-blue-600" :
+                                                                tag === "低脂" ? "bg-green-100 text-green-600" :
+                                                                tag === "素食" ? "bg-orange-100 text-orange-600" :
+                                                                tag === "健康脂肪" ? "bg-purple-100 text-purple-600" :
+                                                                tag === "高纤维" ? "bg-teal-100 text-teal-600" :
+                                                                tag === "生酮" ? "bg-gray-100 text-gray-600" :
+                                                                "bg-gray-100 text-gray-600"
+                                                            }`}>
+                                                            {tag}
+                                                        </span>
+                                                        ))}
+                                                    </div>
+                                                    {formData.name === "测试食谱名称" ? (
+                                                        <div className="mt-4">
+                                                            <p className="text-xs text-gray-600 mb-3">{formData.note || water.note}</p>
+                                                            <div className="flex gap-2">
+                                                                <button className="flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded hover:bg-blue-600 transition-colors">
+                                                                    <i className="fas fa-edit mr-1"></i> 编辑
+                                                                </button>
+                                                                <button className="flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded hover:bg-red-600 transition-colors">
+                                                                    <i className="fas fa-trash mr-1"></i> 删除
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="mt-4 text-sm text-gray-600">
+                                                            <p>适合健身后食用，补充蛋白质</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Other Recipe Cards */}
+                                            <div className="bg-white border rounded-lg shadow-md overflow-hidden">
+                                                <img 
+                                                    src="https://picsum.photos/id/431/400/300" 
+                                                    alt="牛油果三文鱼饭" 
+                                                    className="w-full h-48 object-cover"
+                                                />
+                                                <div className="p-4">
+                                                    <h4 className="text-lg font-medium text-blue-600 mb-3">牛油果三文鱼饭</h4>
+                                                    <div className="mb-4">
+                                                        <div className="flex justify-between mb-2">
+                                                            <span className="text-sm text-gray-600">420 卡路里</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center mb-4">
+                                                        <img src="https://picsum.photos/id/1/44/32" alt="蛋白" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">30g</span>
+                                                        <img src="https://picsum.photos/id/2/44/32" alt="碳水" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">45g</span>
+                                                        <img src="https://picsum.photos/id/3/44/32" alt="脂肪" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700">20g</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">高蛋白</span>
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">健康脂肪</span>
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-600">蔬菜</span>
+                                                    </div>
+                                                    <div className="mt-4 text-sm text-gray-600">
+                                                        <p>混合食材营养，提供优质蛋白质</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-white border rounded-lg shadow-md overflow-hidden">
+                                                <img 
+                                                    src="https://picsum.photos/id/436/400/300" 
+                                                    alt="希腊酸奶水果碗" 
+                                                    className="w-full h-48 object-cover"
+                                                />
+                                                <div className="p-4">
+                                                    <h4 className="text-lg font-medium text-blue-600 mb-3">希腊酸奶水果碗</h4>
+                                                    <div className="mb-4">
+                                                        <div className="flex justify-between mb-2">
+                                                            <span className="text-sm text-gray-600">280 卡路里</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center mb-4">
+                                                        <img src="https://picsum.photos/id/1/44/32" alt="蛋白" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">20g</span>
+                                                        <img src="https://picsum.photos/id/2/44/32" alt="碳水" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700 mr-3">35g</span>
+                                                        <img src="https://picsum.photos/id/3/44/32" alt="脂肪" className="w-6 h-6 rounded-full mr-2" />
+                                                        <span className="text-xs text-gray-700">9g</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">低脂</span>
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">高纤维</span>
+                                                        <span className="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-600">健康脂肪</span>
+                                                    </div>
+                                                    <div className="mt-4 text-sm text-gray-600">
+                                                        <p>新鲜水果搭配酸奶，营养均衡</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Add Recipe Button */}
+                                    <div className="mt-8 text-center">
+                                        <button 
+                                            onClick={() => formData.name === "" ? handleAddRecipe() : handleSaveChanges()}
+                                            className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>
+                                            {formData.name === "" ? "添加食谱" : formData.name === "测试食谱名称" ? "继续编辑" : "保存更改"}
+                                        </button>
+                                    </div>
+
+                                    {/* Help Section */}
+                                    <div className="mt-8 text-center text-gray-500 text-sm">
+                                        <button className="text-red-500 hover:text-red-600 text-xs">
+                                            <i className="fas fa-clippy mr-1"></i>
+                                            恢复默认
+                                        </button>
+                                        <span className="ml-4">用户手册</span>
+                                    </div>
+                                </div>
+
+                                {/* Right Sidebar */}
+                                <div className="lg:col-span-1">
+                                    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+                                        {/* Weekly Stats */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">营养摄入统计</h3>
+                                            <div className="mb-2">
+                                                <h4 className="text-sm font-medium text-gray-600">本周营养摄入对比</h4>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-red-500 mb-1">85%</div>
+                                                    <div className="text-xs text-gray-600">高蛋白</div>
+                                                    <div className="text-xs text-gray-400">目标 90%</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-green-500 mb-1">65%</div>
+                                                    <div className="text-xs text-gray-600">低脂</div>
+                                                    <div className="text-xs text-gray-400">目标 70%</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-2xl font-bold text-orange-500 mb-1">75%</div>
+                                                    <div className="text-xs text-gray-600">膳食纤维</div>
+                                                    <div className="text-xs text-gray-400">目标 90%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Export Options */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">导出数据</h3>
+                                            <div className="space-y-2">
+                                                <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded text-sm hover:bg-gray-200 transition-colors">
+                                                    <i className="fas fa-file-pdf mr-2"></i>
+                                                    导出PDF
+                                                </button>
+                                                <button className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded text-sm hover:bg-gray-200 transition-colors">
+                                                    <i className="fas fa-file-csv mr-2"></i>
+                                                    导出CSV
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Tips */}
+                                        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                            <div className="flex items-start">
+                                                <i className="fas fa-lightbulb text-yellow-500 mr-2 mt-0.5"></i>
+                                                <div>
+                                                    <h4 className="font-medium text-yellow-800 mb-1">使用小贴士</h4>
+                                                    <p className="text-sm text-yellow-700">
+                                                        优质蛋白质优先摄入，有助于肌肉修复
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 mt-1">
+                                                        可在编辑区实时预览营养分布图
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Edit Modal */}
+                {(showEditModal || editingRecipe) && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold">编辑健身餐食谱</h3>
+                                <button 
+                                    onClick={handleCancel}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            食谱名称
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            营养标签
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['高蛋白', '低脂', '素食', '高纤维', '生酮', '健康脂肪', '主食', '海产', '海鲜菜', '糖菜', '生酮'].map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => {
+                                                        const newTags = formData.tags.includes(tag) 
+                                                            ? formData.tags.filter(t => t !== tag)
+                                                            : [...formData.tags, tag];
+                                                        setFormData({...formData, tags: newTags});
+                                                    }}
+                                                    className={`px-2 py-1 text-xs rounded ${
+                                                        formData.tags.includes(tag) 
+                                                            ? 'bg-blue-500 text-white' 
+                                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            底图图片
+                                        </label>
+                                        <div className="text-center">
+                                            <button className="w-full bg-gray-300 text-gray-600 px-3 py-2 rounded mb-2">
+                                                <i className="fas fa-cloud-upload mr-2"></i>
+                                                更改图片
+                                            </button>
+                                            <p className="text-xs text-gray-500">当前图片</p>
+                                            <img 
+                                                src={formData.name === "测试食谱名称" ? "测试食谱名称" : recipes[0].image} 
+                                                alt={formData.name === "测试食谱名称" ? "测试食谱名称" : recipes[0].name}
+                                                className="w-full h-32 object-cover rounded"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            营养成分
+                                        </label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    value={formData.energy}
+                                                    onChange={(e) => setFormData({...formData, energy: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <div className="text-xs text-gray-600 mt-1">
+                                                    卡路里 (nCal)
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    value={formData.protein}
+                                                    onChange={(e) => setFormData({...formData, protein: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <div className="text-xs text-gray-600 mt-1">
+                                                    蛋白质 (g)
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    value={formData.carbs}
+                                                    onChange={(e) => setFormData({...formData, carbs: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <div className="text-xs text-gray-600 mt-1">
+                                                    碳水(g)
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <input
+                                                    type="number"
+                                                    value={formData.fat}
+                                                    onChange={(e) => setFormData({...formData, fat: e.target.value})}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                <div className="text-xs text-gray-600 mt-1">
+                                                    脂肪(g)
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        备注
+                                    </label>
+                                    <textarea
+                                        value={formData.note}
+                                        onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                        rows="4"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        菜系类型
+                                    </label>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="沙拉">沙拉</option>
+                                        <option value="主食">主食</option>
+                                        <option value="早餐">早餐</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <button 
+                                    onClick={handleCancel}
+                                    className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleSaveChanges}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                                >
+                                    <i className="fas fa-save mr-2"></i>
+                                    保存更改
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal */}
+                {(showDeleteModal || editingRecipe) && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                            <div className="flex items-center mb-4">
+                                <i className="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                <h3 className="text-lg font-semibold">确认删除</h3>
+                            </div>
+                            <p className="text-gray-600 mb-6">
+                                确认删除 "{formData.name || editingRecipe?.name}"？此操作不可撤销。
+                            </p>
+                            <div className="flex justify-end space-x-3">
+                                <button 
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleConfirmDelete}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                                >
+                                    确认删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            }
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

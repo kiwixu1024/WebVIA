@@ -1,0 +1,610 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兼职信息平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [categoryExpanded, setCategoryExpanded] = useState(false);
+            const [publishExpanded, setPublishExpanded] = useState(false);
+            const [messageExpanded, setMessageExpanded] = useState(false);
+            const [accountExpanded, setAccountExpanded] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingIndex, setEditingIndex] = useState(null);
+            const [modalFormData, setModalFormData] = useState({
+                title: '',
+                company: '',
+                salary: '',
+                city: '',
+                type: '兼职',
+                tags: '',
+                description: ''
+            });
+
+            const [dailyNewJobs, setDailyNewJobs] = useState(8);
+            const [totalJobs, setTotalJobs] = useState(128);
+            const [activeUsers, setActiveUsers] = useState(1024);
+
+            const jobs = [
+                {
+                    id: 1,
+                    title: '店员助理',
+                    company: '星巴克咖啡 · 上海',
+                    salary: '20-30元/小时',
+                    tags: ['餐饮', '周末', '灵活时间'],
+                    date: '2023-06-15',
+                    avatar: 'https://picsum.photos/id/1/80/80',
+                    detail: '负责咖啡店日常运营，顾客接待及产品制作'
+                },
+                {
+                    id: 2,
+                    title: '线上家教',
+                    company: '优学教育 · 全国',
+                    salary: '150-200元/小时',
+                    tags: ['教育', '远程', '本科以上'],
+                    date: '2023-06-14',
+                    avatar: 'https://picsum.photos/id/2/80/80',
+                    detail: '在线辅导中小学生课程'
+                },
+                {
+                    id: 3,
+                    title: '翻译兼职',
+                    company: '环球翻译社 · 北京',
+                    salary: '0.3-0.5元/字',
+                    tags: ['翻译', '英语', '自由工作'],
+                    date: '2023-06-12',
+                    avatar: 'https://picsum.photos/id/3/80/80',
+                    detail: '提供多语言翻译服务'
+                }
+            ];
+
+            const categories = ['餐饮服务', '教育培训', '销售客服', '设计传媒', '物流快递'];
+
+            const handleCategoryToggle = () => {
+                setCategoryExpanded(!categoryExpanded);
+            };
+
+            const handlePublishToggle = () => {
+                setPublishExpanded(!publishExpanded);
+            };
+
+            const handleMessageToggle = () => {
+                setMessageExpanded(!messageExpanded);
+            };
+
+            const handleAccountToggle = () => {
+                setAccountExpanded(!accountExpanded);
+            };
+
+            const handleAddJob = () => {
+                setShowAddModal(true);
+                setModalFormData({
+                    title: '',
+                    company: '',
+                    salary: '',
+                    city: '',
+                    type: '兼职',
+                    tags: '',
+                    description: ''
+                });
+            };
+
+            const handleEditJob = (index) => {
+                const job = jobs[index];
+                setModalFormData({
+                    title: job.title,
+                    company: job.company.split(' · ')[0],
+                    salary: job.salary,
+                    city: job.company.split(' · ')[1],
+                    type: '兼职',
+                    tags: job.tags.join(', '),
+                    description: job.detail
+                });
+                setEditingIndex(index);
+                setShowAddModal(true);
+            };
+
+            const handleSave = () => {
+                if (showAddModal) {
+                    // 添加新岗位
+                    let newJob = {
+                        id: jobs.length + 1,
+                        title: modalFormData.title,
+                        company: `${modalFormData.company} · ${modalFormData.city}`,
+                        salary: modalFormData.salary,
+                        tags: modalFormData.tags.split(', ').map(tag => tag.trim()),
+                        date: new Date().toISOString().split('T')[0],
+                        avatar: `https://picsum.photos/id/${Math.floor(Math.random() * 100)}/80/80`,
+                        detail: modalFormData.description
+                    };
+                    
+                    setTotalJobs(prev => prev + 1);
+                    
+                    if (editingIndex !== null) {
+                        // 编辑现有岗位
+                        jobs[editingIndex] = newJob;
+                        setDailyNewJobs(prev => prev - 1);
+                    } else {
+                        // 添加新岗位
+                        jobs.unshift(newJob);
+                        setDailyNewJobs(prev => prev + 1);
+                    }
+                    setShowAddModal(false);
+                    setEditingIndex(null);
+                }
+            };
+
+            const handleCancel = () => {
+                setShowAddModal(false);
+                setShowEditModal(false);
+                setEditingIndex(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-blue-600 text-white px-6 py-4">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-white bg-opacity-20 flex items-center justify-center rounded-full">
+                                    <img src="https://picsum.photos/id/40/40/40" alt="logo" className="w-8 h-8 rounded-full" />
+                                </div>
+                                <div>
+                                    <div className="text-white font-semibold">兼职信息平台</div>
+                                    <div className="text-blue-200 text-sm">兼职・实习 · 灵活工作机会</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <input 
+                                    type="text" 
+                                    placeholder="搜索兼职岗位..." 
+                                    className="px-4 py-2 rounded-lg border-0 focus:ring-2 focus:ring-blue-300 w-64"
+                                />
+                                <button className="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <i className="fas fa-plus"></i>
+                                    <span>快速发布兼职</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-6 py-6">
+                        <div className="flex space-x-6">
+                            {/* Sidebar */}
+                            <div className="w-80 space-y-6">
+                                {/* Category Section */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div 
+                                        className="flex items-center justify-between cursor-pointer"
+                                        onClick={handleCategoryToggle}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-list text-blue-600"></i>
+                                            <span className="font-medium">职位分类</span>
+                                        </div>
+                                        <i className={`fas fa-chevron-${categoryExpanded ? 'up' : 'down'}`}></i>
+                                    </div>
+                                    {categoryExpanded && (
+                                        <div className="mt-3 space-y-1">
+                                            {categories.map((category, index) => (
+                                                <div 
+                                                    key={index}
+                                                    className="flex items-center space-x-3 px-3 py-2 rounded hover:bg-gray-50 cursor-pointer"
+                                                    onClick={() => setCategoryExpanded(false)}
+                                                >
+                                                    <i className="fas fa-tag text-blue-600"></i>
+                                                    <span>{category}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* My Publish Section */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div 
+                                        className="flex items-center justify-between cursor-pointer"
+                                        onClick={handlePublishToggle}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-coaster text-green-600"></i>
+                                            <span className="font-medium">我的发布</span>
+                                        </div>
+                                        <i className={`fas fa-chevron-${publishExpanded ? 'up' : 'down'}`}></i>
+                                    </div>
+                                    {publishExpanded && (
+                                        <div className="mt-3 space-y-1">
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-50">
+                                                <i className="fas fa-check-circle text-green-600"></i>
+                                                <span>已发布</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-50">
+                                                <i className="fas fa-file-alt text-orange-600"></i>
+                                                <span>草稿箱</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-50">
+                                                <i className="fas fa-clock text-red-600"></i>
+                                                <span>已过期</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Message Center */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div 
+                                        className="flex items-center justify-between cursor-pointer"
+                                        onClick={handleMessageToggle}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-bell text-orange-600"></i>
+                                            <span className="font-medium">消息中心</span>
+                                        </div>
+                                        <i className={`fas fa-chevron-${messageExpanded ? 'up' : 'down'}`}></i>
+                                    </div>
+                                    {messageExpanded && (
+                                        <div className="mt-3 space-y-1">
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-50 cursor-pointer">
+                                                <i className="fas fa-circle text-blue-500"></i>
+                                                <span>招聘方消息</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-50 cursor-pointer">
+                                                <i className="fas fa-circle text-blue-500"></i>
+                                                <span>求职者消息</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Account Settings */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div 
+                                        className="flex items-center justify-between cursor-pointer"
+                                        onClick={handleAccountToggle}
+                                    >
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-cog text-gray-600"></i>
+                                            <span className="font-medium">账号设置</span>
+                                        </div>
+                                        <i className={`fas fa-chevron-${accountExpanded ? 'up' : 'down'}`}></i>
+                                    </div>
+                                </div>
+
+                                {/* Customer Service */}
+                                <div className="bg-blue-50 p-4 rounded-lg">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <img src="https://picsum.photos/id/40/30/30" alt="客服" className="w-8 h-8 rounded-full" />
+                                        <span className="font-medium text-gray-700">联系我们</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600 space-y-1">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-phone text-blue-500"></i>
+                                            <span>客服热线: 400-123-4567</span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-envelope text-blue-500"></i>
+                                            <span>邮箱: support@jobplatform.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="text-gray-500 text-xs text-center mt-6 space-y-1">
+                                    <div>© 2023 兼职信息平台 版权所有</div>
+                                    <div className="flex justify-center space-x-4">
+                                        <span className="hover:underline cursor-pointer">用户协议</span>
+                                        <span className="hover:underline cursor-pointer">隐私政策</span>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="w-px h-full bg-gray-200"></div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="flex-1 space-y-6">
+                                {/* Job List Header */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-briefcase text-blue-600"></i>
+                                            <span className="font-medium">兼职岗位列表</span>
+                                        </div>
+                                        <button 
+                                            onClick={handleAddJob}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                                        >
+                                            <i className="fas fa-plus"></i>
+                                            <span>添加兼职信息</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Add Job Modal */}
+                                {showAddModal && (
+                                    <div className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                                            <h3 className="text-lg font-medium mb-4">添加兼职信息</h3>
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="岗位名称"
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.title}
+                                                    onChange={(e) => setModalFormData({...modalFormData, title: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="公司/招聘方"
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.company}
+                                                    onChange={(e) => setModalFormData({...modalFormData, company: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="薪资范围"
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.salary}
+                                                    onChange={(e) => setModalFormData({...modalFormData, salary: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="工作城市"
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.city}
+                                                    onChange={(e) => setModalFormData({...modalFormData, city: e.target.value})}
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <select 
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.type}
+                                                    onChange={(e) => setModalFormData({...modalFormData, type: e.target.value})}
+                                                >
+                                                    <option>兼职</option>
+                                                </select>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="多个标签用逗号分隔"
+                                                    className="px-3 py-2 border rounded"
+                                                    value={modalFormData.tags}
+                                                    onChange={(e) => setModalFormData({...modalFormData, tags: e.target.value})}
+                                                />
+                                            </div>
+                                            <textarea 
+                                                placeholder="岗位描述"
+                                                rows="3"
+                                                className="w-full px-3 py-2 border rounded"
+                                                value={modalFormData.description}
+                                                onChange={(e) => setModalFormData({...modalFormData, description: e.target.value})}
+                                            ></textarea>
+                                            <div className="flex space-x-2 mt-4">
+                                                <button 
+                                                    onClick={handleCancel}
+                                                    className="px-4 py-2 border rounded hover:bg-gray-50"
+                                                >
+                                                    取消
+                                                </button>
+                                                <button 
+                                                    onClick={handleSave}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                >
+                                                    保存
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Edit Job Modal */}
+                                {showEditModal && (
+                                    <div className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                                            <h3 className="text-lg font-medium mb-4">编辑兼职信息</h3>
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <input 
+                                                    type="text" 
+                                                    value={modalFormData.title}
+                                                    onChange={(e) => setModalFormData({...modalFormData, title: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    value={modalFormData.company}
+                                                    onChange={(e) => setModalFormData({...modalFormData, company: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    value={modalFormData.salary}
+                                                    onChange={(e) => setModalFormData({...modalFormData, salary: e.target.value})}
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    value={modalFormData.city}
+                                                    onChange={(e) => setModalFormData({...modalFormData, city: e.target.value})}
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <select 
+                                                    value={modalFormData.type}
+                                                    onChange={(e) => setModalFormData({...modalFormData, type: e.target.value})}
+                                                >
+                                                    <option>兼职</option>
+                                                </select>
+                                                <input 
+                                                    type="text" 
+                                                    value={modalFormData.tags}
+                                                    onChange={(e) => setModalFormData({...modalFormData, tags: e.target.value})}
+                                                />
+                                            </div>
+                                            <textarea 
+                                                rows="3"
+                                                value={modalFormData.description}
+                                                onChange={(e) => setModalFormData({...modalFormData, description: e.target.value})}
+                                            ></textarea>
+                                            <div className="flex space-x-2 mt-4">
+                                                <button 
+                                                    onClick={handleCancel}
+                                                    className="px-4 py-2 border rounded hover:bg-gray-50"
+                                                >
+                                                    取消
+                                                </button>
+                                                <button 
+                                                    onClick={handleSave}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                                >
+                                                    保存
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Job List */}
+                                <div className="bg-white rounded-lg shadow-sm">
+                                    <div className="p-6 border-b">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-list text-blue-600"></i>
+                                            <span className="font-medium">兼职岗位列表</span>
+                                        </div>
+                                    </div>
+                                    <div className="divide-y">
+                                        {(showEditModal ? jobs : jobs.slice(0, 3)).map((job, index) => (
+                                            <div key={job.id} className="p-6 hover:bg-gray-50">
+                                                <div className="flex space-x-4">
+                                                    <img 
+                                                        src={job.avatar} 
+                                                        alt={job.title}
+                                                        className="w-20 h-20 rounded-lg object-cover"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <h3 className="font-semibold text-lg mb-1">{job.title}</h3>
+                                                        <p className="text-gray-600 mb-2">{job.company}</p>
+                                                        <div className="text-red-600 font-medium">{job.salary}</div>
+                                                        <div className="flex items-center space-x-2 mt-2">
+                                                            {job.tags.map((tag, tagIndex) => (
+                                                                <span key={tagIndex} className="px-2 py-1 bg-blue-100 text-blue-600 rounded text-sm">
+                                                                    {tag}
+                                                                </span>
+                                                            ))}
+                                                            <span className="ml-auto text-gray-400 text-sm flex items-center">
+                                                                <i className="far fa-clock mr-1"></i>
+                                                                {job.date}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => editingIndex === index ? handleCancel() : handleEditJob(index)}
+                                                            className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                                                        >
+                                                            <i className="fas fa-edit mr-1"></i>
+                                                            编辑
+                                                        </button>
+                                                        <button className="px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                                                            <i className="fas fa-trash mr-1"></i>
+                                                            删除
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Platform Statistics */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <div className="flex items-center space-x-2 mb-4">
+                                        <i className="fas fa-chart-bar text-green-600"></i>
+                                        <span className="font-medium">平台数据统计</span>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div className="bg-blue-50 rounded-lg p-4">
+                                            <div className="text-sm text-blue-600 font-medium">今日新增岗位</div>
+                                            <div className="text-2xl font-bold text-blue-600">{dailyNewJobs}</div>
+                                            <button 
+                                                onClick={() => setDailyNewJobs(prev => prev + 1)}
+                                                className="text-blue-600 text-sm hover:underline"
+                                            >
+                                                <i className="fas fa-sync-alt mr-1"></i>
+                                                刷新数据
+                                            </button>
+                                        </div>
+                                        <div className="bg-green-50 rounded-lg p-4">
+                                            <div className="text-sm text-green-600 font-medium">总岗位数</div>
+                                            <div className="text-2xl font-bold text-green-600">{totalJobs}</div>
+                                            <button 
+                                                onClick={() => setTotalJobs(prev => prev + 1)}
+                                                className="text-green-600 text-sm hover:underline"
+                                            >
+                                                <i className="fas fa-sync-alt mr-1"></i>
+                                                刷新数据
+                                            </button>
+                                        </div>
+                                        <div className="bg-purple-50 rounded-lg p-4">
+                                            <div className="text-sm text-purple-600 font-medium">活跃用户数</div>
+                                            <div className="text-2xl font-bold text-purple-600">{activeUsers}</div>
+                                            <button 
+                                                onClick={() => setActiveUsers(prev => prev + 1)}
+                                                className="text-purple-600 text-sm hover:underline"
+                                            >
+                                                <i className="fas fa-sync-alt mr-1"></i>
+                                                刷新数据
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Tips */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <div className="flex items-center space-x-2 mb-4">
+                                        <i className="fas fa-lightbulb text-yellow-600"></i>
+                                        <span className="font-medium">使用小贴士</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex space-x-3">
+                                            <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">
+                                                <i className="fas fa-info"></i>
+                                            </div>
+                                            <span className="text-sm">操作指南：点击"添加兼职信息"快速发布新岗位</span>
+                                        </div>
+                                        <div className="flex space-x-3">
+                                            <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">
+                                                <i className="fas fa-exclamation-circle"></i>
+                                            </div>
+                                            <span className="text-sm">安全提示：请勿在平台发布虚假或违规信息</span>
+                                        </div>
+                                        <div className="flex space-x-3">
+                                            <div className="w-6 h-6 bg-yellow-600 text-white rounded-full flex items-center justify-center text-sm">
+                                                <i className="fas fa-star"></i>
+                                            </div>
+                                            <span className="text-sm">效率建议：完善公司资料可提高招聘效率</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

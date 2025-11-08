@@ -1,0 +1,237 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>互动时光村</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const App = () => {
+      const [activeTab, setActiveTab] = React.useState(1);
+      const [modalOpen, setModalOpen] = React.useState(false);
+      const [editModalOpen, setEditModalOpen] = React.useState(false);
+      const [editingEntry, setEditingEntry] = React.useState(null);
+
+      const entries = [
+        {
+          id: 1,
+          date: '2023-01-15',
+          title: '家庭野餐',
+          description: '和家人一起去公园野餐，享受阳光和美食。',
+          image: 'https://picsum.photos/id/1010/400/300',
+          interactionCount: 12
+        },
+        {
+          id: 2,
+          date: '2023-02-20',
+          title: '孩子的第一次画展',
+          description: '小明的绘画作品在学校展出，他很兴奋和自豪。',
+          image: 'https://picsum.photos/id/1025/400/300',
+          interactionCount: 8
+        },
+        {
+          id: 3,
+          date: '2023-03-10',
+          title: '家庭游戏之夜',
+          description: '全家人一起玩游戏，欢笑贯穿了整个晚上。',
+          image: 'https://picsum.photos/id/1011/400/300',
+          interactionCount: 15
+        }
+      ];
+
+      const addNewMemory = () => {
+        setModalOpen(false);
+      };
+
+      const editMemory = (entry) => {
+        setEditingEntry(entry);
+        setEditModalOpen(true);
+      };
+
+      const saveEditingMemory = () => {
+        setEditModalOpen(false);
+        setEditingEntry(null);
+      };
+
+      const renderTabContent = () => {
+        switch (activeTab) {
+          case 1:
+            return (
+              <div>
+                <div className="flex justify-between mb-4">
+                  <h1 className="text-xl font-bold text-green-600">
+                    幸福时光展示
+                  </h1>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                    onClick={() => setModalOpen(true)}
+                  >
+                    + 添加时光
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {entries.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="border rounded shadow-md p-4 bg-white"
+                    >
+                      <img
+                        src={entry.image}
+                        alt={entry.title}
+                        className="rounded-md mb-4"
+                      />
+                      <h2 className="font-medium text-lg">{entry.title}</h2>
+                      <p className="text-sm text-gray-500">{entry.date}</p>
+                      <p className="text-sm mt-2 text-gray-700">
+                        {entry.description}
+                      </p>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="text-red-500 flex items-center">
+                          <i className="fas fa-heart"></i>
+                          <span className="ml-2">{entry.interactionCount}</span>
+                        </div>
+                        <button
+                          onClick={() => editMemory(entry)}
+                          className="text-blue-600 flex items-center"
+                        >
+                          <i className="fas fa-edit"></i>
+                          <span className="ml-1">编辑</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          case 2:
+            return (
+              <div>
+                <h1 className="text-xl font-bold text-green-600 mb-4">
+                  时光条目编辑
+                </h1>
+                <table className="w-full border">
+                  <thead className="bg-gray-100 border-b">
+                    <tr>
+                      <th className="p-2 text-left">日期</th>
+                      <th className="p-2 text-left">标题</th>
+                      <th className="p-2 text-left">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {entries.map((entry) => (
+                      <tr key={entry.id} className="border-b">
+                        <td className="p-2">{entry.date}</td>
+                        <td className="p-2">{entry.title}</td>
+                        <td className="p-2 flex items-center">
+                          <button
+                            className="text-blue-500 flex items-center mr-4"
+                            onClick={() => editMemory(entry)}
+                          >
+                            <i className="fas fa-edit"></i>
+                            <span className="ml-1">编辑</span>
+                          </button>
+                          <button className="text-red-500 flex items-center">
+                            <i className="fas fa-trash"></i>
+                            <span className="ml-1">删除</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          case 3:
+            return (
+              <div>
+                <h1 className="text-xl font-bold text-green-600 mb-4">
+                  时光统计
+                </h1>
+                {/* Implement statistics UI */}
+              </div>
+            );
+        }
+      };
+
+      return (
+        <div className="flex h-screen">
+          <aside className="w-1/4 bg-pink-100 p-8">
+            <h1 className="text-lg font-bold text-red-500 mb-6">
+              互动幸福时光村
+            </h1>
+            <ul>
+              <li
+                className={`p-4 mb-2 rounded cursor-pointer ${
+                  activeTab === 1 ? "bg-green-400 text-white" : ""
+                }`}
+                onClick={() => setActiveTab(1)}
+              >
+                展示区
+              </li>
+              <li
+                className={`p-4 mb-2 rounded cursor-pointer ${
+                  activeTab === 2 ? "bg-green-400 text-white" : ""
+                }`}
+                onClick={() => setActiveTab(2)}
+              >
+                编辑区
+              </li>
+              <li
+                className={`p-4 mb-2 rounded cursor-pointer ${
+                  activeTab === 3 ? "bg-green-400 text-white" : ""
+                }`}
+                onClick={() => setActiveTab(3)}
+              >
+                统计区
+              </li>
+            </ul>
+          </aside>
+          <main className="w-3/4 bg-gray-50 p-8">{renderTabContent()}</main>
+
+          {modalOpen && (
+            <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-8 rounded shadow-md">
+                <h2 className="text-lg font-medium text-green-600 mb-4">
+                  添加新时光
+                </h2>
+                {/* Form for adding new memory */}
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded mt-4"
+                  onClick={() => setModalOpen(false)}
+                >
+                  关闭
+                </button>
+              </div>
+            </div>
+          )}
+
+          {editModalOpen && editingEntry && (
+            <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-8 rounded shadow-md">
+                <h2 className="text-lg font-medium text-green-600 mb-4">
+                  编辑时光
+                </h2>
+                {/* Form for editing memory */}
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded mt-4"
+                  onClick={saveEditingMemory}
+                >
+                  保存
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>

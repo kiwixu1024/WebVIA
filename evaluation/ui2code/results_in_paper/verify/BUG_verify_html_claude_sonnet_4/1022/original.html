@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程练习系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('exercises');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [isDarkMode, setIsDarkMode] = useState(false);
+
+            const exercises = [
+                {
+                    id: 1,
+                    title: '变量声明与基本类型',
+                    description: '学习JavaScript中的变量声明方式（var、let、const）以及基本数据类型，理解变量作用域和提升机制。',
+                    status: 'new',
+                    icon: '🟢'
+                },
+                {
+                    id: 2,
+                    title: '数组排序算法',
+                    description: '实现一个基础的排序算法，对数组进行排序，理解时间复杂度和空间复杂度的概念。',
+                    status: 'completed',
+                    icon: '✅'
+                },
+                {
+                    id: 3,
+                    title: '异步编程与Promise',
+                    description: '学习JavaScript中的异步编程模式，掌握Promise的使用方法，以及async/await语法。',
+                    status: 'error',
+                    icon: '🔴'
+                }
+            ];
+
+            const renderHeader = () => (
+                <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} px-6 py-3`}>
+                    <div className="flex items-center justify-between">
+                        <nav className="flex items-center space-x-1">
+                            <button 
+                                onClick={() => setCurrentPage('exercises')}
+                                className={`px-4 py-2 rounded ${currentPage === 'exercises' ? 'bg-blue-500 text-white' : `${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}`}
+                            >
+                                编程列表
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage('intro')}
+                                className={`px-4 py-2 rounded ${currentPage === 'intro' ? 'bg-blue-500 text-white' : `${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}`}
+                            >
+                                主题介绍
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage('help')}
+                                className={`px-4 py-2 rounded ${currentPage === 'help' ? 'bg-blue-500 text-white' : `${isDarkMode ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-100'}`}`}
+                            >
+                                帮助
+                            </button>
+                        </nav>
+                        <div className="flex items-center space-x-2">
+                            <button 
+                                onClick={() => setShowAddModal(true)}
+                                className="bg-blue-500 text-white px-4 py-2 rounded flex items-center"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加新练习
+                            </button>
+                            <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center">
+                                <i className="fas fa-download mr-2"></i>
+                                导出JSON
+                            </button>
+                            <button 
+                                onClick={() => setIsDarkMode(!isDarkMode)}
+                                className={`p-2 rounded ${isDarkMode ? 'bg-yellow-500 text-black' : 'bg-gray-600 text-white'}`}
+                            >
+                                {isDarkMode ? '☀️' : '🌙'}
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            );
+
+            const renderSidebar = () => (
+                <aside className={`w-64 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} border-r ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} p-4`}>
+                    <div className="mb-6">
+                        <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>练习分类</h3>
+                        <ul className="space-y-2">
+                            <li className={`flex items-center justify-between p-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
+                                <span className={`flex items-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <i className="fas fa-code mr-2"></i>
+                                    基础语法
+                                </span>
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+                            </li>
+                            <li className={`flex items-center justify-between p-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
+                                <span className={`flex items-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <i className="fas fa-database mr-2"></i>
+                                    数据结构
+                                </span>
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+                            </li>
+                            <li className={`flex items-center justify-between p-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
+                                <span className={`flex items-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <i className="fas fa-chart-line mr-2"></i>
+                                    算法
+                                </span>
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+                            </li>
+                            <li className={`flex items-center justify-between p-2 rounded ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
+                                <span className={`flex items-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <i className="fas fa-project-diagram mr-2"></i>
+                                    项目实战
+                                </span>
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">0</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="mb-6">
+                        <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>学习进度</h3>
+                        <div className="space-y-2">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-green-500 h-2 rounded-full" style={{width: '33%'}}></div>
+                            </div>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>完成度: 33%</p>
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'} p-3 rounded`}>
+                                <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-blue-900'}`}>小提示</p>
+                                <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-blue-700'}`}>今天练习了编程3题，一个月后你将看到显著进步！</p>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            );
+
+            const renderRightSidebar = () => (
+                <aside className={`w-80 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} border-l ${isDarkMode ? 'border-gray-700' : 'border-gray-200'} p-4`}>
+                    <div className="mb-6">
+                        <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>学习统计</h3>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="text-center">
+                                <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>3</div>
+                                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>总练习</div>
+                            </div>
+                            <div className="text-center">
+                                <div className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>1</div>
+                                <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>已完成</div>
+                            </div>
+                        </div>
+                        <div className="text-center mb-4">
+                            <div className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>平均得分</div>
+                            <div className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>2.0</div>
+                            <div className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>通过率</div>
+                            <div className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>33%</div>
+                        </div>
+                        <div className="mb-4">
+                            <div className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>难度分布</div>
+                            <div className="flex h-4 rounded overflow-hidden">
+                                <div className="bg-green-500 flex-1"></div>
+                                <div className="bg-yellow-500 flex-1"></div>
+                                <div className="bg-red-500 flex-1"></div>
+                            </div>
+                            <div className="flex justify-between text-xs mt-1">
+                                <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>简单</span>
+                                <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>中等</span>
+                                <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>困难</span>
+                            </div>
+                        </div>
+                        <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>数据基于最近的练习统计，如你有疑问，请联系我们。</p>
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>编程小贴士</h3>
+                        <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-blue-50'} p-3 rounded mb-3`}>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-blue-800'}`}>
+                                <strong>Tip:</strong> 学会使用浏览器的调试器可以让你快速定位问题，是每个开发者必须掌握的技能。
+                            </p>
+                        </div>
+                        <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} space-y-2`}>
+                            <p>善用注释能够使你代码更易读之目标，编程不仅是为了运行，更是为了维护和调试。</p>
+                            <p>遇到定位问题时请看错误提示，尝试理解JavaScript的语法。</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className={`font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>推荐学习资源</h3>
+                        <ul className="space-y-2 text-sm">
+                            <li className={`flex items-center ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                <i className="fas fa-external-link-alt mr-2"></i>
+                                MDN Web 文档
+                            </li>
+                            <li className={`flex items-center ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                <i className="fas fa-external-link-alt mr-2"></i>
+                                LeetCode 算法题库
+                            </li>
+                            <li className={`flex items-center ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                <i className="fas fa-external-link-alt mr-2"></i>
+                                JavaScript 深入系列教程
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+            );
+
+            const renderExercises = () => (
+                <div className="space-y-4">
+                    {exercises.map((exercise) => (
+                        <div key={exercise.id} className={`${isDarkMode ? 'bg-gray-700' : 'bg-white'} rounded-lg shadow p-6 border ${isDarkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                                        exercise.status === 'completed' ? 'bg-green-100' : 
+                                        exercise.status === 'error' ? 'bg-red-100' : 'bg-blue-100'
+                                    }`}>
+                                        <span className="text-lg">
+                                            {exercise.status === 'completed' ? '✅' : 
+                                             exercise.status === 'error' ? '❗' : '🔵'}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                            {exercise.id}. {exercise.title}
+                                        </h3>
+                                        {exercise.status === 'completed' && (
+                                            <span className="text-sm text-green-600 font-medium">✓ 已完成</span>
+                                        )}
+                                    </div>
+                                </div>
+                                <button className={`${isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}>
+                                    <i className="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} leading-relaxed`}>
+                                {exercise.description}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            const renderIntro = () => (
+                <div className="space-y-6">
+                    <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>编程习题集</h1>
+                    
+                    <div className="rounded-lg overflow-hidden">
+                        <img 
+                            src="https://picsum.photos/id/7/800/220" 
+                            alt="编程学习环境"
+                            className="w-full h-56 object-cover"
+                        />
+                    </div>
+
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>项目介绍</h2>
+                        <p className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} leading-relaxed`}>
+                            本练习集是基础编程练习，算法系统，项目实战，提供支持的编程语言练习，帮你全面提升编程能力，无论你是编程初学者还是想提升编程技能的开发者，这都能为你提供全面的训练。
+                        </p>
+                    </div>
+
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-6 text-green-600`}>特色亮点</h2>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-layer-group text-2xl text-blue-600"></i>
+                                </div>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>难度分级</h3>
+                                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>从易到难，循序渐进提升能力</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-chart-line text-2xl text-green-600"></i>
+                                </div>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>进度追踪</h3>
+                                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>实时记录学习进度，量化了解成长过程</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                                    <i className="fas fa-code text-2xl text-yellow-600"></i>
+                                </div>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>代码示例</h3>
+                                <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>提供详尽的代码示例和解释，帮助理解</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>使用小贴士</h2>
+                        <ul className="space-y-3">
+                            <li className={`flex items-start ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <i className="fas fa-diamond text-blue-500 mr-3 mt-1 text-sm"></i>
+                                定期练习：建议每天至少完成1-2道练习，养成编程练习习惯
+                            </li>
+                            <li className={`flex items-start ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <i className="fas fa-diamond text-blue-500 mr-3 mt-1 text-sm"></i>
+                                复习练习：定期回顾已完成的练习，加深记忆
+                            </li>
+                            <li className={`flex items-start ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <i className="fas fa-diamond text-blue-500 mr-3 mt-1 text-sm"></i>
+                                实践应用：尝试将所学应用到实际项目中
+                            </li>
+                            <li className={`flex items-start ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <i className="fas fa-diamond text-blue-500 mr-3 mt-1 text-sm"></i>
+                                持续挑战：接受上层难度挑战，创建自己的题库
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            );
+
+            const renderHelp = () => (
+                <div className="space-y-6">
+                    <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>帮助中心</h1>
+                    
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>快速开始</h2>
+                        <ol className={`list-decimal list-inside space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <li>点击顶部的"编程列表"按钮查看所有可用练习</li>
+                            <li>点击"添加新练习"按钮创建自己的练习</li>
+                            <li>点击每个练习展开详情以查看所需完成的内容</li>
+                            <li>完成练习后，点击右下方上传按钮"校验完成"按钮</li>
+                            <li>查看右侧统计区了解自己的学习进度</li>
+                        </ol>
+                    </div>
+
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>快捷键</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-3 rounded`}>
+                                <code className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Ctrl+E</code>
+                                <span className={`ml-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>- 编辑选中的练习</span>
+                            </div>
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-3 rounded`}>
+                                <code className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Ctrl+N</code>
+                                <span className={`ml-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>- 添加新练习</span>
+                            </div>
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-3 rounded`}>
+                                <code className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>双击</code>
+                                <span className={`ml-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>- 展开练习详情</span>
+                            </div>
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'} p-3 rounded`}>
+                                <code className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Esc</code>
+                                <span className={`ml-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>- 关闭当前弹窗</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 className={`text-xl font-semibold mb-4 text-green-600`}>常见问题</h2>
+                        
+                        <div className="space-y-4">
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-green-50'} p-4 rounded`}>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-green-800'}`}>如何导出数据练习?</h3>
+                                <p className={`${isDarkMode ? 'text-gray-300' : 'text-green-700'}`}>
+                                    点击顶部导航栏中的"导出JSON"按钮，系统将自动下载包含所有练习的JSON文件。
+                                </p>
+                            </div>
+
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-green-50'} p-4 rounded`}>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-green-800'}`}>如何更改练习题题?</h3>
+                                <p className={`${isDarkMode ? 'text-gray-300' : 'text-green-700'}`}>
+                                    编辑练习，可以双击于任意题体发难度等级（易/中/难）。
+                                </p>
+                            </div>
+
+                            <div className={`${isDarkMode ? 'bg-gray-700' : 'bg-green-50'} p-4 rounded`}>
+                                <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-green-800'}`}>数据会自动保存吗?</h3>
+                                <p className={`${isDarkMode ? 'text-gray-300' : 'text-green-700'}`}>
+                                    目前系统暂不具备自动保存，我们建议定期使用"导出JSON"功能备份你的数据。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={`${isDarkMode ? 'bg-blue-900 border-blue-700' : 'bg-blue-50 border-blue-200'} border-l-4 p-4`}>
+                        <h3 className={`font-semibold mb-2 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}`}>需要更多帮助?</h3>
+                        <p className={`${isDarkMode ? 'text-blue-200' : 'text-blue-700'}`}>
+                            如有任何问题或建议，请发送邮件至：
+                            <a href="mailto:support@codingexercises.com" className="underline ml-1">
+                                support@codingexercises.com
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            );
+
+            const renderAddModal = () => {
+                if (!showAddModal) return null;
+                
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
+                            <h2 className="text-xl font-semibold mb-4">添加新练习</h2>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">练习标题</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="输入练习标题"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">练习描述</label>
+                                    <textarea 
+                                        rows={4}
+                                        placeholder="输入练习描述"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">代码示例</label>
+                                    <textarea 
+                                        rows={6}
+                                        placeholder="// 在这里写代码"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">难度等级</label>
+                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="易">易</option>
+                                        <option value="中">中</option>
+                                        <option value="难">难</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="flex items-center">
+                                    <input 
+                                        type="checkbox" 
+                                        id="completed"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="completed" className="ml-2 text-sm text-gray-700">
+                                        标记为已完成
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                                >
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+                    {renderHeader()}
+                    <div className="flex">
+                        {renderSidebar()}
+                        <main className="flex-1 p-6">
+                            {currentPage === 'exercises' && renderExercises()}
+                            {currentPage === 'intro' && renderIntro()}
+                            {currentPage === 'help' && renderHelp()}
+                        </main>
+                        {render

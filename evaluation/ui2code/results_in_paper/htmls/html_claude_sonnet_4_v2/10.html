@@ -1,0 +1,586 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微笑打卡专属湾</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('main');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('全部分类');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [searchResults, setSearchResults] = useState([]);
+
+            const handleSearch = (query) => {
+                setSearchQuery(query);
+                if (query === '测试') {
+                    setSearchResults([
+                        {
+                            id: 1,
+                            title: '暂无微笑记录',
+                            description: '点击在下方的"添加微笑"按钮，记录你的第一个微笑瞬间吧！',
+                            image: 'https://picsum.photos/id/1/300/200'
+                        }
+                    ]);
+                } else {
+                    setSearchResults([]);
+                }
+            };
+
+            const posts = [
+                {
+                    id: 1,
+                    author: '青天',
+                    date: '2024-06-01',
+                    content: '今天在海边看到了奇妙的日落，心情太好了-',
+                    image: 'https://picsum.photos/id/395/300/200',
+                    stars: 5,
+                    category: '日常'
+                },
+                {
+                    id: 2,
+                    author: '小白',
+                    date: '2024-06-02',
+                    content: '被家里小猫咪萌到，记录一瞬！',
+                    image: 'https://picsum.photos/id/433/300/200',
+                    stars: 4,
+                    category: '萌宠'
+                },
+                {
+                    id: 3,
+                    author: '旅行者',
+                    date: '2024-06-03',
+                    content: '高山的风景，春好了让我的云雨，太感谢了！',
+                    image: 'https://picsum.photos/id/1003/300/200',
+                    stars: 5,
+                    category: '旅行'
+                },
+                {
+                    id: 4,
+                    author: '美食家',
+                    date: '2024-06-04',
+                    content: '今天遇了一碗非常好吃，家人超级不错口！',
+                    image: 'https://picsum.photos/id/429/300/200',
+                    stars: 4,
+                    category: '美食'
+                },
+                {
+                    id: 5,
+                    author: '小明',
+                    date: '2024-06-05',
+                    content: '第一次给科技过生日，难忘了很奇怪吧，想突然好开心！',
+                    image: 'https://picsum.photos/id/96/300/200',
+                    stars: 5,
+                    category: '其他'
+                },
+                {
+                    id: 6,
+                    author: '书虫',
+                    date: '2024-06-06',
+                    content: '终于读完了期待已久的小说，整晚出来举行庆祝派对。',
+                    image: 'https://picsum.photos/id/481/300/200',
+                    stars: 4,
+                    category: '日常'
+                }
+            ];
+
+            if (currentView === 'create') {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        {/* Header */}
+                        <div className="bg-white shadow-sm">
+                            <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <img src="https://picsum.photos/id/1025/40/40" className="w-8 h-8 rounded mr-2" />
+                                    <span className="text-orange-500 font-medium">微笑打卡专属湾</span>
+                                </div>
+                                <div className="flex space-x-6">
+                                    <span className="text-gray-600 cursor-pointer">展示区</span>
+                                    <span className="bg-yellow-400 text-black px-3 py-1 rounded cursor-pointer">解说区</span>
+                                    <span className="text-gray-600 cursor-pointer">统计区</span>
+                                    <span className="text-gray-600 cursor-pointer">帮助说明</span>
+                                </div>
+                                <div className="w-8 h-8 bg-black rounded-full"></div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="container mx-auto px-4 py-8 flex">
+                            {/* Sidebar */}
+                            <div className="w-64 mr-8">
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                                    <div className="bg-orange-100 text-orange-600 px-3 py-2 rounded mb-3">展示区</div>
+                                    <div className="text-gray-600 mb-3 cursor-pointer" onClick={() => setCurrentView('main')}>📊 我的打卡</div>
+                                    <div className="text-gray-600 mb-3">🏷️ 标签管理</div>
+                                    <div className="text-gray-600">⚙️ 设置</div>
+                                </div>
+                            </div>
+
+                            {/* Content Area */}
+                            <div className="flex-1">
+                                <div className="text-center py-20">
+                                    <img src="https://picsum.photos/id/517/100/100" className="w-20 h-20 mx-auto mb-4 rounded" />
+                                    <h2 className="text-xl font-semibold mb-4">开始创建你的微笑记录</h2>
+                                    <p className="text-gray-600 mb-8">分享你的微笑瞬间，记录每一个值得珍藏的美好时刻，让幸福变得更有意义</p>
+                                    <button className="bg-yellow-400 text-black px-6 py-2 rounded-full font-medium hover:bg-yellow-500">
+                                        ✏️ 立即添加微笑
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-64 ml-8">
+                                <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                                    <h3 className="text-orange-500 font-medium mb-4">今日数据</h3>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">今日打卡</span>
+                                            <span>78次</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">活跃用户</span>
+                                            <span>56人</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">平均心情</span>
+                                            <div className="text-yellow-400">★★★★★</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <h3 className="text-orange-500 font-medium mb-4">用户排行</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center">
+                                            <span className="text-yellow-500 mr-2">1</span>
+                                            <img src="https://picsum.photos/id/64/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                            <span className="text-gray-700">青天</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="text-gray-500 mr-2">2</span>
+                                            <img src="https://picsum.photos/id/65/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                            <span className="text-gray-700">旅行者</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <span className="text-gray-500 mr-2">3</span>
+                                            <img src="https://picsum.photos/id/66/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                            <span className="text-gray-700">小白</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-orange-400 text-sm mt-4 cursor-pointer">查看更多</div>
+
+                                    <h3 className="text-orange-500 font-medium mt-6 mb-4">微笑小贴士</h3>
+                                    <div className="text-gray-600 text-sm space-y-2">
+                                        <p>微笑可以减轻压力，情绪改善是关键！</p>
+                                        <p>每天坚持3分钟正念冥想练习，有助于提升幸福感。</p>
+                                        <p>分享你的微笑，感染身边每一位朋友，传递积极能量。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <footer className="bg-white border-t py-8 mt-16">
+                            <div className="container mx-auto px-4">
+                                <div className="grid grid-cols-4 gap-8">
+                                    <div>
+                                        <h4 className="text-orange-500 font-medium mb-4">微笑打卡专属湾</h4>
+                                        <p className="text-gray-600 text-sm">每天一个微笑，记录美好瞬间吧！</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-gray-700 font-medium mb-4">快速链接</h4>
+                                        <div className="space-y-2 text-sm text-gray-600">
+                                            <div>关于我们</div>
+                                            <div>使用条款</div>
+                                            <div>隐私政策</div>
+                                            <div>帮助中心</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-gray-700 font-medium mb-4">联系我们</h4>
+                                        <div className="space-y-2 text-sm text-gray-600">
+                                            <div>📧 smile@example.com</div>
+                                            <div>📞 400-123-4567</div>
+                                            <div>📍 像素大厦，书香路100号</div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-gray-700 font-medium mb-4">关注我们</h4>
+                                        <div className="flex space-x-2">
+                                            <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                            <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                            <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                            <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-4">©2024 微笑打卡专属湾. 保留所有权利</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>
+
+                        {/* Floating Chat Button */}
+                        <div className="fixed bottom-8 right-8 w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center cursor-pointer">
+                            <span className="text-white">💬</span>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm">
+                        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center">
+                                <img src="https://picsum.photos/id/1025/40/40" className="w-8 h-8 rounded mr-2" />
+                                <span className="text-orange-500 font-medium">微笑打卡专属湾</span>
+                            </div>
+                            <div className="flex space-x-6">
+                                <span className="text-gray-600 cursor-pointer">展示区</span>
+                                <span className="bg-yellow-400 text-black px-3 py-1 rounded cursor-pointer">解说区</span>
+                                <span className="text-gray-600 cursor-pointer">统计区</span>
+                                <span className="text-gray-600 cursor-pointer">帮助说明</span>
+                            </div>
+                            <div className="w-8 h-8 bg-black rounded-full"></div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="container mx-auto px-4 py-8 flex">
+                        {/* Sidebar */}
+                        <div className="w-64 mr-8">
+                            <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                                <div className="bg-orange-100 text-orange-600 px-3 py-2 rounded mb-3">展示区</div>
+                                <div className="text-gray-600 mb-3">📊 我的打卡</div>
+                                <div className="text-gray-600 mb-3">🏷️ 标签管理</div>
+                                <div className="text-gray-600">⚙️ 设置</div>
+                            </div>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="flex-1">
+                            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                <p className="text-gray-700 mb-4">在这里，你可以随时记录自己身边好友的微笑瞬间，每一个记忆都值得珍藏心中。</p>
+                                
+                                {/* Search Section */}
+                                <div className="mb-4">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="flex-1 relative">
+                                            <span className="text-gray-600 mr-2">搜索微笑</span>
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入关键词搜索..."
+                                                value={searchQuery}
+                                                onChange={(e) => handleSearch(e.target.value)}
+                                                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                                            />
+                                            <button className="absolute right-3 top-8 text-gray-400">
+                                                🔍
+                                            </button>
+                                        </div>
+                                        <div className="relative">
+                                            <span className="text-gray-600 mr-2">分类筛选</span>
+                                            <select 
+                                                value={selectedCategory}
+                                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                                className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+                                            >
+                                                <option>全部分类</option>
+                                                <option>日常</option>
+                                                <option>旅行</option>
+                                                <option>美食</option>
+                                                <option>萌宠</option>
+                                                <option>其他</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Tips */}
+                                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                                    <span>💡 产品须知通案才能帮你的账！</span>
+                                    <span>💾 数据将来本月可携带/备份</span>
+                                </div>
+                            </div>
+
+                            {/* Posts Grid or Search Results */}
+                            {searchQuery && searchResults.length > 0 ? (
+                                <div className="text-center py-8">
+                                    <img src={searchResults[0].image} className="w-32 h-32 mx-auto mb-4 rounded" />
+                                    <h3 className="text-lg font-medium mb-2">{searchResults[0].title}</h3>
+                                    <p className="text-gray-600 mb-6">{searchResults[0].description}</p>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-yellow-400 text-black px-6 py-2 rounded-full font-medium hover:bg-yellow-500"
+                                    >
+                                        立即添加微笑
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-6">
+                                    {posts.map(post => (
+                                        <div key={post.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                            <div className="p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center">
+                                                        <img src={`https://picsum.photos/id/${post.id + 60}/32/32`} className="w-8 h-8 rounded-full mr-3" />
+                                                        <div>
+                                                            <div className="font-medium">{post.author}</div>
+                                                            <div className="text-sm text-gray-500">{post.date}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => setShowEditModal(true)}
+                                                            className="text-gray-400 hover:text-gray-600"
+                                                        >
+                                                            ✏️
+                                                        </button>
+                                                        <button className="text-gray-400 hover:text-gray-600">🗑️</button>
+                                                    </div>
+                                                </div>
+                                                <p className="text-gray-700 mb-3">{post.content}</p>
+                                                <img src={post.image} className="w-full h-48 object-cover rounded mb-3" />
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <span key={i} className={`text-yellow-400 ${i < post.stars ? '' : 'opacity-30'}`}>★</span>
+                                                        ))}
+                                                    </div>
+                                                    <span className="text-orange-400 text-sm">{post.category}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-64 ml-8">
+                            <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                                <h3 className="text-orange-500 font-medium mb-4">今日数据</h3>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">今日打卡</span>
+                                        <span>78次</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">活跃用户</span>
+                                        <span>56人</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">平均心情</span>
+                                        <div className="text-yellow-400">★★★★★</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <h3 className="text-orange-500 font-medium mb-4">用户排行</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center">
+                                        <span className="text-yellow-500 mr-2">1</span>
+                                        <img src="https://picsum.photos/id/64/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                        <span className="text-gray-700">青天</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="text-gray-500 mr-2">2</span>
+                                        <img src="https://picsum.photos/id/65/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                        <span className="text-gray-700">旅行者</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <span className="text-gray-500 mr-2">3</span>
+                                        <img src="https://picsum.photos/id/66/24/24" className="w-6 h-6 rounded-full mr-2" />
+                                        <span className="text-gray-700">小白</span>
+                                    </div>
+                                </div>
+                                <div className="text-orange-400 text-sm mt-4 cursor-pointer">查看更多</div>
+
+                                <h3 className="text-orange-500 font-medium mt-6 mb-4">微笑小贴士</h3>
+                                <div className="text-gray-600 text-sm space-y-2">
+                                    <p>微笑可以减轻压力，情绪改善是关键！</p>
+                                    <p>每天坚持3分钟正念冥想练习，有助于提升幸福感。</p>
+                                    <p>分享你的微笑，感染身边每一位朋友，传递积极能量。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t py-8 mt-16">
+                        <div className="container mx-auto px-4">
+                            <div className="grid grid-cols-4 gap-8">
+                                <div>
+                                    <h4 className="text-orange-500 font-medium mb-4">微笑打卡专属湾</h4>
+                                    <p className="text-gray-600 text-sm">每天一个微笑，记录美好瞬间吧！</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-gray-700 font-medium mb-4">快速链接</h4>
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                        <div>关于我们</div>
+                                        <div>使用条款</div>
+                                        <div>隐私政策</div>
+                                        <div>帮助中心</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-gray-700 font-medium mb-4">联系我们</h4>
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                        <div>📧 smile@example.com</div>
+                                        <div>📞 400-123-4567</div>
+                                        <div>📍 像素大厦，书香路100号</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-gray-700 font-medium mb-4">关注我们</h4>
+                                    <div className="flex space-x-2">
+                                        <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                        <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                        <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                        <div className="w-8 h-8 bg-orange-400 rounded-full"></div>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-4">©2024 微笑打卡专属湾. 保留所有权利</p>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Floating Chat Button */}
+                    <div className="fixed bottom-8 right-8 w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center cursor-pointer">
+                        <span className="text-white">💬</span>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <h3 className="text-lg font-medium text-orange-500 mb-4">编辑微笑</h3>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">微笑意义</label>
+                                    <p className="text-gray-600">今天在海边看到了奇妙的日落，心情太好了-</p>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">图片上传</label>
+                                    <img src="https://picsum.photos/id/395/200/150" className="w-full h-32 object-cover rounded border-2 border-dashed border-gray-300" />
+                                    <button className="absolute top-2 right-2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow">
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 mb-2">心情评分</label>
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-sm">心情较差</span>
+                                        <div className="flex-1 bg-blue-500 h-2 rounded"></div>
+                                        <div className="flex">
+                                            {[...Array(5)].map((_, i) => (
+                                                <span key={i} className="text-yellow-400">★</span>
+                                            ))}
+                                        </div>
+                                        <span className="text-sm">分类</span>
+                                        <select className="border border-gray-300 rounded px-2 py-1">
+                                            <option>日常</option>
+                                            <option>旅行</option>
+                                            <option>美食</option>
+                                            <option>萌宠</option>
+                                            <option>其他</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-3 justify-end">
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                                    >
+                                        保存修改
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <h3 className="text-lg font-medium text-orange-500 mb-4">添加微笑</h3>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">微笑意义</label>
+                                    <textarea 
+                                        placeholder="分享你的微笑瞬间..."
+                                        className="w-full border border-gray-300 rounded px-3 py-2 h-24 focus:outline-none focus:border-blue-500 resize-none"
+                                    ></textarea>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">图片上传</label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded p-8 text-center">
+                                        <div className="text-gray-400 mb-2">☁️</div>
+                                        <p className="text-gray-500 text-sm">点击上传图片，或者拖拽图片到此区域</p>
+                                    </div>
+                                </div>
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 mb-2">心情评分</label>
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-sm">心情较差</span>
+                                        <div className="flex-1 bg-blue-500 h-2 rounded"></div>
+                                        <div className="flex">
+                                            {[...Array(3)].map((_, i) => (
+                                                <span key={i} className="text-yellow-400">★</span>
+                                            ))}
+                                            {[...Array(2)].map((_, i) => (
+                                                <span key={i} className="text-gray-300">★</span>
+                                            ))}
+                                        </div>
+                                        <span className="text-sm">分类</span>
+                                        <select className="border border-gray-300 rounded px-2 py-1">
+                                            <option>日常</option>
+                                            <option>旅行</option>
+                                            <option>美食</option>
+                                            <option>萌宠</option>
+                                            <option>其他</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-3 justify-end">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 bg-yellow-400 text-black rounded hover:bg-yellow-500"
+                                    >
+                                        发布打卡
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

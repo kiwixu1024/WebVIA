@@ -1,0 +1,618 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游泳成绩记录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'PingFang SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [viewMode, setViewMode] = useState('table');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingIndex, setEditingIndex] = useState(null);
+            const [deletingIndex, setDeletingIndex] = useState(null);
+            const [statsData, setStatsData] = useState([
+                { day: '2024-06-01', time: '40.0', color: 'blue' },
+                { day: '2024-05-28', time: '80.0', color: 'orange' },
+                { day: '05/20/2024', time: '160', color: 'red' }
+            ]);
+
+            const [records, setRecords] = useState([
+                {
+                    name: '50米自由泳',
+                    style: '自由泳',
+                    date: '2024-06-01',
+                    time: 23.45,
+                    note: '状态良好',
+                    id: 1
+                },
+                {
+                    name: '100米蛙泳',
+                    style: '蛙泳',
+                    date: '2024-05-28',
+                    time: 65.23,
+                    note: '技术有待提高',
+                    id: 2
+                },
+                {
+                    name: '200米仰泳',
+                    style: '仰泳',
+                    date: '2024-05-20',
+                    time: 145.78,
+                    note: '个人最佳',
+                    id: 3
+                }
+            ]);
+
+            const openEditModal = (index) => {
+                setEditingIndex(index);
+                setShowEditModal(true);
+            };
+
+            const openDeleteModal = (index) => {
+                setDeletingIndex(index);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = (index) => {
+                const newRecords = [...records];
+                newRecords.splice(index, 1);
+                setRecords(newRecords);
+                setShowDeleteModal(false);
+                setDeletingIndex(null);
+            };
+
+            const confirmAdd = (record) => {
+                setRecords([...records, record]);
+                setShowAddModal(false);
+                setStatsData(prev => [{
+                    day: '2024-07-06',
+                    time: '22.13',
+                    color: 'green'
+                }, ...prev]);
+            };
+
+            const getStyleForDay = (day) => {
+                const record = records.find(r => r.date === day && 
+                    ['50米自由泳', '100米蛙泳', '200米仰泳'].includes(r.name));
+                if (record && record.style === '自由泳') return 'blue';
+                if (record && record.style === '蛙泳') return 'orange';
+                return 'red';
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <img src="https://picsum.photos/id/1043/40/40" alt="Logo" className="w-10 h-10 rounded-full" />
+                                    <div>
+                                        <h1 className="text-xl font-semibold text-blue-600">🏊 游泳成绩记录</h1>
+                                        <p className="text-sm text-gray-500">记录每一次的游泳成绩，追踪进度与技能</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">🏠 主页</button>
+                                    <button className="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium">📊 成绩管理</button>
+                                    <button className="text-gray-700 px-4 py-2 text-sm font-medium">📈 统计报表</button>
+                                    <button className="text-gray-700 px-4 py-2 text-sm font-medium">❓ 帮助说明</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto p-6">
+                        <div className="flex gap-6">
+                            {/* Left Content */}
+                            <div className="flex-1">
+                                {/* Page Title */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-semibold text-gray-900">游泳成绩记录</h2>
+                                    <div className="flex items-center space-x-3">
+                                        <button 
+                                            onClick={() => setShowAddModal(true)}
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                                        >
+                                            ➕ 添加成绩
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Records Table/List */}
+                                {viewMode === 'table' ? (
+                                    <div className="bg-white rounded-lg shadow-sm">
+                                        <div className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-gray-200">
+                                            <div>项目</div>
+                                            <div>泳姿</div>
+                                            <div>日期</div>
+                                            <div>成绩 (秒)</div>
+                                            <div>备注</div>
+                                            <div>操作</div>
+                                        </div>
+                                        {records.map((record, index) => (
+                                            <div key={record.id} className="border-b border-gray-200 last:border-b-0">
+                                                <div className="grid grid-cols-5 gap-4 items-center py-4 px-6">
+                                                    <div><strong>{record.name}</strong></div>
+                                                    <div>{record.style}</div>
+                                                    <div><strong>{record.date}</strong></div>
+                                                    <div><strong>{record.time}</strong></div>
+                                                    <div><strong>{record.note}</strong></div>
+                                                    <div>
+                                                        <button 
+                                                            onClick={() => openEditModal(index)}
+                                                            className="text-blue-600 hover:bg-blue-50 px-3 py-1 rounded text-sm"
+                                                        >
+                                                            📝 编辑
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => openDeleteModal(index)}
+                                                            className="text-red-600 hover:bg-red-50 px-3 py-1 rounded text-sm"
+                                                        >
+                                                            🗑 删除
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="bg-white rounded-lg shadow-sm space-y-4">
+                                        {records.map((record, index) => (
+                                            <div key={record.id} className="border-b border-gray-200 p-4 last:border-b-0 last:pb-0">
+                                                <h3 className="font-semibold text-gray-900 mb-2">{record.name}</h3>
+                                                <div className="grid grid-cols-4 gap-4 text-sm text-gray-600">
+                                                    <div>
+                                                        <span className="text-gray-500">泳姿</span>
+                                                        <div>{record.style}</div>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500">日期</span>
+                                                        <div>{record.date}</div>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500">成绩</span>
+                                                        <div><strong>{record.time} 秒</strong></div>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-500">备注</span>
+                                                        <div>{record.note}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex space-x-2 mt-4">
+                                                    <button 
+                                                        onClick={() => openEditModal(index)}
+                                                        className="text-blue-600 hover:bg-blue-50 px-3 py-1 rounded text-sm"
+                                                    >
+                                                        📝 编辑
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => openDeleteModal(index)}
+                                                        className="text-red-600 hover:bg-red-50 px-3 py-1 rounded text-sm"
+                                                    >
+                                                        🗑 删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Statistics Section */}
+                                <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <i className="fas fa-chart-line text-blue-600"></i>
+                                        <h3 className="font-semibold text-gray-900">数据统计</h3>
+                                    </div>
+
+                                    <div className="mb-6">
+                                        <div className="flex items-center space-x-2 mb-4">
+                                            <span className="text-gray-700">📊 本周进步提醒</span>
+                                        </div>
+                                        
+                                        <div className="mb-6">
+                                            <h4 className="font-medium text-gray-900 mb-3">游泳成绩趋势图</h4>
+                                            <div className="bg-gray-50 rounded-lg p-8 h-80 relative">
+                                                <svg width="100%" height="300" viewBox="0 0 400 300">
+                                                    <defs>
+                                                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3"/>
+                                                            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.1"/>
+                                                        </linearGradient>
+                                                        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                            <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.3"/>
+                                                            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.1"/>
+                                                        </linearGradient>
+                                                        <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                            <stop offset="0%" stopColor="#EF4444" stopOpacity="0.3"/>
+                                                            <stop offset="100%" stopColor="#EF4444" stopOpacity="0.1"/>
+                                                        </linearGradient>
+                                                    </defs>
+                                                    
+                                                    {/* 自由泳折线 */}
+                                                    <polyline
+                                                        id="freestyleLine"
+                                                        points="80,180 200,120 320,100"
+                                                        stroke="#3B82F6"
+                                                        strokeWidth="3"
+                                                        fill="none"
+                                                    />
+                                                    
+                                                    {/* 蛙泳折线 */}
+                                                    <polyline
+                                                        points="80,120 200,90 320,70"
+                                                        stroke="#F59E0B"
+                                                        strokeWidth="3"
+                                                        fill="none"
+                                                    />
+                                                    
+                                                    {/* 仰泳折线 */}
+                                                    <polyline
+                                                        points="80,80 200,60 320,40"
+                                                        stroke="#EF4444"
+                                                        strokeWidth="3"
+                                                        fill="none"
+                                                    />
+                                                    
+                                                    {/* 最近一项 */}
+                                                    <circle cx="380" cy="200" r="4" fill="#3B82F6"/>
+                                                    <text x="385" y="188" fill="#3B82F6" fontSize="10" textAnchor="middle">2024-06-01</text>
+                                                    
+                                                    {/* 标签 */}
+                                                    <text x="120" y="290" fill="#6B7280" fontSize="10" textAnchor="middle">2024-05-20</text>
+                                                    <text x="285" y="290" fill="#6B7280" fontSize="10" textAnchor="middle">2024-05-28</text>
+                                                    <text x="445" y="290" fill="#6B7280" fontSize="10" textAnchor="middle">2024-06-01</text>
+                                                    
+                                                    {/* 时间轴 */}
+                                                    <defs>
+                                                        <pattern id="timeGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                                                            <path d="M 5 5 L 5 15" stroke="#e5e7eb" strokeWidth="1" fill="none"/>
+                                                        </pattern>
+                                                    </defs>
+                                                    
+                                                    <rect x="-1" y="-1" width="402" height="298" fill="url(#timeGrid"/>
+                                                    
+                                                    {/* Y轴时间标签 */}
+                                                    <text x="-10" y="250" fill="#6B7280" fontSize="10" textAnchor="middle">160</text>
+                                                    <text x="-10" y="200" fill="#6B7280" fontSize="10" textAnchor="middle">140</text>
+                                                    <text x="-10" y="150" fill="#6B7280" fontSize="10" textAnchor="middle">120</text>
+                                                    <text x="-10" y="100" fill="#6B7280" fontSize="10" textAnchor="middle">100</text>
+                                                    <text x="-10" y="50" fill="#6B7280" fontSize="10" textAnchor="middle">80</text>
+                                                    <text x="-10" y="0" fill="#6B7280" fontSize="10" textAnchor="middle">0</text>
+                                                    
+                                                    {/* X轴时间标签 */}
+                                                    <text x="100" y="295" fill="#6B7280" fontSize="10" textAnchor="middle">2024-05-20</text>
+                                                    <text x="265" y="295" fill="#6B7280" fontSize="10" textAnchor="middle">2024-05-28</text>
+                                                    <text x="435" y="295" fill="#6B7280" fontSize="10" textAnchor="middle">2024-06-01</text>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-center">
+                                        <span className="text-gray-600">🏃 保持节奏，勇往直前！</span>
+                                    </div>
+                                </div>
+
+                                {/* Training Tips */}
+                                <div className="mt-8 grid grid-cols-2 gap-6">
+                                    <div className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <i className="fas fa-lightbulb text-yellow-500"></i>
+                                            <h3 className="font-semibold text-gray-900">各泳姿最佳成绩对比提示</h3>
+                                        </div>
+                                        <p className="text-gray-600 mb-4">自由泳视觉化展示三者历年数据分布情况，优化运动效率。</p>
+                                        <div className="mb-4">
+                                            <p className="font-medium text-gray-900 mb-2">各泳姿训练分布</p>
+                                            <div className="flex items-center gap-1 mb-2">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                <span className="text-sm text-gray-700">自由泳 46%</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 mb-2">
+                                                <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                <span className="text-sm text-gray-700">蛙泳 36%</span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                                <span className="text-sm text-gray-700">仰泳 19%</span>
+                                            </div>
+                                        </div>
+                                        <img src="https://picsum.photos/id/1041/400/200" alt="Training break-even" className="w-full h-40 object-cover rounded-lg" />
+                                    </div>
+
+                                    <div className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <i className="fas fa-clipboard-list text-blue-600"></i>
+                                            <h3 className="font-semibold text-gray-900">训练小贴士</h3>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <h4 className="font-medium text-gray-900 mb-2">自由泳技巧</h4>
+                                            <p className="text-sm text-gray-600">身体保持流线型体态，减少水的阻力</p>
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <h4 className="font-medium text-gray-900 mb-2">蛙泳呼吸</h4>
+                                            <p className="text-sm text-gray-600">规律呼吸，避免体力过早消耗</p>
+                                        </div>
+
+                                        <div className="bg-blue-50 rounded-lg p-3 mt-4">
+                                            <h4 className="text-blue-800 font-medium mb-2 flex items-center">
+                                                <i className="fas fa-info-circle mr-2"></i>
+                                                今日小贴士
+                                            </h4>
+                                            <ul className="text-sm text-blue-700 space-y-1">
+                                                <li className="flex items-center text-blue-600">
+                                                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                                                    提高游泳效率的三个关键点：
+                                                </li>
+                                                <li className="flex items-start text-blue-600">• 保持流线型体态，减少水的阻力</li>
+                                                <li className="flex items-start text-blue-600">• 规律呼吸，避免体力过早消耗</li>
+                                                <li className="flex items-start text-blue-600">• 控制节奏，找到最适合自己的配速</li>
+                                            </ul>
+                                            <img src="https://picsum.photos/id/1015/200/150" alt="Training schedule" className="w-full h-32 object-cover rounded-lg mt-3" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sidebar */}
+                            <div className="w-80 space-y-6">
+                                {/* Personal Info Widget */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <i className="fas fa-user text-blue-600"></i>
+                                        <h3 className="font-semibold text-gray-900">个人信息</h3>
+                                    </div>
+                                    <div className="space-y-3 text-sm text-gray-600">
+                                        <p>练成三（20岁，女）</p>
+                                        <p>训练次数: 7次</p>
+                                        <p>最佳成绩: 22.35秒</p>
+                                        <p>持续目标: 赛事</p>
+                                    </div>
+                                </div>
+
+                                {/* Stroke Settings */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-3">泳姿设置</h3>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                                    >
+                                        Modal icon
+                                    </button>
+                                </div>
+
+                                {/* Historical Records */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-3">历史记录</h3>
+                                    <ul className="text-sm text-gray-600 space-y-2">
+                                        <li>自由泳: 2024-06-01</li>
+                                        <li>蛙泳: 2024-05-28</li>
+                                        <li>仰泳: 2024-05-20</li>
+                                    </ul>
+                                </div>
+
+                                {/* System Settings */}
+                                <div className="bg-white rounded-lg shadow-sm p-4">
+                                    <h3 className="font-semibold text-gray-900 mb-3">系统设置</h3>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                            <i className="fas fa-cog text-gray-500"></i>
+                                            <span className="text-sm text-gray-700">数据同步设置</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                            <i className="fas fa-history text-gray-500"></i>
+                                            <span className="text-sm text-gray-700">训练进度查看</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                            <i className="fas fa-chart-pie text-gray-500"></i>
+                                            <span className="text-sm text-gray-700">分析查看</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Help Info */}
+                                <div className="bg-blue-600 text-white rounded-lg p-4">
+                                    <h3 className="font-semibold mb-2">🔄 游泳成绩管理助手</h3>
+                                    <p className="text-sm mb-3">记录并追踪您的游泳训练成绩，分析进步趋势，提升竞技水平。</p>
+                                    <ul className="text-xs space-y-1">
+                                        <li className="flex items-start">
+                                            <i className="fas fa-chart-line mr-2"></i>
+                                            实时追踪：记录每次训练成绩，查看进步曲线。
+                                        </li>
+                                        <li className="flex items-start">
+                                            <i className="fas fa-calculator mr-2"></i>
+                                            数据分析：自动生统计图表，发现训练规律。
+                                        </li>
+                                        <li className="flex items-start">
+                                            <i className="fas fa-target mr-2"></i>
+                                            目标管理：设定目标，激励自己不断前进。
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add/Edit/Delete Modals */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                        {editingIndex !== null ? '编辑游泳成绩' : '添加游泳成绩'}
+                                    </h3>
+                                    <button 
+                                        onClick={() => {
+                                            setShowAddModal(false);
+                                            setEditingIndex(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            项目名称 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="例如：50米自由泳"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            泳姿选择 <span className="text-red-500">*</span>
+                                        </label>
+                                        <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <option>自由泳</option>
+                                            <option>蛙泳</option>
+                                            <option>仰泳</option>
+                                            <option>蝶泳</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                        <input 
+                                            type="date"
+                                            defaultValue="09/23/2025"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            成绩 <span className="text-red-500">*</span> 
+                                        </label>
+                                        <input 
+                                            type="text"
+                                            placeholder="例如：23.45"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                                        <textarea 
+                                            placeholder="添加备注..."
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => {
+                                            setShowAddModal(false);
+                                            setEditingIndex(null);
+                                        }}
+                                        className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                                    >
+                                        取消
+                                    </button>
+                                    {editingIndex !== null ? (
+                                        <button 
+                                            onClick={() => {
+                                                confirmAdd({
+                                                    name: '50米自由泳',
+                                                    style: '自由泳',
+                                                    date: '2024-06-01',
+                                                    time: 23.45,
+                                                    note: '状态良好'
+                                                });
+                                                setShowAddModal(false);
+                                            }}
+                                            className="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-yellow-700"
+                                        >
+                                            保存更改
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={() => confirmAdd({
+                                                name: '50米自由泳',
+                                                style: '自由泳',
+                                                date: '2024-06-01',
+                                                time: 23.45,
+                                                note: '状态良好'
+                                            })}
+                                            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700"
+                                        >
+                                            确认添加
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">确认删除</h3>
+                                    <button 
+                                        onClick={() => {
+                                            setShowDeleteModal(false);
+                                            setDeletingIndex(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <p className="mb-6 text-gray-700">
+                                    您确定要删除 <strong>50米自由泳 (2024-06-01)</strong> 的记录吗？此操作无法撤销。
+                                </p>
+
+                                <div className="flex space-x-3">
+                                    <button 
+                                        onClick={() => {
+                                            setShowDeleteModal(false);
+                                            setDeletingIndex(null);
+                                        }}
+                                        className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => confirmDelete(deletingIndex)}
+                                        className="flex-1 bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

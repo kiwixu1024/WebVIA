@@ -1,0 +1,270 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>青少年运动成就</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const initialData = [
+        {
+          id: 1,
+          title: "游泳比赛金牌",
+          date: "2023-06-15",
+          image: "https://picsum.photos/id/1003/300/200",
+          desc: "在市青少年游泳比赛中荣获50米自由泳金牌",
+          category: "游泳"
+        },
+        {
+          id: 2,
+          title: "篮球联赛最佳射手",
+          date: "2023-04-22",
+          image: "https://picsum.photos/id/1025/300/200",
+          desc: "在学校篮球联赛中荣获年度最佳射手称号，场均得分25.5分",
+          category: "篮球"
+        },
+        {
+          id: 3,
+          title: "校园马拉松完赛",
+          date: "2023-05-10",
+          image: "https://picsum.photos/id/1059/300/200",
+          desc: "成功完成10公里校园马拉松，用时55分钟",
+          category: "跑步"
+        }
+      ];
+      const [items, setItems] = useState(initialData);
+      const [showModal, setShowModal] = useState(false);
+      const [form, setForm] = useState({ title:"", date:"", image:"", desc:"", category:"其他" });
+      const [mode, setMode] = useState("add"); // add or edit
+      const [editId, setEditId] = useState(null);
+
+      // statistics
+      const stats = items.reduce((acc, it) => {
+        acc[it.category] = (acc[it.category] || 0) + 1;
+        return acc;
+      }, {});
+      const totalCount = items.length;
+      const totalTypes = Object.keys(stats).length;
+
+      function openAdd() {
+        setMode("add");
+        setForm({ title:"", date:"", image:"", desc:"", category:"其他" });
+        setShowModal(true);
+      }
+      function openEdit(item) {
+        setMode("edit");
+        setEditId(item.id);
+        setForm({ title:item.title, date:item.date, image:item.image, desc:item.desc, category:item.category });
+        setShowModal(true);
+      }
+      function handleSave() {
+        if (mode==="add") {
+          const newItem = {
+            id: Date.now(),
+            title: form.title,
+            date: form.date,
+            image: form.image,
+            desc: form.desc,
+            category: form.category
+          };
+          setItems([...items, newItem]);
+        } else if (mode==="edit") {
+          setItems(items.map(it=>it.id===editId?{...it,title:form.title,date:form.date,image:form.image,desc:form.desc,category:form.category}:it));
+        }
+        setShowModal(false);
+      }
+      function handleDelete(id) {
+        setItems(items.filter(it=>it.id!==id));
+      }
+
+      return (
+        <div className="min-h-screen">
+          {/* header */}
+          <header className="bg-gradient-to-r from-orange-600 to-blue-400 py-6 px-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-white text-2xl font-bold">青少年运动成就</h1>
+              <p className="text-white text-sm mt-1">记录青春的每一次突破</p>
+            </div>
+            <div>
+              <img src="https://picsum.photos/id/1066/300/150" alt="" className="rounded shadow-md"/>
+            </div>
+          </header>
+
+          {/* why section */}
+          <section className="px-8 py-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-orange-600 font-semibold mb-4">为何记录运动成就？</h2>
+              <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm leading-relaxed">
+                <p>身心健康的奠基——定期运动可以提升青少年的心肺功能，增强肌肉力量，帮助骨骼发育，同时缓解压力，提升自信心和社交能力。</p>
+                <p>激励进步的动力——每一次成就记录都是对过去努力的认可，也是对未来挑战的动力。</p>
+                <p>养成习惯的关键——通过记录和跟踪成就，可以让运动变成一种习惯，建立长期健康的生活方式。</p>
+                <p>成长历程的见证——运动记录将承载了青少年成长的珍贵回忆，见证着每一次突破与成长。</p>
+              </div>
+            </div>
+          </section>
+
+          {/* main layout */}
+          <div className="px-8 pb-8 grid grid-cols-12 gap-6">
+            {/* sidebar */}
+            <aside className="col-span-2 bg-white rounded-lg shadow p-4">
+              <div className="flex flex-col items-center mb-6">
+                <img src="https://picsum.photos/id/1005/80/80" alt="avatar" className="rounded-full mb-3"/>
+                <p className="font-semibold">青春运动记录</p>
+              </div>
+              <nav className="space-y-2">
+                <a href="#" className="flex items-center text-white bg-blue-400 px-3 py-2 rounded">
+                  <i className="fas fa-home mr-2"></i> 首页
+                </a>
+                <a href="#" className="flex items-center text-gray-600 hover:text-blue-500 px-3 py-2 rounded">
+                  <i className="fas fa-trophy mr-2"></i> 我的成就
+                </a>
+                <a href="#" className="flex items-center text-gray-600 hover:text-blue-500 px-3 py-2 rounded">
+                  <i className="fas fa-chart-line mr-2"></i> 统计分析
+                </a>
+                <a href="#" className="flex items-center text-gray-600 hover:text-blue-500 px-3 py-2 rounded">
+                  <i className="fas fa-question-circle mr-2"></i> 帮助说明
+                </a>
+              </nav>
+            </aside>
+
+            {/* achievements */}
+            <main className="col-span-7">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-gray-800 text-xl font-semibold">我的成就记录</h2>
+                <button onClick={openAdd} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded flex items-center">
+                  <i className="fas fa-plus mr-2"></i> 添加成就
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {items.map(item=>(
+                  <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden relative">
+                    <img src={item.image} alt={item.title} className="w-full h-40 object-cover"/>
+                    <button onClick={()=>openEdit(item)} className="absolute top-2 right-2 bg-white rounded-full p-1 text-gray-600 hover:text-orange-500">
+                      <i className="fas fa-pencil-alt"></i>
+                    </button>
+                    <div className="p-4">
+                      <h3 className="text-orange-600 font-semibold mb-1">{item.title}</h3>
+                      <p className="text-gray-500 text-sm mb-2">{item.date}</p>
+                      {item.desc && <p className="text-gray-600 text-sm mb-3">{item.desc}</p>}
+                      <button onClick={()=>handleDelete(item.id)} className="text-red-500 text-sm hover:underline">删除</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-gray-500 italic mt-6">“每一次突破，都是青春的助燃” 记录成长，见证未来</p>
+            </main>
+
+            {/* right stats and help */}
+            <aside className="col-span-3 space-y-6">
+              {/* stats */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="font-semibold mb-3">成就统计</h3>
+                <div className="mb-4">
+                  <p className="text-gray-600 text-sm mb-2">项目分布</p>
+                  {Object.entries(stats).map(([cat, cnt])=>(
+                    <div key={cat} className="flex items-center mb-2">
+                      <span className="w-16 text-xs">{cat}</span>
+                      <div className="flex-1 h-2 bg-blue-200 rounded mr-2">
+                        <div className="h-2 bg-blue-500 rounded" style={{width: `${(cnt/totalCount)*100}%`}}></div>
+                      </div>
+                      <span className="text-xs text-gray-600">{cnt}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-gray-50 rounded p-3 text-center mb-3">
+                  <span className="block text-blue-600 text-2xl font-bold">{totalCount}</span>
+                  <span className="text-gray-600 text-sm">总成就数</span>
+                  <span className="block text-orange-600 text-2xl font-bold mt-2">{totalTypes}</span>
+                  <span className="text-gray-600 text-sm">运动种类</span>
+                </div>
+                <button className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded flex items-center justify-center">
+                  <i className="fas fa-download mr-2"></i> 导出统计
+                </button>
+              </div>
+              {/* help */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="font-semibold mb-3">使用帮助</h3>
+                <ul className="text-gray-600 text-sm space-y-2">
+                  <li><i className="fas fa-circle text-xs mr-2"></i>点击“添加成就”新增记录</li>
+                  <li><i className="fas fa-circle text-xs mr-2"></i>在卡片上点击“编辑”可修改内容</li>
+                  <li><i className="fas fa-circle text-xs mr-2"></i>点击“删除”按钮移除无效记录</li>
+                  <li><i className="fas fa-circle text-xs mr-2"></i>图表可导出为CSV数据</li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+
+          {/* modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-96 p-6 relative shadow-lg">
+                <h3 className="text-lg font-semibold mb-4">{mode==="add"? "添加新成就":"编辑成就"}</h3>
+                <button onClick={()=>setShowModal(false)} className="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+                  <i className="fas fa-times"></i>
+                </button>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm mb-1">项目名称</label>
+                    <input 
+                      type="text" 
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm" 
+                      placeholder="例如：100米短跑比赛"
+                      value={form.title}
+                      onChange={e=>setForm({...form, title:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">达成日期</label>
+                    <input 
+                      type="date" 
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                      value={form.date}
+                      onChange={e=>setForm({...form, date:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">照片 URL</label>
+                    <input 
+                      type="text" 
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm" 
+                      placeholder="填写网络图片地址或使用 Picsum"
+                      value={form.image}
+                      onChange={e=>setForm({...form, image:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">详细描述</label>
+                    <textarea 
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm h-20 resize-none" 
+                      placeholder="描述你的成就细节..."
+                      value={form.desc}
+                      onChange={e=>setForm({...form, desc:e.target.value})}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button onClick={()=>setShowModal(false)} className="px-4 py-2 mr-3 bg-gray-200 hover:bg-gray-300 rounded text-gray-700">取消</button>
+                  <button onClick={handleSave} className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded">
+                    {mode==="add"?"保存成就":"保存修改"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

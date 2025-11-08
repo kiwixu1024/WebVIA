@@ -1,0 +1,653 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>家庭愿望清单</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FFF8E7;
+            margin: 0;
+            padding: 0;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [wishes, setWishes] = useState([
+                {
+                    id: 1,
+                    title: "家庭电影之夜",
+                    date: "2023年09月21日",
+                    description: "每人选一部最爱的电影，准备爆米花和饮料，学友家看电影时光",
+                    priority: "低",
+                    completed: true,
+                },
+                {
+                    id: 2,
+                    title: "家庭周末野餐",
+                    date: "2023年09月23日",
+                    description: "带上野餐垫和家庭最爱的食物，去城市公园野餐",
+                    priority: "高",
+                    completed: false,
+                },
+                {
+                    id: 3,
+                    title: "孩子生日派对",
+                    date: "2023年10月14日",
+                    description: "为孩子准备一个主题派对，准备他的好朋友们参加",
+                    priority: "中",
+                    completed: false,
+                },
+            ]);
+
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [currentWish, setCurrentWish] = useState(null);
+            const [searchTerm, setSearchTerm] = useState("");
+            const [filterCompleted, setFilterCompleted] = useState("全部显示");
+            const [sortByPriority, setSortByPriority] = useState(false);
+            
+            const handleAddWish = () => {
+                setShowAddModal(true);
+            };
+            
+            const handleEditWish = (wish) => {
+                setCurrentWish(wish);
+                setShowEditModal(true);
+            };
+            
+            const handleSearch = (term) => {
+                setSearchTerm(term);
+            };
+            
+            const handleFilterChange = (filter) => {
+                setFilterCompleted(filter);
+            };
+            
+            const handleSortByPriority = () => {
+                setSortByPriority(!sortByPriority);
+            };
+
+            const filteredWishes = wishes.filter(wish => {
+                // 搜索过滤
+                const searchMatch = wish.title.toLowerCase().includes(searchTerm.toLowerCase());
+                
+                // 完成状态过滤
+                let statusMatch = true;
+                if (filterCompleted === "已完成") {
+                    statusMatch = wish.completed;
+                } else if (filterCompleted === "未完成") {
+                    statusMatch = !wish.completed;
+                }
+                
+                return searchMatch && statusMatch;
+            });
+
+            const sortedWishes = [...filteredWishes].sort((a, b) => {
+                if (sortByPriority) {
+                    const priorityOrder = { "高": 1, "中": 2, "低": 3 };
+                    return priorityOrder[a.priority] - priorityOrder[b.priority];
+                }
+                return 0;
+            });
+
+            const completedCount = wishes.filter(wish => wish.completed).length;
+            const completionRate = wishes.length > 0 ? Math.round((completedCount / wishes.length) * 100) : 0;
+            const todayWishesCount = 0; // 今日到期
+            
+            return (
+                <div className="min-h-screen">
+                    {/* 顶部导航栏 */}
+                    <header className="bg-yellow-400 p-4 flex justify-between items-center">
+                        <div className="flex items-center">
+                            <i className="fas fa-home text-white mr-2"></i>
+                            <span className="text-white font-bold">家庭愿望清单</span>
+                        </div>
+                        <button 
+                            onClick={handleAddWish}
+                            className="bg-white text-yellow-400 px-3 py-1 rounded-md flex items-center"
+                        >
+                            <span className="mr-1">+</span>
+                            <span>添加愿望</span>
+                        </button>
+                    </header>
+                    
+                    {/* 主内容区 */}
+                    <div className="flex p-4 gap-4">
+                        {/* 左侧栏 */}
+                        <div className="w-1/5 bg-white rounded-md p-4 shadow-sm">
+                            <div className="mb-4">
+                                <div className="flex items-center mb-2 text-gray-500">
+                                    <i className="fas fa-list mr-2"></i>
+                                    <span>菜单</span>
+                                </div>
+                                <hr className="my-2" />
+                                
+                                <div className="py-2 flex items-center text-yellow-500">
+                                    <i className="fas fa-star mr-2"></i>
+                                    <span>所有愿望</span>
+                                </div>
+                                
+                                <div className="py-2 flex items-center text-blue-400">
+                                    <i className="far fa-calendar mr-2"></i>
+                                    <span>今日到期</span>
+                                </div>
+                                
+                                <div className="py-2 flex items-center text-green-500">
+                                    <i className="fas fa-check-circle mr-2"></i>
+                                    <span>已完成愿望</span>
+                                </div>
+                                
+                                <div className="py-2 flex items-center text-red-500">
+                                    <i className="fas fa-exclamation-circle mr-2"></i>
+                                    <span>紧急愿望</span>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-6 bg-yellow-50 p-3 rounded-md">
+                                <div className="flex items-center text-yellow-700 mb-2">
+                                    <i className="fas fa-lightbulb mr-2"></i>
+                                    <span className="font-bold">小贴士</span>
+                                </div>
+                                <p className="text-xs text-gray-600">
+                                    定期更新你的愿望清单，让家庭生活充满惊喜和期待！
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {/* 中间主内容区 */}
+                        <div className="w-3/5 flex flex-col">
+                            <h1 className="text-2xl font-bold text-center my-4">家庭愿望清单</h1>
+                            
+                            {/* 搜索和过滤 */}
+                            <div className="flex mb-4 gap-2">
+                                <div className="flex-grow relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i className="fas fa-search text-gray-400"></i>
+                                    </div>
+                                    <input 
+                                        type="text"
+                                        placeholder="搜索愿望..."
+                                        className="w-full pl-10 pr-4 py-2 border rounded-md"
+                                        value={searchTerm}
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                    />
+                                </div>
+                                
+                                <div className="relative">
+                                    <select 
+                                        value={filterCompleted}
+                                        onChange={(e) => handleFilterChange(e.target.value)}
+                                        className="appearance-none bg-white border rounded-md px-4 py-2 pr-8"
+                                    >
+                                        <option>全部显示</option>
+                                        <option>已完成</option>
+                                        <option>未完成</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                        <i className="fas fa-chevron-down text-gray-400"></i>
+                                    </div>
+                                </div>
+                                
+                                <button 
+                                    className={`px-4 py-2 rounded-md ${sortByPriority ? "bg-yellow-400 text-white" : "bg-blue-100 text-blue-500"}`}
+                                    onClick={handleSortByPriority}
+                                >
+                                    <i className="fas fa-filter mr-1"></i>
+                                    <span>优先级</span>
+                                </button>
+                            </div>
+                            
+                            {/* 愿望列表 */}
+                            <div className="space-y-4">
+                                {sortedWishes.map(wish => (
+                                    <div key={wish.id} className="bg-white p-4 rounded-md shadow-sm">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h3 className="font-medium">{wish.title}</h3>
+                                                <div className="flex items-center text-sm text-gray-500">
+                                                    <i className="far fa-calendar-alt mr-1"></i>
+                                                    <span>截止日期: {wish.date}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex">
+                                                <button 
+                                                    className="text-blue-400 px-2 py-1"
+                                                    onClick={() => handleEditWish(wish)}
+                                                >
+                                                    <i className="fas fa-pen mr-1"></i>
+                                                    <span>编辑</span>
+                                                </button>
+                                                <button className="text-red-400 px-2 py-1">
+                                                    <i className="fas fa-trash-alt mr-1"></i>
+                                                    <span>删除</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <p className="text-sm my-2">{wish.description}</p>
+                                        
+                                        <div className="flex justify-between items-center mt-4">
+                                            <div className="flex items-center">
+                                                <span className="text-xs mr-2">优先级: </span>
+                                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                                    wish.priority === "高" ? "bg-red-100 text-red-600" :
+                                                    wish.priority === "中" ? "bg-yellow-100 text-yellow-600" :
+                                                    "bg-green-100 text-green-600"
+                                                }`}>
+                                                    {wish.priority}
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex items-center">
+                                                <span className="text-xs mr-2">状态: </span>
+                                                <label className="toggle-switch">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={wish.completed}
+                                                        onChange={() => {
+                                                            const updatedWishes = wishes.map(w => 
+                                                                w.id === wish.id ? {...w, completed: !w.completed} : w
+                                                            );
+                                                            setWishes(updatedWishes);
+                                                        }}
+                                                    />
+                                                    <span className="toggle-slider"></span>
+                                                </label>
+                                                <span className="text-xs ml-2">{wish.completed ? "已完成" : "未完成"}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            {/* 底部使用指南 */}
+                            <div className="mt-8 bg-white p-4 rounded-md shadow-sm">
+                                <div className="flex items-center mb-3 text-blue-500">
+                                    <i className="fas fa-info-circle mr-2"></i>
+                                    <span className="font-medium">如何使用家庭愿望清单</span>
+                                </div>
+                                
+                                <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                    <li>点击"添加愿望"按钮，填写愿望标题、截止日期和其他信息</li>
+                                    <li>点击卡片右上角的"编辑"按钮编辑愿望详情</li>
+                                    <li>点击"删除"按钮可以移除不需要的愿望</li>
+                                    <li>通过搜索和排序功能快速查找特定愿望</li>
+                                    <li>使用开关切换愿望的完成状态</li>
+                                </ol>
+                                
+                                <div className="flex justify-between items-center mt-4 text-xs text-gray-500">
+                                    <span>家庭愿望清单 v1.0</span>
+                                    <span>联系我们: family@wishlist.example.com</span>
+                                </div>
+                                
+                                <div className="mt-4 p-3 bg-yellow-50 rounded-md border-l-4 border-yellow-400">
+                                    <div className="flex items-center mb-1 text-yellow-700">
+                                        <i className="fas fa-exclamation-triangle mr-2"></i>
+                                        <span className="font-medium">温馨提示</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600">
+                                        和家人一起制定愿望清单，让每一个家庭时刻充满期待与仪式感！记录下你们想要一起完成的事情，创造美好记忆。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* 右侧统计区 */}
+                        <div className="w-1/5 bg-white rounded-md p-4 shadow-sm">
+                            <div className="flex items-center mb-4 text-blue-400">
+                                <i className="fas fa-chart-pie mr-2"></i>
+                                <span className="font-medium">愿望统计</span>
+                            </div>
+                            
+                            <div className="flex justify-center mb-4">
+                                <div className="relative" style={{width: '120px', height: '120px'}}>
+                                    <svg className="progress-ring" viewBox="0 0 120 120">
+                                        <circle 
+                                            cx="60" cy="60" r="54" 
+                                            fill="none" 
+                                            stroke="#FFD699" 
+                                            strokeWidth="12"
+                                        />
+                                        <circle 
+                                            cx="60" cy="60" r="54" 
+                                            fill="none" 
+                                            stroke="#8FDA9D" 
+                                            strokeWidth="12"
+                                            strokeDasharray="339.3"
+                                            strokeDashoffset={339.3 * (1 - completionRate / 100)}
+                                            transform="rotate(-90 60 60)"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-center mb-4">
+                                <div className="flex items-center">
+                                    <div className="w-3 h-3 bg-green-300 rounded-full mr-1"></div>
+                                    <span className="text-xs mr-4">已完成</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-3 h-3 bg-yellow-300 rounded-full mr-1"></div>
+                                    <span className="text-xs">未完成</span>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-yellow-50 p-3 rounded-md mb-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">愿望总数</span>
+                                    <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                                        <span className="font-bold text-yellow-700">{wishes.length}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-blue-50 p-3 rounded-md mb-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">今日到期</span>
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span className="font-bold text-blue-700">{todayWishesCount}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-green-50 p-3 rounded-md">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">完成率</span>
+                                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                        <span className="font-bold text-green-700">{completionRate}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-6">
+                                <div className="flex items-center mb-2 text-purple-500">
+                                    <i className="fas fa-bolt mr-2"></i>
+                                    <span className="font-medium">快捷操作</span>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                    <button 
+                                        className="w-full py-2 bg-green-100 text-green-600 rounded-md flex items-center justify-center"
+                                        onClick={handleAddWish}
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>
+                                        <span>添加新愿望</span>
+                                    </button>
+                                    
+                                    <button className="w-full py-2 bg-blue-100 text-blue-600 rounded-md flex items-center justify-center">
+                                        <i className="fas fa-print mr-2"></i>
+                                        <span>打印清单</span>
+                                    </button>
+                                    
+                                    <button className="w-full py-2 bg-yellow-100 text-yellow-600 rounded-md flex items-center justify-center">
+                                        <i className="fas fa-share-alt mr-2"></i>
+                                        <span>分享清单</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* 添加愿望模态框 */}
+                    {showAddModal && (
+                        <div className="modal-overlay">
+                            <div className="bg-white rounded-md w-1/3 p-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center text-yellow-500">
+                                        <i className="fas fa-plus-circle mr-2"></i>
+                                        <span className="font-medium">添加愿望</span>
+                                    </div>
+                                    <button onClick={() => setShowAddModal(false)}>
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block mb-1 text-sm">
+                                            愿望标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入愿望标题" 
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">
+                                            截止日期
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">优先级</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center">
+                                                <input type="radio" name="priority" value="高" className="mr-1" />
+                                                <span>高</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input type="radio" name="priority" value="中" className="mr-1" checked />
+                                                <span>中</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input type="radio" name="priority" value="低" className="mr-1" />
+                                                <span>低</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">备注</label>
+                                        <textarea 
+                                            placeholder="添加愿望详细..." 
+                                            className="w-full p-2 border rounded-md"
+                                            rows="4"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="flex justify-end gap-2">
+                                        <button 
+                                            type="button" 
+                                            className="px-4 py-2 border rounded-md"
+                                            onClick={() => setShowAddModal(false)}
+                                        >
+                                            取消添加
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="px-4 py-2 bg-yellow-400 text-white rounded-md"
+                                            onClick={() => setShowAddModal(false)}
+                                        >
+                                            添加愿望
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* 编辑愿望模态框 */}
+                    {showEditModal && currentWish && (
+                        <div className="modal-overlay">
+                            <div className="bg-white rounded-md w-1/3 p-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center text-blue-500">
+                                        <i className="fas fa-edit mr-2"></i>
+                                        <span className="font-medium">编辑愿望</span>
+                                    </div>
+                                    <button onClick={() => setShowEditModal(false)}>
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block mb-1 text-sm">
+                                            愿望标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            defaultValue={currentWish.title}
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">
+                                            截止日期
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            defaultValue={currentWish.date.split('年')[0] + "-" + 
+                                                         currentWish.date.split('年')[1].split('月')[0].padStart(2, '0') + "-" + 
+                                                         currentWish.date.split('月')[1].split('日')[0].padStart(2, '0')}
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">优先级</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="priority" 
+                                                    value="高" 
+                                                    className="mr-1" 
+                                                    defaultChecked={currentWish.priority === "高"}
+                                                />
+                                                <span>高</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="priority" 
+                                                    value="中" 
+                                                    className="mr-1" 
+                                                    defaultChecked={currentWish.priority === "中"}
+                                                />
+                                                <span>中</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input 
+                                                    type="radio" 
+                                                    name="priority" 
+                                                    value="低" 
+                                                    className="mr-1" 
+                                                    defaultChecked={currentWish.priority === "低"}
+                                                />
+                                                <span>低</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block mb-1 text-sm">备注</label>
+                                        <textarea 
+                                            defaultValue={currentWish.description}
+                                            className="w-full p-2 border rounded-md"
+                                            rows="4"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="flex justify-end gap-2">
+                                        <button 
+                                            type="button" 
+                                            className="px-4 py-2 border rounded-md"
+                                            onClick={() => setShowEditModal(false)}
+                                        >
+                                            取消编辑
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="px-4 py-2 bg-blue-400 text-white rounded-md"
+                                            onClick={() => setShowEditModal(false)}
+                                        >
+                                            保存修改
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

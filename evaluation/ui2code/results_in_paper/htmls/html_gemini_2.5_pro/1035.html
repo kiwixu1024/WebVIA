@@ -1,0 +1,365 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨读书感悟打卡圈</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-[#F5F3EC]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialCardsData = [
+            {
+                id: 1,
+                title: '百年孤独',
+                date: '2023-03-15',
+                content: '爱与孤独交织，时间如环，故事永不褪色。',
+                tags: ['#孤独', '#魔幻现实'],
+                author: '悠然读者',
+                likes: 15,
+                comments: 5,
+                mood: '喜欢'
+            },
+            {
+                id: 2,
+                title: '围城',
+                date: '2023-04-02',
+                content: '婚姻像城，城外的人想冲进去，城里的人想逃出来。',
+                tags: ['#婚姻', '#人生'],
+                author: '思考者',
+                likes: 12,
+                comments: 3,
+                mood: '一般'
+            },
+            {
+                id: 3,
+                title: '活着',
+                date: '2023-04-10',
+                content: '苦难与希望同在，活着本身就是胜利。',
+                tags: ['#坚强', '#逆境'],
+                author: '生活家',
+                likes: 24,
+                comments: 8,
+                mood: '喜欢'
+            }
+        ];
+
+        const Card = ({ card, onEdit, onDelete, onLike }) => {
+            return (
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-semibold text-gray-800">{card.title}</h3>
+                        <div className="flex items-center text-gray-400 space-x-4">
+                            <i className="far fa-calendar-alt"></i>
+                            <span className="text-sm text-gray-500">{card.date}</span>
+                            <button onClick={() => onEdit(card)} className="hover:text-blue-500"><i className="fas fa-pencil-alt"></i></button>
+                            <button onClick={() => onDelete(card.id)} className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    <p className="text-gray-600 mb-4">{card.content}</p>
+                    <div className="flex space-x-2 mb-4">
+                        {card.tags.map(tag => (
+                            <span key={tag} className="bg-blue-100 text-blue-600 text-xs font-medium px-2.5 py-1 rounded-full">{tag}</span>
+                        ))}
+                    </div>
+                    <div className="flex justify-between items-center text-gray-500">
+                        <span>{card.author}</span>
+                        <div className="flex items-center space-x-4">
+                            <button onClick={() => onLike(card.id)} className="flex items-center space-x-1 hover:text-red-500">
+                                <i className="far fa-heart"></i>
+                                <span>{card.likes}</span>
+                            </button>
+                            <div className="flex items-center space-x-1">
+                                <i className="far fa-comment"></i>
+                                <span>{card.comments}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DeleteModal = ({ isOpen, onClose, onConfirm }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md text-center">
+                        <h2 className="text-xl font-bold mb-4">确认删除</h2>
+                        <p className="text-gray-600 mb-6">确定要删除这条打卡吗？此操作不可撤销。</p>
+                        <div className="flex justify-center space-x-4">
+                            <button onClick={onClose} className="px-6 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300">取消</button>
+                            <button onClick={onConfirm} className="px-6 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">确定删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const CardFormModal = ({ isOpen, onClose, onSave, cardData }) => {
+            const isEditMode = !!cardData;
+            const [title, setTitle] = useState('');
+            const [date, setDate] = useState('2025-09-23');
+            const [content, setContent] = useState('');
+            const [tags, setTags] = useState([]);
+            const [currentTag, setCurrentTag] = useState('');
+            const [mood, setMood] = useState('一般');
+
+            useEffect(() => {
+                if (isOpen) {
+                    if (isEditMode) {
+                        setTitle(cardData.title);
+                        setDate(cardData.date);
+                        setContent(cardData.content);
+                        setTags(cardData.tags);
+                        setMood(cardData.mood);
+                    } else {
+                        setTitle('');
+                        setDate('2025-09-23');
+                        setContent('');
+                        setTags([]);
+                        setCurrentTag('');
+                        setMood('一般');
+                    }
+                }
+            }, [isOpen, cardData, isEditMode]);
+
+            if (!isOpen) return null;
+            
+            const moodOptions = ["不喜欢", "一般", "喜欢"];
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold">{isEditMode ? '编辑打卡' : '新增打卡'}</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">书名</label>
+                                <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="输入书名..." className="w-full border-gray-300 rounded-md shadow-sm p-2" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full border-gray-300 rounded-md shadow-sm p-2" />
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">读后感悟</label>
+                                <textarea value={content} onChange={e => setContent(e.target.value)} rows="4" placeholder="写下你的感悟..." className="w-full border-gray-300 rounded-md shadow-sm p-2"></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">标签</label>
+                                 <div className="flex items-center">
+                                    <input type="text" placeholder="添加标签..." className="flex-grow border-gray-300 rounded-l-md shadow-sm p-2" />
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600">添加</button>
+                                </div>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {tags.map((tag, index) => (
+                                    <span key={index} className="bg-blue-100 text-blue-600 text-xs font-medium px-2.5 py-1 rounded-full flex items-center">
+                                      {tag}
+                                      {isEditMode && <button className="ml-1.5 text-blue-600 hover:text-blue-800">&times;</button>}
+                                    </span>
+                                  ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">阅读心情</label>
+                                <div className="flex justify-around items-center text-gray-500">
+                                {moodOptions.map((option, index) => (
+                                    <div key={option} className="flex flex-col items-center">
+                                        <button onClick={() => setMood(option)} className={`text-3xl transition-transform duration-200 ${mood === option ? 'scale-125' : 'opacity-50'}`}>
+                                            {index === 0 ? '☹️' : index === 1 ? '😐' : '😊'}
+                                        </button>
+                                        <span className={`mt-1 text-sm ${mood === option ? 'text-orange-500 font-semibold' : ''}`}>{option}</span>
+                                    </div>
+                                ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end space-x-4 mt-8">
+                            <button onClick={onClose} className="px-6 py-2 rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300">取消</button>
+                            <button onClick={() => onSave({})} className="px-6 py-2 rounded-md bg-orange-500 text-white hover:bg-orange-600">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        const App = () => {
+            const [cards, setCards] = useState(initialCardsData);
+            const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+            const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+            const [editingCard, setEditingCard] = useState(null);
+            const [deletingCardId, setDeletingCardId] = useState(null);
+
+            const handleOpenNewModal = () => setIsNewModalOpen(true);
+
+            const handleOpenEditModal = (card) => {
+                setEditingCard(card);
+                setIsEditModalOpen(true);
+            };
+
+            const handleOpenDeleteModal = (cardId) => {
+                setDeletingCardId(cardId);
+                setIsDeleteModalOpen(true);
+            };
+
+            const handleCloseModals = () => {
+                setIsNewModalOpen(false);
+                setIsEditModalOpen(false);
+                setIsDeleteModalOpen(false);
+                setEditingCard(null);
+                setDeletingCardId(null);
+            };
+
+            const handleLike = (cardId) => {
+                setCards(cards.map(card => 
+                    card.id === cardId ? { ...card, likes: card.likes + 1 } : card
+                ));
+            };
+            
+            const handleDeleteConfirm = () => {
+                setCards(cards.filter(card => card.id !== deletingCardId));
+                handleCloseModals();
+            };
+
+            const handleSave = (cardData) => {
+              // In a real app, this would save the data.
+              // For this demo, we just close the modal.
+              handleCloseModals();
+            };
+
+
+            return (
+                <div className="min-h-screen">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm p-4 flex justify-between items-center border-b border-gray-200">
+                        <div className="flex items-center space-x-3">
+                             <span className="text-2xl text-orange-500"><i className="fas fa-book-open"></i></span>
+                             <h1 className="text-xl font-bold text-gray-800">温馨读书感悟打卡圈</h1>
+                        </div>
+                        <button onClick={handleOpenNewModal} className="bg-[#E58D49] text-white font-semibold px-4 py-2 rounded-md hover:bg-opacity-90 transition">
+                            + 新增打卡
+                        </button>
+                    </header>
+
+                    <div className="flex max-w-screen-xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
+                        {/* Left Sidebar */}
+                        <aside className="w-1/6 pr-8 space-y-8">
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-800 mb-6">读书感悟圈</h2>
+                                <nav className="space-y-1">
+                                    <a href="#" className="flex items-center px-4 py-2.5 text-gray-700 bg-[#EFEBE0] rounded-md relative">
+                                        <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#E58D49] rounded-r-md"></span>
+                                        <i className="fas fa-home w-6 text-gray-600"></i>
+                                        <span className="font-semibold">首页</span>
+                                    </a>
+                                    <a href="#" className="flex items-center px-4 py-2.5 text-gray-600 hover:bg-gray-200/50 rounded-md">
+                                        <i className="fas fa-list-ul w-6 text-gray-500"></i>
+                                        <span>打卡记录</span>
+                                    </a>
+                                    <a href="#" className="flex items-center px-4 py-2.5 text-gray-600 hover:bg-gray-200/50 rounded-md">
+                                        <i className="fas fa-chart-pie w-6 text-gray-500"></i>
+                                        <span>统计分析</span>
+                                    </a>
+                                    <a href="#" className="flex items-center px-4 py-2.5 text-gray-600 hover:bg-gray-200/50 rounded-md">
+                                        <i className="far fa-question-circle w-6 text-gray-500"></i>
+                                        <span>帮助说明</span>
+                                    </a>
+                                </nav>
+                            </div>
+                            <div className="text-xs text-gray-400 absolute bottom-8">
+                                “阅读是一场心灵旅行，<br />每一次打卡都是风景。”
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="w-3/6 space-y-6">
+                            <div className="bg-[#FFFBF2] p-4 rounded-lg flex justify-between items-center border border-yellow-200/80">
+                                <div>
+                                    <h2 className="font-semibold text-gray-800">读书感悟记录</h2>
+                                    <p className="text-sm text-gray-500">记录每一次阅读的感悟与收获，让思考可见为智慧。</p>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button onClick={handleOpenNewModal} className="bg-[#4A5568] text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-opacity-90 transition">
+                                        + 添加新打卡
+                                    </button>
+                                    <button className="bg-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-md hover:bg-gray-300 transition">
+                                        一键清空
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-6">
+                                {cards.map(card => (
+                                    <Card key={card.id} card={card} onEdit={handleOpenEditModal} onDelete={handleOpenDeleteModal} onLike={handleLike} />
+                                ))}
+                            </div>
+
+                            <div className="bg-gray-100 p-4 rounded-lg flex justify-between items-center cursor-pointer">
+                                <span className="text-gray-600 font-medium">阅读资讯推荐</span>
+                                <i className="fas fa-chevron-down text-gray-500"></i>
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-2/6 pl-8">
+                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80 space-y-4">
+                                <h3 className="font-bold text-gray-800 border-b pb-3">我的阅读统计</h3>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">累计打卡天数</span>
+                                    <span className="font-bold text-xl text-gray-800">45</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">本月打卡次数</span>
+                                    <span className="font-bold text-xl text-gray-800">12</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">最长连读天数</span>
+                                    <span className="font-bold text-xl text-gray-800">7</span>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 text-sm text-gray-600">
+                                <h4 className="font-bold text-gray-800 mb-2">读书小贴士</h4>
+                                <ul className="list-disc list-inside space-y-1 text-gray-500">
+                                    <li>每天坚持阅读15分钟，一周可读完12-15本书</li>
+                                    <li>感悟中可记录原书段落感悟和对比</li>
+                                    <li>曾国藩多元化阅读主题，拓宽知识面</li>
+                                </ul>
+                            </div>
+
+                             <div className="mt-6 text-sm text-gray-600">
+                                <h4 className="font-bold text-gray-800 mb-2">圈子特色</h4>
+                                <p className="text-gray-500 mb-3">每日一打卡，分享阅读感悟，互相鼓励成长。在这里，我们共同探索文字的力量，以阅读点亮生活的美好习惯。</p>
+                                <img src="https://picsum.photos/id/10/300/200" alt="Forest" className="rounded-lg w-full h-auto object-cover" />
+                            </div>
+                        </aside>
+                    </div>
+                    
+                    <CardFormModal isOpen={isNewModalOpen} onClose={handleCloseModals} onSave={handleSave} />
+                    <CardFormModal isOpen={isEditModalOpen} onClose={handleCloseModals} onSave={handleSave} cardData={editingCard} />
+                    <DeleteModal isOpen={isDeleteModalOpen} onClose={handleCloseModals} onConfirm={handleDeleteConfirm} />
+
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

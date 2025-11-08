@@ -1,0 +1,548 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邻里互助平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [selectedTag, setSelectedTag] = useState('all');
+            const [showEditForm, setShowEditForm] = useState(false);
+            
+            const tasks = [
+                {
+                    id: 1,
+                    title: "帮忙代收快递",
+                    author: "张三",
+                    deadline: "2023-12-25",
+                    contact: "电话：138****1234",
+                    urgency: "0000",
+                    tags: ["购物代买"],
+                    description: "购物代买"
+                },
+                {
+                    id: 2,
+                    title: "带小朋友散步",
+                    author: "李四",
+                    deadline: "2023-12-26",
+                    contact: "微信：lisi",
+                    urgency: "00",
+                    tags: ["陪伴聊天"],
+                    description: "陪伴聊天"
+                },
+                {
+                    id: 3,
+                    title: "共享电动车工具",
+                    author: "王五",
+                    deadline: "2023-12-30",
+                    contact: "电话：139****5678",
+                    urgency: "0000",
+                    tags: ["家电维修"],
+                    description: "家电维修"
+                }
+            ];
+
+            const filteredTasks = selectedTag === 'all' ? tasks : tasks.filter(task => task.tags.includes(selectedTag));
+
+            const renderHeader = () => (
+                <header className="bg-white border-b border-gray-200 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                            <i className="fas fa-home text-blue-500"></i>
+                            <span className="font-semibold text-gray-800">邻里互助平台</span>
+                        </div>
+                        <nav className="flex items-center space-x-6">
+                            <button 
+                                onClick={() => setCurrentPage('home')}
+                                className={`text-sm ${currentPage === 'home' ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'}`}
+                            >
+                                首页
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage('addTask')}
+                                className={`text-sm ${currentPage === 'addTask' ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'}`}
+                            >
+                                添加任务
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage('stats')}
+                                className={`text-sm ${currentPage === 'stats' ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'}`}
+                            >
+                                统计分析
+                            </button>
+                            <button 
+                                onClick={() => setCurrentPage('help')}
+                                className={`text-sm ${currentPage === 'help' ? 'text-blue-500' : 'text-gray-600 hover:text-blue-500'}`}
+                            >
+                                帮助说明
+                            </button>
+                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                <i className="fas fa-search"></i>
+                                <span>搜索</span>
+                            </div>
+                        </nav>
+                    </div>
+                </header>
+            );
+
+            const renderSidebar = () => (
+                <aside className="w-64 bg-yellow-50 min-h-screen p-4">
+                    <div className="space-y-6">
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-2 text-gray-700">
+                                <i className="fas fa-list"></i>
+                                <span>我的任务</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-gray-600">
+                                <i className="fas fa-bell"></i>
+                                <span>社区公告</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-gray-600">
+                                <i className="fas fa-cog"></i>
+                                <span>设置</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-3">互助心情</h3>
+                            <div className="bg-white rounded-lg p-3 text-sm text-gray-600">
+                                "助人为乐，乐在互助中。每一次互助都是一份温暖，让我们的社区更美好。"
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            );
+
+            const renderSidebarData = () => (
+                <aside className="w-80 bg-gray-50 min-h-screen p-6">
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-medium text-gray-800">数据概况</h3>
+                                <i className="fas fa-chart-line text-blue-500"></i>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm text-gray-600">任务完成率</span>
+                                        <i className="fas fa-plus-circle text-blue-400"></i>
+                                    </div>
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div className="w-3/4 bg-blue-500 h-2 rounded-full"></div>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>0%</span>
+                                        <span>70%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm text-gray-600">任务类型分布</span>
+                                        <i className="fas fa-plus-circle text-blue-400"></i>
+                                    </div>
+                                    <img src="https://picsum.photos/id/180/280/150" alt="任务类型分布" className="w-full rounded-lg" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-4">今日统计</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">新增任务:</span>
+                                    <span className="font-medium">5</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">已完成:</span>
+                                    <span className="font-medium">2</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">待处理:</span>
+                                    <span className="font-medium">3</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-3">互助小贴士</h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                您好邻居！社区互助，参与社区互助活动不仅能帮助他人还能获得友谊。今天，我们从一个小的互助开始吧！
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            );
+
+            const renderHomePage = () => (
+                <div className="flex-1 p-6">
+                    <div className="mb-6">
+                        <h1 className="text-xl font-semibold text-gray-800 mb-4">社区互助任务列表</h1>
+                        
+                        <div className="flex items-center space-x-4 mb-6">
+                            <span className="text-sm text-gray-600">按标签筛选：</span>
+                            <div className="flex flex-wrap gap-2">
+                                {['购物代买', '家电维修', '陪伴聊天', '接送小孩', '居家打扫', '园艺帮助', '宠物照顾', '社区活动', '朋友分享', '其他'].map(tag => (
+                                    <button
+                                        key={tag}
+                                        onClick={() => setSelectedTag(tag === selectedTag ? 'all' : tag)}
+                                        className={`px-3 py-1 rounded-full text-sm ${
+                                            selectedTag === tag || (selectedTag === 'all' && !tag)
+                                                ? 'bg-blue-500 text-white' 
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                ))}
+                                {selectedTag !== 'all' && (
+                                    <button
+                                        onClick={() => setSelectedTag('all')}
+                                        className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    >
+                                        清除筛选
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {filteredTasks.map(task => (
+                            <div key={task.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                        <h3 className="font-medium text-gray-800 mb-2">{task.title}</h3>
+                                        <div className="space-y-1 text-sm text-gray-600">
+                                            <div>发起人：{task.author}</div>
+                                            <div>截止日期：{task.deadline}</div>
+                                            <div>{task.contact}</div>
+                                            <div>紧急程度：<span className="text-orange-500 font-medium">{task.urgency}</span></div>
+                                        </div>
+                                        <div className="mt-3">
+                                            <span className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                                                {task.description}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end space-y-2 ml-4">
+                                        <button 
+                                            onClick={() => setShowEditForm(true)}
+                                            className="text-blue-500 hover:text-blue-600"
+                                        >
+                                            <i className="fas fa-edit mr-1"></i>
+                                            编辑
+                                        </button>
+                                        <button className="text-red-500 hover:text-red-600">
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                        <div className="flex items-flex-start space-x-2">
+                            <i className="fas fa-heart text-gray-500 mt-1"></i>
+                            <div>
+                                <h3 className="font-medium text-gray-800 mb-2">社区互助，让爱传递</h3>
+                                <p className="text-sm text-gray-600">
+                                    邻里互助，共同成长。在我们的社区中，每一次互助都是一份温暖，每一次帮助都是一次成长。让我们携手共建和谐友爱的社区家园！
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderAddTaskPage = () => (
+                <div className="flex-1 p-6">
+                    <div className="max-w-2xl mx-auto">
+                        <h1 className="text-xl font-semibold text-gray-800 mb-6 text-center">添加新任务</h1>
+                        
+                        <form className="bg-white rounded-lg border border-gray-200 p-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        任务名称 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="例如：帮忙代收快递"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        发起人 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="您的姓名"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">截止日期</label>
+                                    <input 
+                                        type="date" 
+                                        defaultValue="2025-09-23"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        紧急程度: 3
+                                    </label>
+                                    <div className="relative">
+                                        <input 
+                                            type="range" 
+                                            min="1" 
+                                            max="5" 
+                                            defaultValue="3"
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                        />
+                                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                            <span>不急</span>
+                                            <span className="text-blue-500">●</span>
+                                            <span>紧急</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        联系方式 <span className="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="电话或微信"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        标签 <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['购物代买', '家电维修', '陪伴聊天', '接送小孩', '居家打扫', '园艺帮助', '宠物照顾', '社区活动', '朋友分享', '其他'].map(tag => (
+                                            <label key={tag} className="flex items-center space-x-1">
+                                                <input type="checkbox" className="rounded text-blue-500" />
+                                                <span className="text-sm text-gray-600">{tag}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button 
+                                        type="submit"
+                                        className="w-full bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+
+            const renderStatsPage = () => (
+                <div className="flex-1 p-6">
+                    <h1 className="text-xl font-semibold text-gray-800 mb-6">统计分析</h1>
+                    
+                    <div className="grid grid-cols-2 gap-6 mb-6">
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-medium text-gray-800">任务完成情况</h3>
+                                <button className="text-blue-500 hover:text-blue-600">
+                                    <i className="fas fa-sync-alt mr-1"></i>
+                                    刷新数据
+                                </button>
+                            </div>
+                            <img src="https://picsum.photos/id/326/400/250" alt="任务完成情况" className="w-full rounded-lg" />
+                            <p className="text-xs text-gray-500 mt-2">数据更新于：10分钟前</p>
+                        </div>
+
+                        <div className="bg-white rounded-lg border border-gray-200 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-medium text-gray-800">任务类型分布</h3>
+                                <button className="text-blue-500 hover:text-blue-600">
+                                    <i className="fas fa-sync-alt mr-1"></i>
+                                    刷新数据
+                                </button>
+                            </div>
+                            <img src="https://picsum.photos/id/180/400/250" alt="任务类型分布" className="w-full rounded-lg" />
+                            <p className="text-xs text-gray-500 mt-2">数据更新于：10分钟前</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-medium text-gray-800">任务详细统计</h3>
+                            <button className="text-blue-500 hover:text-blue-600">
+                                <i className="fas fa-download mr-1"></i>
+                                导出报表
+                            </button>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-gray-200">
+                                        <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">任务类型</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-700">总数量</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-700">已完成</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-700">进行中</th>
+                                        <th className="text-center py-3 px-4 text-sm font-medium text-gray-700">完成率</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-3 px-4 text-sm text-gray-800">购物代买</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">24</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">18</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">6</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">75%</td>
+                                    </tr>
+                                    <tr className="border-b border-gray-100">
+                                        <td className="py-3 px-4 text-sm text-gray-800">家电维修</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">15</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">12</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">3</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">80%</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-3 px-4 text-sm text-gray-800">陪伴聊天</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">30</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">22</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">8</td>
+                                        <td className="text-center py-3 px-4 text-sm text-gray-600">73%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderHelpPage = () => (
+                <div className="flex-1 p-6">
+                    <h1 className="text-xl font-semibold text-gray-800 mb-6">帮助说明</h1>
+                    
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-3">如何快速发起互助</h3>
+                            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                <li>点击顶部导航栏的"添加任务"按钮</li>
+                                <li>填写任务名称、发起人、截止日期等基本信息</li>
+                                <li>设置紧急程度和选择相关标签</li>
+                                <li>提供您的联系方式，方便邻居联系您</li>
+                                <li>点击"保存"按钮完成发布</li>
+                            </ol>
+                        </div>
+
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-3">如何筛选任务</h3>
+                            <p className="text-sm text-gray-600 mb-3">
+                                在任务列表上方，您可以通过点击不同的标签来筛选任务。例如：
+                            </p>
+                            <ul className="list-disc list-inside space-y-2 text-sm text-gray-600 ml-4">
+                                <li>需要帮忙购物时，点击"购物代买"标签</li>
+                                <li>寻求家电维修帮助时，点击"家电维修"标签</li>
+                                <li>想要找人聊天时，点击"陪伴聊天"标签</li>
+                                <li>您可以同时选择多个标签进行组合筛选，也可以点击"清除筛选"恢复全部列表。</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 className="font-medium text-gray-800 mb-3">社区公约</h3>
+                            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                                <li>尊重隐私：请在公开任务中分享个人信息。</li>
+                                <li>诚信互助：发布真实需求，按时完成互助任务。</li>
+                                <li>友善交流：保持友好沟通态度，互相理解与包容。</li>
+                                <li>及时反馈：任务完成后，请对对方评价或感谢信息。</li>
+                                <li>互帮互助：在获得帮助的同时，也请积极帮助需要的邻居。</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderFooter = () => (
+                <footer className="bg-yellow-50 border-t border-yellow-200 px-4 py-6">
+                    <div className="grid grid-cols-3 gap-8">
+                        <div>
+                            <h4 className="font-medium text-gray-800 mb-3">温馨提示</h4>
+                            <p className="text-sm text-gray-600">请文明互助，保护个人隐私，有问题请联系社区管理员。</p>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-gray-800 mb-3">联系我们</h4>
+                            <p className="text-sm text-gray-600">社区服务热线：400-123-4567</p>
+                            <p className="text-sm text-gray-600">邮箱：support@community.com</p>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-gray-800 mb-3">关注我们</h4>
+                            <div className="flex space-x-2">
+                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i className="fab fa-weixin text-white text-sm"></i>
+                                </div>
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <i className="fab fa-qq text-white text-sm"></i>
+                                </div>
+                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm">微</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-center mt-6 pt-4 border-t border-yellow-200 text-sm text-gray-500">
+                        © 2023 邻里互助平台 | 让爱与温暖传递
+                    </div>
+                </footer>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex flex-col">
+                    {renderHeader()}
+                    <div className="flex flex-1">
+                        {renderSidebar()}
+                        <main className="flex-1">
+                            {currentPage === 'home' && renderHomePage()}
+                            {currentPage === 'addTask' && renderAddTaskPage()}
+                            {currentPage === 'stats' && renderStatsPage()}
+                            {currentPage === 'help' && renderHelpPage()}
+                        </main>
+                        {renderSidebarData()}
+                    </div>
+                    {renderFooter()}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

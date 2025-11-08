@@ -1,0 +1,167 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微耐心挑战</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body class="bg-orange-50">
+  <div id="root"></div>
+  <script type="text/babel">
+    function App() {
+      const [currentView, setCurrentView] = React.useState("home");
+      const [challenges, setChallenges] = React.useState([
+        { id: 1, title: "耐心大师", description: "耐心等待不插队", score: "15天" },
+        { id: 2, title: "冷静小王", description: "公交车上谨言慎行", score: "12天" },
+        { id: 3, title: "淡定哥", description: "排队买奶茶不催促", score: "10天" },
+        { id: 4, title: "从容姐", description: "专注等待45分钟不看手机", score: "8天" },
+        { id: 5, title: "静思姐", description: "等人遇事不发脾气", score: "7天" },
+      ]);
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const [modalData, setModalData] = React.useState(null);
+
+      const handleEditClick = (challenge) => {
+        setModalData(challenge);
+        setIsModalOpen(true);
+      };
+
+      const handleInput = (e, field) => {
+        setModalData({ ...modalData, [field]: e.target.value });
+      };
+
+      const handleSave = () => {
+        const updatedChallenges = challenges.map((ch) =>
+          ch.id === modalData.id ? modalData : ch
+        );
+        setChallenges(updatedChallenges);
+        setIsModalOpen(false);
+      };
+
+      return (
+        <div className="max-w-screen-xl mx-auto p-4">
+          <header className="flex justify-between items-center bg-gradient-to-r from-orange-300 to-orange-200 p-4 rounded-md">
+            <h1 className="text-lg font-bold text-white flex items-center">
+              <i className="fas fa-hourglass-half mr-2"></i> 微耐心
+            </h1>
+            <div className="flex items-center space-x-4">
+              <button onClick={() => setCurrentView("home")} className="px-4 py-2 bg-orange-400 text-white rounded-md shadow-md">展示榜单</button>
+              <button onClick={() => setCurrentView("editChallenges")} className="px-4 py-2 bg-orange-400 text-white rounded-md shadow-md">编辑挑战</button>
+              <button onClick={() => setCurrentView("help")} className="px-4 py-2 bg-orange-400 text-white rounded-md shadow-md">帮助指南</button>
+              <button className="px-4 py-2 bg-orange-500 text-white rounded-md shadow-md">登录/注册</button>
+            </div>
+          </header>
+
+          <main className="mt-6">
+            {currentView === "home" && (
+              <div>
+                <h2 className="text-xl font-bold text-orange-600 mb-4">生活微耐心挑战榜 Top10</h2>
+                <ul className="space-y-4">
+                  {challenges.map((challenge, index) => (
+                    <li key={challenge.id} className="flex items-center bg-white shadow-md p-4 rounded-md">
+                      <div className="w-10 h-10 bg-orange-200 flex items-center justify-center rounded-full text-lg font-bold text-orange-600 mr-4">{index + 1}</div>
+                      <div className="flex-grow">
+                        <h3 className="font-bold text-lg">{challenge.title}</h3>
+                        <p className="text-sm text-gray-600">{challenge.description}</p>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <button className="px-4 py-2 bg-blue-500 text-white rounded-md">查看详情</button>
+                        <button onClick={() => handleEditClick(challenge)} className="px-4 py-2 bg-yellow-400 text-white rounded-md">编辑挑战</button>
+                        <button className="px-4 py-2 bg-red-500 text-white rounded-md">删除挑战</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {currentView === "editChallenges" && (
+              <div>
+                <h2 className="text-xl font-bold text-orange-600 mb-4">编辑您的挑战</h2>
+                {challenges.map((challenge) => (
+                  <div
+                    key={challenge.id}
+                    className="flex items-center bg-white shadow-md p-4 rounded-md mb-4"
+                  >
+                    <div className="flex-grow">
+                      <h3 className="font-bold">{challenge.title}</h3>
+                      <p className="text-sm text-gray-600">{challenge.description}</p>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => handleEditClick(challenge)}
+                        className="px-4 py-2 bg-yellow-400 text-white rounded-md"
+                      >
+                        编辑
+                      </button>
+                      <button className="px-4 py-2 bg-red-500 text-white rounded-md">
+                        删除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {currentView === "help" && (
+              <div>
+                <h2 className="text-xl font-bold text-orange-600 mb-4">如何参与微耐心挑战?</h2>
+                <ol className="list-decimal list-inside">
+                  <li>添加新微耐心挑战并填写表单。</li>
+                  <li>坚持每日打卡并更新完成情况。</li>
+                  <li>在展示榜单中查看最新排行。</li>
+                </ol>
+              </div>
+            )}
+          </main>
+
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white rounded-md shadow-md w-1/3 p-4">
+                <h2 className="text-lg font-bold mb-4">编辑挑战</h2>
+                <label className="block mb-2">
+                  挑战标题
+                  <input
+                    type="text"
+                    value={modalData.title}
+                    onChange={(e) => handleInput(e, "title")}
+                    className="block w-full border border-gray-300 rounded-md p-2 mt-1"
+                  />
+                </label>
+                <label className="block mb-2">
+                  挑战类型
+                  <input
+                    type="text"
+                    value={modalData.description}
+                    onChange={(e) => handleInput(e, "description")}
+                    className="block w-full border border-gray-300 rounded-md p-2 mt-1"
+                  />
+                </label>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleSave}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>

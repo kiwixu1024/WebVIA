@@ -1,0 +1,557 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百度搜索结果管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialResults = [
+            {
+                id: 1,
+                title: "如何在百度搜索结果页添加条目?",
+                content: "本教程详细介绍如何在百度搜索结果页添加新的搜索结果条目，适合初学者和专业人士。",
+                url: "https://example.com/article1",
+                category: "网页",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 2,
+                title: "百度搜索结果页交互设计教程",
+                content: "学习如何设计符合用户体验的搜索结果页，提高用户转化率和满意度。",
+                url: "https://example.com/article2",
+                category: "网页",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 3,
+                title: "百度搜索算法最新更新详解",
+                content: "深入分析百度搜索引擎算法算法变化，帮助站长优化网站排名。",
+                url: "https://example.com/article3",
+                category: "资讯",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 4,
+                title: "如何解读百度搜索数据报告",
+                content: "专业指南：如何理解并利用百度搜索数据报告优化您的网络营销策略。",
+                url: "https://example.com/article4",
+                category: "资讯",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 5,
+                title: "百度搜索页面设计变迁史",
+                content: "回顾百度搜索结果页从诞生至今的设计演变，见证中国互联网发展历程。",
+                url: "https://example.com/article5",
+                category: "网页",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 6,
+                title: "百度搜索优化完全指南2023",
+                content: "最新SEO技巧：如何提高网站在百度搜索中的曝光度和排名。",
+                url: "https://example.com/article6",
+                category: "网页",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 7,
+                title: "百度移动搜索与PC搜索的差异",
+                content: "深度分析百度在不同设备平台上的搜索结果差异，及其对SEO的影响。",
+                url: "https://example.com/article7",
+                category: "视频",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 8,
+                title: "百度图片搜索技巧大全",
+                content: "掌握这些高级搜索技巧，让百度图片搜索更精准高效。",
+                url: "https://example.com/article8",
+                category: "图片",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 9,
+                title: "百度搜索结果页广告投放指南",
+                content: "从策略到实施，全面解析如何在百度搜索结果页有效投放广告。",
+                url: "https://example.com/article9",
+                category: "视频",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            },
+            {
+                id: 10,
+                title: "提高百度自然排名的10个秘诀",
+                content: "专业SEO专家分享的提升网站在百度搜索中自然排名的实用技巧。",
+                url: "https://example.com/article10",
+                category: "网页",
+                newCount: 0,
+                webCount: 0,
+                contentCount: 0
+            }
+        ];
+
+        function App() {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [showModal, setShowModal] = useState(null); // null, 'add', 'edit'
+            const [selectedCategory, setSelectedCategory] = useState('全部');
+            const [stats, setStats] = useState({
+                total: 10,
+                todayNew: 2,
+                recent24: 1234
+            });
+            const [newResults, setNewResults] = useState({});
+
+            const [results, setResults] = useState(initialResults);
+
+            const getDisplayedResults = () => {
+                if (selectedCategory === '全部') {
+                    return results;
+                }
+                return results.filter(result => result.category === selectedCategory);
+            };
+
+            const handleLogin = () => setIsLoggedIn(true);
+            const handleLogout = () => setIsLoggedIn(false);
+
+            const handleSubmitResults = () => {
+                setShowModal(null);
+                setResults(prev => prev.map(result => ({
+                    ...result,
+                    newCount: 0,
+                    webCount: 0,
+                    contentCount: 0
+                })));
+            };
+
+            const handleRefreshStats = () => {
+                setStats(prev => ({
+                    ...prev,
+                    total: 10,
+                    todayNew: 1,
+                    recent24: 1527
+                }));
+            };
+
+            const handleCategoryClick = (category) => {
+                setSelectedCategory(category);
+            };
+
+            const closeModal = () => {
+                setShowModal(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <img src="https://picsum.photos/id/1/40/40" alt="Company Logo" className="w-10 h-10 rounded" />
+                                <div>
+                                    <h1 className="text-lg font-semibold text-gray-900">百度搜索结果管理系统</h1>
+                                    <p className="text-sm text-gray-600">管理系统各项百度搜索结果，支持添加、编辑、删除功能</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                {isLoggedIn ? (
+                                    <>
+                                        <div className="relative">
+                                            <img src="https://picsum.photos/id/10/40/40" alt="User Avatar" className="w-10 h-10 rounded-full border-2 border-white" />
+                                        </div>
+                                        <span className="text-sm text-gray-700">已登录</span>
+                                    </>
+                                ) : (
+                                    <button 
+                                        onClick={handleLogin}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                                    >
+                                        登录
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-12 gap-6">
+                        {/* Main Content */}
+                        <div className="col-span-8">
+                            <div className="bg-white rounded-lg shadow p-6">
+                                {/* Title */}
+                                <div className="flex items-start space-x-3 mb-6">
+                                    <i className="fas fa-search text-gray-600 text-xl"></i>
+                                    <h2 className="text-xl font-semibold text-gray-900">百度搜索结果管理系统</h2>
+                                    <p className="text-sm text-gray-600 ml-auto">模拟演示版</p>
+                                </div>
+
+                                {/* Description */}
+                                <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                                    <p className="text-blue-700">这是一个模拟的百度搜索结果管理后端，您可以添加、编辑和删除搜索结果。系统会实时更新统计数据。</p>
+                                </div>
+
+                                {/* Search Box */}
+                                <div className="flex space-x-4 mb-6">
+                                    <div className="flex-1 relative">
+                                        <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入关键词进行搜索"
+                                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <button className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors">
+                                        <i className="fas fa-search mr-2"></i>搜索结果
+                                    </button>
+                                </div>
+
+                                {/* Results List */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900">搜索结果列表 ({getDisplayedResults().length})</h3>
+                                </div>
+
+                                {/* Add Button */}
+                                <div className="flex justify-end mb-6">
+                                    <button 
+                                        onClick={() => setShowModal('add')}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>添加结果
+                                    </button>
+                                </div>
+
+                                {/* Results List */}
+                                <div className="space-y-4">
+                                    {getDisplayedResults().map((result) => (
+                                        <div key={result.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <h4 className="text-lg font-medium text-blue-600 mb-2">{result.title}</h4>
+                                                    <p className="text-gray-600 mb-4">{result.content}</p>
+                                                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                                        <a href={result.url} className="text-blue-500 hover:underline">{result.url}</a>
+                                                        <span>分类：{result.category}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center space-x-3 ml-6">
+                                                    <button 
+                                                        onClick={() => setShowModal('edit')}
+                                                        className="text-gray-500 hover:text-gray-700 px-3 py-1 text-sm border border-gray-300 rounded-md"
+                                                    >
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </button>
+                                                    <button className="text-red-500 hover:text-red-700 px-3 py-1 text-sm">
+                                                        <i className="fas fa-trash mr-1"></i>删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="col-span-4 space-y-6">
+                            {/* Search Categories */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">搜索结果分类</h3>
+                                <div className="space-y-2">
+                                    {['全部', '网页', '资讯', '视频', '图片', '知道', '文库', '贴吧'].map((category) => (
+                                        <button
+                                            key={category}
+                                            onClick={() => handleCategoryClick(category)}
+                                            className={`w-full text-left px-4 py-3 rounded-lg ${
+                                                selectedCategory === category 
+                                                    ? 'bg-blue-500 text-white' 
+                                                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            <i className={`mr-2 ${
+                                                selectedCategory === category 
+                                                    ? 'fas fa-check' 
+                                                    : category.includes('网') || category.includes('视') ? 'fas fa-video' : 'fas fa-newspaper'
+                                            }`}></i>
+                                            {category}
+                                        </button>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-4">点击分类标签可快速过滤搜索结果</p>
+                            </div>
+
+                            {/* Stats Panel */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">统计数据</h3>
+                                    <button 
+                                        onClick={handleRefreshStats}
+                                        className="bg-gray-600 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition-colors"
+                                    >
+                                        刷新统计
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600">总结结果</span>
+                                        <span className="font-semibold">{stats.total} 条</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600">今日新增</span>
+                                        <span className="text-red-500 font-semibold">{stats.todayNew} 条</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600">24小时搜索量</span>
+                                        <span className="text-blue-500 font-semibold">{stats.recent24} 次</span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-6">
+                                    <h4 className="text-sm font-medium text-gray-900 mb-3">搜索量统计图表</h4>
+                                    <div className="bg-gray-50 rounded-lg p-4 h-40 overflow-hidden">
+                                        <div className="bg-blue-500 flex flex-col transition-all duration-500" style={{height: '200px'}}></div>
+                                    </div>
+                                    <div className="mt-3 flex justify-between text-xs text-gray-500">
+                                        <span>周一</span>
+                                        <span>周二</span>
+                                        <span>周三</span>
+                                        <span>周四</span>
+                                        <span>周五</span>
+                                        <span>周六</span>
+                                        <span>周日</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Instructions */}
+                            <div className="bg-white rounded-lg shadow p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">操作指引</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <div>
+                                            <span className="font-medium">点击"添加结果"按钮可快速新增搜索结果</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <div>
+                                            <span className="font-medium">编辑快捷键：选中后按E；删除</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <div>
+                                            <span className="font-medium">快捷键：选中后按Delete</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <div>
+                                            <span className="font-medium">使用左侧分类栏可快速筛选不同类型结果</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <div>
+                                            <span className="font-medium">点击"刷新统计"可更新右侧数据面板</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="w-full mt-4 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors">
+                                    查看完整帮助文档
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                {showModal === 'add' && (
+                                    <div className="space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-900">添加搜索结果</h3>
+                                        <button 
+                                            onClick={closeModal}
+                                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    标题 <span className="text-red-500">*</span>
+                                                </label>
+                                                <input 
+                                                    type="text"
+                                                    placeholder="请输入结果标题，如：百度搜索优化指南"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    摘要 <span className="text-red-500">*</span>
+                                                </label>
+                                                <textarea 
+                                                    placeholder="请输入搜索结果摘要，简洁明了地概括内容"
+                                                    rows={4}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    URL链接 <span className="text-red-500">*</span>
+                                                </label>
+                                                <input 
+                                                    type="text"
+                                                    placeholder="请输入完整URL，如：https://www.example.com/article"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                    <option>网页</option>
+                                                    <option>资讯</option>
+                                                    <option>视频</option>
+                                                    <option>图片</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-end space-x-3 mt-6">
+                                            <button 
+                                                onClick={closeModal}
+                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleSubmitResults}
+                                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                            >
+                                                确认添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {showModal === 'edit' && (
+                                    <div className="space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-900">编辑搜索结果</h3>
+                                        <button 
+                                            onClick={closeModal}
+                                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    标题 <span className="text-red-500">*</span>
+                                                </label>
+                                                <input 
+                                                    type="text"
+                                                    value="如何在百度搜索结果页添加条目？"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    摘要 <span className="text-red-500">*</span>
+                                                </label>
+                                                <textarea 
+                                                    rows={4}
+                                                    value="本教程详细介绍如何在百度搜索结果页添加新的搜索结果条目，适合初学者和专业人士。"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">URL链接</label>
+                                                <input 
+                                                    type="text"
+                                                    value="https://example.com/article1"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                                    <option>网页</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-end space-x-3 mt-6">
+                                            <button 
+                                                onClick={closeModal}
+                                                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleSubmitResults}
+                                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                            >
+                                                保存修改
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Background overlay for modal */}
+                    {(showModal || selectedCategory !== '全部' || stats.todayNew !== 2) && (
+                        <div 
+                            className="fixed inset-0 bg-gray-500 bg-opacity-50 z-40"
+                            onClick={ closeModal }
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

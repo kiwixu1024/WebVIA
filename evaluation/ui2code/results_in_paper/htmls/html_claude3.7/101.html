@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邻里互助平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fffbf0;
+        }
+        .sidebar {
+            background-color: #fffbf0;
+        }
+        .urgent-level {
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('home');
+            const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+            const [showEditTaskModal, setShowEditTaskModal] = useState(false);
+            const [selectedTask, setSelectedTask] = useState(null);
+            const [selectedTaskType, setSelectedTaskType] = useState(null);
+            
+            const handleTabClick = (tab) => {
+                setActiveTab(tab);
+                setShowAddTaskModal(false);
+                setShowEditTaskModal(false);
+                setSelectedTaskType(null);
+            };
+            
+            const handleEditClick = (task) => {
+                setSelectedTask(task);
+                setShowEditTaskModal(true);
+            };
+            
+            const handleTaskTypeClick = (type) => {
+                setActiveTab('home');
+                setSelectedTaskType(type);
+            };
+            
+            return (
+                <div className="flex flex-col min-h-screen">
+                    {/* 顶部导航栏 */}
+                    <header className="bg-white shadow-sm py-3 px-4">
+                        <div className="container mx-auto flex justify-between items-center">
+                            <div className="flex items-center">
+                                <a href="#" className="flex items-center" onClick={() => handleTabClick('home')}>
+                                    <i className="fas fa-home text-gray-800 mr-2"></i>
+                                    <span className="font-bold text-gray-800">邻里互助平台</span>
+                                </a>
+                            </div>
+                            <div className="flex items-center space-x-6">
+                                <a href="#" className={`text-sm ${activeTab === 'home' ? 'text-blue-600 font-medium' : 'text-gray-700'}`} 
+                                   onClick={() => handleTabClick('home')}>首页</a>
+                                <a href="#" className={`text-sm ${activeTab === 'tasks' ? 'text-blue-600 font-medium' : 'text-gray-700'}`} 
+                                   onClick={() => handleTabClick('tasks')}>源站任务</a>
+                                <a href="#" className={`text-sm ${activeTab === 'stats' ? 'text-blue-600 font-medium' : 'text-gray-700'}`} 
+                                   onClick={() => handleTabClick('stats')}>统计分析</a>
+                                <a href="#" className={`text-sm ${activeTab === 'help' ? 'text-blue-600 font-medium' : 'text-gray-700'}`} 
+                                   onClick={() => handleTabClick('help')}>帮助说明</a>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-2">
+                                        <i className="fas fa-search text-gray-500"></i>
+                                    </span>
+                                    <input type="text" placeholder="搜索" className="pl-8 pr-4 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex flex-1">
+                        {/* 左侧边栏 */}
+                        <div className="sidebar w-40 border-r">
+                            <div className="p-4">
+                                <ul className="space-y-3">
+                                    <li>
+                                        <a href="#" className="flex items-center text-gray-700 hover:text-blue-600">
+                                            <i className="fas fa-tasks mr-2 w-5 text-center"></i>
+                                            <span className="text-sm">我的任务</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="flex items-center text-gray-700 hover:text-blue-600">
+                                            <i className="fas fa-bullhorn mr-2 w-5 text-center"></i>
+                                            <span className="text-sm">社区公告</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="flex items-center text-gray-700 hover:text-blue-600">
+                                            <i className="fas fa-cog mr-2 w-5 text-center"></i>
+                                            <span className="text-sm">设置</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="p-4 mt-4 border-t">
+                                <div className="bg-white p-3 rounded-md shadow-sm">
+                                    <h3 className="text-sm font-medium mb-2">互助心得</h3>
+                                    <p className="text-xs text-gray-600">
+                                        "互帮互助，让社区更美好。社区的小事，是联系彼此的小纽带。"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 主内容区 */}
+                        <div className="flex-1 p-6">
+                            {activeTab === 'home' && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h1 className="text-xl font-medium">社区互助任务列表</h1>
+                                        <button 
+                                            className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                                            onClick={() => setShowAddTaskModal(true)}
+                                        >
+                                            添加任务
+                                        </button>
+                                    </div>
+
+                                    {/* 任务类型筛选 */}
+                                    <div className="mb-6">
+                                        <div className="flex items-center space-x-1 text-sm border-b pb-2">
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === null ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => setSelectedTaskType(null)}
+                                            >
+                                                综合筛选
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '购物代买' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('购物代买')}
+                                            >
+                                                购物代买
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '家电维修' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('家电维修')}
+                                            >
+                                                家电维修
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '陪伴聊天' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('陪伴聊天')}
+                                            >
+                                                陪伴聊天
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '接送小孩' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('接送小孩')}
+                                            >
+                                                接送小孩
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '居家打扫' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('居家打扫')}
+                                            >
+                                                居家打扫
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '园艺帮助' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('园艺帮助')}
+                                            >
+                                                园艺帮助
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '宠物照顾' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('宠物照顾')}
+                                            >
+                                                宠物照顾
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '社区活动' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('社区活动')}
+                                            >
+                                                社区活动
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '路边分享' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('路边分享')}
+                                            >
+                                                路边分享
+                                            </button>
+                                            <button 
+                                                className={`px-3 py-1 rounded-md ${selectedTaskType === '其他' ? 'bg-blue-100 text-blue-600' : 'text-gray-700'}`}
+                                                onClick={() => handleTaskTypeClick('其他')}
+                                            >
+                                                其他
+                                            </button>
+                                            {selectedTaskType === '购物代买' && (
+                                                <button 
+                                                    className="px-3 py-1 rounded-md text-gray-700"
+                                                >
+                                                    清除筛选
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* 任务列表 */}
+                                    <div className="space-y-6">
+                                        {/* 帮忙代收快递任务 */}
+                                        {(selectedTaskType === null || selectedTaskType === '购物代买') && (
+                                            <div className="bg-white p-4 rounded-md shadow-sm">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 className="text-base font-medium mb-2">帮忙代收快递</h3>
+                                                        <div className="text-sm text-gray-600 mb-1">委托人: 张三</div>
+                                                        <div className="text-sm text-gray-600 mb-1">截止日期: 2023-12-25</div>
+                                                        <div className="text-sm text-gray-600 mb-1">联系方式: 电话: 138****1234</div>
+                                                        <div className="flex items-center mt-2">
+                                                            <span className="text-xs mr-2">紧急程度:</span>
+                                                            <span className="flex">
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">购物代买</span>
+                                                        </div>
+                                                    </div>
+                                                    <button 
+                                                        className="text-blue-600 text-sm hover:text-blue-800"
+                                                        onClick={() => handleEditClick({
+                                                            title: '帮忙代收快递',
+                                                            person: '张三',
+                                                            date: '2023-12-25',
+                                                            contact: '138****1234',
+                                                            urgency: 3,
+                                                            type: '购物代买'
+                                                        })}
+                                                    >
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </button>
+                                                </div>
+                                                <div className="mt-3 flex justify-end">
+                                                    <button className="text-red-500 text-xs">
+                                                        <i className="fas fa-trash-alt mr-1"></i>删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 带小朋友放学任务 */}
+                                        {(selectedTaskType === null || selectedTaskType === '接送小孩') && (
+                                            <div className="bg-white p-4 rounded-md shadow-sm">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 className="text-base font-medium mb-2">带小朋友放学</h3>
+                                                        <div className="text-sm text-gray-600 mb-1">委托人: 李四</div>
+                                                        <div className="text-sm text-gray-600 mb-1">截止日期: 2023-12-26</div>
+                                                        <div className="text-sm text-gray-600 mb-1">联系方式: 微信: Li_si</div>
+                                                        <div className="flex items-center mt-2">
+                                                            <span className="text-xs mr-2">紧急程度:</span>
+                                                            <span className="flex">
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">接送小孩</span>
+                                                        </div>
+                                                    </div>
+                                                    <button className="text-blue-600 text-sm hover:text-blue-800">
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </button>
+                                                </div>
+                                                <div className="mt-3 flex justify-end">
+                                                    <button className="text-red-500 text-xs">
+                                                        <i className="fas fa-trash-alt mr-1"></i>删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 共享电动工具任务 */}
+                                        {(selectedTaskType === null || selectedTaskType === '家电维修') && (
+                                            <div className="bg-white p-4 rounded-md shadow-sm">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h3 className="text-base font-medium mb-2">共享电动工具</h3>
+                                                        <div className="text-sm text-gray-600 mb-1">委托人: 王五</div>
+                                                        <div className="text-sm text-gray-600 mb-1">截止日期: 2023-12-30</div>
+                                                        <div className="text-sm text-gray-600 mb-1">联系方式: 电话: 139****5678</div>
+                                                        <div className="flex items-center mt-2">
+                                                            <span className="text-xs mr-2">紧急程度:</span>
+                                                            <span className="flex">
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                                <i className="fas fa-exclamation-circle text-red-500 text-xs"></i>
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">家电维修</span>
+                                                        </div>
+                                                    </div>
+                                                    <button className="text-blue-600 text-sm hover:text-blue-800">
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </button>
+                                                </div>
+                                                <div className="mt-3 flex justify-end">
+                                                    <button className="text-red-500 text-xs">
+                                                        <i className="fas fa-trash-alt mr-1"></i>删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 社区口号 */}
+                                    <div className="mt-8 bg-gray-50 p-4 rounded-md">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-hands-helping text-gray-700 mr-2"></i>
+                                            <h3 className="text-base font-medium">社区互助，让爱传递</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mt-2">
+                                            促进互助，共创成长，在我们的社区中，每一次互助都是一份温暖。每一次帮助都是一次成长。让我们共同打造温馨友爱的社区家园！
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'stats' && (
+                                <div>
+                                    <h1 className="text-xl font-medium mb-6">统计分析</h1>
+                                    
+                                    <div className="grid grid-cols-2 gap-6 mb-8">
+                                        <div>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h2 className="text-lg font-medium">任务完成情况</h2>
+                                                <button className="text-blue-600 text-sm">
+                                                    <i className="fas fa-sync-alt mr-1"></i>刷新数据
+                                                </button>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-md shadow-sm">
+                                                <img src="https://picsum.photos/id/48/600/350" alt="任务完成情况图表" className="w-full h-auto" />
+                                                <div className="text-xs text-gray-500 text-right mt-1">数据更新时间：10分钟前</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h2 className="text-lg font-medium">任务类型分布</h2>
+                                                <button className="text-blue-600 text-sm">
+                                                    <i className="fas fa-file-export mr-1"></i>导出数据
+                                                </button>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-md shadow-sm">
+                                                <img src="https://picsum.photos/id/87/600/350" alt="任务类型分布图表" className="w-full h-auto" />
+                                                <div className="text-xs text-gray-500 text-right mt-1">数据更新时间：10分钟前</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-6">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h2 className="text-lg font-medium">任务详细统计</h2>
+                                            <button className="text-blue-600 text-sm">
+                                                <i className="fas fa-download mr-1"></i>导出报表
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="bg-white rounded-md shadow-sm overflow-hidden">
+                                            <table className="min-w-full divide-y divide-gray-200">
+                                                <thead className="bg-gray-50">
+                                                    <tr>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">任务类型</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">总数量</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">已完成</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">进行中</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">完成率</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="bg-white divide-y divide-gray-200">
+                                                    <tr>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">购物代买</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">24</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">18</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">6</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">75%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">家电维修</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">15</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">12</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">3</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">80%</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">陪伴聊天</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">30</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">22</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">8</td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">73%</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'help' && (
+                                <div>
+                                    <h1 className="text-xl font-medium mb-6">帮助说明</h1>
+                                    
+                                    <div className="bg-white p-6 rounded-md shadow-sm mb-6">
+                                        <h2 className="text-lg font-medium mb-4">如何快速发起互助</h2>
+                                        <ol className="list-decimal pl-5 space-y-2 text-gray-700">
+                                            <li>点击页面顶部的"添加任务"按钮或"发起任务"按钮</li>
+                                            <li>填写任务名称、截止日期和联系信息</li>
+                                            <li>设置紧急程度和选择相关的任务类型</li>
+                                            <li>填写您的联系方式，方便邻居联系您</li>
+                                            <li>点击"确认"按钮完成发布</li>
+                                        </ol>
+                                    </div>
+                                    
+                                    <div className="bg-white p-6 rounded-md shadow-sm mb-6">
+                                        <h2 className="text-lg font-medium mb-4">如何筛选任务</h2>
+                                        <p className="text-gray-700 mb-3">在任务列表上方，可以通过点击不同的标签来筛选任务，例如：</p>
+                                        <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                                            <li>需要帮忙代购物时，点击"购物代买"标签</li>
+                                            <li>寻求家电维修帮助时，点击"家电维修"标签</li>
+                                            <li>想找人聊天时，点击"陪伴聊天"标签</li>
+                                        </ul>
+                                        <p className="text-gray-700 mt-3">您可以同时选择多个标签进行组合筛选，也可以点击"清除筛选"恢复完整列表。</p>
+                                    </div>
+                                    
+                                    <div className="bg-white p-6 rounded-md shadow-sm">
+                                        <h2 className="text-lg font-medium mb-4">社区公约</h2>
+                                        <ol className="list-decimal pl-5 space-y-3 text-gray-700">
+                                            <li><strong>尊重隐私：</strong>请勿在公开任务中分享个人敏感信息。</li>
+                                            <li><strong>诚信互助：</strong>发布真实需求，按约定完成互助任务。</li>
+                                            <li><strong>友善交流：</strong>保持良好沟通态度，互相理解与尊重。</li>
+                                            <li><strong>及时反馈：</strong>任务完成后，请及时更新状态或感谢帮助者。</li>
+                                            <li><strong>互帮互助：</strong>在获得帮助的同时，也请积极帮助有需要的邻居。</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 右侧边栏 */}
+                        <div className="w-64 border-l p-4">
+                            <div className="mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-medium">数据概览</h3>
+                                    <button className="text-xs text-blue-600">刷新</button>
+                                </div>
+                                <div className="mb-3">
+                                    <div className="flex justify-between items-center text-xs mb-1">
+                                        <span>任务完成率</span>
+                                        <div className="flex space-x-2">
+                                            <span>0%</span>
+                                            <span>70%</span>
+                                            <span>100%</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div className="h-full bg-blue-500 rounded-full" style={{ width: "70%" }}></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-medium">任务类型分布</h3>
+                                    <button className="text-xs text-blue-600">刷新</button>
+                                </div>
+                                <div className="bg-white rounded-md overflow-hidden mb-2">
+                                    <img src="https://picsum.photos/id/3/300/150" alt="任务类型分布图" className="w-full h-auto" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="text-sm font-medium">今日统计</h3>
+                                    <button className="text-xs text-blue-600">查看详情 &gt;</button>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between bg-gray-50 p-2 rounded">
+                                        <span className="text-xs text-gray-600">新增任务</span>
+                                        <span className="text-xs font-medium">5</span>
+                                    </div>
+                                    <div className="flex justify-between bg-gray-50 p-2 rounded">
+                                        <span className="text-xs text-gray-600">已完成</span>
+                                        <span className="text-xs font-medium">2</span>
+                                    </div>
+                                    <div className="flex justify-between bg-gray-50 p-2 rounded">
+                                        <span className="text-xs text-gray-600">待领取</span>
+                                        <span className="text-xs font-medium">3</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t">
+                                <h3 className="text-sm font-medium mb-2">互助小贴士</h3>
+                                <p className="text-xs text-gray-600">
+                                    您知道吗？积极参与社区互助，参与互动可增加您的社区互助积分，累计积分可兑换小礼品！每天7:00-9:30将是互助高峰期。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 底部信息 */}
+                    <footer className="bg-gray-100 py-4 px-6 mt-auto">
+                        <div className="container mx-auto">
+                            <div className="flex flex-wrap justify-between">
+                                <div className="w-full m

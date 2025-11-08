@@ -1,0 +1,658 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微耐心 - 培养生活中的微小耐心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeView, setActiveView] = useState('list');
+            const [filterType, setFilterType] = useState('today');
+            const [showHelp, setShowHelp] = useState(false);
+            const [formData, setFormData] = useState({
+                title: '',
+                type: '排队',
+                difficulty: 3,
+                duration: 7
+            });
+            const [challenges, setChallenges] = useState([
+                {
+                    id: 1,
+                    title: '耐心等电梯不插队',
+                    type: '礼让',
+                    difficulty: 3,
+                    daysTarget: 30,
+                    completed: 15
+                },
+                {
+                    id: 2,
+                    title: '公交车上给老人让座',
+                    type: '礼让',
+                    difficulty: 2,
+                    daysTarget: 15,
+                    completed: 12
+                },
+                {
+                    id: 3,
+                    title: '排队买奶茶不催促',
+                    type: '排队',
+                    difficulty: 4,
+                    daysTarget: 20,
+                    completed: 10
+                },
+                {
+                    id: 4,
+                    title: '专注写作45分钟不碰手机',
+                    type: '专注',
+                    difficulty: 5,
+                    daysTarget: 25,
+                    completed: 9
+                },
+                {
+                    id: 5,
+                    title: '等人迟到不发脾气',
+                    type: '等待',
+                    difficulty: 3,
+                    daysTarget: 10,
+                    completed: 8
+                }
+            ]);
+            const [editChallenge, setEditChallenge] = useState(null);
+
+            const completedCount = challenges.reduce((sum, challenge) => sum + challenge.completed, 0);
+            const totalCount = challenges.length;
+            const todayProgress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+            const filteredChallenges = filterType === 'today' 
+                ? challenges.filter(c => c.completed > 0)
+                : challenges;
+
+            const rankingData = [
+                { rank: 1, name: '耐心大师', days: 15, score: 15, completed: true },
+                { rank: 2, name: '冷静小王', days: 12, score: 12, completed: true },
+                { rank: 3, name: '淡定哥', days: 10, score: 10, completed: true },
+                ...challenges.filter(c => c.completed <= 9).map((c, index) => ({
+                    rank: index + 4,
+                    name: c.title,
+                    days: c.daysTarget,
+                    score: c.completed,
+                    completed: c.completed > 0
+                }))
+            ].slice(0, 3);
+
+            const handleAddChallenge = () => {
+                if (!formData.title.trim()) return;
+                
+                const newChallenge = {
+                    id: Date.now(),
+                    title: formData.title,
+                    type: formData.type,
+                    difficulty: formData.difficulty,
+                    daysTarget: formData.duration,
+                    completed: 0
+                };
+                
+                setChallenges([...challenges, newChallenge]);
+                setFormData({ title: '', type: '排队', difficulty: 3, duration: 7 });
+            };
+
+            const handleCompleteCount = () => {
+                setChallenges(challenges.map(c => ({ ...c, completed: Math.min(c.daysTarget, c.completed + 1) })));
+                setTodayProgress(todayProgress);
+            };
+
+            const handleEdit = (challenge) => {
+                setEditChallenge(challenge);
+                setFormData(challenge);
+            };
+
+            const handleSaveEdit = () => {
+                setChallenges(challenges.map(c => 
+                    c.id === editChallenge.id ? { ...c, ...formData } : c
+                ));
+                setEditChallenge(null);
+            };
+
+            const closeModal = () => {
+                setEditChallenge(null);
+                setFormData({ title: '', type: '排队', difficulty: 3, duration: 7 });
+            };
+
+            return (
+                <div className="min-h-screen bg-orange-50">
+                    {/* Header */}
+                    <header className="bg-orange-100 px-6 py-3 flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                            <i className="fas fa-heart text-orange-600"></i>
+                            <span className="text-orange-800 font-bold text-lg">微耐心</span>
+                        </div>
+                        <nav className="flex items-center space-x-6">
+                            <button className="bg-orange-200 px-3 py-1 rounded text-orange-800 text-sm">展示榜单</button>
+                            <button 
+                                className="text-orange-600 hover:text-orange-800 text-sm"
+                                onClick={() => {
+                                    setActiveView('edit');
+                                    setShowHelp(false);
+                                }}
+                            >
+                                编辑挑战
+                            </button>
+                            <button 
+                                className="text-orange-600 hover:text-orange-800 text-sm"
+                                onClick={() => {
+                                    setShowHelp(true);
+                                    setActiveView('list');
+                                }}
+                            >
+                                帮助指南
+                            </button>
+                            <div className="text-orange-600 text-sm">
+                                <i className="fas fa-door-open mr-1"></i>
+                                登录 / 注册
+                            </div>
+                        </nav>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-80 p-6">
+                            <div className="space-y-6">
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-check-circle text-orange-600"></i>
+                                        <span className="font-semibold">今日挑战</span>
+                                    </div>
+                                    <button className="w-full bg-orange-100 hover:bg-orange-200 p-2 rounded">
+                                        <span className="text-gray-700">查看今日清单</span>
+                                    </button>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-trophy text-orange-600"></i>
+                                        <span className="font-semibold">历史成绩</span>
+                                    </div>
+                                    <button className="w-full bg-orange-100 hover:bg-orange-200 p-2 rounded">
+                                        <span className="text-gray-700">查看历史排行</span>
+                                    </button>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4">
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-cog text-orange-600"></i>
+                                        <span className="font-semibold">个人设置</span>
+                                    </div>
+                                    <button className="w-full bg-orange-100 hover:bg-orange-200 p-2 rounded">
+                                        <span className="text-gray-700">修改资料与设置</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            {/* Active View Content */}
+                            {showHelp ? (
+                                /* Help Guide */
+                                <div className="bg-white rounded-lg p-6">
+                                    <div className="flex items-center space-x-2 mb-6">
+                                        <i className="fas fa-book text-orange-600"></i>
+                                        <h2 className="text-lg font-semibold">如何参与微耐心挑战？</h2>
+                                    </div>
+                                    
+                                    <div className="flex items-start space-x-6">
+                                        <div className="flex-1">
+                                            <div className="bg-orange-50 p-4 rounded-lg mb-6">
+                                                <h3 className="font-semibold mb-3">导出您的挑战</h3>
+                                                <p className="text-orange-700 text-sm leading-relaxed">
+                                                    在这里您可以管理所有已创建的挑战，包括修改目标，最新完成，删除不需要的挑战等。
+                                                </p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <div className="flex items-start space-x-3">
+                                                    <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2">点击"新增微耐心挑战"填写表单</h4>
+                                                        <p className="text-gray-600 text-sm">请在页面底部有"新增微耐心挑战"表单，填写您想要挑战的关务，设定难度和目标天数，点击添加按钮即可创建您的个人挑战。</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-start space-x-3">
+                                                    <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2">坚持每日打卡并更新完成次数</h4>
+                                                        <p className="text-gray-600 text-sm">每完成一次挑战，点击对应挑战卡片上的"更新进度"按钮，记录您的完成情况。系统会自动统计您的完成次数并更新排行榜。</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-start space-x-3">
+                                                    <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2">在"展示榜单中查看最新排行</h4>
+                                                        <p className="text-gray-600 text-sm">通过首页的"展示榜单"，您可以看到所有参与者的排名情况。排名根据挑战完成次数，难度等因素综合计算，每周更新一次。</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-yellow-50 border rounded-lg p-3 mt-6">
+                                                <p className="text-orange-700 text-sm italic">
+                                                    小贴士：坚持是成功的关键！即室是简单的微耐心挑战，每天坚持也能带来巨大的改变。加油！
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : activeView === 'edit' ? (
+                                /* Challenge Editing */
+                                <div className="space-y-6">
+                                    <div className="bg-orange-100 p-4 rounded-lg">
+                                        <h2 className="text-lg font-semibold text-orange-800">
+                                            <i className="fas fa-edit mr-2"></i>
+                                            编辑您的挑战
+                                        </h2>
+                                        <p className="text-orange-700 text-sm mt-2">
+                                            在这里您可以管理所有已创建的挑战，包括修改目标、更新进度、删除不需要的挑战等。
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-white rounded-lg p-6">
+                                        {editChallenge ? (
+                                            <div>
+                                                <div className="grid grid-cols-2 gap-6 mb-6">
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2">挑战标题</label>
+                                                        <input
+                                                            type="text"
+                                                            className="w-full border border-orange-300 rounded p-3 text-sm"
+                                                            value={editChallenge.title}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2">挑战类型</label>
+                                                        <select
+                                                            className="w-full border border-gray-300 rounded p-3 text-sm"
+                                                            value={editChallenge.type}
+                                                            readOnly
+                                                        >
+                                                            <option>礼让</option>
+                                                            <option>排队</option>
+                                                            <option>专注</option>
+                                                            <option>等待</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-6">
+                                                    <label className="block text-sm font-medium mb-2">难度评分</label>
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                            <div 
+                                                                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                                                style={{ 
+                                                                    width: `${Math.max(0, Math.min(editChallenge.difficulty * 40, 100))}%` 
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-sm">1星</span>
+                                                        <input
+                                                            type="text"
+                                                            value={editChallenge.difficulty}
+                                                            className="w-16 bg-gray-100 rounded h-2 border border-gray-300"
+                                                            readOnly
+                                                        />
+                                                        <span className="text-sm ml-8">5星</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="border-t pt-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="bg-green-50 border border-green-200 p-3 rounded">
+                                                            <i className="fas fa-check-circle text-green-600"></i>
+                                                        </div>
+                                                        <span className="text-gray-500 text-sm">哥等待长达变化，通过白日的坚持，逐渐外加人持艺冲质和意志力。</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex space-x-3">
+                                                    <button className="bg-pink-500 text-white px-6 py-2 rounded-full hover:bg-pink-600">
+                                                        <i className="fas fa-save mr-1"></i>
+                                                        保存
+                                                    </button>
+                                                    <button 
+                                                        onClick={closeModal}
+                                                        className="bg-gray-500 text-white px-6 py-2 rounded-full hover:bg-gray-600"
+                                                    >
+                                                        取消
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="grid grid-cols-2 gap-6 mb-6">
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2">挑战标题</label>
+                                                        <input
+                                                            type="text"
+                                                            className="w-full border border-gray-300 rounded p-3 text-sm"
+                                                            placeholder="例如：耐心排队买奶茶"
+                                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium mb-2">挑战类型</label>
+                                                        <select
+                                                            className="w-full border border-gray-300 rounded p-3 text-sm"
+                                                            value={formData.type}
+                                                            onChange={(e) => setFormData({...formData, type: e.target.value})}
+                                                        >
+                                                            <option>排队</option>
+                                                            <option>专注</option>
+                                                            <option>等待</option>
+                                                            <option>礼让</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mb-6">
+                                                    <label className="block text-sm font-medium mb-2">难度评分</label>
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                            <div 
+                                                                className="bg-blue-500 h-2 rounded-full"
+                                                                style={{ width: `${Math.max(0, Math.min(formData.difficulty * 40, 100))}%` }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className="text-sm">1星</span>
+                                                        <input
+                                                            type="range"
+                                                            min="1"
+                                                            max="5"
+                                                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none bg-no-repeat bg-right"
+                                                            style={{ backgroundSize: '2px 2px', backgroundPositionX: `-${formData.difficulty * 20}px` }}
+                                                            defaultValue={formData.difficulty}
+                                                            onChange={(e) => setFormData({...formData, difficulty: parseInt(e.target.value)})}
+                                                        />
+                                                        <span className="text-sm ml-8">5星</span>
+                                                        <span className="text-sm ml-3 text-gray-700">{formData.difficulty}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="border-t pt-6">
+                                                    <img src="https://picsum.photos/id/1015/90/90" alt="Voice instruction" className="w-20 h-20 rounded-lg object-cover" />
+                                                    <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mt-3">
+                                                        <div className="flex items-center justify-center">
+                                                            <i className="fas fa-redo text-gray-400 text-2xl"></i>
+                                                        </div>
+                                                        <div className="text-center text-gray-500 text-sm mt-2">哥等待长达变化</div>
+                                                    </div>
+                                                </div>
+
+                                                <button 
+                                                    className="w-full bg-orange-500 text-white py-3 rounded-lg text-lg hover:bg-orange-600"
+                                                    onClick={handleAddChallenge}
+                                                >
+                                                    <i className="fas fa-plus mr-2"></i>
+                                                    添加挑战
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                /* Main Content */
+                                <div>
+                                    {/* Title */}
+                                    <h1 className="text-2xl font-bold text-orange-800 text-center mb-6">
+                                        生活微耐心挑战榜 Top 10
+                                        <button 
+                                            className="bg-orange-500 text-white px-3 py-1 rounded text-sm ml-3 hover:bg-orange-600"
+                                            onClick={() => {
+                                                setActiveView('edit');
+                                                setShowHelp(false);
+                                            }}
+                                        >
+                                            编辑挑战
+                                        </button>
+                                    </h1>
+
+                                    <div className="bg-white rounded-lg p-6 mb-8">
+                                        {filteredChallenges.map((challenge, index) => (
+                                            <div key={challenge.id} className={`flex items-center justify-between py-4 ${challenge.completed ? 'border-2 border-green-300 bg-green-50' : 'border-gray-200'}`}>
+                                                <div className="flex items-center space-x-4">
+                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${challenge.completed ? 'bg-green-500' : challenge.type === '礼让' || challenge.type === '体贴' ? 'bg-yellow-500' : 'bg-gray-400'}`}>
+                                                        {index + 1}
+                                                    </div>
+                                                    <img 
+                                                        src={challenge.completed ? "https://picsum.photos/id/1025/40/40" : "https://picsum.photos/id/1/40/40"} 
+                                                        alt="Avatar" 
+                                                        className="w-10 h-10 rounded-full object-cover"
+                                                    />
+                                                    <div>
+                                                        <h3 className="font-semibold text-gray-800">{challenge.title}</h3>
+                                                        <p className="text-sm text-orange-600">{challenge.type}</p>
+                                                        <p className="text-xs text-gray-500">{challenge.completed ? '已坚持' : '已坚持'} {challenge.daysTarget} 次</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex space-x-3">
+                                                    <button 
+                                                        className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600"
+                                                        onClick={() => {
+                                                            document.getElementById(`detail-${challenge.id}`).scrollIntoView({ behavior: 'smooth' });
+                                                            setEditChallenge(challenge);
+                                                            SetData(challenge);
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-eye mr-1"></i>
+                                                        查看详细
+                                                    </button>
+                                                    <button 
+                                                        className="bg-orange-500 text-white px-4 py-2 rounded text-sm hover:bg-orange-600"
+                                                        onClick={() => {
+                                                            handleEdit(challenge);
+                                                            closeModal();
+                                                        }}
+                                                    >
+                                                        <i className="fas fa-edit mr-1"></i>
+                                                        编辑挑战
+                                                    </button>
+                                                    <button className="bg-red-500 text-white px-4 py-2 rounded text-sm hover:bg-red-600">
+                                                        <i className="fas fa-trash mr-1"></i>
+                                                        删除挑战
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex items-start space-x-4 mb-6">
+                                        <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                                            +
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-orange-800">新增微耐心挑战</h3>
+                                    </div>
+
+                                    <div className="bg-white rounded-lg p-6">
+                                        <div className="grid grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">挑战标题</label>
+                                                <input
+                                                    type="text"
+                                                    id="title"
+                                                    className="w-full border border-orange-300 rounded p-3 text-sm bg-white"
+                                                    placeholder="例如：耐心排队买奶茶"
+                                                    value={formData.title}
+                                                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-2">挑战类型</label>
+                                                <select
+                                                    className="w-full border border-gray-300 rounded p-3 text-sm bg-white"
+                                                    value={formData.type}
+                                                    onChange={(e) => setFormData({...formData, type: e.target.value})}
+                                                >
+                                                    <option>排队</option>
+                                                    <option>专注</option>
+                                                    <option>等待</option>
+                                                    <option>礼让</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium mb-2">难度评分</label>
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                    <div 
+                                                        className="bg-blue-500 h-2 rounded-full"
+                                                        style={{ width: `${Math.max(0, Math.min(formData.difficulty * 40, 100))}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="text-sm">1星</span>
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="5"
+                                                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none bg-no-repeat bg-right"
+                                                    style={{ backgroundSize: '2px 2px', backgroundPositionX: `-${formData.difficulty * 20}px` }}
+                                                    defaultValue={formData.difficulty}
+                                                    onChange={(e) => setFormData({...formData, difficulty: parseInt(e.target.value)})}
+                                                />
+                                                <span className="text-sm ml-8">5星</span>
+                                                <span className="text-sm ml-3 text-gray-700">{formData.difficulty}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="border-t pt-6">
+                                            <img 
+                                                src={formData.title.includes('测试挑战') ? "https://picsum.photos/id/1015/90/90" : "https://picsum.photos/id/1025/90/90"} 
+                                                alt="Voice instruction" 
+                                                className="w-20 h-20 rounded-lg object-cover" 
+                                            />
+                                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mt-3">
+                                                <div className="flex items-center justify-center">
+                                                    <i className="fas fa-redo text-gray-400 text-2xl"></i>
+                                                </div>
+                                                <div className="text-center text-gray-500 text-sm mt-2">哥等待长达变化</div>
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            className="w-full bg-orange-500 text-white py-3 rounded-lg text-lg hover:bg-orange-600"
+                                            onClick={handleAddChallenge}
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>
+                                            添加挑战
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </main>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-orange-300 text-white text-center py-6 mt-12">
+                        <div className="flex justify-between items-center max-w-6xl mx-auto px-6">
+                            <div className="text-sm">© 2024 微耐心</div>
+                            <div className="flex space-x-6 text-sm">
+                                <a href="#" className="hover:text-orange-800 transition-colors">关于我们</a>
+                                <a href="#" className="hover:text-orange-800 transition-colors">使用条款</a>
+                                <a href="#" className="hover:text-orange-800 transition-colors">隐私政策</a>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Edit Challenge Modal */}
+                    {editChallenge && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4 text-center">编辑挑战</h3>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">挑战标题</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border border-orange-300 rounded p-3"
+                                            value={editChallenge.title}
+                                            onChange={(e) => setEditChallenge({...editChallenge, title: e.target.value})}
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">挑战类型</label>
+                                        <select
+                                            className="w-full border border-gray-300 rounded p-3"
+                                            value={editChallenge.type}
+                                            onChange={(e) => setEditChallenge({...editChallenge, type: e.target.value})}
+                                        >
+                                            <option>礼让</option>
+                                            <option>排队</option>
+                                            <option>专注</option>
+                                            <option>等待</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">难度评分</label>
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-16 bg-gray-200 rounded h-2">
+                                                <div className="bg-blue-500 h-2 rounded w-4/5"></div>
+                                            </div>
+                                            <span className="text-sm">1星</span>
+                                            <div className="flex-1 h-2 bg-gray-200 rounded"></div>
+                                            <span className="text-sm ml-3">5星</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">持续天数目标</label>
+                                        <input
+                                            type="number"
+                                            className="w-16 border border-gray-300 rounded p-3"
+                                            defaultValue={editChallenge.daysTarget}
+                                            onChange={(e) => setEditChallenge({...editChallenge, daysTarget: parseInt(e.target.value) || 7})}
+                                        />
+                                        <span className="text-sm ml-2 text-gray-600">天</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        className="flex-1 bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
+                                        onClick={handleSaveEdit}
+                                    >
+                                        <i className="fas fa-save mr-1"></i>
+                                        保存
+                                    </button>
+                                    <button 
+                                        className="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
+                                        onClick={closeModal}
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物档案系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [showIntroductionModal, setShowIntroductionModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+
+            const pets = [
+                {
+                    id: 1,
+                    name: '雪球',
+                    breed: '仓鼠',
+                    age: '2岁8个月',
+                    gender: '公',
+                    weight: '45g',
+                    healthStatus: '良好',
+                    statusColor: 'text-green-600',
+                    avatar: 'https://picsum.photos/id/237/100/100'
+                },
+                {
+                    id: 2,
+                    name: '小虎',
+                    breed: '金毛',
+                    age: '4岁3个月',
+                    gender: '母',
+                    weight: '28kg',
+                    healthStatus: '需定期检查',
+                    statusColor: 'text-orange-600',
+                    avatar: 'https://picsum.photos/id/1025/100/100'
+                },
+                {
+                    id: 3,
+                    name: '毛球',
+                    breed: '加菲猫',
+                    age: '2岁10个月',
+                    gender: '母',
+                    weight: '4.2kg',
+                    healthStatus: '已完成免疫',
+                    statusColor: 'text-blue-600',
+                    avatar: 'https://picsum.photos/id/1074/100/100'
+                }
+            ];
+
+            const renderDashboard = () => (
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-xl font-medium text-gray-800">我的宠物家族</h1>
+                        <div className="flex gap-3">
+                            <button className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm">
+                                <i className="fas fa-heart mr-1"></i>
+                                收藏档案
+                            </button>
+                            <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm">
+                                <i className="fas fa-trash mr-1"></i>
+                                批量删除
+                            </button>
+                            <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm">
+                                <i className="fas fa-download mr-1"></i>
+                                导出数据
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6 mb-8">
+                        {pets.map((pet) => (
+                            <div key={pet.id} className="bg-white rounded-lg p-4 shadow-sm border">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center">
+                                        <input type="checkbox" className="mr-3 w-4 h-4 text-blue-600 rounded" />
+                                        <img src={pet.avatar} alt={pet.name} className="w-16 h-16 rounded-full object-cover" />
+                                    </div>
+                                    <div className="flex gap-1">
+                                        <button className="w-6 h-6 hover:bg-gray-100 rounded flex items-center justify-center">
+                                            <i className="fas fa-edit text-gray-400 text-xs"></i>
+                                        </button>
+                                        <button className="w-6 h-6 hover:bg-gray-100 rounded flex items-center justify-center">
+                                            <i className="fas fa-trash text-gray-400 text-xs"></i>
+                                        </button>
+                                        <input type="checkbox" className="w-4 h-4 text-blue-600 rounded mt-1" />
+                                    </div>
+                                </div>
+                                
+                                <h3 className="font-medium text-gray-800 mb-1">{pet.name}</h3>
+                                <p className="text-sm text-gray-600 mb-3">{pet.breed}</p>
+                                
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">年龄</span>
+                                        <span className="text-gray-800">{pet.age}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">性别</span>
+                                        <span className="text-gray-800">{pet.gender}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">体重</span>
+                                        <span className="text-gray-800">{pet.weight}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600">健康状况</span>
+                                        <span className={`text-sm ${pet.statusColor}`}>{pet.healthStatus}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                        <div className="flex items-start">
+                            <i className="fas fa-lightbulb text-yellow-500 mt-1 mr-2"></i>
+                            <div>
+                                <h3 className="font-medium text-gray-800 mb-2">贴心小提示</h3>
+                                <ul className="text-sm text-gray-600 space-y-1">
+                                    <li>• 定期更新体重可帮助监测宠物健康状况</li>
+                                    <li>• 点击宠物头像可查看详细成长历程（功能开发中）</li>
+                                    <li>• 宠物疫苗信息请在编辑宠物档案时详细填写</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderStatistics = () => (
+                <div className="p-6">
+                    <h1 className="text-xl font-medium text-gray-800 mb-6">宠物统计详情</h1>
+                    
+                    <div className="grid grid-cols-2 gap-8 mb-8">
+                        <div className="bg-white rounded-lg p-6 shadow-sm border">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4">宠物数量统计</h2>
+                            <div className="text-center">
+                                <div className="text-4xl font-bold text-pink-300 mb-2">3</div>
+                                <p className="text-gray-600">当前已登记的宠物总数</p>
+                                <div className="mt-6 grid grid-cols-2 gap-4 text-center">
+                                    <div>
+                                        <div className="text-sm text-gray-600">宠物数量</div>
+                                        <div className="text-lg font-medium">1</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-gray-600">其他宠物</div>
+                                        <div className="text-lg font-medium">1</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-sm text-gray-600">健康状况良好</div>
+                                        <div className="text-lg font-medium">1</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-6 shadow-sm border">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4">宠物年龄分布</h2>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-600">0-1岁</span>
+                                    <div className="flex-1 mx-3 h-8 bg-pink-200 rounded"></div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-600">1-2岁</span>
+                                    <div className="flex-1 mx-3 h-6 bg-pink-200 rounded"></div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-600">2-3岁</span>
+                                    <div className="flex-1 mx-3 h-4 bg-pink-200 rounded"></div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-600">3岁以上</span>
+                                    <div className="flex-1 mx-3 h-6 bg-pink-200 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-6 shadow-sm border">
+                        <h2 className="text-lg font-medium text-gray-800 mb-4">健康状况分析</h2>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">良好</span>
+                                    <span className="text-sm font-medium text-green-600">33%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-green-500 h-2 rounded-full" style={{width: '33%'}}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">需检查</span>
+                                    <span className="text-sm font-medium text-yellow-600">33%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-yellow-500 h-2 rounded-full" style={{width: '33%'}}></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">已完成</span>
+                                    <span className="text-sm font-medium text-blue-600">33%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '33%'}}></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderHelpCenter = () => (
+                <div className="p-6">
+                    <h1 className="text-xl font-medium text-gray-800 mb-6">帮助中心</h1>
+                    
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-lg p-6 shadow-sm border">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                                <i className="fas fa-question-circle text-blue-500 mr-2"></i>
+                                如何添加新档案
+                            </h2>
+                            <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                                <li>点击页面顶部或右上角的"新增宠物档案"按钮</li>
+                                <li>在弹出的表单中填写宠物的基本信息，包括名称、品种、出生日期等</li>
+                                <li>确保所有必填项（标有*的字段）已填写完整</li>
+                                <li>点击"保存"按钮完成新档案的创建</li>
+                            </ol>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-6 shadow-sm border">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                                <i className="fas fa-question-circle text-blue-500 mr-2"></i>
+                                如何编辑与删除
+                            </h2>
+                            <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
+                                <li>在宠物卡片上点击右上角"编辑"按钮（铅笔图标）</li>
+                                <li>点击该按钮打开编辑菜单，修改需要更新的信息</li>
+                                <li>点击"保存"按钮保存修改</li>
+                                <li>要删除档案，点击宠物卡片右上角的"删除"按钮（垃圾桶图标）</li>
+                                <li>在确认对话框中点击"确认删除"完成删除操作</li>
+                            </ol>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-6 shadow-sm border">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4">常见问题与提示</h2>
+                            
+                            <div className="space-y-4 text-sm text-gray-600">
+                                <div>
+                                    <strong className="text-gray-800">如何计算宠物年龄？</strong>
+                                    <p>系统会根据您输入的出生日期自动计算宠物的精确年龄，精确到月和日。</p>
+                                </div>
+                                <div>
+                                    <strong className="text-gray-800">如何更换宠物照片？</strong>
+                                    <p>编辑宠物档案后，点击"更换照片"按钮即可上传新的宠物照片（功能开发中）。</p>
+                                </div>
+                                <div>
+                                    <strong className="text-gray-800">可以导出宠物数据吗？</strong>
+                                    <p>是的，点击底部导航栏中的"导出数据"按钮，即可将所有宠物信息导出为JSON文件。</p>
+                                </div>
+                                <div>
+                                    <strong className="text-gray-800">如何批量管理多个宠物？</strong>
+                                    <p>可以通过选择卡片左上角的复选框，选中多个宠物后点击"批量删除"按钮进行操作。</p>
+                                </div>
+                                <div>
+                                    <strong className="text-gray-800">系统支持哪些宠物类型？</strong>
+                                    <p>系统支持所有常见宠物类型，包括猫狗、兔子、鸟类、鱼类、爬行动物等。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderManagement = () => (
+                <div className="p-6">
+                    <h1 className="text-xl font-medium text-gray-800 mb-6">管理宠物档案</h1>
+                    
+                    <div className="mb-6">
+                        <p className="text-gray-600 mb-4">在此页面，您可以直接添加或编辑现有宠物的详细信息。请填写表单以创建新的宠物档案。</p>
+                        <button className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm">
+                            <i className="fas fa-plus mr-1"></i>
+                            新增档案
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                        <table className="min-w-full">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">品种</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">年龄</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {pets.map((pet) => (
+                                    <tr key={pet.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pet.name}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pet.breed}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pet.age}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button className="inline-flex items-center px-3 py-1 border border-yellow-300 text-yellow-700 rounded-full text-xs">
+                                                <i className="fas fa-edit mr-1"></i>
+                                                编辑
+                                            </button>
+                                            <button className="ml-2 inline-flex items-center px-3 py-1 border border-red-300 text-red-700 rounded-full text-xs">
+                                                <i className="fas fa-trash mr-1"></i>
+                                                删除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex">
+                    {/* Sidebar */}
+                    <div className="w-48 bg-green-100 min-h-screen">
+                        <div className="p-4">
+                            <h2 className="text-lg font-medium text-gray-800 mb-4">宠物档案系统</h2>
+                            
+                            <nav className="space-y-2">
+                                <button 
+                                    onClick={() => setCurrentView('dashboard')}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm ${
+                                        currentView === 'dashboard' ? 'bg-white text-gray-800' : 'text-gray-600 hover:bg-white'
+                                    }`}
+                                >
+                                    <i className="fas fa-folder mr-3"></i>
+                                    宠物档案
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('statistics')}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm ${
+                                        currentView === 'statistics' ? 'bg-white text-gray-800' : 'text-gray-600 hover:bg-white'
+                                    }`}
+                                >
+                                    <i className="fas fa-chart-bar mr-3"></i>
+                                    统计分析
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('help')}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm ${
+                                        currentView === 'help' ? 'bg-white text-gray-800' : 'text-gray-600 hover:bg-white'
+                                    }`}
+                                >
+                                    <i className="fas fa-question-circle mr-3"></i>
+                                    帮助中心
+                                </button>
+                                <button 
+                                    onClick={() => setShowIntroductionModal(true)}
+                                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm ${
+                                        currentView === 'introduction' ? 'bg-white text-gray-800' : 'text-gray-600 hover:bg-white'
+                                    }`}
+                                >
+                                    <i className="fas fa-info-circle mr-3"></i>
+                                    主题介绍
+                                </button>
+                            </nav>
+                        </div>
+                        
+                        <div className="absolute bottom-4 left-4 text-xs text-gray-500">
+                            <div>宠物档案系统 v1.0.0</div>
+                            <div>开发者：PetLover Team</div>
+                            <div>联系邮箱</div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col">
+                        {/* Top Navigation */}
+                        <header className="bg-white shadow-sm border-b">
+                            <div className="px-6 py-3 flex justify-between items-center">
+                                <nav className="flex space-x-8">
+                                    <button 
+                                        onClick={() => setCurrentView('management')}
+                                        className="text-gray-600 hover:text-gray-800 font-medium"
+                                    >
+                                        新增/编辑
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('statistics')}
+                                        className="text-gray-600 hover:text-gray-800 font-medium"
+                                    >
+                                        数据统计
+                                    </button>
+                                </nav>
+                                
+                                <div className="flex items-center space-x-3">
+                                    <button className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm">
+                                        <i className="fas fa-heart mr-1"></i>
+                                        收藏档案
+                                    </button>
+                                    <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm">
+                                        <i className="fas fa-trash mr-1"></i>
+                                        批量删除
+                                    </button>
+                                    <button className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm">
+                                        <i className="fas fa-download mr-1"></i>
+                                        导出数据
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* Content Area */}
+                        <main className="flex-1">
+                            {currentView === 'dashboard' && renderDashboard()}
+                            {currentView === 'statistics' && renderStatistics()}
+                            {currentView === 'help' && renderHelpCenter()}
+                            {currentView === 'management' && renderManagement()}
+                        </main>
+
+                        {/* Footer */}
+                        <footer className="bg-white border-t">
+                            <div className="px-6 py-3 flex justify-between items-center text-sm text-gray-500">
+                                <span>当前共有 3 个宠物档案</span>
+                            </div>
+                        </footer>
+                    </div>
+
+                    {/* Introduction Modal */}
+                    {showIntroductionModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-xl font-medium text-gray-800">萌宠档案管理系统介绍</h2>
+                                        <button 
+                                            onClick={() => setShowIntroductionModal(false)}
+                                            className="text-gray-400 hover:text-gray-600"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        <div className="flex items-start">
+                                            <img src="https://picsum.photos/id/1074/200/150" alt="Pet" className="w-32 h-24 object-cover rounded-lg mr-4" />
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-800 mb-2 flex items-center">
+                                                    <i className="fas fa-bell text-yellow-500 mr-2"></i>
+                                                    健康提醒
+                                                </h3>
+                                                <p className="text-gray-600 text-sm">系统会根据宠物的生日信息，智能生成疫苗接种、体检、驱虫等重要提醒事项，让您不错过任何重要的护理时间点，确保爱宠健康成长。</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start">
+                                            <i className="fas fa-book text-blue-500 text-xl mr-4 mt-2"></i>
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-800 mb-2 flex items-center">
+                                                    <i className="fas fa-book text-blue-500 mr-2"></i>
+                                                    宝贝记忆册
+                                                </h3>
+                                                <p className="text-gray-600 text-sm">为您爱宠建立专属相册，记录每个珍贵的时刻，重要的里程碑，通过时间轴查看宠物的成长历程，分享爱宠生活的美好时光。</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start">
+                                            <i className="fas fa-camera text-pink-500 text-xl mr-4 mt-2"></i>
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-800 mb-2 flex items-center">
+                                                    <i className="fas fa-heart text-pink-500 mr-2"></i>
+                                                    记录成长瞬间
+                                                </h3>
+                                                <p className="text-gray-600 text-sm">记录宠物的每一个成长瞬间和重要时刻，通过家庭档案管理系统，您可以追踪宠物从小到大成长的点点滴滴，包括体重变化、健康状况、重要事件等，让回忆永远保存。</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start">
+                                            <i className="fas fa-chart-line text-teal-500 text-xl mr-4 mt-2"></i>
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-800 mb-2 flex items-center">
+                                                    <i className="fas fa-chart-line text-teal-500 mr-2"></i>
+                                                    数据统计分析
+                                                </h3>
+                                                <p className="text-gray-600 text-sm">系统自动分析宠物的健康数据、活动规律等信息，生成直观的数据报表，帮助您更全面了解爱宠的生活状态，及时发现异常并采取相应措施。</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 text-center">
+                                        <h3 className="text-lg font-medium text-gray-800 mb-2">开始使用萌宠档案系统</h3>
+                                        <p className="text-gray-600 mb-4">只需简单几步，即可创建您心爱的专属档案，记录成长点滴，守护健康生活。</p>
+                                        <button className="px-6 py-2 bg-pink-100 text-pink-600 rounded-lg">
+                                            立即体验
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg max-w-md w-full mx-4">
+                                <div className="p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-xl font-medium text-gray-800">编辑宠物档案</h2>
+                                        <button 
+                                            onClick={() => setShowEditModal(false)}
+                                            className="text-gray-400 hover:text-gray-600"
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="flex justify-center mb-6">
+                                        <img src="https://picsum.photos/id/237/80/80" alt="Pet Avatar" className="w-20 h-20 rounded-full object-cover" />
+                                    </div>
+
+                                    <form className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                宠物名称 *
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                defaultValue="雪球" 
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                宠物品种 *
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                defaultValue="仓鼠" 
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    出生日期 *
+                                                </label>
+                                                <input 
+                                                    type="date" 
+                                                    defaultValue="2023-01-01" 
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    性别 *
+                                                </label>
+                                                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                                                    <option>请选择</option>
+                                                    <option>公</option>
+                                                    <option>母</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    体重 *
+                                                </label>
+                                                <input 
+                                                    type="text" 
+                                                    defaultValue="45g" 
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    健康状况 *
+                                                </label>
+                                                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500">
+                                                    <option>请选择</option>
+                                                    <option>良好</option>
+                                                    <option>需检查</option>
+                                                    <option>已完成免疫</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-end space-x-3 pt-4">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowEditModal(false)}
+                                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                type="submit"
+                                                className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+                                            >
+                                                保存
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

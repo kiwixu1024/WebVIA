@@ -1,0 +1,704 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体能测试中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('project');
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [deleteProjectIndex, setDeleteProjectIndex] = useState(null);
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    name: '俯卧撑',
+                    description: '双手撑地，身体保持平直，上下运动',
+                    image: 'https://picsum.photos/id/1/400/250',
+                    category: '力量',
+                    standards: '男:≥40个&lt;分,女:≥25个/分钟',
+                    onDelete: () => {
+                        setDeleteProjectIndex(0);
+                        setShowDeleteModal(true);
+                    },
+                    onEdit: () => {
+                        console.log('Edit project 1');
+                    },
+                    onDeleteProject: () => {
+                        setProjects(projects.filter(p => p.id !== 1));
+                    }
+                },
+                {
+                    id: 2,
+                    name: '仰卧起坐',
+                    description: '仰卧，膝盖弯曲，上身起坐',
+                    image: 'https://picsum.photos/id/2/400/250',
+                    category: '力量',
+                    standards: '男:≥35个/分钟,女:≥30个/分钟',
+                    onDelete: () => {
+                        setDeleteProjectIndex(1);
+                        setShowDeleteModal(true);
+                    },
+                    onEdit: () => {
+                        console.log('Edit project 2');
+                    },
+                    onDeleteProject: () => {
+                        setProjects(projects.filter(p => p.id !== 2));
+                    }
+                },
+                {
+                    id: 3,
+                    name: '引体向上',
+                    description: '双手握杠，身体向上拉，下巴过杠',
+                    image: 'https://picsum.photos/id/3/400/250',
+                    category: '力量',
+                    standards: '男:≥10个,女:≥5个',
+                    onDelete: () => {
+                        setDeleteProjectIndex(2);
+                        setShowDeleteModal(true);
+                    },
+                    onEdit: () => {
+                        console.log('Edit project 3');
+                    },
+                    onDeleteProject: () => {
+                        setProjects(projects.filter(p => p.id !== 3));
+                    }
+                },
+                {
+                    id: 4,
+                    name: '1000米跑',
+                    description: '1000米跑道，计时完成',
+                    image: 'https://picsum.photos/id/4/400/250',
+                    category: '耐力',
+                    standards: '男:≤4分钟,女:≤5分钟',
+                    onDelete: () => {
+                        setDeleteProjectIndex(3);
+                        setShowDeleteModal(true);
+                    },
+                    onEdit: () => {
+                        console.log('Edit project 4');
+                    },
+                    onDeleteProject: () => {
+                        setProjects(projects.filter(p => p.id !== 4));
+                    }
+                },
+                {
+                    id: 5,
+                    name: '立定跳远',
+                    description: '双脚同时起跳，测量距离',
+                    image: 'https://picsum.photos/id/5/400/250',
+                    category: '爆发力',
+                    standards: '男:≥2.2米,女:≥1.8米',
+                    onDelete: () => {
+                        setDeleteProjectIndex(4);
+                        setShowDeleteModal(true);
+                    },
+                    onEdit: () => {
+                        console.log('Edit project 5');
+                    },
+                    onDeleteProject: () => {
+                        setProjects(projects.filter(p => p.id !== 5));
+                    }
+                }
+            ]);
+
+            const renderContent = () => {
+                if (currentPage === 'help') {
+                    return (
+                        <div className="bg-white rounded-lg shadow-sm p-6">
+                            <h2 className="text-xl font-medium mb-4 text-blue-600 flex items-center">
+                                🗂️ 帮助与说明
+                            </h2>
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 className="font-medium text-blue-800 mb-3 flex items-center">
+                                        👨\u200d🏫 操作指南
+                                    </h3>
+                                    <ol className="text-blue-700 space-y-2">
+                                        <li>1. 添加测试项目：点击"添加测试项目"按钮，填写项目信息并保存。</li>
+                                        <li>2. 编辑测试项目：在项目卡片上点击"编辑项目"按钮修改信息。</li>
+                                        <li>3. 删除测试项目：在项目卡片上点击"删除项目"按钮，确认后删除。</li>
+                                        <li>4. 查看统计数据：在右侧面板可查看当前统计数据，点击"刷新数据"更新。</li>
+                                        <li>5. 导出报告：点击"导出报告"按钮将当前数据导出为PDF文件。</li>
+                                    </ol>
+                                </div>
+                                
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 relative">
+                                    <span className="inline-block bg-yellow-500 text-white text-xs px-2 py-1 rounded-full -top-2 left-2 absolute">
+                                        ℹ️ FAQ
+                                    </span>
+                                    <h3 className="font-medium text-yellow-800 mb-3 flex items-center">
+                                        🧨 常见问题
+                                    </h3>
+                                    <div className="text-yellow-700 space-y-2">
+                                        <div>
+                                            <strong>Q:</strong> 如何添加自定义评分标准？
+                                        </div>
+                                        <div>
+                                            <strong>A:</strong> 在添加或编辑项目时，可以在"评分标准"字段中输入自定义规则。
+                                        </div>
+                                        <div>
+                                            <strong>Q:</strong> 是否可以导入历史测试数据？
+                                        </div>
+                                        <div>
+                                            <strong>A:</strong> 是的，在"成绩统计"页面有批量导入功能，支持Excel格式。
+                                        </div>
+                                        <div>
+                                            <strong>Q:</strong> 如何对比班级的成绩？
+                                        </div>
+                                        <div>
+                                            <strong>A:</strong> 在"成绩统计"页面选择多个班级，系统会自动生成对比图表。
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4 relative">
+                                    <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded-full -top-2 left-2 absolute">
+                                        🔵 评分细则
+                                    </span>
+                                    <h3 className="font-medium text-green-800 mb-3 flex items-center">
+                                        🔥 力量测试项目
+                                    </h3>
+                                    <ul className="text-green-700 space-y-1">
+                                        <li>• 力量类测试项目：根据完成次数评分，标准动作才计入有效次数。</li>
+                                        <li>• 耐力类测试项目：根据完成时间和心率评分，时间越短分数越高。</li>
+                                        <li>• 爆发力测试项目：根据距离或高度评分，数值越大分数越高。</li>
+                                        <li>• 灵敏度测试项目：根据反应时间和完成质量综合评分。</li>
+                                    </ul>
+                                    <p className="text-sm text-green-600 mt-2">
+                                        *具体评分请参考各项目卡片中的评分标准。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                if (currentPage === 'statistics') {
+                    return (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="font-medium text-blue-700 mb-4">📊 历史成绩趋势</h3>
+                                    <div className="bg-gray-100 rounded-lg p-12 text-center">
+                                        <div className="text-gray-400 mb-2 text-lg">
+                                            📊 铲合/原型
+                                        </div>
+                                        <div className="text-gray-500 text-sm">
+                                            请选择学员和时间段查看成绩趋势
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="font-medium text-blue-700 mb-4">📊 项目对比分析</h3>
+                                    <div className="bg-gray-100 rounded-lg p-12 text-center">
+                                        <div className="text-gray-400 mb-2 text-lg">
+                                            📊 项目对比分析
+                                        </div>
+                                        <div className="text-gray-500 text-sm">
+                                            请选择需要对比的项目
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="font-medium text-blue-700 mb-4">📊 班级成绩分布</h3>
+                                    <div className="bg-gray-100 rounded-lg p-12 text-center">
+                                        <div className="text-gray-400 mb-2 text-lg">
+                                            📊 班级成绩分布
+                                        </div>
+                                        <div className="text-gray-500 text-sm">
+                                            请选择班级和测试项目
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="font-medium text-blue-700 mb-4">📊 达标率分析</h3>
+                                    <div className="bg-gray-100 rounded-lg p-12 text-center">
+                                        <div className="text-gray-400 mb-2 text-lg">
+                                            📊 达标率分析
+                                        </div>
+                                        <div className="text-gray-500 text-sm">
+                                            请选择测试周期查看达标情况
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                // Project management page
+                return (
+                    <div className="space-y-6">
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-800 flex items-center justify-center">
+                                🏃 体能测试项目
+                            </h2>
+                            <p className="text-gray-600 mt-2">体能测试中心 - 提升您的身体素质</p>
+                        </div>
+                        
+                        <div className="mb-8">
+                            <p className="text-sm text-gray-600 mb-4">
+                                本平台提供标准化的体能测试流程和评估工具，帮助教练、学校和组织有效<span className="underline cursor-pointer"></span>体能测试项目。通过科学的测量方法和数据分析，
+                                您可以追踪个人或团队的体能发展趋势，制定有针对性的训练计划。
+                            </p>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg shadow-sm p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex items-center">
+                                    <span className="text-blue-600 mr-2">📊</span>
+                                    <h3 className="text-xl font-medium">体能测试项目</h3>
+                                </div>
+                                <button 
+                                    onClick={() => setCurrentPage('add')}
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center text-sm"
+                                >
+                                    + 添加测试项目
+                                </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {projects.map((project, index) => (
+                                    <div key={`project-${index}`} className="border rounded-lg overflow-hidden">
+                                        <img 
+                                            src={project.image} 
+                                            alt={project.name}
+                                            className="w-full h-52 object-cover"
+                                        />
+                                        <div className="p-4">
+                                            <h4 className="font-medium mb-2">{project.name}</h4>
+                                            <p className="text-gray-600 text-sm mb-3">{project.description}</p>
+                                            <div className="mb-3">
+                                                <span className="inline-block bg-blue-100 text-blue-700 text-sm px-2 py-1 rounded">
+                                                    {project.category}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-700 text-sm mb-4">
+                                                评分标准：<br/>
+                                                {project.standards}
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={project.onEdit}
+                                                    className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 flex items-center"
+                                                >
+                                                    💾 编辑项目
+                                                </button>
+                                                <button 
+                                                    onClick={deleteProjectIndex === project.id ? () => {} : project.onDelete}
+                                                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex items-center"
+                                                >
+                                                    🗑️ 删除项目
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderRightPanel = () => {
+                if (currentPage === 'statistics') {
+                    return (
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-medium flex items-center">
+                                        📊 测试成绩统计
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                                            🔄 刷新数据
+                                        </button>
+                                        <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center">
+                                            📥 导出报告
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 className="font-medium mb-3">⭐ 平均成绩趋势</h4>
+                                        <div className="bg-white rounded border p-4 min-h-40">
+                                            <div className="text-sm text-gray-600 mb-2">
+                                                ☰ 线图选项
+                                            </div>
+                                            <div className="flex items-end justify-between h-20 space-x-2 overview-data">
+                                                {['俯卧撑', '仰卧起坐', '引体向上', '1000米跑', '立定跳远'].map((item, idx) => (
+                                                    <div key={item} className="flex flex-col items-center text-sm">
+                                                        <div 
+                                                            className="bg-blue-500 text-white rounded-t px-1.5 py-1 w-2"
+                                                            style={{ height: `${80 + idx * 15}px` }}
+                                                        ></div>
+                                                        <div className="text-xs mt-1">{item}</div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 className="font-medium mb-3">📊 项目得分对比</h4>
+                                        <div className="gradient-chart"></div>
+                                        <p className="text-xs text-gray-500 mt-2 text-center">Avg &gt; 高度或深度测制值</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 p-3 bg-blue-50 rounded">
+                                    <div className="flex items-start">
+                                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full mr-2 mt-0.5 flex-shrink-0">📍</span>
+                                        <div>
+                                            <h5 className="font-medium text-blue-700">🪙 测试小贴士</h5>
+                                            <p className="text-xs text-blue-600 mt-1">
+                                                定期进行体能测试，可以帮助您了解自身身体素质的变化趋势，及时调整训练计划，建议每月进行一次全面测试，每周进行重点项目检测。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return (
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-medium flex items-center">
+                                📊 测试成绩统计
+                            </h3>
+                            <div className="flex gap-2">
+                                <button className="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                                    🔄 刷新数据
+                                </button>
+                                <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 flex items-center">
+                                    📥 导出报告
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h4 className="font-medium mb-3">⭐ 平均成绩趋势</h4>
+                                <div className="relative">
+                                    <div className="w-full h-48 bg-gray-100 border rounded-lg relative overflow-hidden">
+                                        <svg className="absolute inset-0 w-full h-full">
+                                            <defs>
+                                                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stopColor="#3B82F6"/>
+                                                    <stop offset="50%" stopColor="#3B82F6"/>
+                                                    <stop offset="100%" stopColor="#11285F"/>
+                                                </linearGradient>
+                                            </defs>
+                                            <polyline
+                                                fill="none"
+                                                stroke="url(#lineGradient)"
+                                                strokeWidth="2"
+                                                points="40,120 70,105 100,90 130,85 160,75 190,65 220,45 250,35 280,30 310,15 340,10 370,20"
+                                            />
+                                            <polyline
+                                                fill="none"
+                                                stroke="black"
+                                                strokeWidth="2"
+                                                points="60,120 65,114"
+                                            />
+                                            <polyline
+                                                fill="none"
+                                                stroke="black"
+                                                strokeWidth="2"
+                                                points="140,90 145,85 150,85"
+                                            />
+                                            <polyline
+                                                fill="none"
+                                                stroke="black"
+                                                strokeWidth="2"
+                                                points="180,75 185,72 200,70"
+                                            />
+                                            <polyline
+                                                fill="none"
+                                                stroke="black"
+                                                strokeWidth="2"
+                                                points="280,30 285,28 295,27"
+                                            />
+                                        </svg>
+                                        <div className="absolute bottom-2 left-6 text-xs">
+                                            偏卧撑
+                                        </div>
+                                    </div>
+                                    <div className="mt-2 flex justify-between text-xs text-gray-600">
+                                        <span>俯卧撑</span>
+                                        <span>85次</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-4 p-3 bg-orange-50 rounded">
+                                    <div className="text-sm text-gray-600 mb-1">⚡ 分数趋势</div>
+                                    <div className="flex justify-between text-xs">
+                                        <span>偏卧撑</span>
+                                        <span>85及格</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span>仰卧起坐</span>
+                                        <span>78良好</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span>引体向上</span>
+                                        <span>63优秀</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span>1000米跑</span>
+                                        <span>46及格</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span>立定跳远</span>
+                                        <span>1.2及格</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 className="font-medium mb-3">📊 项目得分对比</h4>
+                                <img 
+                                    src="https://picsum.photos/id/7/400/200" 
+                                    alt="项目对比图"
+                                    className="w-full h-40 object-cover rounded"
+                                />
+                                <div className="mt-4 p-3 bg-blue-50 rounded text-center">
+                                    <span className="text-xs text-blue-600 inline-block mb-1">📊</span>
+                                    <span className="text-xs text-blue-700">灰色对比值高标正常锁结合的意思</span>
+                                    <p className="text-xs text-blue-600 mt-1">测试小贴士</p>
+                                    <p className="text-xs text-blue-600">
+                                        定期进行体能测试，可以帮助您了解自身身体素质的变化趋势，及时调整训练计划，建议每月进行一次全面测试，每周进行重点项目检测。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Delete confirmation modal
+            const confirmDelete = () => {
+                setShowDeleteModal(false);
+                if (deleteProjectIndex !== null) {
+                    setProjects(projects.filter(p => p.id !== deleteProjectIndex));
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                        <i className="fas fa-running text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-xl font-semibold text-gray-900">体能测试中心</h1>
+                                        <p className="text-sm text-gray-600">科学评估 · 全面提升</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center space-x-4">
+                                    <img 
+                                        src="https://picsum.photos/id/64/40/40" 
+                                        alt="用户头像" 
+                                        className="w-8 h-8 rounded-full cursor-pointer hover:scale-110"
+                                        onClick={() => setCurrentPage('project')}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Sidebar */}
+                    <div className="w-80 bg-gray-600 text-white shadow-sm">
+                        <div className="p-6">
+                            <div className="text-xs text-gray-300 mb-4">功能导航</div>
+                            
+                            <nav className="space-y-2">
+                                <button
+                                    onClick={() => setCurrentPage('project')}
+                                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                                        currentPage === 'project' ? 'bg-blue-700' : 'hover:bg-gray-500'
+                                    }`}
+                                >
+                                    <i className="fas fa-th列表 text-lg"></i>
+                                    <span>项目管理</span>
+                                </button>
+                                
+                                <button
+                                    onClick={() => {
+                                        setCurrentPage('statistics');
+                                        setShowDeleteModal(false);
+                                    }}
+                                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                                        currentPage === 'statistics' ? 'bg-blue-700' : 'hover:bg-gray-500'
+                                    }`}
+                                >
+                                    <i className="fas fa-chart-line text-lg"></i>
+                                    <span>成绩统计</span>
+                                </button>
+                                
+                                <button
+                                    onClick={() => setCurrentPage('help')}
+                                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                                        currentPage === 'help' ? 'bg-blue-700' : 'hover:bg-gray-500'
+                                    }`}
+                                >
+                                    <i className="fas fa-question-circle text-lg"></i>
+                                    <span>帮助说明</span>
+                                </button>
+                                
+                                <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-500 transition-colors">
+                                    <i className="fas fa-users text-lg"></i>
+                                    <span>用户管理</span>
+                                </button>
+                                
+                                <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-gray-500 transition-colors">
+                                    <i className="fas fa-cog text-lg"></i>
+                                    <span>系统设置</span>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 p-6">
+                        <div className="max-w-7xl mx-auto">
+                            {/* Page Title */}
+                            <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                                🏃 体能测试项目
+                            </h2>
+                            
+                            <p className="text-sm text-gray-600 mb-6">体能测试中心 - 提升您的身体素质</p>
+                            
+                            <p className="text-sm text-gray-700 max-w-2xl mb-8">
+                                本平台提供标准化的体能测试流程和评估工具，帮助教练、学校和组织有效管理体能测试项目。通过科学的测量方法和数据分析，您可以追踪个人或团队的体能发展趋势，制定有针对性的训练计划。
+                            </p>
+                            
+                            {/* Content */}
+                            <div className="bg-white rounded-lg shadow-sm">
+                                <div className="flex justify-between items-center p-6 border-b">
+                                    <h3 className="text-xl font-medium">体能测试项目</h3>
+                                    <button 
+                                        onClick={() => setCurrentPage('add')}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center text-sm"
+                                    >
+                                        + 添加测试项目
+                                    </button>
+                                </div>
+                                
+                                <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {projects.map((project, index) => (
+                                        <div key={`project-${index}`} className="border rounded-lg overflow-hidden">
+                                            <img 
+                                                src={project.image} 
+                                                alt={project.name}
+                                                className="w-full h-52 object-cover"
+                                            />
+                                            <div className="p-4">
+                                                <h4 className="font-medium mb-2">{project.name}</h4>
+                                                <p className="text-gray-600 text-sm mb-3">{project.description}</p>
+                                                <div className="mb-3">
+                                                    <span className="inline-block bg-blue-100 text-blue-700 text-sm px-2 py-1 rounded">
+                                                        {project.category}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-700 text-sm mb-4">
+                                                    评分标准：<br/>
+                                                    {project.standards}
+                                                </p>
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        onClick={project.onEdit}
+                                                        className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 flex items-center"
+                                                    >
+                                                        💾 编辑项目
+                                                    </button>
+                                                    <button 
+                                                        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex items-center"
+                                                        onClick={deleteProjectIndex === project.id ? () => {} : project.onDelete}
+                                                    >
+                                                        🗑️ 删除项目
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Right Panel */}
+                            {renderRightPanel()}
+                        </div>
+                    </div>
+
+                    {/* Bottom Info */}
+                    <footer className="bg-gray-800 border-t border-gray-700 mt-16">
+                        <div className="max-w-7xl mx-auto px-6 py-6">
+                            <div className="flex justify-between items-center text-sm text-gray-400">
+                                <div>© 2023 体能测试中心. 保留所有权利.</div>
+                                <div className="flex space-x-6">
+                                    <a href="#" className="hover:text-white">隐私政策</a>
+                                    <a href="#" className="hover:text-white">使用条款</a>
+                                    <a href="#" className="hover:text-white">联系我们</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <h3 className="text-lg font-medium mb-4">确认删除</h3>
+                                <p className="text-gray-600 mb-6">您确定要删除测试项目 {projects.find(p => p.id === deleteProjectIndex)?.name} 吗？此操作不可撤销。</p>
+                                <div className="flex justify-end gap-2">
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                    >
+                                        确认删除
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

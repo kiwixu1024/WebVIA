@@ -1,0 +1,682 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养早餐创新榜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingItem, setEditingItem] = useState(null);
+            const [breakfastItems, setBreakfastItems] = useState([
+                {
+                    id: 1,
+                    name: "燕麦水果杯",
+                    image: "https://picsum.photos/id/102/300/200",
+                    tags: ["素食", "甜品"],
+                    protein: 8,
+                    carbs: 40,
+                    fat: 6,
+                    fiber: 5,
+                    rating: 4.5,
+                    description: "健康的燕麦配色彩纷呈的水果，富含膳食纤维和各种维生素，是一天能量的完美开端。"
+                },
+                {
+                    id: 2,
+                    name: "法式土司",
+                    image: "https://picsum.photos/id/135/300/200",
+                    tags: ["西式"],
+                    protein: 12,
+                    carbs: 35,
+                    fat: 15,
+                    fiber: 2,
+                    rating: 4,
+                    description: "经典法式土司配新鲜浆果"
+                },
+                {
+                    id: 3,
+                    name: "皮蛋瘦肉粥",
+                    image: "https://picsum.photos/id/88/300/200",
+                    tags: ["中式"],
+                    protein: 15,
+                    carbs: 30,
+                    fat: 8,
+                    fiber: 1,
+                    rating: 5,
+                    description: "传统中式营养粥品"
+                },
+                {
+                    id: 4,
+                    name: "牛油果吐司",
+                    image: "https://picsum.photos/id/225/300/200",
+                    tags: ["西式", "素食"],
+                    protein: 10,
+                    carbs: 25,
+                    fat: 18,
+                    fiber: 7,
+                    rating: 4.5,
+                    description: "健康美味的牛油果吐司"
+                },
+                {
+                    id: 5,
+                    name: "豆浆油条",
+                    image: "https://picsum.photos/id/312/300/200",
+                    tags: ["中式", "素食"],
+                    protein: 12,
+                    carbs: 38,
+                    fat: 14,
+                    fiber: 2,
+                    rating: 4,
+                    description: "经典中式早餐组合"
+                },
+                {
+                    id: 6,
+                    name: "蛋黄松饼",
+                    image: "https://picsum.photos/id/428/300/200",
+                    tags: ["西式", "甜品"],
+                    protein: 6,
+                    carbs: 45,
+                    fat: 12,
+                    fiber: 4,
+                    rating: 5,
+                    description: "香甜可口的蛋黄松饼"
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                name: "",
+                tags: [],
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                fiber: 0,
+                rating: 3,
+                imageUrl: "",
+                description: ""
+            });
+
+            const handleAddClick = () => {
+                setFormData({
+                    name: "",
+                    tags: [],
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                    fiber: 0,
+                    rating: 3,
+                    imageUrl: "",
+                    description: ""
+                });
+                setShowAddModal(true);
+            };
+
+            const handleEditClick = (item) => {
+                setEditingItem(item);
+                setFormData({
+                    name: item.name,
+                    tags: [...item.tags],
+                    protein: item.protein,
+                    carbs: item.carbs,
+                    fat: item.fat,
+                    fiber: item.fiber,
+                    rating: item.rating,
+                    imageUrl: item.image,
+                    description: item.description
+                });
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = (id) => {
+                setBreakfastItems(items => items.filter(item => item.id !== id));
+            };
+
+            const handleModalClose = () => {
+                setShowAddModal(false);
+                setShowEditModal(false);
+                setEditingItem(null);
+            };
+
+            const handleTagToggle = (tag) => {
+                setFormData(prev => ({
+                    ...prev,
+                    tags: prev.tags.includes(tag) 
+                        ? prev.tags.filter(t => t !== tag)
+                        : [...prev.tags, tag]
+                }));
+            };
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({
+                    ...prev,
+                    [field]: value
+                }));
+            };
+
+            const renderStars = (rating) => {
+                return [...Array(5)].map((_, i) => (
+                    <span key={i} className={`text-sm ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}>
+                        ★
+                    </span>
+                ));
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50" style={{fontFamily: 'Noto Sans SC, sans-serif'}}>
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200 px-4 py-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-6 h-6 bg-yellow-400 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">🍳</span>
+                                </div>
+                                <span className="text-lg font-medium text-gray-800">营养早餐创新榜</span>
+                            </div>
+                            <div className="flex items-center space-x-6 text-sm text-gray-600">
+                                <span>首页</span>
+                                <span>榜单展示</span>
+                                <span>内容管理</span>
+                                <span>统计分析</span>
+                                <span>帮助说明</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-48 bg-white border-r border-gray-200 min-h-screen">
+                            <div className="p-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2 text-blue-500 cursor-pointer">
+                                        <i className="fas fa-home text-xs"></i>
+                                        <span className="text-sm">首页</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer pl-4">
+                                        <span className="text-sm text-blue-500">展示区</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer pl-4">
+                                        <span className="text-sm">编辑区</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer pl-4">
+                                        <span className="text-sm">测试体作目录</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer mt-4">
+                                        <i className="fas fa-list text-xs"></i>
+                                        <span className="text-sm">分类</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer">
+                                        <i className="fas fa-edit text-xs"></i>
+                                        <span className="text-sm">编辑</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer">
+                                        <i className="fas fa-cog text-xs"></i>
+                                        <span className="text-sm">设置</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-600 cursor-pointer">
+                                        <i className="fas fa-question-circle text-xs"></i>
+                                        <span className="text-sm">帮助</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h1 className="text-xl font-medium text-gray-800">早餐菜单展示</h1>
+                                <div className="flex space-x-3">
+                                    <button 
+                                        onClick={handleAddClick}
+                                        className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded text-sm font-medium flex items-center space-x-1"
+                                    >
+                                        <span>✚</span>
+                                        <span>添加新早餐</span>
+                                    </button>
+                                    <div className="bg-blue-400 text-white px-4 py-2 rounded text-sm font-medium flex items-center space-x-1">
+                                        <span>⏸️</span>
+                                        <div>
+                                            <div className="text-xs">今日早餐</div>
+                                            <div className="text-xs">5 款早餐</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Breakfast Grid */}
+                            <div className="grid grid-cols-3 gap-6">
+                                {breakfastItems.map((item) => (
+                                    <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                        <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
+                                        <div className="p-4">
+                                            <h3 className="font-medium text-gray-800 mb-2">{item.name}</h3>
+                                            <div className="flex space-x-1 mb-3">
+                                                {item.tags.map((tag, index) => (
+                                                    <span key={index} className={`px-2 py-1 text-xs rounded ${
+                                                        tag === '中式' ? 'bg-blue-100 text-blue-600' :
+                                                        tag === '西式' ? 'bg-green-100 text-green-600' :
+                                                        tag === '素食' ? 'bg-green-100 text-green-600' :
+                                                        'bg-red-100 text-red-600'
+                                                    }`}>
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mb-3">
+                                                <span>蛋白质 {item.protein}g</span>
+                                                <span className="ml-3">碳水 {item.carbs}g</span>
+                                                <span className="ml-3">脂肪 {item.fat}g</span>
+                                                <span className="ml-3">纤维 {item.fiber}g</span>
+                                            </div>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center space-x-1">
+                                                    {renderStars(item.rating)}
+                                                    <span className="text-xs text-gray-500 ml-1">({item.rating})</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <button 
+                                                    onClick={() => handleEditClick(item)}
+                                                    className="flex-1 bg-blue-400 hover:bg-blue-500 text-white py-2 px-4 rounded text-sm font-medium"
+                                                >
+                                                    📝 编辑
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteClick(item.id)}
+                                                    className="flex-1 bg-red-400 hover:bg-red-500 text-white py-2 px-4 rounded text-sm font-medium"
+                                                >
+                                                    🗑️ 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 bg-white border-l border-gray-200 p-4">
+                            <div className="mb-6">
+                                <h3 className="font-medium text-gray-800 mb-3">数据概览</h3>
+                                <h4 className="font-medium text-gray-700 mb-3">最受欢迎 TOP3</h4>
+                                <div className="space-y-3">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                                        <img src="https://picsum.photos/id/88/40/40" alt="" className="w-10 h-10 rounded object-cover" />
+                                        <div>
+                                            <div className="text-sm font-medium">皮蛋瘦肉粥</div>
+                                            <div className="flex text-xs text-yellow-400">★★★★★</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold">2</div>
+                                        <img src="https://picsum.photos/id/312/40/40" alt="" className="w-10 h-10 rounded object-cover" />
+                                        <div>
+                                            <div className="text-sm font-medium">豆浆油条</div>
+                                            <div className="flex text-xs text-yellow-400">★★★★★</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center text-white text-xs font-bold">3</div>
+                                        <img src="https://picsum.photos/id/102/40/40" alt="" className="w-10 h-10 rounded object-cover" />
+                                        <div>
+                                            <div className="text-sm font-medium">燕麦水果杯</div>
+                                            <div className="flex text-xs text-yellow-400">★★★★☆</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-medium text-gray-700 mb-3">饮食类型占比</h4>
+                                <div className="w-32 h-32 mx-auto mb-3">
+                                    <div className="w-full h-full rounded-full" style={{
+                                        background: 'conic-gradient(#3b82f6 0deg 72deg, #10b981 72deg 144deg, #22c55e 144deg 216deg, #f59e0b 216deg 288deg, #ef4444 288deg 360deg)'
+                                    }}></div>
+                                </div>
+                                <div className="space-y-1 text-xs">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-3 h-3 bg-orange-400 rounded"></div>
+                                            <span>中式 (20%)</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-3 h-3 bg-blue-400 rounded"></div>
+                                            <span>西式 (30%)</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-3 h-3 bg-green-400 rounded"></div>
+                                            <span>素食 (25%)</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-3 h-3 bg-red-400 rounded"></div>
+                                            <span>甜品 (25%)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-medium text-gray-700 mb-3">今日小贴士</h4>
+                                <div className="bg-blue-50 p-3 rounded text-xs text-blue-600">
+                                    每天一杯牛奶再配点谷物，开启活力的一天。为身体补充一大早起所需要的一天营养补给
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="font-medium text-gray-700 mb-3">健康话题</h4>
+                                <div className="bg-green-50 p-3 rounded text-xs text-green-600">
+                                    营养均衡：始终坚持高质量营养摄取目标配方，多样性营养搭配，健康美味从早餐开始
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">添加新早餐</h2>
+                                    <button onClick={handleModalClose} className="text-gray-400 hover:text-gray-600">✕</button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入菜名称"
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
+                                            value={formData.name}
+                                            onChange={(e) => handleInputChange('name', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">菜系（可多选）</label>
+                                        <div className="flex space-x-2">
+                                            {['中式', '西式', '素食', '甜品'].map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => handleTagToggle(tag)}
+                                                    className={`px-3 py-1 text-sm rounded ${
+                                                        formData.tags.includes(tag) 
+                                                            ? 'bg-blue-400 text-white' 
+                                                            : 'bg-gray-100 text-gray-700'
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">营养成分（单位：g）</label>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <div>
+                                                <label className="text-xs text-gray-500">蛋白质</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.protein}
+                                                    onChange={(e) => handleInputChange('protein', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">碳水</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.carbs}
+                                                    onChange={(e) => handleInputChange('carbs', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">脂肪</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.fat}
+                                                    onChange={(e) => handleInputChange('fat', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">纤维</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.fiber}
+                                                    onChange={(e) => handleInputChange('fiber', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">评分评级：{formData.rating}</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="range" 
+                                                min="1" 
+                                                max="5" 
+                                                step="0.5"
+                                                className="w-full"
+                                                value={formData.rating}
+                                                onChange={(e) => handleInputChange('rating', parseFloat(e.target.value))}
+                                            />
+                                            <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>1</span>
+                                                <span>2</span>
+                                                <span>3</span>
+                                                <span>4</span>
+                                                <span>5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">图片URL</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入图片URL或留空使用任意图片"
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
+                                            value={formData.imageUrl}
+                                            onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">简文案说明</label>
+                                        <textarea 
+                                            placeholder="请简要描述这道早餐的特色"
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm h-20 resize-none"
+                                            value={formData.description}
+                                            onChange={(e) => handleInputChange('description', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex space-x-3 pt-4">
+                                        <button 
+                                            onClick={handleModalClose}
+                                            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded text-sm font-medium"
+                                        >
+                                            取消
+                                        </button>
+                                        <button className="flex-1 bg-orange-400 text-white py-2 px-4 rounded text-sm font-medium">
+                                            确定
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">编辑早餐</h2>
+                                    <button onClick={handleModalClose} className="text-gray-400 hover:text-gray-600">✕</button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">名称</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
+                                            value={formData.name}
+                                            onChange={(e) => handleInputChange('name', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">菜系（可多选）</label>
+                                        <div className="flex space-x-2">
+                                            {['中式', '西式', '素食', '甜品'].map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    onClick={() => handleTagToggle(tag)}
+                                                    className={`px-3 py-1 text-sm rounded ${
+                                                        formData.tags.includes(tag) 
+                                                            ? 'bg-blue-400 text-white' 
+                                                            : 'bg-gray-100 text-gray-700'
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">营养成分（单位：g）</label>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <div>
+                                                <label className="text-xs text-gray-500">蛋白质</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.protein}
+                                                    onChange={(e) => handleInputChange('protein', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">碳水</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.carbs}
+                                                    onChange={(e) => handleInputChange('carbs', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">脂肪</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.fat}
+                                                    onChange={(e) => handleInputChange('fat', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs text-gray-500">纤维</label>
+                                                <input 
+                                                    type="number" 
+                                                    className="w-full border border-gray-200 rounded px-2 py-1 text-sm"
+                                                    value={formData.fiber}
+                                                    onChange={(e) => handleInputChange('fiber', parseInt(e.target.value) || 0)}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-2">评分评级：{formData.rating}</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="range" 
+                                                min="1" 
+                                                max="5" 
+                                                step="0.5"
+                                                className="w-full"
+                                                value={formData.rating}
+                                                onChange={(e) => handleInputChange('rating', parseFloat(e.target.value))}
+                                            />
+                                            <div className="flex justify-between text-xs text-gray-400 mt-1">
+                                                <span>1</span>
+                                                <span>2</span>
+                                                <span>3</span>
+                                                <span>4</span>
+                                                <span>5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">图片URL</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
+                                            value={formData.imageUrl}
+                                            onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                                        />
+                                        {formData.imageUrl && (
+                                            <img src={formData.imageUrl} alt="预览" className="w-full h-32 object-cover mt-2 rounded" />
+                                        )}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm text-gray-700 mb-1">简文案说明</label>
+                                        <textarea 
+                                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm h-20 resize-none"
+                                            value={formData.description}
+                                            onChange={(e) => handleInputChange('description', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="flex space-x-3 pt-4">
+                                        <button 
+                                            onClick={handleModalClose}
+                                            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded text-sm font-medium"
+                                        >
+                                            取消
+                                        </button>
+                                        <button className="flex-1 bg-orange-400 text-white py-2 px-4 rounded text-sm font-medium">
+                                            保存
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <div className="bg-white border-t border-gray-200 px-6 py-3">
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>© 2023 营养早餐创新榜 版权所有</span>
+                            <div className="flex items-center space-x-4">
+                                <span>版本 1.0.0</span>
+                                <span>为早餐爱好者</span>
+                            </div>
+                        </div>
+                    </div>

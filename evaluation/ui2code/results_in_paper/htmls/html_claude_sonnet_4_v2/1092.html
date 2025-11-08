@@ -1,0 +1,528 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>头像定制生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useCallback } = React;
+
+        function App() {
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('卡通风');
+            const [editForm, setEditForm] = useState({
+                name: '科技风尚',
+                weight: 20,
+                hairColor: '#000000',
+                eyeColor: '#00FF00',
+                style: '严肃'
+            });
+            const [addForm, setAddForm] = useState({
+                name: '',
+                weight: 50,
+                hairColor: '#B45F06',
+                eyeColor: '#0000FF',
+                style: '改变'
+            });
+
+            const avatarData = [
+                { name: '梦幻雪数', icon: 'fas fa-snowflake', active: true },
+                { name: '科技风尚', icon: 'fas fa-rocket', active: false },
+                { name: '卡通形象', icon: 'fas fa-palette', active: false }
+            ];
+
+            const templates = {
+                '卡通风': [
+                    { name: '卡通风格1', image: 'https://picsum.photos/id/64/120/80' },
+                    { name: '卡通风格2', image: 'https://picsum.photos/id/65/120/80' }
+                ],
+                '写实风': [
+                    { name: '写实风格1', image: 'https://picsum.photos/id/177/120/80' },
+                    { name: '写实风格2', image: 'https://picsum.photos/id/200/120/80' }
+                ]
+            };
+
+            const handleEditClick = () => {
+                setEditForm({
+                    name: '科技风尚',
+                    weight: 20,
+                    hairColor: '#000000',
+                    eyeColor: '#00FF00',
+                    style: '严肃'
+                });
+                setShowEditModal(true);
+            };
+
+            const handleAddClick = () => {
+                setAddForm({
+                    name: '',
+                    weight: 50,
+                    hairColor: '#B45F06',
+                    eyeColor: '#0000FF',
+                    style: '改变'
+                });
+                setShowAddModal(true);
+            };
+
+            const handleEditSpecialClick = () => {
+                setEditForm({
+                    name: '梦幻雪数',
+                    weight: 70,
+                    hairColor: '#B45F06',
+                    eyeColor: '#0000FF',
+                    style: '改变'
+                });
+                setShowEditModal(true);
+            };
+
+            const currentTemplates = templates[selectedCategory] || [];
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex items-center justify-between h-16">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                        <i className="fas fa-user text-white text-sm"></i>
+                                    </div>
+                                    <span className="text-lg font-medium">头像定制生成器</span>
+                                </div>
+                                <div className="flex items-center space-x-8">
+                                    <a href="#" className="text-blue-500 hover:text-blue-600">预览</a>
+                                    <a href="#" className="text-gray-600 hover:text-gray-700">编辑</a>
+                                    <a href="#" className="text-gray-600 hover:text-gray-700">设计</a>
+                                    <a href="#" className="text-gray-600 hover:text-gray-700">数据</a>
+                                </div>
+                                <div className="flex items-center">
+                                    <img src="https://picsum.photos/id/91/32/32" alt="Profile" className="w-8 h-8 rounded-full" />
+                                    <i className="fas fa-chevron-down ml-2 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="grid grid-cols-12 gap-6">
+                            {/* Left Sidebar */}
+                            <div className="col-span-3">
+                                {/* Gallery Images */}
+                                <div className="bg-white rounded-lg p-4 mb-6">
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div className="relative">
+                                            <img src="https://picsum.photos/id/180/120/80" alt="梦幻雪数" className="w-full h-20 object-cover rounded" />
+                                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">名称：梦幻雪数</div>
+                                        </div>
+                                        <div className="relative">
+                                            <img src="https://picsum.photos/id/175/120/80" alt="科技风尚" className="w-full h-20 object-cover rounded" />
+                                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">名称：科技风尚</div>
+                                        </div>
+                                        <div className="relative">
+                                            <img src="https://picsum.photos/id/188/120/80" alt="卡通形象" className="w-full h-20 object-cover rounded" />
+                                            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">名称：卡通形象</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* My Avatar List */}
+                                <div className="bg-white rounded-lg p-4 mb-6">
+                                    <h3 className="font-medium mb-4">我的头像列表</h3>
+                                    <div className="space-y-3">
+                                        {avatarData.map((avatar, index) => (
+                                            <div key={index} className="flex items-center space-x-3">
+                                                <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center">
+                                                    <i className={`${avatar.icon} text-white text-sm`}></i>
+                                                </div>
+                                                <span className="text-sm">{avatar.name}</span>
+                                                <div className="flex space-x-1 ml-auto">
+                                                    <button 
+                                                        onClick={avatar.name === '科技风尚' ? handleEditClick : handleEditSpecialClick}
+                                                        className="text-blue-500 hover:text-blue-600"
+                                                    >
+                                                        <i className="fas fa-edit text-xs"></i>
+                                                    </button>
+                                                    <div className="w-3 h-3 bg-orange-400 rounded"></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Template Categories */}
+                                <div className="bg-white rounded-lg p-4 mb-6">
+                                    <h3 className="font-medium mb-4">模板分类</h3>
+                                    <select 
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded text-sm"
+                                    >
+                                        <option value="卡通风">卡通风</option>
+                                        <option value="写实风">写实风</option>
+                                    </select>
+                                    <div className="grid grid-cols-2 gap-2 mt-4">
+                                        {currentTemplates.map((template, index) => (
+                                            <div key={index} className="text-center">
+                                                <img src={template.image} alt={template.name} className="w-full h-20 object-cover rounded mb-1" />
+                                                <div className="text-xs text-gray-600">{template.name}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Add New Avatar Button */}
+                                <button 
+                                    onClick={handleAddClick}
+                                    className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 text-sm"
+                                >
+                                    <i className="fas fa-plus mr-2"></i>添加新头像
+                                </button>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="col-span-6">
+                                <div className="bg-white rounded-lg p-6">
+                                    <h2 className="text-xl font-medium mb-6">编辑区</h2>
+                                    
+                                    {/* Property Panel */}
+                                    <div className="mb-6">
+                                        <h3 className="font-medium mb-4">属性面板</h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">定制名称</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="输入定制名称"
+                                                    className="w-full p-2 border border-gray-300 rounded text-sm"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">定制权重：50</label>
+                                                <input 
+                                                    type="range" 
+                                                    min="0" 
+                                                    max="100" 
+                                                    defaultValue="50"
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">发色</label>
+                                                <div className="w-full h-8 bg-yellow-800 rounded"></div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">瞳色</label>
+                                                <div className="w-full h-8 bg-blue-600 rounded"></div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">风格选择</label>
+                                                <select className="w-full p-2 border border-gray-300 rounded text-sm">
+                                                    <option>改变</option>
+                                                    <option>严肃</option>
+                                                    <option>活泼</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-600 mb-1">上传自定义图标</label>
+                                                <button className="w-full p-2 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50">
+                                                    <i className="fas fa-upload mr-2"></i>选择文件
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex space-x-3 mt-6">
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">应用风格</button>
+                                            <button className="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">重置</button>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Preview */}
+                                    <div className="text-center">
+                                        <div className="inline-block relative">
+                                            <img 
+                                                src="https://picsum.photos/id/190/200/200" 
+                                                alt="头像预览"
+                                                className="w-48 h-48 rounded-full border-4 border-blue-300"
+                                            />
+                                        </div>
+                                        <div className="text-gray-600 mt-4 mb-6">未命名头像</div>
+                                        <div className="flex justify-center space-x-3">
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
+                                                <i className="fas fa-download mr-2"></i>下载PNG
+                                            </button>
+                                            <button className="bg-gray-700 text-white px-4 py-2 rounded text-sm hover:bg-gray-800">
+                                                <i className="fas fa-download mr-2"></i>下载SVG
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="col-span-3">
+                                <div className="bg-white rounded-lg p-4 mb-6">
+                                    <h3 className="font-medium mb-4">统计数据</h3>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <div className="text-sm text-gray-600">今日头像总数</div>
+                                            <div className="text-2xl font-bold text-blue-500">1,280次</div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm">未满档/编辑运行开源</span>
+                                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">?</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm">平淡风</span>
+                                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">?</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm">复古风</span>
+                                                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                                    <span className="text-white text-xs">?</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm">二次元</span>
+                                                <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        <a href="#" className="text-blue-500 text-sm hover:underline">查看详细统计 ></a>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-4">
+                                    <h3 className="font-medium mb-4">小贴士</h3>
+                                    <div className="text-sm text-gray-600 mb-2">
+                                        AI智能头像制作新工具，打造专属AI身份像
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom Sections */}
+                        <div className="grid grid-cols-2 gap-6 mt-8">
+                            <div className="bg-white rounded-lg p-6">
+                                <h3 className="font-medium mb-4">使用指引</h3>
+                                <ol className="text-sm text-gray-600 space-y-2">
+                                    <li>1. 点击左侧"头像库选择基础工具"</li>
+                                    <li>2. 调用属性选择器进配头像参数</li>
+                                    <li>3. 点击"应用模板"实时预览效果</li>
+                                    <li>4. 点击"下载"即可将可档存档</li>
+                                </ol>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg p-6">
+                                <h3 className="font-medium mb-4">为什么选择我们？</h3>
+                                <ul className="text-sm text-gray-600 space-y-2">
+                                    <li><i className="fas fa-circle text-blue-500 mr-2" style={{fontSize: '4px'}}></i>数迅速流</li>
+                                    <li><i className="fas fa-circle text-blue-500 mr-2" style={{fontSize: '4px'}}></i>友谊但处过</li>
+                                    <li><i className="fas fa-circle text-blue-500 mr-2" style={{fontSize: '4px'}}></i>专有风格</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">编辑头像</h2>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">定制名称</label>
+                                        <input 
+                                            type="text" 
+                                            value={editForm.name}
+                                            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                            className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">定制权重：{editForm.weight}</label>
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value={editForm.weight}
+                                            onChange={(e) => setEditForm({...editForm, weight: parseInt(e.target.value)})}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">发色</label>
+                                            <div 
+                                                className="w-full h-8 rounded cursor-pointer"
+                                                style={{backgroundColor: editForm.hairColor}}
+                                            ></div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">瞳色</label>
+                                            <div 
+                                                className="w-full h-8 rounded cursor-pointer"
+                                                style={{backgroundColor: editForm.eyeColor}}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">风格选择</label>
+                                        <select 
+                                            value={editForm.style}
+                                            onChange={(e) => setEditForm({...editForm, style: e.target.value})}
+                                            className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        >
+                                            <option>改变</option>
+                                            <option>严肃</option>
+                                            <option>活泼</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="flex-1 bg-blue-500 text-white py-2 rounded text-sm hover:bg-blue-600"
+                                    >
+                                        保存
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="flex-1 bg-gray-300 text-gray-700 py-2 rounded text-sm hover:bg-gray-400"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium">添加新头像</h2>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">定制名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入定制名称"
+                                            value={addForm.name}
+                                            onChange={(e) => setAddForm({...addForm, name: e.target.value})}
+                                            className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">定制权重：{addForm.weight}</label>
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="100" 
+                                            value={addForm.weight}
+                                            onChange={(e) => setAddForm({...addForm, weight: parseInt(e.target.value)})}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">发色</label>
+                                            <div 
+                                                className="w-full h-8 rounded cursor-pointer"
+                                                style={{backgroundColor: addForm.hairColor}}
+                                            ></div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm text-gray-600 mb-1">瞳色</label>
+                                            <div 
+                                                className="w-full h-8 rounded cursor-pointer"
+                                                style={{backgroundColor: addForm.eyeColor}}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">风格选择</label>
+                                        <select 
+                                            value={addForm.style}
+                                            onChange={(e) => setAddForm({...addForm, style: e.target.value})}
+                                            className="w-full p-2 border border-gray-300 rounded text-sm"
+                                        >
+                                            <option>改变</option>
+                                            <option>严肃</option>
+                                            <option>活泼</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 bg-blue-500 text-white py-2 rounded text-sm hover:bg-blue-600"
+                                    >
+                                        保存
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 bg-gray-300 text-gray-700 py-2 rounded text-sm hover:bg-gray-400"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

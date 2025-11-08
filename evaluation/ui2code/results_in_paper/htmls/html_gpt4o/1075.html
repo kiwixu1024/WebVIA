@@ -1,0 +1,293 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭愿望清单</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body class="bg-yellow-100">
+
+<div id="app"></div>
+
+<script type="text/babel">
+  const { useState } = React;
+
+  function App() {
+    const [showAddWishlistModal, setShowAddWishlistModal] = useState(false);
+    const [showEditWishlistModal, setShowEditWishlistModal] = useState(false);
+    const [searchText, setSearchText] = useState("");
+    const [filter, setFilter] = useState("全部显示");
+
+    const wishes = [
+      {
+        id: 1,
+        title: "家庭电影之夜",
+        date: "2023年9月22日",
+        priority: null,
+        memo: "每人选一部想看的电影，准备爆米花和饮料，享受家庭电影时光。",
+        completed: true
+      },
+      {
+        id: 2,
+        title: "家庭周末野餐",
+        date: "2023年9月29日",
+        priority: "高",
+        memo: "带上手工做的健康美味的食物，去城市公园野餐。",
+        completed: false
+      },
+      {
+        id: 3,
+        title: "孩子生日派对",
+        date: "2023年10月14日",
+        priority: "中",
+        memo: "为孩子举办一个主题派对，邀请他的好朋友们参加。",
+        completed: false
+      }
+    ];
+
+    const stats = {
+      total: wishes.length,
+      completed: wishes.filter(wish => wish.completed).length,
+      percentage: Math.round(
+        (wishes.filter(wish => wish.completed).length / wishes.length) * 100
+      )
+    };
+
+    const filteredWishes = wishes.filter(wish => {
+      if (filter === "未完成") return !wish.completed;
+      if (filter === "已完成") return wish.completed;
+      return true;
+    }).filter(wish => wish.title.includes(searchText));
+
+    return (
+      <div className="flex flex-col min-h-screen">
+        <header className="bg-yellow-300 px-6 py-4 text-lg font-bold text-white flex items-center justify-between">
+          家庭愿望清单
+          <button
+            onClick={() => setShowAddWishlistModal(true)}
+            className="bg-orange-400 text-white px-4 py-2 rounded-lg"
+          >
+            + 添加愿望
+          </button>
+        </header>
+
+        <main className="flex-grow p-6">
+          <div className="flex gap-6">
+            {/* Sidebar */}
+            <aside className="w-1/6 bg-white rounded-lg shadow flex flex-col">
+              <nav className="p-4">
+                <ul>
+                  <li className="flex items-center gap-2 text-yellow-500">
+                    <i className="fas fa-star"></i>
+                    所有愿望
+                  </li>
+                  <li>今日日期</li>
+                  <li>已完成愿望</li>
+                  <li>紧急愿望</li>
+                </ul>
+              </nav>
+
+              <div className="mt-auto p-4 bg-yellow-100 rounded-lg text-sm">
+                <i className="fas fa-info-circle text-yellow-500"></i> 小贴士
+                定期更新你的愿望清单，让家庭生活充满希望与期待！
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <section className="flex-grow">
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  placeholder="搜索愿望..."
+                  value={searchText}
+                  onChange={e => setSearchText(e.target.value)}
+                  className="border rounded-lg px-3 py-2 flex-grow"
+                />
+                <select
+                  className="border rounded-lg px-3 py-2"
+                  onChange={e => setFilter(e.target.value)}
+                  value={filter}
+                >
+                  <option>全部显示</option>
+                  <option>时间</option>
+                  <option>优先级</option>
+                  <option>未完成</option>
+                </select>
+              </div>
+
+              {/* Wishlist List */}
+              <div className="bg-white rounded-lg shadow p-4">
+                {filteredWishes.map(wish => (
+                  <div
+                    key={wish.id}
+                    className="p-4 border-b last:border-b-0 flex justify-between items-center"
+                  >
+                    <div>
+                      <h3 className="font-bold">{wish.title}</h3>
+                      <p className="text-sm text-gray-500">截止日期: {wish.date}</p>
+                      {wish.priority && (
+                        <span className="px-2 py-1 text-sm bg-yellow-200 rounded-lg inline-block">
+                          优先级: {wish.priority}
+                        </span>
+                      )}
+                      <p className="mt-2 text-sm text-gray-700">{wish.memo}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowEditWishlistModal(true)}
+                        className="text-blue-500 hover:underline"
+                      >
+                        编辑
+                      </button>
+                      <button className="text-red-500 hover:underline">删除</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* How to use section */}
+              <div className="mt-4 flex gap-4">
+                <div className="bg-blue-100 rounded-lg p-4 flex-grow">
+                  <h4 className="font-bold">如何使用愿望清单</h4>
+                  <ol className="text-sm list-decimal pl-6">
+                    <li>点击“添加愿望”按钮，填写愿望标题、截止日期和其他信息。</li>
+                    <li>点击右上角的菜单栏获取相关愿望详细信息。</li>
+                    <li>点击“编辑”可以修改不需要的愿望项。</li>
+                    <li>通过筛选和搜索快速查找指定愿望。</li>
+                    <li>使用开关切换愿望的完成状态。</li>
+                  </ol>
+                </div>
+                <div className="bg-yellow-100 rounded-lg p-4">
+                  <h4 className="font-bold">温馨提示</h4>
+                  <p className="text-sm">
+                    和家人一起建立愿望清单，让每一个家庭时光充满期待与仪式感！
+                  </p>
+                  <p className="text-xs">联系我们: family@wishlist.example.com</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Statistics */}
+            <aside className="w-1/5 bg-white rounded-lg shadow p-4">
+              <h4 className="font-bold">愿望统计</h4>
+              <ul className="text-sm mt-2 space-y-2">
+                <li>愿望总数: {stats.total}</li>
+                <li>今日日期: 0</li>
+                <li>完成率: {stats.percentage}%</li>
+              </ul>
+              <div className="mt-4 flex flex-col gap-2">
+                <button className="bg-green-400 text-white px-3 py-2 rounded-lg">
+                  添加新愿望
+                </button>
+                <button className="bg-blue-400 text-white px-3 py-2 rounded-lg">
+                  打印清单
+                </button>
+                <button className="bg-orange-400 text-white px-3 py-2 rounded-lg">
+                  分享清单
+                </button>
+              </div>
+            </aside>
+          </div>
+        </main>
+
+        {/* Add Wishlist Modal */}
+        {showAddWishlistModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-lg">
+              <h4 className="font-bold">添加愿望</h4>
+              <input
+                type="text"
+                placeholder="愿望标题"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              />
+              <input
+                type="date"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              />
+              <div className="flex gap-4 mt-4">
+                <label>
+                  <input type="radio" name="priority" value="高" /> 高
+                </label>
+                <label>
+                  <input type="radio" name="priority" value="中" /> 中
+                </label>
+                <label>
+                  <input type="radio" name="priority" value="低" /> 低
+                </label>
+              </div>
+              <textarea
+                placeholder="备注"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              ></textarea>
+              <div className="mt-4 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowAddWishlistModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                >
+                  取消
+                </button>
+                <button className="px-4 py-2 bg-orange-400 text-white rounded-lg">
+                  添加愿望
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Wishlist Modal */}
+        {showEditWishlistModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-6 rounded-lg">
+              <h4 className="font-bold">编辑愿望</h4>
+              <input
+                type="text"
+                defaultValue="家庭电影之夜"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              />
+              <input
+                type="date"
+                defaultValue="2023-09-22"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              />
+              <div className="flex gap-4 mt-4">
+                <label>
+                  <input type="radio" name="priority" value="高" /> 高
+                </label>
+                <label>
+                  <input type="radio" name="priority" value="中" /> 中
+                </label>
+                <label>
+                  <input type="radio" name="priority" value="低" /> 低
+                </label>
+              </div>
+              <textarea
+                defaultValue="每人选一部想看的电影，准备爆米花和饮料，享受家庭电影时光。"
+                className="border rounded-lg px-3 py-2 w-full mt-4"
+              ></textarea>
+              <div className="mt-4 flex justify-end gap-4">
+                <button
+                  onClick={() => setShowEditWishlistModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg"
+                >
+                  取消
+                </button>
+                <button className="px-4 py-2 bg-orange-400 text-white rounded-lg">
+                  保存修改
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById("app"));
+</script>
+
+</body>
+</html>

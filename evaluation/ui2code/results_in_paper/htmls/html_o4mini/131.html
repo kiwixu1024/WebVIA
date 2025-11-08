@@ -1,0 +1,359 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>印象笔记同步</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-screen bg-gray-100">
+  <div id="root" class="h-full"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // fixed images
+    const noteImages = {
+      1: "https://picsum.photos/id/1005/120/80",
+      2: "https://picsum.photos/id/1011/120/80",
+      3: "https://picsum.photos/id/1025/120/80"
+    };
+
+    function App() {
+      const initialNotes = [
+        {
+          id: 1,
+          title: "项目周报",
+          content: "完成了A模块开发，发现B问题需解决，下周将继续优化C功能，团队协作顺利。",
+          tags: ["工作", "报告"],
+          status: "已同步",
+          date: "2024-06-10 14:32",
+          img: noteImages[1]
+        },
+        {
+          id: 2,
+          title: "旅行计划",
+          content: "计划下个月前往云南，包括昆明、大理、丽江三地，预计10天行程，需准备防晒、雨具等装备。",
+          tags: ["生活", "旅行"],
+          status: "待同步",
+          date: "2024-06-09 09:15",
+          img: noteImages[2]
+        },
+        {
+          id: 3,
+          title: "读书笔记：聊聊（刻意练习）",
+          content: "刻意练习的核心是目标的，有针对地练习，关注弱点，获得反馈，走出舒适区。这本书让我重新思考学习方法...",
+          tags: ["学习", "读书笔记"],
+          status: "已同步",
+          date: "2024-06-08 21:45",
+          img: noteImages[3]
+        }
+      ];
+
+      const allTags = ["工作","生活","学习","报告","旅行","读书笔记"];
+      const [notes, setNotes] = useState(initialNotes);
+      const [currentTab, setCurrentTab] = useState("全部笔记");
+      const [selectedCategory, setSelectedCategory] = useState(null);
+      const [catExpanded, setCatExpanded] = useState(false);
+      const [selectedNotes, setSelectedNotes] = useState([]);
+      const [showNewModal, setShowNewModal] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [editNote, setEditNote] = useState(null);
+
+      // Filtering logic
+      const filtered = notes.filter(n => {
+        let ok = true;
+        if (currentTab === "待同步") ok = n.status === "待同步";
+        if (currentTab === "已同步") ok = n.status === "已同步";
+        if (selectedCategory) ok = n.tags.includes(selectedCategory);
+        return ok;
+      });
+
+      function toggleSelect(id) {
+        setSelectedNotes(prev =>
+          prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
+      }
+
+      function openEdit(n) {
+        setEditNote({ ...n });
+        setShowEditModal(true);
+      }
+
+      function saveEdit() {
+        setNotes(prev => prev.map(n => n.id === editNote.id ? editNote : n));
+        setShowEditModal(false);
+      }
+
+      function saveNew(note) {
+        const nextId = Math.max(...notes.map(n=>n.id)) + 1;
+        setNotes([{ ...note, id: nextId, status:"待同步", date: new Date().toISOString().slice(0,16).replace('T',' '), img:noteImages[2] }, ...notes]);
+        setShowNewModal(false);
+      }
+
+      return (
+        <div className="flex h-full">
+          {/* 左侧 */}
+          <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div className="px-6 py-4 text-lg font-bold text-gray-800">印象笔记同步</div>
+            <div className="px-6 py-4">
+              <div className="flex items-center text-gray-700 mb-2">
+                <i className="fas fa-sync-alt mr-2"></i> 同步状态
+              </div>
+              <div className="flex items-center text-green-600 font-medium mb-1">已完成</div>
+              <div className="h-1 bg-green-300 rounded"></div>
+            </div>
+            <div className="border-t border-gray-200 flex-grow">
+              <div className="px-6 py-3 text-gray-700 font-medium">笔记分类</div>
+              <ul>
+                {["工作","生活","学习"].map((cat, idx) => (
+                  <li key={cat}>
+                    <button
+                      onClick={()=>{
+                        setSelectedCategory(cat);
+                        setSelectedNotes([]);
+                        setCurrentTab("全部笔记");
+                      }}
+                      className={`w-full text-left px-6 py-2 flex justify-between ${selectedCategory===cat ? "bg-gray-100 font-medium" : "text-gray-600 hover:bg-gray-50"}`}
+                    >
+                      <span>{cat}</span>
+                      <span className="text-gray-400">{ cat==="工作"?15: cat==="生活"?8:12 }</span>
+                    </button>
+                    {cat==="工作" && catExpanded && (
+                      <ul className="ml-4">
+                        <li className="px-6 py-1 text-gray-600 hover:text-gray-800 cursor-pointer">工作笔记1</li>
+                        <li className="px-6 py-1 text-gray-600 hover:text-gray-800 cursor-pointer">工作笔记2</li>
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200">
+              <button
+                className="w-full mb-2 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded"
+                onClick={()=>setShowNewModal(true)}
+              >
+                <i className="fas fa-plus mr-2"></i> 新建笔记
+              </button>
+              <button className="w-full flex items-center justify-center bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-50">
+                <i className="fas fa-sync-alt mr-2"></i> 批量同步
+              </button>
+            </div>
+          </div>
+          {/* 中间内容 */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Tabs and header */}
+            <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-gray-200">
+              <ul className="flex space-x-6 text-gray-600">
+                {["全部笔记","待同步","已同步"].map(tab=>(
+                  <li key={tab}>
+                    <button
+                      onClick={()=>{setCurrentTab(tab); setSelectedCategory(null); setSelectedNotes([]);}}
+                      className={`pb-2 ${currentTab===tab?"border-b-2 border-green-500 text-gray-800 font-medium":"hover:text-gray-800"}`}
+                    >{tab}</button>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={()=>setShowNewModal(true)}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center"
+              >
+                <i className="fas fa-plus mr-2"></i> 新建笔记
+              </button>
+            </div>
+            <div className="p-6 flex-grow overflow-auto">
+              <div className="text-gray-700 mb-4">展示区 - 在这里查看同步后的笔记清单，轻松管理您的内容</div>
+              <div className="bg-white shadow rounded">
+                <div className="flex items-center justify-between border-b border-gray-200 px-6 py-3">
+                  <div className="flex items-center">
+                    <input type="checkbox" disabled className="mr-2 text-gray-400" />
+                    <span className="text-gray-600 font-medium">笔记标题</span>
+                  </div>
+                  <div className="flex items-center space-x-6 text-gray-600">
+                    <span>状态</span>
+                    <span>更新时间</span>
+                    <span>操作</span>
+                  </div>
+                </div>
+                {selectedNotes.length > 0 && (
+                  <div className="flex items-center px-6 py-2 bg-gray-50 border-b border-gray-200 space-x-4">
+                    <button className="text-white bg-red-500 px-3 py-1 rounded hover:bg-red-600">批量删除</button>
+                    <button className="text-white bg-green-500 px-3 py-1 rounded hover:bg-green-600">批量同步</button>
+                  </div>
+                )}
+                <div>
+                  {filtered.map(n => (
+                    <div key={n.id} className="flex items-center px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+                      <div className="flex items-center w-1/2">
+                        <input
+                          type="checkbox"
+                          className="mr-4"
+                          checked={selectedNotes.includes(n.id)}
+                          onChange={()=>toggleSelect(n.id)}
+                        />
+                        <div>
+                          <div className="font-medium text-gray-800">{n.title}</div>
+                          <div className="text-gray-500 text-sm mt-1">{n.content}</div>
+                          <div className="mt-2 space-x-2">
+                            {n.tags.map(t=>(
+                              <span key={t} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{t}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center w-1/2 justify-end space-x-6">
+                        <img src={n.img} alt="" className="w-20 h-12 object-cover rounded" />
+                        <span className={`text-xs px-2 py-1 rounded-full ${n.status==="已同步"?"bg-green-100 text-green-600":"bg-yellow-100 text-yellow-600"}`}>
+                          {n.status}
+                        </span>
+                        <span className="text-gray-500 text-sm">{n.date}</span>
+                        <button onClick={()=>openEdit(n)} className="text-gray-400 hover:text-gray-600">
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {filtered.length===0 && (
+                    <div className="text-center py-10 text-gray-400">暂无笔记</div>
+                  )}
+                </div>
+                <div className="py-4 text-center">
+                  <button className="px-4 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200">加载更多</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* 右侧统计 */}
+          <div className="w-64 bg-white border-l border-gray-200 px-6 py-6 flex-shrink-0">
+            <div className="text-gray-700 font-medium mb-4">今日笔记统计</div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-2xl font-bold text-gray-800">12</div>
+              <div className="text-green-600">笔记总数</div>
+            </div>
+            <div className="flex justify-center mb-4">
+              <svg width="80" height="80" viewBox="0 0 36 36">
+                <path stroke="#E5F1FB" strokeWidth="2" fill="none"
+                  d="M18 2.0845 A 15.9155 15.9155 0 0 1 18 33.9155 A 15.9155 15.9155 0 0 1 18 2.0845"/>
+                <path stroke="#34A853" strokeWidth="2" fill="none" strokeDasharray="95,100"
+                  d="M18 2.0845 A 15.9155 15.9155 0 0 1 18 33.9155"/>
+                <text x="18" y="20.35" fill="#000" fontSize="6" textAnchor="middle">95%</text>
+              </svg>
+            </div>
+            <button className="w-full mb-6 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-50">导出报表</button>
+            <div className="text-gray-700 font-medium mb-4">历史同步趋势</div>
+            <div className="h-32 mb-2 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+              {/* placeholder chart */}
+              <div>图表区域</div>
+            </div>
+            <div className="text-xs text-gray-500">小贴士：保持网络稳定可提高同步成功率</div>
+          </div>
+
+          {/* 新建笔记 Modal */}
+          {showNewModal && (
+            <Modal title="新建笔记" onClose={()=>setShowNewModal(false)}>
+              <NoteForm tags={allTags} onCancel={()=>setShowNewModal(false)} onSave={saveNew} />
+            </Modal>
+          )}
+
+          {/* 编辑笔记 Modal */}
+          {showEditModal && editNote && (
+            <Modal title="编辑笔记" onClose={()=>setShowEditModal(false)}>
+              <NoteForm
+                tags={allTags}
+                note={editNote}
+                onCancel={()=>setShowEditModal(false)}
+                onSave={() => saveEdit()}
+                onChange={(field, val) => setEditNote(prev=>({...prev, [field]: val}))}
+              />
+            </Modal>
+          )}
+        </div>
+      );
+    }
+
+    function Modal({ title, children, onClose }) {
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded shadow-lg w-96">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-lg font-medium text-gray-800">{title}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="px-6 py-4">{children}</div>
+          </div>
+        </div>
+      );
+    }
+
+    function NoteForm({ tags, note={}, onCancel, onSave, onChange }) {
+      const [title, setTitle] = useState(note.title || "");
+      const [content, setContent] = useState(note.content || "");
+      const [selTags, setSelTags] = useState(note.tags ? [...note.tags] : []);
+      function toggleTag(t) {
+        if (selTags.includes(t)) setSelTags(selTags.filter(x=>x!==t));
+        else setSelTags([...selTags, t]);
+      }
+      function handleSave() {
+        const n = { ...note, title, content, tags: selTags };
+        onSave(n);
+      }
+      return (
+        <div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">标题</label>
+            <input
+              className="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-green-500"
+              placeholder="输入笔记标题"
+              value={title}
+              onChange={e=>setTitle(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">标签</label>
+            <div className="flex flex-wrap gap-2">
+              {tags.map(t=>(
+                <button
+                  key={t}
+                  onClick={()=>toggleTag(t)}
+                  className={`text-sm px-2 py-1 rounded ${selTags.includes(t)?"bg-green-100 text-green-600":"bg-gray-100 text-gray-600"}`}
+                >{t}</button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-1">内容</label>
+            <div className="border border-gray-300 rounded">
+              <div className="px-2 py-1 border-b border-gray-200 flex items-center text-gray-600 space-x-3">
+                <button><b>B</b></button>
+                <button><i>I</i></button>
+                <button><i className="fas fa-list"></i></button>
+              </div>
+              <textarea
+                className="w-full h-32 p-3 focus:outline-none"
+                placeholder="输入笔记内容..."
+                value={content}
+                onChange={e=>setContent(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="text-right space-x-3">
+            <button onClick={onCancel} className="px-4 py-1 text-gray-600 bg-gray-100 rounded hover:bg-gray-200">取消</button>
+            <button onClick={handleSave} className="px-4 py-1 text-white bg-green-500 rounded hover:bg-green-600">保存笔记</button>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

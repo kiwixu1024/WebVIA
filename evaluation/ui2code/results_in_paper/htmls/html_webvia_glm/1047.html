@@ -1,0 +1,582 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物成长相册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('album');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [albums, setAlbums] = useState([
+                {
+                    id: 1,
+                    title: '第一次来到新家',
+                    date: '2023-01-15',
+                    description: '小猫刚到新家时，胆小又好奇，一直躲在沙发下。',
+                    stage: '初识萌宠',
+                    image: 'https://picsum.photos/id/237/300/200'
+                },
+                {
+                    id: 2,
+                    title: '学会使用猫砂',
+                    date: '2023-02-01',
+                    description: '经过一周的训练，小猫咪终于学会正确使用猫砂了！',
+                    stage: '初识萌宠',
+                    image: 'https://picsum.photos/id/1036/300/200'
+                },
+                {
+                    id: 3,
+                    title: '第一次打疫苗',
+                    date: '2023-03-10',
+                    description: '今天小猫咪完成了第一针疫苗，很勇敢没有哭闹。',
+                    stage: '成年时光',
+                    image: 'https://picsum.photos/id/1025/300/200'
+                },
+                {
+                    id: 4,
+                    title: '学会爬楼梯',
+                    date: '2023-04-20',
+                    description: '小猫咪学会了爬楼梯飞快，新买的猫抓板成了最爱！',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/1015/300/200'
+                },
+                {
+                    id: 5,
+                    title: '第一次户外散步',
+                    date: '2023-05-15',
+                    description: '带着牵引绳带它出门散步，对一切充满好奇。',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/1011/300/200'
+                },
+                {
+                    id: 6,
+                    title: '一周岁生日',
+                    date: '2023-07-10',
+                    description: '给小猫咪庆生一周年生日，准备了专属蛋糕和玩具。',
+                    stage: '成年时光',
+                    image: 'https://picsum.photos/id/923/300/200'
+                }
+            ]);
+
+            const filteredAlbums = searchQuery ? 
+                albums.filter(album => album.title.includes(searchQuery)) : albums;
+
+            const getStageStats = () => {
+                const stats = {};
+                albums.forEach(album => {
+                    stats[album.stage] = (stats[album.stage] || 0) + 1;
+                });
+                return stats;
+            };
+
+            const getMonthStats = () => {
+                const stats = {};
+                const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月'];
+                months.forEach(month => stats[month] = 0);
+                
+                albums.forEach(album => {
+                    const monthNum = parseInt(album.date.split('-')[1]);
+                    if (!isNaN(monthNum)) {
+                        const monthIndex = monthNum <= 7 ? monthNum : monthNum - 1;
+                        const monthNames = ['', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月'];
+                        stats[monthNames[monthIndex]]++;
+                    }
+                });
+                return stats;
+            };
+
+            const stageStats = getStageStats();
+            const monthStats = getMonthStats();
+
+            const renderHeader = () => (
+                <header className="bg-white border-b border-gray-200 px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-8">
+                            <div className="flex items-center space-x-2">
+                                <i className="fas fa-heart text-pink-500 text-xl"></i>
+                                <span className="text-lg font-semibold text-gray-800">宠物成长相册</span>
+                            </div>
+                            <nav className="flex space-x-6">
+                                <button 
+                                    onClick={() => setCurrentView('album')}
+                                    className={`px-4 py-2 rounded ${currentView === 'album' ? 'bg-pink-100 text-pink-600' : 'text-gray-600 hover:text-pink-600'}`}
+                                >
+                                    相册首页
+                                </button>
+                                <button 
+                                    onClick={() => setShowModal(true)}
+                                    className={`px-4 py-2 rounded ${currentView === 'add' ? 'bg-pink-100 text-pink-600' : 'text-gray-600 hover:text-pink-600'}`}
+                                >
+                                    添加记录
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('statistics')}
+                                    className={`px-4 py-2 rounded ${currentView === 'statistics' ? 'bg-pink-100 text-pink-600' : 'text-gray-600 hover:text-pink-600'}`}
+                                >
+                                    统计报告
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('help')}
+                                    className={`px-4 py-2 rounded ${currentView === 'help' ? 'bg-pink-100 text-pink-600' : 'text-gray-600 hover:text-pink-600'}`}
+                                >
+                                    帮助说明
+                                </button>
+                            </nav>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <div className="relative">
+                                <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input
+                                    type="text"
+                                    placeholder="搜索相册..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-pink-500"
+                                />
+                            </div>
+                            <div className="w-8 h-8 bg-black rounded-full"></div>
+                        </div>
+                    </div>
+                </header>
+            );
+
+            const renderSidebar = () => (
+                <aside className="w-80 bg-gray-50 p-6">
+                    <div className="mb-8">
+                        <h3 className="text-lg font-semibold mb-4 text-gray-800">成长阶段</h3>
+                        <p className="text-sm text-gray-600 mb-4">按照不同时期记录爱宠的成长历程</p>
+                        <ul className="space-y-2">
+                            <li className="flex items-center text-sm text-gray-700">
+                                <i className="fas fa-circle text-gray-400 mr-2 text-xs"></i>
+                                初识萌宠
+                            </li>
+                            <li className="flex items-center text-sm text-gray-700">
+                                <i className="fas fa-circle text-gray-400 mr-2 text-xs"></i>
+                                成长之路
+                            </li>
+                            <li className="flex items-center text-sm text-gray-700">
+                                <i className="fas fa-circle text-gray-400 mr-2 text-xs"></i>
+                                成年时光
+                            </li>
+                        </ul>
+                        <button className="w-full mt-4 bg-yellow-100 text-yellow-700 py-2 rounded flex items-center justify-center text-sm">
+                            <i className="fas fa-plus mr-2"></i>
+                            新增阶段
+                        </button>
+                    </div>
+                    
+                    <div className="bg-red-50 border border-red-200 p-4 rounded">
+                        <h4 className="font-medium text-red-800 mb-2">小贴士</h4>
+                        <p className="text-sm text-red-700">按照不同的成长阶段整理照片，能更好地回顾宠物从幼年到成年的精彩瞬间！</p>
+                    </div>
+                </aside>
+            );
+
+            const renderMainContent = () => {
+                if (currentView === 'album') {
+                    if (filteredAlbums.length === 0 && searchQuery) {
+                        return (
+                            <main className="flex-1 p-6">
+                                <div className="mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">宠物相册</h2>
+                                    <p className="text-gray-600">在这里浏览您的宠物成长瞬间</p>
+                                </div>
+
+                                <div className="mb-8">
+                                    <h3 className="text-lg font-semibold mb-4 text-gray-800">主要特色</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="bg-pink-50 p-4 rounded-lg">
+                                            <i className="fas fa-edit text-pink-500 text-xl mb-2"></i>
+                                            <h4 className="font-medium text-pink-800 mb-1">一键管理</h4>
+                                            <p className="text-sm text-pink-600">快速添加/编辑/删除所有成长记录</p>
+                                        </div>
+                                        <div className="bg-blue-50 p-4 rounded-lg">
+                                            <i className="fas fa-chart-bar text-blue-500 text-xl mb-2"></i>
+                                            <h4 className="font-medium text-blue-800 mb-1">多维统计</h4>
+                                            <p className="text-sm text-blue-600">自动生成统计、月历分析图表</p>
+                                        </div>
+                                        <div className="bg-red-50 p-4 rounded-lg">
+                                            <i className="fas fa-heart text-red-500 text-xl mb-2"></i>
+                                            <h4 className="font-medium text-red-800 mb-1">温馨回顾</h4>
+                                            <p className="text-sm text-red-600">随时翻阅，定格最美好瞬间</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="text-center py-12">
+                                    <div className="mb-4">
+                                        <i className="fas fa-images text-gray-300 text-6xl"></i>
+                                    </div>
+                                    <h3 className="text-xl font-medium text-gray-500 mb-2">暂无相册记录</h3>
+                                    <p className="text-gray-400 mb-6">点击"添加记录"按钮开始创建您的宠物相册吧</p>
+                                    <button 
+                                        onClick={() => setShowModal(true)}
+                                        className="bg-pink-500 text-white px-6 py-2 rounded-lg hover:bg-pink-600"
+                                    >
+                                        开始添加
+                                    </button>
+                                </div>
+                            </main>
+                        );
+                    }
+
+                    return (
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">宠物相册</h2>
+                                <p className="text-gray-600">在这里浏览您的宠物成长瞬间</p>
+                            </div>
+
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800">主要特色</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-pink-50 p-4 rounded-lg">
+                                        <i className="fas fa-edit text-pink-500 text-xl mb-2"></i>
+                                        <h4 className="font-medium text-pink-800 mb-1">一键管理</h4>
+                                        <p className="text-sm text-pink-600">快速添加/编辑/删除所有成长记录</p>
+                                    </div>
+                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                        <i className="fas fa-chart-bar text-blue-500 text-xl mb-2"></i>
+                                        <h4 className="font-medium text-blue-800 mb-1">多维统计</h4>
+                                        <p className="text-sm text-blue-600">自动生成统计、月历分析图表</p>
+                                    </div>
+                                    <div className="bg-red-50 p-4 rounded-lg">
+                                        <i className="fas fa-heart text-red-500 text-xl mb-2"></i>
+                                        <h4 className="font-medium text-red-800 mb-1">温馨回顾</h4>
+                                        <p className="text-sm text-red-600">随时翻阅，定格最美好瞬间</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6">
+                                {filteredAlbums.map((album) => (
+                                    <div key={album.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                        <img 
+                                            src={album.image} 
+                                            alt={album.title}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                        <div className="p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h3 className="font-semibold text-gray-800">{album.title}</h3>
+                                                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                                                    {album.stage}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-500 mb-2">{album.date}</p>
+                                            <p className="text-sm text-gray-600 mb-4">{album.description}</p>
+                                            <div className="flex justify-between">
+                                                <button className="text-blue-500 hover:text-blue-700 text-sm">
+                                                    <i className="fas fa-edit mr-1"></i>
+                                                    编辑
+                                                </button>
+                                                <button className="text-red-500 hover:text-red-700 text-sm">
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+                    );
+                }
+
+                if (currentView === 'statistics') {
+                    return (
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">统计报告</h2>
+                                <p className="text-gray-600">查看您的宠物相册统计数据</p>
+                            </div>
+
+                            <div className="mb-8 bg-blue-50 p-6 rounded-lg text-center">
+                                <h3 className="text-xl font-semibold text-gray-800 mb-4">相册总数</h3>
+                                <div className="text-6xl font-bold text-blue-500 mb-2">{albums.length}</div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-gray-800">按阶段分布</h3>
+                                    <div className="space-y-3">
+                                        {Object.entries(stageStats).map(([stage, count]) => (
+                                            <div key={stage} className="flex items-center">
+                                                <span className="text-sm text-gray-600 w-12">{stage}</span>
+                                                <div className="flex-1 bg-gray-200 rounded-full h-6 ml-4">
+                                                    <div 
+                                                        className="bg-pink-500 h-6 rounded-full flex items-center justify-end pr-2"
+                                                        style={{ width: `${(count / albums.length) * 100}%` }}
+                                                    >
+                                                        <span className="text-xs text-white font-medium">{count}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-4 text-gray-800">按月份分布</h3>
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {Object.entries(monthStats).map(([month, count]) => (
+                                            <div key={month} className="text-center">
+                                                <div className="text-xs text-gray-600 mb-1">{month}</div>
+                                                <div className={`h-8 rounded ${count > 0 ? 'bg-blue-500' : 'bg-gray-200'}`} 
+                                                     style={{ height: `${Math.max(count * 10, 8)}px` }}></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 p-6 rounded-lg">
+                                <h3 className="text-lg font-semibold mb-4 text-gray-800">最新添加</h3>
+                                <div className="space-y-3">
+                                    {albums.slice(-4).reverse().map((album) => (
+                                        <div key={album.id} className="flex items-center justify-between bg-white p-3 rounded">
+                                            <div>
+                                                <h4 className="font-medium text-gray-800">{album.title}</h4>
+                                                <p className="text-sm text-gray-500">{album.date}</p>
+                                            </div>
+                                            <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                                                {album.stage}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </main>
+                    );
+                }
+
+                if (currentView === 'help') {
+                    return (
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">帮助说明</h2>
+                                <p className="text-gray-600">了解如何使用宠物成长相册功能</p>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="border-l-4 border-pink-500 pl-4">
+                                    <h3 className="text-lg font-semibold text-pink-700 mb-2">如何添加照片？</h3>
+                                    <p className="text-gray-700">
+                                        点击顶部导航栏的"添加记录"按钮，在弹出的表单中填写相关信息并上传照片。您可以选择合适的成长阶段分类，并填写拍摄日期和描述，以便日后回顾。
+                                    </p>
+                                    <p className="text-gray-700 mt-2">
+                                        添加成功后，新的记录将自动显示在相册首页，并更新统计数据。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-blue-500 pl-4">
+                                    <h3 className="text-lg font-semibold text-blue-700 mb-2">如何编辑和删除记录？</h3>
+                                    <p className="text-gray-700">
+                                        在每条相册卡片的后部，您可以找到"编辑"和"删除"按钮。点击"编辑"按钮打开编辑面板，修改后点击保存即可。
+                                    </p>
+                                    <p className="text-gray-700 mt-2">
+                                        点击"删除"按钮将弹出确认对话框，确认后记录将被永久删除。请谨慎操作。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-yellow-500 pl-4">
+                                    <h3 className="text-lg font-semibold text-yellow-700 mb-2">如何查看统计和筛选？</h3>
+                                    <p className="text-gray-700">
+                                        点击顶部导航栏的"统计报告"标签，可以查看按阶段和月份分布的图表。点击图表中的条形可以快速筛选对应阶段或月份的照片。
+                                    </p>
+                                    <p className="text-gray-700 mt-2">
+                                        您也可以通过左侧边栏的分类筛选直接查看，或使用顶部的搜索框进行关键词搜索。
+                                    </p>
+                                </div>
+
+                                <div className="border-l-4 border-green-500 pl-4">
+                                    <h3 className="text-lg font-semibold text-green-700 mb-2">如何创建新的成长阶段？</h3>
+                                    <p className="text-gray-700">
+                                        在左侧边栏底部，点击"新增阶段"按钮，输入新阶段名称并选择图标即可添加。
+                                    </p>
+                                    <p className="text-gray-700 mt-2">
+                                        新增的阶段将立即显示在左侧边栏列表中，您可以在添加或编辑记录时选择使用这个新阶段。
+                                    </p>
+                                </div>
+                            </div>
+                        </main>
+                    );
+                }
+            };
+
+            const renderRightSidebar = () => {
+                if (currentView !== 'album') {
+                    return null;
+                }
+
+                return (
+                    <aside className="w-80 bg-gray-50 p-6">
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-800">宠物相册统计</h3>
+                            
+                            <div className="bg-white p-4 rounded-lg mb-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">图片总数</span>
+                                    <span className="text-2xl font-bold text-pink-500">{albums.length}</span>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-medium mb-3 text-gray-700">阶段分布</h4>
+                                {Object.entries(stageStats).map(([stage, count]) => (
+                                    <div key={stage} className="flex justify-between items-center mb-2">
+                                        <span className="text-sm text-gray-600">{stage}</span>
+                                        <span className="text-sm font-medium text-pink-500">{count} 张</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-medium mb-3 text-gray-700">月份分布</h4>
+                                {Object.entries(monthStats).map(([month, count]) => (
+                                    <div key={month} className="flex justify-between items-center mb-1">
+                                        <span className="text-sm text-gray-600">{month}</span>
+                                        <span className="text-sm font-medium text-pink-500">{count}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <h4 className="font-medium mb-3 text-gray-700">最新添加</h4>
+                            {albums.slice(-3).reverse().map((album) => (
+                                <div key={album.id} className="mb-3">
+                                    <h5 className="text-sm font-medium text-gray-800">{album.title}</h5>
+                                    <p className="text-xs text-gray-500">{album.date}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-medium mb-2 text-blue-700">温馨提示</h4>
+                            <p className="text-sm text-blue-600">
+                                定期整理相册，留住每个瞬间，让爱宠的成长过程更加珍贵！
+                            </p>
+                        </div>
+                    </aside>
+                );
+            };
+
+            const renderModal = () => {
+                if (!showModal) return null;
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-800">添加新记录</h3>
+                            
+                            <form className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">照片标题</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入照片标题"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-pink-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">拍摄日期</label>
+                                    <input 
+                                        type="date" 
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-pink-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">成长阶段</label>
+                                    <select className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-pink-500">
+                                        <option>初识萌宠</option>
+                                        <option>成长之路</option>
+                                        <option>成年时光</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">照片URL</label>
+                                    <input 
+                                        type="url" 
+                                        placeholder="输入照片URL"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-pink-500"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">可以使用 https://picsum.photos/ 或其他图片服务</p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">照片描述</label>
+                                    <textarea 
+                                        placeholder="输入照片描述"
+                                        rows="3"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-pink-500 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="flex justify-end space-x-3 pt-4">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowModal(false)}
+                                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+                                    >
+                                        添加
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderFooter = () => (
+                <footer className="bg-white border-t border-gray-200 px-6 py-4 mt-auto">
+                    <div className="flex justify-between items-center text-sm text-gray-500">
+                        <div>© 2023 宠物成长相册 · 关爱每一个毛孩子的成长</div>
+                        <div>联系我们: petphoto@example.com</div>
+                        <div>Tip: 定期整理相册，留住每个瞬间～</div>
+                    </div>
+                </footer>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex flex-col">
+                    {renderHeader()}
+                    <div className="flex-grow flex">
+                        {renderSidebar()}
+                        {renderMainContent()}
+                        {renderRightSidebar()}
+                    </div>
+                    {renderFooter()}
+                    {renderModal()}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青少年运动成就</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f0f2f5; /* Matching the background of the main content area */
+        }
+        #root {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .achievement-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+        /* Custom date picker styling if needed, but for now simple input is fine */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: none;
+            display: block;
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 30px; /* Adjust size as needed */
+            cursor: pointer;
+        }
+        .date-picker-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none; /* Make icon unclickable */
+            color: #6B7280; /* Gray-500 */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialAchievements = [
+            {
+                id: '1',
+                name: '游泳比赛金牌',
+                date: '2023-06-15',
+                imageUrl: 'https://picsum.photos/id/1015/300/200',
+                description: '在市级青少年游泳比赛中获得50米自由泳金牌',
+                category: '游泳'
+            },
+            {
+                id: '2',
+                name: '足球联赛最佳射手',
+                date: '2023-04-22',
+                imageUrl: 'https://picsum.photos/id/1083/300/200',
+                description: '在学校足球联赛中赢得最佳射手称号，场均得分22.5分',
+                category: '足球'
+            },
+            {
+                id: '3',
+                name: '校园马拉松竞赛',
+                date: '2023-05-10',
+                imageUrl: 'https://picsum.photos/id/1070/300/200',
+                description: '成功完成10公里校园马拉松，用时55分钟',
+                category: '跑步'
+            }
+        ];
+
+        const achievementColors = {
+            '游泳': 'bg-blue-500',
+            '足球': 'bg-green-500',
+            '跑步': 'bg-yellow-500',
+            '其他': 'bg-gray-400'
+        };
+
+        function calculateStatistics(achievements) {
+            const categoryCounts = {};
+            achievements.forEach(ach => {
+                const category = ach.category || '其他';
+                categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+            });
+
+            const totalAchievements = achievements.length;
+            const uniqueCategories = Object.keys(categoryCounts).length;
+
+            return { categoryCounts, totalAchievements, uniqueCategories };
+        }
+
+        function AchievementCard({ achievement, onDelete, onEdit }) {
+            return (
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                    <div className="relative">
+                        <img src={achievement.imageUrl} alt={achievement.name} className="w-full h-32 object-cover" />
+                        <button
+                            onClick={() => onEdit(achievement.id)}
+                            className="absolute top-2 right-2 bg-white text-gray-700 p-1 rounded-full shadow-md hover:bg-gray-100 transition-colors"
+                            aria-label="编辑成就"
+                        >
+                            <i className="fas fa-pen text-sm"></i>
+                        </button>
+                    </div>
+                    <div className="p-4 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 className="font-semibold text-gray-800 text-base mb-1">{achievement.name}</h3>
+                            <p className="text-gray-500 text-sm mb-2">{achievement.date}</p>
+                            <p className="text-gray-600 text-sm leading-tight">{achievement.description}</p>
+                        </div>
+                        <button
+                            onClick={() => onDelete(achievement.id)}
+                            className="mt-4 text-red-500 hover:text-red-700 text-sm font-medium self-start"
+                        >
+                            删除
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function AchievementModal({ isOpen, onClose, onSave, initialData = {}, isEditing = false }) {
+            const [name, setName] = useState(initialData.name || '');
+            const [date, setDate] = useState(initialData.date || '');
+            const [imageUrl, setImageUrl] = useState(initialData.imageUrl || '');
+            const [description, setDescription] = useState(initialData.description || '');
+
+            useEffect(() => {
+                setName(initialData.name || '');
+                setDate(initialData.date || '');
+                setImageUrl(initialData.imageUrl || '');
+                setDescription(initialData.description || '');
+            }, [initialData, isOpen]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const category = inferCategory(name); // Infer category based on name
+                onSave({ id: initialData.id, name, date, imageUrl, description, category });
+                onClose();
+            };
+
+            const inferCategory = (achievementName) => {
+                if (achievementName.includes('游泳')) return '游泳';
+                if (achievementName.includes('足球')) return '足球';
+                if (achievementName.includes('马拉松') || achievementName.includes('跑步')) return '跑步';
+                return '其他';
+            };
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6 relative">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-6">{isEditing ? '编辑成就' : '添加新成就'}</h2>
+                        <button
+                            onClick={onClose}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                            aria-label="关闭"
+                        >
+                            <i className="fas fa-times text-lg"></i>
+                        </button>
+
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-4">
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="例如：100米短跑比赛"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">达成日期</label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        id="date"
+                                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm appearance-none pr-8"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        required
+                                    />
+                                    <span className="date-picker-icon">
+                                        <i className="far fa-calendar-alt"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">照片URL</label>
+                                <input
+                                    type="url"
+                                    id="imageUrl"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    placeholder="https://picsum.photos/id/1079/300/200"
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    required
+                                />
+                                <p className="mt-1 text-xs text-gray-500">填写成就相关图片URL</p>
+                            </div>
+                            <div className="mb-6">
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">详细描述</label>
+                                <textarea
+                                    id="description"
+                                    rows="3"
+                                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm resize-y"
+                                    placeholder="描述你的成就细节..."
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    {isEditing ? '保存修改' : '保存成就'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+
+        function App() {
+            const [achievements, setAchievements] = useState(initialAchievements);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingAchievementId, setEditingAchievementId] = useState(null);
+
+            const statistics = calculateStatistics(achievements);
+
+            const handleAddAchievement = (newAchievement) => {
+                setAchievements([...achievements, { ...newAchievement, id: String(Date.now()) }]);
+            };
+
+            const handleEditAchievement = (updatedAchievement) => {
+                setAchievements(achievements.map(ach =>
+                    ach.id === updatedAchievement.id ? updatedAchievement : ach
+                ));
+            };
+
+            const handleDeleteAchievement = (id) => {
+                setAchievements(achievements.filter(ach => ach.id !== id));
+            };
+
+            const openAddModal = () => {
+                setEditingAchievementId(null);
+                setIsModalOpen(true);
+            };
+
+            const openEditModal = (id) => {
+                setEditingAchievementId(id);
+                setIsModalOpen(true);
+            };
+
+            const closeAddEditModal = () => {
+                setIsModalOpen(false);
+                setEditingAchievementId(null); // Clear editing state
+            };
+
+            const currentAchievementToEdit = editingAchievementId
+                ? achievements.find(ach => ach.id === editingAchievementId)
+                : {};
+
+            const categoryOrder = ['游泳', '跑步', '足球', '其他']; // Define a consistent order
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex flex-col">
+                    {/* Header */}
+                    <header className="relative bg-gradient-to-r from-orange-500 to-blue-500 text-white p-6 flex justify-between items-center h-48">
+                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-blue-500 opacity-90"></div>
+                        <div className="relative z-10">
+                            <h1 className="text-4xl font-bold mb-2">青少年运动成就</h1>
+                            <p className="text-xl font-light">记录青春的每一次突破</p>
+                        </div>
+                        <div className="relative z-10 w-96 h-full flex justify-end items-center">
+                            <img src="https://picsum.photos/id/245/400/200" alt="背景图片" className="object-cover w-full h-full rounded-lg shadow-lg" />
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <div className="flex-grow container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6">
+
+                        {/* Left Sidebar */}
+                        <aside className="md:col-span-1 lg:col-span-2 bg-white rounded-lg shadow-sm p-6 h-fit">
+                            <div className="flex items-center mb-6">
+                                <span className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                                    <i className="fas fa-running text-white text-xl"></i>
+                                </span>
+                                <h2 className="text-lg font-bold text-gray-800">青春运动记录</h2>
+                            </div>
+                            <nav>
+                                <ul>
+                                    <li className="mb-4">
+                                        <a href="#" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                                            <i className="fas fa-home w-6"></i>
+                                            <span className="ml-2 font-medium">首页</span>
+                                        </a>
+                                    </li>
+                                    <li className="mb-4">
+                                        <a href="#" className="flex items-center text-blue-600 font-bold bg-blue-50 bg-opacity-80 py-2 px-3 rounded-md">
+                                            <i className="fas fa-trophy w-6"></i>
+                                            <span className="ml-2">我的成就</span>
+                                        </a>
+                                    </li>
+                                    <li className="mb-4">
+                                        <a href="#" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                                            <i className="fas fa-chart-bar w-6"></i>
+                                            <span className="ml-2 font-medium">统计分析</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                                            <i className="fas fa-question-circle w-6"></i>
+                                            <span className="ml-2 font-medium">帮助说明</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </aside>
+
+                        {/* Middle Content */}
+                        <main className="md:col-span-3 lg:col-span-7 space-y-6">
+                            {/* Why Record Achievements */}
+                            <section className="bg-white rounded-lg shadow-sm p-6">
+                                <h2 className="text-xl font-bold text-gray-800 mb-4">为何记录运动成就?</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 text-sm leading-relaxed">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 mb-2">身心健康的基石</h3>
+                                        <p className="mb-3">定期运动可以提升青少年身心肺功能、增强肌肉力量、帮助骨骼发育，同时减轻压力，提升自信心和社交能力。</p>
+                                        <h3 className="font-semibold text-gray-800 mb-2">养成习惯的关键</h3>
+                                        <p>通过记录和跟踪成就，可以让运动变成一种习惯，建立长期健康的生活方式。</p>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 mb-2">激励进步的动力</h3>
+                                        <p className="mb-3">每一次成就记录都是对过去努力的认可，也是对未来挑战的动力。</p>
+                                        <h3 className="font-semibold text-gray-800 mb-2">成长历程的见证</h3>
+                                        <p>运动记录构成了青少年成长的珍贵回忆，见证着每一次突破与成长。</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* My Achievement Records */}
+                            <section className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-xl font-bold text-gray-800">我的成就记录</h2>
+                                    <button
+                                        onClick={openAddModal}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md shadow-md transition-colors flex items-center"
+                                    >
+                                        <i className="fas fa-plus mr-2 text-sm"></i>
+                                        添加成就
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+                                    {achievements.map(achievement => (
+                                        <AchievementCard
+                                            key={achievement.id}
+                                            achievement={achievement}
+                                            onDelete={handleDeleteAchievement}
+                                            onEdit={openEditModal}
+                                        />
+                                    ))}
+                                </div>
+                                <p className="text-center text-gray-500 text-sm italic">
+                                    “每一次突破，都是青春的勋章”<br />
+                                    记录成长，见证未来
+                                </p>
+                            </section>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="md:col-span-4 lg:col-span-3 space-y-6">
+                            {/* Achievement Statistics */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex mb-4 border-b border-gray-200">
+                                    <button className="pb-3 text-blue-600 font-semibold border-b-2 border-blue-600 -mb-px">
+                                        成就统计
+                                    </button>
+                                    <button className="ml-6 pb-3 text-gray-500 hover:text-gray-700 font-medium">
+                                        项目统计
+                                    </button>
+                                </div>
+
+                                {/* Project Distribution */}
+                                <div className="mb-6">
+                                    <h3 className="text-base font-semibold text-gray-800 mb-3">项目分布</h3>
+                                    <ul className="space-y-3">
+                                        {categoryOrder.map(category => {
+                                            const count = statistics.categoryCounts[category] || 0;
+                                            const colorClass = achievementColors[category] || achievementColors['其他'];
+                                            return (
+                                                <li key={category} className="flex items-center">
+                                                    <span className={`w-3 h-3 rounded-full mr-2 ${colorClass}`}></span>
+                                                    <span className="text-gray-700 text-sm w-16">{category}</span>
+                                                    <div className="flex-grow bg-gray-200 rounded-full h-2 mr-3">
+                                                        <div
+                                                            className={`achievement-bar ${colorClass}`}
+                                                            style={{ width: `${(count / (statistics.totalAchievements || 1)) * 100}%` }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-gray-600 text-sm">{count}</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+
+                                {/* Overall Data */}
+                                <div className="mb-6">
+                                    <h3 className="text-base font-semibold text-gray-800 mb-3">总体数据</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-gray-50 rounded-lg p-3 text-center">
+                                            <p className="text-2xl font-bold text-gray-800">{statistics.totalAchievements}</p>
+                                            <p className="text-gray-500 text-sm">总成就数</p>
+                                        </div>
+                                        <div className="bg-gray-50 rounded-lg p-3 text-center">
+                                            <p className="text-2xl font-bold text-gray-800">{statistics.uniqueCategories}</p>
+                                            <p className="text-gray-500 text-sm">运动种类</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-md shadow-sm transition-colors flex items-center justify-center">
+                                    <i className="fas fa-download mr-2 text-sm"></i>
+                                    导出统计
+                                </button>
+                            </div>
+
+                            {/* Usage Instructions */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <h3 className="text-lg font-bold text-gray-800 mb-4">使用帮助</h3>
+                                <ul className="space-y-3">
+                                    <li className="flex items-start">
+                                        <i className="fas fa-check-circle text-blue-500 mt-1 mr-2 text-base"></i>
+                                        <p className="text-gray-700 text-sm">点击"添加成就"新增记录</p>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <i className="fas fa-check-circle text-blue-500 mt-1 mr-2 text-base"></i>
+                                        <p className="text-gray-700 text-sm">在卡片上点击"编辑"可修改内容</p>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <i className="far fa-circle text-gray-400 mt-1 mr-2 text-base"></i>
+                                        <p className="text-gray-700 text-sm">点击"删除"按钮移除无效记录</p>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <i className="far fa-circle text-gray-400 mt-1 mr-2 text-base"></i>
+                                        <p className="text-gray-700 text-sm">图表区可导出CSV数据</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <AchievementModal
+                        isOpen={isModalOpen}
+                        onClose={closeAddEditModal}
+                        onSave={editingAchievementId ? handleEditAchievement : handleAddAchievement}
+                        initialData={currentAchievementToEdit}
+                        isEditing={!!editingAchievementId}
+                    />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

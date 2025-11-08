@@ -1,0 +1,533 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微笑打卡专属池</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('display');
+            const [searchKeyword, setSearchKeyword] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('全部分类');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [editContent, setEditContent] = useState('今天在海边看到了超美的日落，心情大好~');
+            const [editRating, setEditRating] = useState(5);
+            const [editCategory, setEditCategory] = useState('日常');
+
+            const smileRecords = [
+                {
+                    id: 1,
+                    user: '晴天',
+                    date: '2024-06-01',
+                    content: '今天在海边看到了超美的日落，心情大好~',
+                    image: 'https://picsum.photos/id/1015/300/200',
+                    rating: 5,
+                    category: '日常'
+                },
+                {
+                    id: 2,
+                    user: '小白',
+                    date: '2024-06-02',
+                    content: '被家里小猫萌翻啦，记录一次！',
+                    image: 'https://picsum.photos/id/1025/300/200',
+                    rating: 4,
+                    category: '宠物'
+                },
+                {
+                    id: 3,
+                    user: '旅行者',
+                    date: '2024-06-03',
+                    content: '爬山到山顶，看到了壮观的云海，太美啦了！',
+                    image: 'https://picsum.photos/id/1036/300/200',
+                    rating: 5,
+                    category: '旅行'
+                },
+                {
+                    id: 4,
+                    user: '美食家',
+                    date: '2024-06-04',
+                    content: '今天做了一道拿手好菜，家人都很不错口！',
+                    image: 'https://picsum.photos/id/1060/300/200',
+                    rating: 4,
+                    category: '美食'
+                },
+                {
+                    id: 5,
+                    user: '小明',
+                    date: '2024-06-05',
+                    content: '第一次给妈妈过生日，准备了惊喜蛋糕，她笑得好开心！',
+                    image: 'https://picsum.photos/id/1074/300/200',
+                    rating: 5,
+                    category: '家庭'
+                },
+                {
+                    id: 6,
+                    user: '书虫',
+                    date: '2024-06-06',
+                    content: '终于读完了期待已久的小说，结局出乎意料但很感人。',
+                    image: 'https://picsum.photos/id/1080/300/200',
+                    rating: 3,
+                    category: '阅读'
+                }
+            ];
+
+            const filteredRecords = smileRecords.filter(record => {
+                const matchesKeyword = searchKeyword === '' || record.content.includes(searchKeyword);
+                const matchesCategory = selectedCategory === '全部分类' || record.category === selectedCategory;
+                return matchesKeyword && matchesCategory;
+            });
+
+            const handleSearch = (keyword) => {
+                setSearchKeyword(keyword);
+            };
+
+            const handleCategoryChange = (category) => {
+                setSelectedCategory(category);
+            };
+
+            const renderStars = (rating) => {
+                return Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className={`text-yellow-400 ${i < rating ? 'fas' : 'far'} fa-star`}></span>
+                ));
+            };
+
+            const renderSidebar = () => (
+                <div className="w-48 bg-gray-50 p-4 h-screen">
+                    <div className="bg-orange-100 rounded-lg p-3 mb-4">
+                        <h3 className="text-orange-600 font-medium flex items-center">
+                            <i className="fas fa-circle text-orange-500 text-xs mr-2"></i>
+                            展示区
+                        </h3>
+                    </div>
+                    
+                    <ul className="space-y-2">
+                        <li className="flex items-center text-gray-700 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                            <i className="fas fa-calendar-check w-4 mr-3"></i>
+                            我的打卡
+                        </li>
+                        <li className="flex items-center text-gray-700 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                            <i className="fas fa-tags w-4 mr-3"></i>
+                            标签管理
+                        </li>
+                        <li className="flex items-center text-gray-700 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                            <i className="fas fa-cog w-4 mr-3"></i>
+                            设置
+                        </li>
+                    </ul>
+                </div>
+            );
+
+            const renderMainContent = () => {
+                if (currentView === 'editor') {
+                    return (
+                        <div className="flex-1 p-8">
+                            <div className="max-w-4xl mx-auto">
+                                <h2 className="text-xl font-medium mb-6">填写微笑故事，上传美好画面，保存你的每日好心情！</h2>
+                                
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+                                    <img src="https://picsum.photos/id/1057/150/120" alt="创作提示" className="mx-auto mb-4 rounded" />
+                                    <h3 className="text-lg font-medium mb-2">开始创建你的微笑记录</h3>
+                                    <p className="text-gray-600 mb-6">分享你的微笑瞬间，记录每一个值得珍藏的美好时刻，让幸福常驻心间。</p>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-orange-400 text-white px-6 py-2 rounded-full hover:bg-orange-500"
+                                    >
+                                        立即添加微笑
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="flex-1 p-6">
+                        <div className="max-w-6xl mx-auto">
+                            <p className="text-gray-600 mb-6">在这里，你可以随时回顾自己或好友的微笑瞬间，每一个记录都温暖心田。</p>
+                            
+                            <div className="flex gap-4 mb-6">
+                                <div className="flex-1">
+                                    <label className="block text-sm text-gray-600 mb-2">搜索微笑</label>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="输入关键词搜索..."
+                                            value={searchKeyword}
+                                            onChange={(e) => handleSearch(e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                        />
+                                        <i className="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm text-gray-600 mb-2">分类筛选</label>
+                                    <select 
+                                        value={selectedCategory}
+                                        onChange={(e) => handleCategoryChange(e.target.value)}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                    >
+                                        <option>全部分类</option>
+                                        <option>日常</option>
+                                        <option>旅行</option>
+                                        <option>宠物</option>
+                                        <option>美食</option>
+                                        <option>家庭</option>
+                                        <option>阅读</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {filteredRecords.length === 0 ? (
+                                <div className="text-center py-20">
+                                    <img src="https://picsum.photos/id/1040/150/120" alt="暂无记录" className="mx-auto mb-4 rounded" />
+                                    <h3 className="text-lg font-medium mb-2">暂无微笑记录</h3>
+                                    <p className="text-gray-600 mb-6">点击右下角的"添加微笑"按钮，记录你的第一个微笑瞬间吧！</p>
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-orange-400 text-white px-6 py-2 rounded-full hover:bg-orange-500"
+                                    >
+                                        立即添加微笑
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-6">
+                                    {filteredRecords.map((record) => (
+                                        <div key={record.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                            <div className="p-4">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center">
+                                                        <img src={`https://picsum.photos/id/${100 + record.id}/32/32`} alt={record.user} className="w-8 h-8 rounded-full mr-2" />
+                                                        <span className="font-medium">{record.user}</span>
+                                                        <span className="text-gray-400 text-sm ml-2">{record.date}</span>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => setShowEditModal(true)}
+                                                            className="text-gray-400 hover:text-blue-500"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                        <button className="text-gray-400 hover:text-red-500">
+                                                            <i className="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <p className="text-gray-800 mb-4">{record.content}</p>
+                                                
+                                                <img src={record.image} alt="微笑瞬间" className="w-full h-40 object-cover rounded-lg mb-3" />
+                                                
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex space-x-1">
+                                                        {renderStars(record.rating)}
+                                                    </div>
+                                                    <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded text-sm">{record.category}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderRightSidebar = () => (
+                <div className="w-64 bg-gray-50 p-4 h-screen">
+                    <div className="mb-6">
+                        <h3 className="text-orange-600 font-medium mb-3">今日数据</h3>
+                        <div className="space-y-2">
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">今日打卡</span>
+                                <span className="font-medium">78次</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-600">活跃用户</span>
+                                <span className="font-medium">56人</span>
+                            </div>
+                            <div>
+                                <span className="text-gray-600">平均心情</span>
+                                <div className="flex space-x-1 mt-1">
+                                    <span className="text-yellow-400">★★★★★</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h3 className="text-orange-600 font-medium mb-3">用户排行</h3>
+                        <div className="space-y-2">
+                            <div className="flex items-center">
+                                <span className="w-4 h-4 bg-yellow-400 rounded-full mr-2 text-white text-xs flex items-center justify-center">1</span>
+                                <img src="https://picsum.photos/id/1027/24/24" alt="晴天" className="w-6 h-6 rounded-full mr-2" />
+                                <span>晴天</span>
+                            </div>
+                            <div className="flex items-center">
+                                <span className="w-4 h-4 bg-gray-400 rounded-full mr-2 text-white text-xs flex items-center justify-center">2</span>
+                                <img src="https://picsum.photos/id/1040/24/24" alt="旅行者" className="w-6 h-6 rounded-full mr-2" />
+                                <span>旅行者</span>
+                            </div>
+                            <div className="flex items-center">
+                                <span className="w-4 h-4 bg-orange-400 rounded-full mr-2 text-white text-xs flex items-center justify-center">3</span>
+                                <img src="https://picsum.photos/id/1055/24/24" alt="小白" className="w-6 h-6 rounded-full mr-2" />
+                                <span>小白</span>
+                            </div>
+                        </div>
+                        <button className="text-orange-500 text-sm mt-2 hover:text-orange-600">查看更多</button>
+                    </div>
+
+                    <div className="bg-white rounded-lg p-4">
+                        <h3 className="text-orange-600 font-medium mb-3">微笑小贴士</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                            微笑可以减轻压力，增强免疫系统！
+                            <br />每天记录5分钟生活中的美好，有助于提升幸福感。
+                            <br />分享你的微笑，能够感染身边的人，传递积极能量。
+                        </p>
+                    </div>
+                </div>
+            );
+
+            const renderFooter = () => (
+                <footer className="bg-gray-50 p-6 border-t">
+                    <div className="max-w-6xl mx-auto grid grid-cols-4 gap-8">
+                        <div>
+                            <h4 className="font-medium text-orange-600 mb-2">微笑打卡专属池</h4>
+                            <p className="text-gray-600 text-sm">每天一个微笑，记录幸福瞬间！</p>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-orange-600 mb-2">快速链接</h4>
+                            <ul className="space-y-1 text-sm text-gray-600">
+                                <li>关于我们</li>
+                                <li>使用条款</li>
+                                <li>隐私政策</li>
+                                <li>帮助中心</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-orange-600 mb-2">联系我们</h4>
+                            <ul className="space-y-1 text-sm text-gray-600">
+                                <li><i className="fas fa-envelope mr-2"></i>smile@example.com</li>
+                                <li><i className="fas fa-phone mr-2"></i>400-123-4567</li>
+                                <li><i className="fas fa-map-marker-alt mr-2"></i>微笑大道，幸福路100号</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-orange-600 mb-2">关注我们</h4>
+                            <div className="flex space-x-3">
+                                <i className="fab fa-weixin text-green-500 text-lg"></i>
+                                <i className="fab fa-weibo text-red-500 text-lg"></i>
+                                <i className="fab fa-qq text-blue-500 text-lg"></i>
+                                <i className="fab fa-twitter text-blue-400 text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="max-w-6xl mx-auto mt-6 pt-6 border-t text-center text-sm text-gray-500">
+                        ©2024 微笑打卡专属池，保留所有权利。
+                    </div>
+                </footer>
+            );
+
+            const renderEditModal = () => (
+                showEditModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-full">
+                            <h3 className="text-lg font-medium mb-4">编辑微笑</h3>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">微笑备注</label>
+                                <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">图片上传</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                    <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p className="text-gray-600">点击上传图片，或将图片拖至此处</p>
+                                </div>
+                                
+                                <img src="https://picsum.photos/id/1015/300/200" alt="已选图片" className="w-full h-32 object-cover rounded-lg mt-4" />
+                            </div>
+
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">心情评分</label>
+                                    <div className="flex items-center">
+                                        <span className="mr-2">{renderStars(editRating)}</span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">分类</label>
+                                    <select 
+                                        value={editCategory}
+                                        onChange={(e) => setEditCategory(e.target.value)}
+                                        className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                    >
+                                        <option>日常</option>
+                                        <option>旅行</option>
+                                        <option>宠物</option>
+                                        <option>美食</option>
+                                        <option>家庭</option>
+                                        <option>阅读</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end space-x-3">
+                                <button 
+                                    onClick={() => setShowEditModal(false)}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={() => setShowEditModal(false)}
+                                    className="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500"
+                                >
+                                    保存修改
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const renderAddModal = () => (
+                showAddModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-full">
+                            <h3 className="text-lg font-medium mb-4">添加微笑</h3>
+                            
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">微笑备注</label>
+                                <textarea
+                                    placeholder="分享你的微笑瞬间..."
+                                    className="w-full h-24 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:border-blue-500"
+                                ></textarea>
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-2">图片上传</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                    <i className="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                                    <p className="text-gray-600">点击上传图片，或将图片拖至此处</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">心情评分</label>
+                                    <div className="flex items-center">
+                                        <span className="mr-2">{renderStars(3)}</span>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">分类</label>
+                                    <select className="px-3 py-1 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                                        <option>日常</option>
+                                        <option>旅行</option>
+                                        <option>宠物</option>
+                                        <option>美食</option>
+                                        <option>家庭</option>
+                                        <option>阅读</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end space-x-3">
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={() => setShowAddModal(false)}
+                                    className="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500"
+                                >
+                                    提交打卡
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <img src="https://picsum.photos/id/1062/32/32" alt="Logo" className="w-8 h-8 rounded-full" />
+                                <h1 className="text-lg font-medium text-orange-600">微笑打卡专属池</h1>
+                                
+                                <nav className="flex space-x-1">
+                                    <button 
+                                        onClick={() => setCurrentView('display')}
+                                        className={`px-4 py-2 rounded ${currentView === 'display' ? 'bg-orange-200 text-orange-600' : 'text-gray-600 hover:text-orange-600'}`}
+                                    >
+                                        展示区
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('editor')}
+                                        className={`px-4 py-2 rounded ${currentView === 'editor' ? 'bg-orange-200 text-orange-600' : 'text-gray-600 hover:text-orange-600'}`}
+                                    >
+                                        编辑区
+                                    </button>
+                                    <button className="text-gray-600 hover:text-orange-600">统计区</button>
+                                    <button className="text-gray-600 hover:text-orange-600">帮助说明</button>
+                                </nav>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3">
+                                <i className="fas fa-bell text-gray-400"></i>
+                                <img src="https://picsum.photos/id/1070/32/32" alt="User" className="w-8 h-8 rounded-full" />
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {renderSidebar()}
+                        {renderMainContent()}
+                        {renderRightSidebar()}
+                    </div>
+
+                    {renderFooter()}
+                    {renderEditModal()}
+                    {renderAddModal()}
+
+                    {/* Floating Button */}
+                    <button className="fixed bottom-6 right-6 bg-orange-400 text-white w-12 h-12 rounded-full shadow-lg hover:bg-orange-500 flex items-center justify-center">
+                        <i className="fas fa-plus"></i>
+                    </button>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

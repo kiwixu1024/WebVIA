@@ -1,0 +1,362 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>创意作品集</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+</head>
+<body class="h-screen overflow-hidden">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    // 初始卡片数据
+    const initialCards = [
+      {
+        id: 1,
+        title: '城市之光',
+        desc: '探索现代城市夜景的光影变幻，展现都市的繁华与寂寥。',
+        classification: '摄影',
+        tags: ['城市', '夜景', '光影'],
+        cover: 'https://picsum.photos/id/1039/600/400',
+        likes: 245,
+        comments: 124
+      },
+      {
+        id: 2,
+        title: '自然之境',
+        desc: '通过水彩和图像创造出自然的静美光芒，表达对环境保护的关注。',
+        classification: '插画',
+        tags: ['自然', '水彩', '环境'],
+        cover: 'https://picsum.photos/id/1018/600/400',
+        likes: 189,
+        comments: 97
+      },
+      {
+        id: 3,
+        title: '音乐流动',
+        desc: '音乐在跳动的琴键中游走，追求静与动的完美结合，提升用户体验。',
+        classification: 'UI设计',
+        tags: ['UI', '音乐', '应用'],
+        cover: 'https://picsum.photos/id/1074/600/400',
+        likes: 312,
+        comments: 156
+      },
+      {
+        id: 4,
+        title: '海洋之梦',
+        desc: '深入海底世界的梦幻之旅，通过丰富的色彩和线条展现海洋生物的多样性。',
+        classification: '插画',
+        tags: ['海洋', '奇幻', '色彩'],
+        cover: 'https://picsum.photos/id/1025/600/400',
+        likes: 275,
+        comments: 132
+      },
+      {
+        id: 5,
+        title: '星空之下',
+        desc: '高原夜空拍摄作品，记录了银河的壮丽与繁星的点缀，展示大自然的神秘。',
+        classification: 'UI设计',
+        tags: ['星空', '自然', '夜景'],
+        cover: 'https://picsum.photos/id/1023/600/400',
+        likes: 298,
+        comments: 143
+      },
+      {
+        id: 6,
+        title: '电商革新',
+        desc: '电子商务平台的界面设计，优化用户购物流程，提高转化率。',
+        classification: '摄影',
+        tags: ['电商', 'UI', '用户体验'],
+        cover: 'https://picsum.photos/id/1043/600/400',
+        likes: 186,
+        comments: 89
+      }
+    ];
+
+    // 可选封面图列表
+    const coverOptions = [
+      { id: 100, url: 'https://picsum.photos/id/100/200/150' },
+      { id: 1018, url: 'https://picsum.photos/id/1018/200/150' },
+      { id: 1023, url: 'https://picsum.photos/id/1023/200/150' },
+      { id: 1074, url: 'https://picsum.photos/id/1074/200/150' },
+      { id: 1025, url: 'https://picsum.photos/id/1025/200/150' },
+      { id: 1039, url: 'https://picsum.photos/id/1039/200/150' }
+    ];
+
+    function App() {
+      const [cards, setCards] = useState(initialCards);
+      const [filter, setFilter] = useState('所有作品');
+      const [modal, setModal] = useState({ type: null, card: null });
+
+      // 打开编辑
+      const openEdit = (card) => setModal({ type: 'edit', card });
+      // 打开删除确认
+      const openDelete = (card) => setModal({ type: 'delete', card });
+      // 打开添加
+      const openAdd = () => setModal({ type: 'add', card: null });
+      // 打开帮助中心
+      const openHelp = () => setModal({ type: 'help', card: null });
+      // 关闭模态框
+      const closeModal = () => setModal({ type: null, card: null });
+      // 改变过滤
+      const chooseFilter = (cls) => {
+        setFilter(cls);
+        closeModal();
+      };
+
+      // 模拟删除
+      const confirmDelete = () => {
+        setCards(cards.filter(c => c.id !== modal.card.id));
+        closeModal();
+      };
+
+      // 筛选后的列表
+      const showCards = cards.filter(c => filter === '所有作品' || c.classification === filter);
+
+      return (
+        <div className="flex h-full">
+          {/* 侧边栏 */}
+          <nav className="w-48 bg-white border-r flex-shrink-0 flex flex-col">
+            <div className="h-16 flex items-center justify-center text-lg font-semibold">创意作品集</div>
+            <ul className="flex-1">
+              {['所有作品','插画','摄影','UI设计'].map(item => (
+                <li key={item}
+                  className={`px-4 py-3 cursor-pointer flex items-center ${filter === item ? 'bg-green-50 border-l-4 border-green-500 text-green-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`}
+                  onClick={() => chooseFilter(item)}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <div className="p-4 text-xs text-gray-500">
+              使用指南<br/>
+              - 通过左侧分类可快速筛选作品<br/>
+              - 使用顶部按钮进行不同操作
+            </div>
+          </nav>
+          {/* 右侧主区 */}
+          <div className="flex-1 flex flex-col bg-gray-50">
+            {/* 顶部选项卡 */}
+            <div className="h-16 bg-white px-6 flex items-center space-x-6 border-b">
+              <div className="flex items-center text-green-600 font-medium"><i className="fas fa-eye mr-1"></i>展示</div>
+              <div className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer"><i className="fas fa-edit mr-1"></i>编辑</div>
+              <div className="flex items-center text-gray-600 hover:text-gray-800 cursor-pointer"><i className="fas fa-chart-bar mr-1"></i>统计</div>
+            </div>
+            {/* 内容 */}
+            <div className="flex-1 overflow-auto px-6 py-5">
+              <h2 className="text-lg font-semibold mb-4">所有创意作品</h2>
+              <div className="grid grid-cols-3 gap-5">
+                {showCards.map(card => (
+                  <div key={card.id} className="bg-white shadow rounded overflow-hidden">
+                    <img src={card.cover} alt="" className="w-full h-40 object-cover"/>
+                    <div className="p-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium">{card.title}</h3>
+                        <div className="space-x-2 text-gray-400 text-sm">
+                          <i className="fas fa-edit cursor-pointer hover:text-gray-600" onClick={() => openEdit(card)}></i>
+                          <i className="fas fa-trash-alt cursor-pointer hover:text-gray-600" onClick={() => openDelete(card)}></i>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-sm my-2">{card.desc}</p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {card.tags.map((t,i) => (
+                          <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">{t}</span>
+                        ))}
+                      </div>
+                      <div className="flex items-center text-gray-500 text-sm">
+                        <i className="fas fa-heart mr-1"></i>{card.likes}
+                        <i className="fas fa-comment ml-4 mr-1"></i>{card.comments}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* 底部按钮 */}
+            <div className="h-16 bg-white px-6 flex items-center justify-center space-x-4 border-t">
+              <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={openAdd}>添加新作品</button>
+              <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">批量删除</button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">导出数据</button>
+              <button className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800" onClick={openHelp}>帮助中心</button>
+            </div>
+          </div>
+
+          {/* 编辑作品模态框 */}
+          {modal.type === 'edit' && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="bg-white w-2/5 rounded shadow-lg overflow-auto max-h-[90%]">
+                <div className="flex justify-between items-center px-6 py-4 border-b">
+                  <h3 className="font-medium text-lg">编辑作品</h3>
+                  <button className="text-gray-500 hover:text-gray-700" onClick={closeModal}><i className="fas fa-times"></i></button>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品标题</label>
+                    <input type="text" value={modal.card.title} disabled className="w-full border px-3 py-2 rounded bg-gray-100"/>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品描述</label>
+                    <textarea value={modal.card.desc} disabled className="w-full border px-3 py-2 rounded bg-gray-100" rows="3"/>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品分类</label>
+                    <select value={modal.card.classification} disabled className="w-full border px-3 py-2 rounded bg-gray-100">
+                      <option>插画</option><option>摄影</option><option>UI设计</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">标签</label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {modal.card.tags.map((t,i) => (
+                        <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 rounded flex items-center">
+                          {t}<i className="fas fa-times ml-1 text-xs cursor-pointer"></i>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex">
+                      <input type="text" placeholder="输入标签名称" className="flex-1 border px-3 py-2 rounded-l"/>
+                      <button className="bg-green-500 text-white px-4 rounded-r hover:bg-green-600">添加</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">封面图片</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {coverOptions.map(opt => (
+                        <div key={opt.id} className="relative cursor-pointer"
+                          onClick={() => {/* 不可变更，仅示意 */}}>
+                          <img src={opt.url} alt="" className="w-full h-20 object-cover rounded"/>
+                          {opt.id === 1039 && (
+                            <div className="absolute inset-0 bg-green-500 bg-opacity-50 flex items-center justify-center rounded">
+                              <i className="fas fa-check text-white"></i>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <input type="text" value="https://picsum.photos/id/1039/600/400" disabled className="w-full border px-3 py-2 rounded mt-3 bg-gray-100"/>
+                    <img src="https://picsum.photos/id/1039/600/400" alt="" className="w-full h-40 object-cover rounded mt-2"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 删除确认模态框 */}
+          {modal.type === 'delete' && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="bg-white w-96 rounded shadow-lg">
+                <div className="p-6 text-center">
+                  <i className="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+                  <h4 className="text-lg font-medium mb-2">确认删除</h4>
+                  <p className="text-gray-600 mb-4">您确定要删除这个作品吗？此操作不可撤销。</p>
+                  <div className="flex justify-center space-x-4">
+                    <button className="px-4 py-2 border rounded hover:bg-gray-100" onClick={closeModal}>取消</button>
+                    <button className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600" onClick={confirmDelete}>确认删除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 添加作品模态框 */}
+          {modal.type === 'add' && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="bg-white w-2/5 rounded shadow-lg overflow-auto max-h-[90%]">
+                <div className="flex justify-between items-center px-6 py-4 border-b">
+                  <h3 className="font-medium text-lg">添加新作品</h3>
+                  <button className="text-gray-500 hover:text-gray-700" onClick={closeModal}><i className="fas fa-times"></i></button>
+                </div>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品标题</label>
+                    <input type="text" className="w-full border px-3 py-2 rounded"/>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品描述</label>
+                    <textarea className="w-full border px-3 py-2 rounded" rows="3"/>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">作品分类</label>
+                    <select className="w-full border px-3 py-2 rounded">
+                      <option>插画</option><option>摄影</option><option>UI设计</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">标签</label>
+                    <div className="flex flex-wrap gap-2 mb-2"></div>
+                    <div className="flex">
+                      <input type="text" placeholder="输入标签名称" className="flex-1 border px-3 py-2 rounded-l"/>
+                      <button className="bg-green-500 text-white px-4 rounded-r hover:bg-green-600">添加</button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">封面图片</label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {coverOptions.map(opt => (
+                        <div key={opt.id} className="relative cursor-pointer"
+                          onClick={() => {/* 仅示意 */}}>
+                          <img src={opt.url} alt="" className="w-full h-20 object-cover rounded"/>
+                          {opt.id === 100 && (
+                            <div className="absolute inset-0 bg-green-500 bg-opacity-50 flex items-center justify-center rounded">
+                              <i className="fas fa-check text-white"></i>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <input type="text" value="https://picsum.photos/id/100/600/400" disabled className="w-full border px-3 py-2 rounded mt-3 bg-gray-100"/>
+                    <img src="https://picsum.photos/id/100/600/400" alt="" className="w-full h-40 object-cover rounded mt-2"/>
+                  </div>
+                  <div className="text-right">
+                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={closeModal}>我知道了</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 帮助中心模态框 */}
+          {modal.type === 'help' && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="bg-white w-2/5 rounded shadow-lg overflow-auto max-h-[90%]">
+                <div className="flex justify-between items-center px-6 py-4 border-b">
+                  <h3 className="font-medium text-lg">帮助中心</h3>
+                  <button className="text-gray-500 hover:text-gray-700" onClick={closeModal}><i className="fas fa-times"></i></button>
+                </div>
+                <div className="p-6 space-y-4 text-gray-700 text-sm leading-relaxed">
+                  <p className="font-medium">基本操作指南</p>
+                  <ul className="list-disc ml-5">
+                    <li>通过左侧导航栏可以按分类筛选作品</li>
+                    <li>顶部选项卡可以切换不同视图模式</li>
+                    <li>点击底部“添加新作品”按钮可创建新作品</li>
+                    <li>每个作品卡上方有编辑和删除按钮</li>
+                    <li>在编辑框中可选择多个作品进行批量操作</li>
+                  </ul>
+                  <p className="font-medium">常见问题</p>
+                  <p>如何添加新作品？<br/>点击底部“添加新作品”按钮，填写表单并上传封面图片。</p>
+                  <p>如何编辑已有作品？<br/>点击作品卡片右上角的编辑按钮，或在编辑视图中点击对应作品的编辑按钮。</p>
+                  <p>如何删除多个作品？<br/>在编辑视图中选择多个作品，然后点击底部“批量删除”按钮。</p>
+                  <p>如何导出作品数据？<br/>点击底部“导出数据”按钮，选择导出格式和范围。</p>
+                  <p className="font-medium">关于创意作品集</p>
+                  <p>本作品集管理平台旨在帮助创作者高效地管理和展示自己的创意作品，通过直观的界面和丰富的功能，您可以轻松管理不同类型的作品，包括插画、摄影和UI设计等。系统提供了完善的数据分析工具，帮助您了解作品的受欢迎程度和互动情况。</p>
+                  <p className="font-medium">联系我们</p>
+                  <p>如有任何问题或建议，请联系我们：<br/>邮箱：support@creativeworks.com<br/>电话：400-123-4567<br/>工作时间：周一至周五 9:00-18:00</p>
+                  <div className="text-center mt-4">
+                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" onClick={closeModal}>我知道了</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

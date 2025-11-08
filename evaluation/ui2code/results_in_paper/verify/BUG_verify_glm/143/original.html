@@ -1,0 +1,555 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上古籍阅读平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            // 初始书籍数据
+            const [books, setBooks] = useState([
+                {
+                    id: 1,
+                    title: "楚辞",
+                    author: "屈原等",
+                    dynasty: "先秦",
+                    rating: 4.8,
+                    reads: 1857,
+                    tags: ["诗歌", "楚辞体"],
+                    description: "《楚辞》是中国古代诗歌浪漫主义杰作，与《诗经》并称"风骚"，主要收录了屈原、宋玉等人的作品，内容想象丰富，辞藻华丽，对后世文学产生了深远影响。",
+                    image: "https://picsum.photos/id/83/300/400"
+                },
+                {
+                    id: 2,
+                    title: "史记",
+                    author: "司马迁",
+                    dynasty: "汉",
+                    rating: 5,
+                    reads: 2789,
+                    tags: ["史书", "纪传体"],
+                    description: "《史记》是西汉史学家司马迁撰写的史学巨著一部纪传体史书，记载了上至上古传说中的黄帝时代，下至汉武帝太初年间共3000多年的历史。全书包括十二本纪、三十世家、七十列传、十表、八书...",
+                    image: "https://picsum.photos/id/28/300/400"
+                },
+                {
+                    id: 3,
+                    title: "资治通鉴",
+                    author: "司马光",
+                    dynasty: "宋",
+                    rating: 4.9,
+                    reads: 1253,
+                    tags: ["史书", "编年体"],
+                    description: "《资治通鉴》是北宋司马光主编的一部多卷本编年体史书，历时19年完成。从周威烈王二十三年（前403年）写起，到五代后周世宗显德六年（959年）止，涵盖16朝1362年的历史。此书记录了从战国末年到五代的历史，对后世史学发展产生重大影响，被称之为"鉴于往事，有资于治道。"",
+                    image: "https://picsum.photos/id/96/300/400"
+                },
+                {
+                    id: 4,
+                    title: "红楼梦",
+                    author: "曹雪芹",
+                    dynasty: "清",
+                    rating: 5,
+                    reads: 5283,
+                    tags: ["小说", "章回体"],
+                    description: "《红楼梦》，原名《石头记》，中国古代章回体长篇小说，中国古典四大名著之一，其通行本共120回，一般认为前80回为曹雪芹所著，后40回为高鹗所续，整部作品结构宏大，思想深厚。",
+                    image: "https://picsum.photos/id/24/300/400"
+                },
+                {
+                    id: 5,
+                    title: "论语",
+                    author: "孔子弟子及其再传弟子",
+                    dynasty: "春秋战国",
+                    rating: 4.9,
+                    reads: 3156,
+                    tags: ["儒家经典", "语录体"],
+                    description: "《论语》是儒家学派的经典著作之一，由孔子的弟子及其再传弟子编写而成，主要记录孔子及其弟子的言行，集中体现了孔子的政治主张、伦理思想、道德观念及教育原则等。",
+                    image: "https://picsum.photos/id/62/300/400"
+                },
+                {
+                    id: 6,
+                    title: "道德经",
+                    author: "老子",
+                    dynasty: "春秋",
+                    rating: 4.7,
+                    reads: 2453,
+                    tags: ["道家经典", "哲学"],
+                    description: "《道德经》又称《老子》，是中国古代先秦诸子分家前的一部著作，为道家哲学思想的重要来源，是老子的主要作品。全书约5000字，分为上下两篇，分别称为《道经》、《德经》。又称《五千言》、《道德真经》等。",
+                    image: "https://picsum.photos/id/35/300/400"
+                }
+            ]);
+
+            // 状态管理
+            const [sortBy, setSortBy] = useState('default');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingBook, setEditingBook] = useState(null);
+            const [deletingBook, setDeletingBook] = useState(null);
+
+            // 排序逻辑
+            const getSortedBooks = () => {
+                if (sortBy === 'hot') {
+                    return [...books].sort((a, b) => b.reads - a.reads);
+                }
+                return books;
+            };
+
+            // 处理排序
+            const handleSortByHot = () => {
+                setSortBy('hot');
+            };
+
+            // 处理添加书籍
+            const handleAddBook = () => {
+                setShowAddModal(true);
+            };
+
+            // 处理编辑书籍
+            const handleEditBook = (book) => {
+                setEditingBook({...book});
+                setShowEditModal(true);
+            };
+
+            // 处理删除书籍
+            const handleDeleteBook = (book) => {
+                setDeletingBook(book);
+                setShowDeleteModal(true);
+            };
+
+            // 保存编辑
+            const saveEdit = () => {
+                setBooks(books.map(book => 
+                    book.id === editingBook.id ? editingBook : book
+                ));
+                setShowEditModal(false);
+                setEditingBook(null);
+            };
+
+            // 确认删除
+            const confirmDelete = () => {
+                setBooks(books.filter(book => book.id !== deletingBook.id));
+                setShowDeleteModal(false);
+                setDeletingBook(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-b from-amber-800 to-amber-900">
+                    {/* Header */}
+                    <header className="bg-amber-800 text-white px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <span className="text-amber-800 font-bold">印</span>
+                                </div>
+                                <h1 className="text-xl font-semibold">线上古籍阅读平台</h1>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入关键词搜索" 
+                                    className="px-4 py-2 rounded border border-gray-300 bg-white text-black w-64"
+                                />
+                                <button className="px-4 py-2 bg-amber-700 hover:bg-amber-600 rounded">按朝代</button>
+                                <button className="px-4 py-2 bg-amber-700 hover:bg-amber-600 rounded">按分类</button>
+                                <button 
+                                    onClick={handleSortByHot}
+                                    className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded"
+                                >
+                                    按热门
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-amber-900 text-white p-4">
+                            <nav className="space-y-2">
+                                <div className="flex items-center space-x-2 p-2 rounded bg-amber-800">
+                                    <i className="fas fa-home"></i>
+                                    <span>古籍典藏</span>
+                                </div>
+                                <div className="flex items-center space-x-2 p-2 rounded hover:bg-amber-800 cursor-pointer">
+                                    <i className="fas fa-bookmark"></i>
+                                    <span>我的藏书</span>
+                                </div>
+                                <div className="flex items-center space-x-2 p-2 rounded hover:bg-amber-800 cursor-pointer">
+                                    <i className="fas fa-plus-circle"></i>
+                                    <span>新增书目</span>
+                                </div>
+                                <div className="flex items-center space-x-2 p-2 rounded hover:bg-amber-800 cursor-pointer">
+                                    <i className="fas fa-star"></i>
+                                    <span>平台特色</span>
+                                </div>
+                                <div className="flex items-center space-x-2 p-2 rounded hover:bg-amber-800 cursor-pointer">
+                                    <i className="fas fa-question-circle"></i>
+                                    <span>使用帮助</span>
+                                </div>
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-white">古籍典藏</h2>
+                                <button 
+                                    onClick={handleAddBook}
+                                    className="mt-4 ml-auto px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded flex items-center space-x-2"
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    <span>添加古籍</span>
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6">
+                                {getSortedBooks().map(book => (
+                                    <div key={book.id} className="bg-yellow-50 rounded-lg p-4 shadow-lg">
+                                        <div className="flex space-x-4">
+                                            <img 
+                                                src={book.image} 
+                                                alt={book.title}
+                                                className="w-20 h-28 object-cover rounded"
+                                            />
+                                            <div className="flex-1">
+                                                <h3 className="font-bold text-lg mb-1">{book.title}</h3>
+                                                <p className="text-sm text-gray-600 mb-1">作者：{book.author}</p>
+                                                <p className="text-sm text-gray-600 mb-2">朝代：{book.dynasty}</p>
+                                                <div className="flex items-center space-x-4 mb-2">
+                                                    <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">{book.tags[0]}</span>
+                                                    <span className="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded">{book.tags[1]}</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1 mb-2">
+                                                    <span className="text-yellow-500">★</span>
+                                                    <span className="font-medium">{book.rating}</span>
+                                                    <span className="text-gray-500">●</span>
+                                                    <span className="text-gray-500">{book.reads}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-700 mt-3 line-clamp-3">{book.description}</p>
+                                        <div className="flex justify-between items-center mt-4">
+                                            <button 
+                                                onClick={() => handleEditBook(book)}
+                                                className="text-green-600 hover:text-green-800 flex items-center space-x-1"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                                <span>编辑</span>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteBook(book)}
+                                                className="w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center"
+                                            >
+                                                <i className="fas fa-trash text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-64 bg-amber-800 text-white p-4">
+                            <h3 className="font-bold mb-4">统计信息</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <span>总古籍数</span>
+                                    <span className="font-bold">6</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>今日新增</span>
+                                    <span className="font-bold text-green-400">2</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>总阅读量</span>
+                                    <span className="font-bold">16791</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>平均评分</span>
+                                    <span className="font-bold">4.9★</span>
+                                </div>
+                            </div>
+                            <div className="mt-8">
+                                <h4 className="font-bold mb-2">朝代分布</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span>先秦</span>
+                                        <div className="w-12 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>汉</span>
+                                        <div className="w-8 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>唐</span>
+                                        <div className="w-4 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>宋</span>
+                                        <div className="w-6 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>明</span>
+                                        <div className="w-3 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span>清</span>
+                                        <div className="w-5 h-3 bg-gray-300 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-amber-900 text-white text-center py-4 mt-8">
+                        <p>© 2023 线上古籍阅读平台 · 传承千年文化</p>
+                        <div className="flex justify-end space-x-4 mt-2">
+                            <i className="fab fa-weixin"></i>
+                            <i className="fab fa-weibo"></i>
+                            <i className="fab fa-github"></i>
+                        </div>
+                    </footer>
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-yellow-100 rounded-lg p-6 w-96 max-w-full mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-bold">新增古籍</h3>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">书名</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入古籍名称"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">作者</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入作者姓名"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">朝代</label>
+                                            <select className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                <option>先秦</option>
+                                                <option>汉</option>
+                                                <option>唐</option>
+                                                <option>宋</option>
+                                                <option>明</option>
+                                                <option>清</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">封面</label>
+                                            <input 
+                                                type="text" 
+                                                defaultValue="https://picsum.photos/id/83/300/400"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">分类（可多选）</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['史书', '诗歌', '小说', '子部', '儒家经典', '道家经典', '佛经', '兵书', '农书', '地理', '杂家', '笔记', '政论', '文集'].map(tag => (
+                                                <button 
+                                                    key={tag}
+                                                    type="button"
+                                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-orange-200"
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">简介</label>
+                                        <textarea 
+                                            placeholder="请输入古籍简介"
+                                            rows="4"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        ></textarea>
+                                    </div>
+                                    <div className="flex justify-end space-x-3">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowAddModal(false)}
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+                                        >
+                                            保存
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && editingBook && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-yellow-100 rounded-lg p-6 w-96 max-w-full mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-bold">编辑古籍</h3>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">书名</label>
+                                        <input 
+                                            type="text" 
+                                            value={editingBook.title}
+                                            onChange={(e) => setEditingBook({...editingBook, title: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">作者</label>
+                                        <input 
+                                            type="text" 
+                                            value={editingBook.author}
+                                            onChange={(e) => setEditingBook({...editingBook, author: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">朝代</label>
+                                            <select 
+                                                value={editingBook.dynasty}
+                                                onChange={(e) => setEditingBook({...editingBook, dynasty: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                <option>先秦</option>
+                                                <option>汉</option>
+                                                <option>唐</option>
+                                                <option>宋</option>
+                                                <option>明</option>
+                                                <option>清</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">封面</label>
+                                            <input 
+                                                type="text" 
+                                                value={editingBook.image}
+                                                onChange={(e) => setEditingBook({...editingBook, image: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">分类（可多选）</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['史书', '诗歌', '小说', '子部', '儒家经典', '道家经典', '佛经', '兵书', '农书', '地理', '杂家', '笔记', '政论', '文集'].map(tag => (
+                                                <button 
+                                                    key={tag}
+                                                    type="button"
+                                                    className={`px-3 py-1 text-sm rounded ${
+                                                        editingBook.tags.includes(tag) 
+                                                            ? 'bg-orange-400 text-white' 
+                                                            : 'bg-gray-200 text-gray-700 hover:bg-orange-200'
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">简介</label>
+                                        <textarea 
+                                            value={editingBook.description}
+                                            onChange={(e) => setEditingBook({...editingBook, description: e.target.value})}
+                                            rows="4"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        ></textarea>
+                                    </div>
+                                    <div className="flex justify-end space-x-3">
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowEditModal(false)}
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            onClick={saveEdit}
+                                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+                                        >
+                                            保存更改
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && deletingBook && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-yellow-100 rounded-lg p-6 w-80 max-w-full mx-4">
+                                <div className="text-center">
+                                    <div className="text-red-500 text-4xl mb-4">⚠️</div>
+                                    <h3 className="text-lg font-bold mb-2">确认删除</h3>
+                                    <p className="text-gray-700 mb-6">
+                                        您确定要删除《{deletingBook.title}》吗？此操作不可恢复。
+                                    </p>
+                                    <div className="flex justify-center space-x-3">
+                                        <button 
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={confirmDelete}
+                                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    .tab-active {
+      color: #FF7A45;
+      border-bottom: 2px solid #FF7A45;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('推荐');
+      const [showPublishModal, setShowPublishModal] = useState(false);
+      const [showAddTopicModal, setShowAddTopicModal] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+      const [posts, setPosts] = useState([
+        {
+          id: 1,
+          author: 'Alice',
+          avatar: 'https://picsum.photos/id/64/40/40',
+          date: '2023.12.12 14:30',
+          title: '午后阳光漫步分享',
+          content: '今天去了公园见到了可爱的松鼠，它们在树上跳来跳去，非常可爱！阳光透过树叶的缝隙洒在地上，形成了斑驳的光影，整个下午都充满在这美好的氛围中。',
+          images: [
+            'https://picsum.photos/id/251/500/300',
+            'https://picsum.photos/id/29/500/300'
+          ],
+          likes: 24,
+          comments: 5,
+          tags: ['松鼠', '光影', '秋天晚霞']
+        }
+      ]);
+
+      const handleDeletePost = () => {
+        setPosts([]);
+        setShowDeleteConfirm(false);
+      };
+
+      return (
+        <div className="flex min-h-screen bg-gray-100">
+          {/* 左侧导航 */}
+          <div className="w-[120px] bg-white border-r border-gray-200 flex flex-col items-center py-4">
+            <div className="w-14 h-14 rounded-full bg-orange-300 flex items-center justify-center text-white font-bold text-2xl mb-4">
+              F
+            </div>
+            <div className="text-orange-400 text-sm mb-8">交友社区</div>
+            
+            <div className="flex flex-col items-center space-y-6 w-full">
+              <div className="flex flex-col items-center cursor-pointer w-full">
+                <i className="fas fa-user mb-1"></i>
+                <span className="text-sm">Profile</span>
+              </div>
+              <div className="flex flex-col items-center cursor-pointer w-full">
+                <i className="fas fa-comment mb-1"></i>
+                <span className="text-sm">消息</span>
+              </div>
+              <div className="flex flex-col items-center cursor-pointer w-full">
+                <i className="fas fa-store mb-1"></i>
+                <span className="text-sm">好友广场</span>
+              </div>
+              <div className="flex flex-col items-center cursor-pointer w-full">
+                <i className="fas fa-calendar-alt mb-1"></i>
+                <span className="text-sm">活动中心</span>
+              </div>
+              <div className="flex flex-col items-center cursor-pointer w-full">
+                <i className="fas fa-cog mb-1"></i>
+                <span className="text-sm">设置</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* 主内容区 */}
+          <div className="flex-1">
+            {/* 顶部导航栏 */}
+            <div className="flex border-b border-gray-200 bg-white">
+              {['推荐', '新朋友', '热门话题', '我的订阅'].map(tab => (
+                <div 
+                  key={tab}
+                  className={`px-4 py-3 cursor-pointer ${activeTab === tab ? 'tab-active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </div>
+              ))}
+            </div>
+            
+            {/* 主要内容区 */}
+            <div className="flex p-4">
+              {/* 中间内容区 */}
+              <div className="flex-1 bg-white rounded-lg shadow mr-4 p-4">
+                <div className="text-lg font-medium mb-4">分享你的精彩</div>
+                
+                {/* 发布动态和新增话题按钮 */}
+                <div className="flex space-x-4 mb-6">
+                  <button 
+                    className="flex-1 bg-orange-300 text-white py-3 rounded-full flex items-center justify-center"
+                    onClick={() => setShowPublishModal(true)}
+                  >
+                    <i className="fas fa-edit mr-2"></i> 发布动态
+                  </button>
+                  <button 
+                    className="flex-1 bg-blue-300 text-white py-3 rounded-full flex items-center justify-center"
+                    onClick={() => setShowAddTopicModal(true)}
+                  >
+                    <i className="fas fa-plus mr-2"></i> 新增话题
+                  </button>
+                </div>
+                
+                {/* 动态内容 */}
+                {posts.map(post => (
+                  <div key={post.id} className="border-t border-gray-100 pt-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center">
+                        <img src={post.avatar} className="w-10 h-10 rounded-full object-cover" />
+                        <div className="ml-2">
+                          <div className="font-medium">{post.author}</div>
+                          <div className="text-xs text-gray-500">{post.date}</div>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <i className="far fa-edit cursor-pointer" onClick={() => setShowEditModal(true)}></i>
+                        <i className="far fa-trash-alt cursor-pointer" onClick={() => setShowDeleteConfirm(true)}></i>
+                      </div>
+                    </div>
+                    
+                    <div className="my-3 font-medium text-lg">{post.title}</div>
+                    <div className="text-gray-700 mb-4">{post.content}</div>
+                    
+                    <div className="flex space-x-2 mb-3">
+                      {post.images.map((img, idx) => (
+                        <img key={idx} src={img} className="w-1/2 h-[150px] object-cover rounded" />
+                      ))}
+                    </div>
+                    
+                    <div className="flex space-x-2 mb-3">
+                      {post.tags.map((tag, idx) => (
+                        <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">{tag}</span>
+                      ))}
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex items-center">
+                          <i className="far fa-heart mr-1"></i>
+                          <span>{post.likes}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <i className="far fa-comment mr-1"></i>
+                          <span>{post.comments}</span>
+                        </div>
+                      </div>
+                      <i className="fas fa-share-alt"></i>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* 右侧边栏 */}
+              <div className="w-[300px]">
+                {/* 社区数据 */}
+                <div className="bg-white rounded-lg shadow p-4 mb-4">
+                  <div className="text-lg font-medium mb-4">社区数据</div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-600">在线人数</span>
+                    <span className="text-orange-500">1287</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">今日活跃</span>
+                    <span className="text-orange-500">456</span>
+                  </div>
+                </div>
+                
+                {/* 热门话题排行 */}
+                <div className="bg-white rounded-lg shadow p-4 mb-4">
+                  <div className="text-lg font-medium mb-4">热门话题排行</div>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs mr-2">1</div>
+                      <div>初秋旅行推荐地理</div>
+                    </div>
+                    <div className="text-xs text-gray-500 ml-8">1005人参与</div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-white text-xs mr-2">2</div>
+                      <div>周末好去处发现</div>
+                    </div>
+                    <div className="text-xs text-gray-500 ml-8">897人参与</div>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-orange-400 flex items-center justify-center text-white text-xs mr-2">3</div>
+                      <div>宠物好去向推荐</div>
+                    </div>
+                    <div className="text-xs text-gray-500 ml-8">754人参与</div>
+                  </div>
+                  
+                  <div className="text-center mt-4">
+                    <span className="text-orange-300 text-sm cursor-pointer">查看更多 ></span>
+                  </div>
+                </div>
+                
+                {/* 推荐好友 */}
+                <div className="bg-white rounded-lg shadow p-4">
+                  <div className="text-lg font-medium mb-4">推荐好友</div>
+                  
+                  <div className="flex items-center mb-3">
+                    <img src="https://picsum.photos/id/91/40/40" className="w-8 h-8 rounded-full object-cover mr-2" />
+                    <div>
+                      <div className="font-medium">David</div>
+                      <div className="text-xs text-gray-500">旅游摄影爱好者</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <img src="https://picsum.photos/id/65/40/40" className="w-8 h-8 rounded-full object-cover mr-2" />
+                    <div>
+                      <div className="font-medium">Emma</div>
+                      <div className="text-xs text-gray-500">美食DIY达人</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* VIP提示 */}
+          <div className="fixed left-0 bottom-4 bg-blue-50 text-blue-800 p-2 rounded-r-lg shadow-md w-[120px]">
+            <div className="text-xs font-bold mb-1">升级到 VIP 会员</div>
+            <div className="text-xs">解锁更多交友功能！</div>
+          </div>
+          
+          {/* 小助手 */}
+          {!showPublishModal && !showAddTopicModal && !showEditModal && !showDeleteConfirm && (
+            <div className="fixed right-4 bottom-4 shadow-lg rounded-lg bg-white w-[240px]">
+              <div className="flex justify-between items-center p-2 border-b">
+                <div className="text-sm font-medium">小助手</div>
+                <button className="text-gray-500">×</button>
+              </div>
+              <div className="p-2 text-xs text-gray-600">
+                在"热门话题"板块中心你可以查询最热门话题，更容易被其他用户看到！
+              </div>
+              <div className="bg-gray-100 p-2 flex items-center">
+                <img src="https://picsum.photos/id/237/30/30" className="w-6 h-6 rounded-full mr-2" />
+                <div className="text-xs text-gray-500">有任意问题可以在此处联系我们哦！</div>
+              </div>
+            </div>
+          )}
+          
+          {/* 发布动态弹窗 */}
+          {showPublishModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-[600px] max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center p-4 border-b">
+                  <h3 className="text-xl font-medium">发布新动态</h3>
+                  <button className="text-gray-500 text-xl" onClick={() => setShowPublishModal(false)}>×</button>
+                </div>
+                
+                <div className="p-4">
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">标题</div>
+                    <input 
+                      type="text" 
+                      placeholder="给你的动态起个标题" 
+                      className="w-full border border-gray-300 rounded p-2" 
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium flex justify-between">
+                      <span>内容</span>
+                      <span className="text-gray-500 text-sm">0/500</span>
+                    </div>
+                    <textarea 
+                      placeholder="分享你的精彩瞬间..." 
+                      className="w-full border border-gray-300 rounded p-2 h-24"
+                    ></textarea>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">标签</div>
+                    <div className="flex flex-wrap gap-2">
+                      {["旅行", "美食", "摄影", "电影", "音乐", "宠物", "运动", "读书", "游戏", "生活"].map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">图片</div>
+                    <div className="border border-dashed border-gray-300 rounded-md h-24 flex items-center justify-center cursor-pointer">
+                      <i className="fas fa-plus text-gray-400"></i>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">最多可添加4张图片</div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">可见度</div>
+                    <input type="range" className="w-full" min="0" max="100" />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>仅自己</span>
+                      <span>好友可见</span>
+                      <span>公开</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2 p-4 border-t">
+                  <button 
+                    className="px-4 py-2 border border-gray-300 rounded"
+                    onClick={() => setShowPublishModal(false)}
+                  >
+                    取消
+                  </button>
+                  <button 
+                    className="px-4 py-2 bg-orange-400 text-white rounded"
+                    onClick={() => setShowPublishModal(false)}
+                  >
+                    发布
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 添加新话题弹窗 */}
+          {showAddTopicModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-[500px]">
+                <div className="flex justify-between items-center p-4 border-b">
+                  <h3 className="text-xl font-medium">添加新朋友</h3>
+                  <button className="text-gray-500 text-xl" onClick={() => setShowAddTopicModal(false)}>×</button>
+                </div>
+                
+                <div className="p-4">
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">名称</div>
+                    <input 
+                      type="text" 
+                      placeholder="输入好友名称" 
+                      className="w-full border border-gray-300 rounded p-2" 
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">简介</div>
+                    <input 
+                      type="text" 
+                      placeholder="简单描述一下这位朋友" 
+                      className="w-full border border-gray-300 rounded p-2" 
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">兴趣标签</div>
+                    <div className="flex flex-wrap gap-2">
+                      {["旅行", "美食", "摄影", "电影", "音乐", "宠物", "运动", "读书", "游戏", "生活"].map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2 p-4 border-t">
+                  <button 
+                    className="px-4 py-2 border border-gray-300 rounded"
+                    onClick={() => setShowAddTopicModal(false)}
+                  >
+                    取消
+                  </button>
+                  <button 
+                    className="px-4 py-2 bg-orange-400 text-white rounded"
+                    onClick={() => setShowAddTopicModal(false)}
+                  >
+                    添加好友
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 编辑动态弹窗 */}
+          {showEditModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-[600px] max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center p-4 border-b">
+                  <h3 className="text-xl font-medium">编辑动态</h3>
+                  <button className="text-gray-500 text-xl" onClick={() => setShowEditModal(false)}>×</button>
+                </div>
+                
+                <div className="p-4">
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">标题</div>
+                    <input 
+                      type="text" 
+                      value="午后阳光漫步分享"
+                      className="w-full border border-gray-300 rounded p-2" 
+                    />
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium flex justify-between">
+                      <span>内容</span>
+                      <span className="text-gray-500 text-sm">69/500</span>
+                    </div>
+                    <textarea 
+                      value="今天去了公园见到了可爱的松鼠，它们在树上跳来跳去，非常可爱！阳光透过树叶的缝隙洒在地上，形成了斑驳的光影，整个下午都充满在这美好的氛围中。"
+                      className="w-full border border-gray-300 rounded p-2 h-24"
+                    ></textarea>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">标签</div>
+                    <div className="flex flex-wrap gap-2">
+                      {["旅行", "美食", "摄影", "电影", "音乐", "宠物", "运动", "读书", "游戏", "生活"].map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">图片</div>
+                    <div className="flex space-x-2 mb-2">
+                      <div className="border rounded overflow-hidden w-1/3 h-24 relative">
+                        <img src="https://picsum.photos/id/251/500/300" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="border rounded overflow-hidden w-1/3 h-24 relative">
+                        <img src="https://picsum.photos/id/29/500/300" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="border border-dashed border-gray-300 rounded-md w-1/3 h-24 flex items-center justify-center cursor-pointer">
+                        <i className="fas fa-plus text-gray-400"></i>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">最多可添加4张图片</div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="mb-2 font-medium">可见度</div>
+                    <input type="range" className="w-full" min="0" max="100" value="75" />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>仅自己</span>
+                      <span>好友可见</span>
+                      <span>公开</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2 p-4 border-t">
+                  <button 
+                    className="px-4 py-2 border border-gray-300 rounded"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    取消
+                  </button>
+                  <button 
+                    className="px-4 py-2 bg-green-500 text-white rounded"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    保存修改
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 删除确认弹窗 */}
+          {showDeleteConfirm && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg w-[400px]">
+                <div className="p-6 text-center">
+                  <h3 className="text-xl font-medium mb-4">确认删除</h3>
+                  <p className="text-gray-600">确定要删除该动态吗？删除后将无法恢复。</p>
+                  
+                  <div className="flex justify-center space-x-3 mt-6">
+                    <button 
+                      className="px-4 py-2 border border-gray-300 rounded"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      取消
+                    </button>
+                    <button 
+                      className="px-4 py-2 bg-red-500 text-white rounded"
+                      onClick={handleDeletePost}
+                    >
+                      确认删除
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

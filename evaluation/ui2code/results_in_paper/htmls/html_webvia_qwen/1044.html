@@ -1,0 +1,548 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化收藏箱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-800 text-white min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const CollectionBox = () => {
+            const [currentView, setCurrentView] = useState('collection-list');
+            const [selectedCategories, setSelectedCategories] = useState([]);
+            const [hasStarred, setHasStarred] = useState(false);
+            const [showModal, setShowModal] = useState(false);
+            const [dialogs, setDialogs] = useState({});
+
+            const items = [
+                {
+                    id: 1,
+                    title: "AI 设计灵感库",
+                    description: "30+行业案例，分门别类，便于学习借鉴。",
+                    categories: ["设计", "AI"],
+                    date: "2023-05-15",
+                    image: "https://picsum.photos/id/326/400/250",
+                    tags: ["查看详情"]
+                },
+                {
+                    id: 2,
+                    title: "前端开发资源库",
+                    description: "包含最新的React、Vue、Angular等框架教程和工具。",
+                    categories: ["开发", "前端"],
+                    date: "2023-06-20",
+                    image: "https://picsum.photos/id/327/400/250",
+                    tags: ["查看详情"]
+                },
+                {
+                    id: 3,
+                    title: "产品设计方法论",
+                    description: "从用户研究到产品迭代，全流程设计方法总结。",
+                    categories: ["设计", "产品"],
+                    date: "2023-04-10",
+                    image: "https://picsum.photos/id/328/400/250",
+                    tags: ["查看详情"]
+                },
+                {
+                    id: 4,
+                    title: "UI/UX 设计趋势",
+                    description: "2023年UI设计趋势分析与案例解读。",
+                    categories: ["设计", "UI/UX"],
+                    date: "2023-03-05",
+                    image: "https://picsum.photos/id/329/400/250",
+                    tags: ["查看详情"]
+                },
+                {
+                    id: 5,
+                    title: "后端架构设计",
+                    description: "高并发、分布式系统架构设计指南。",
+                    categories: ["开发", "后端"],
+                    date: "2023-02-18",
+                    image: "https://picsum.photos/id/330/400/250",
+                    tags: ["查看详情"]
+                },
+                {
+                    id: 6,
+                    title: "数据可视化资源",
+                    description: "D3.js、ECharts等数据可视化工具使用指南。",
+                    categories: ["数据", "可视化"],
+                    date: "2023-01-30",
+                    image: "https://picsum.photos/id/331/400/250",
+                    tags: ["查看详情"]
+                }
+            ];
+
+            const handleCategoryClick = (category) => {
+                if (selectedCategories.includes(category)) {
+                    setSelectedCategories(selectedCategories.filter(c => c !== category));
+                } else {
+                    setSelectedCategories([...selectedCategories, category]);
+                }
+            };
+
+            const handleStarClick = () => {
+                if (hasStarred) {
+                    setHasStarred(false);
+                    setCurrentView('collection-list');
+                } else {
+                    setHasStarred(true);
+                }
+            };
+
+            const handleCategorySelect = (category) => {
+                if (selectedCategories.includes(category)) {
+                    setSelectedCategories(selectedCategories.filter(c => c !== category));
+                } else {
+                    setSelectedCategories([...selectedCategories, category]);
+                }
+            };
+
+            const getFilteredItems = () => {
+                if (currentView === 'recent-view') {
+                    return items.filter(item => item.categories.includes("前端") || item.categories.includes("设计"));
+                } else if (currentView === 'starred-view') {
+                    return items.filter(item => item.categories.includes("设计") || item.categories.includes("AI"));
+                }
+                return items;
+            };
+
+            const Header = () => (
+                <div className="bg-slate-700 px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <i className="fas fa-briefcase text-blue-400"></i>
+                        <h1 className="text-xl font-semibold text-white">收藏箱</h1>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <img src="https://picsum.photos/id/64/32/32" alt="Avatar" className="w-8 h-8 rounded-full" />
+                        <span className="text-sm text-gray-300">个人电子收藏箱</span>
+                    </div>
+                </div>
+            );
+
+            const Navigation = () => (
+                <div className="bg-slate-700 px-6 py-3">
+                    <div className="flex space-x-4">
+                        <button 
+                            onClick={() => setCurrentView('collection-list')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 ${currentView === 'collection-list' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                        >
+                            <i className="fas fa-list"></i>
+                            <span>收藏列表</span>
+                        </button>
+                        <button 
+                            onClick={() => setShowModal(true)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
+                        >
+                            <i className="fas fa-plus"></i>
+                            <span>新增收藏</span>
+                        </button>
+                        <button 
+                            onClick={() => setCurrentView('statistics')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 ${currentView === 'statistics' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                        >
+                            <i className="fas fa-chart-bar"></i>
+                            <span>统计分析</span>
+                        </button>
+                        <button 
+                            onClick={() => setCurrentView('help')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 ${currentView === 'help' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                        >
+                            <i className="fas fa-question-circle"></i>
+                            <span>帮助指南</span>
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const Sidebar = () => (
+                <div className="bg-slate-700 sticky top-0 p-4 space-y-4">
+                    <button 
+                        onClick={() => setCurrentView('collection-list')}
+                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center space-x-2 ${currentView === 'collection-list' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                    >
+                        <i className="fas fa-folder"></i>
+                        <span>全部分类</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => setCurrentView('recent-view')}
+                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center space-x-2 ${currentView === 'recent-view' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                    >
+                        <i className="fas fa-clock"></i>
+                        <span>最近浏览</span>
+                    </button>
+                    
+                    <button 
+                        onClick={handleStarClick}
+                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center space-x-2 ${hasStarred ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                    >
+                        <i className={`fas fa-star` + (hasStarred ? ' text-yellow-400' : '') + ' inline'}></i>
+                        <span>星标收藏</span>
+                    </button>
+                    
+                    <button 
+                        onClick={() => {}}
+                        className="w-full text-left px-4 py-3 rounded-lg flex items-center space-x-2 bg-slate-600 text-gray-300 hover:bg-slate-500"
+                    >
+                        <i className="fas fa-trash"></i>
+                        <span>回收站</span>
+                    </button>
+                    
+                    <div className="text-sm text-gray-400 text-center">
+                        收藏总数: <span className="text-cyan-400 font-medium">6</span>
+                        <br />
+                        分类分布: <span className="text-blue-400 font-medium">9个分类</span>
+                        <br />
+                        星标收藏: <span className="text-yellow-400 font-medium">3个</span>
+                    </div>
+                </div>
+            );
+
+            const StatsCard = ({ icon, title, subtitle }) => (
+                <div className="bg-slate-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2">
+                        <i className={`fas ${icon} text-cyan-400`}></i>
+                        <span className="font-medium text-cyan-400">{title}</span>
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">{subtitle}</div>
+                </div>
+            );
+
+            const RegularCard = ({ item }) => (
+                <div className="bg-slate-700 rounded-lg overflow-hidden">
+                    <div className="relative">
+                        <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+                        {hasStarred && (
+                            <div className="absolute top-2 right-2 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
+                                <i className="fas fa-star text-yellow-800 text-xs"></i>
+                            </div>
+                        )}
+                        <div className="absolute top-2 left-2">
+                            {item.categories.map((category, index) => (
+                                <span key={index} className="bg-blue-600 text-xs px-2 py-1 rounded mb-1">
+                                    {category}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <h3 className="font-semibold text-white mb-2">{item.title}</h3>
+                        <p className="text-sm text-gray-300 mb-3">{item.description}</p>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-1 text-xs text-gray-400">
+                                <i className="far fa-calendar mr-1"></i>
+                                <span className="mr-4">{item.date}</span>
+                            </div>
+                            <div className="flex space-x-2">
+                                {item.tags.map((tag, index) => (
+                                    <button key={index} className={`px-2 py-1 rounded text-xs ${index === 0 ? 'bg-cyan-600 text-white' : 'bg-slate-600 text-gray-300'}`}>
+                                        {tag}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const CollectionList = () => (
+                <div className="flex-1 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-semibold">收藏列表</h2>
+                        <div className="flex space-x-3">
+                            <button className="bg-slate-600 text-gray-300 px-4 py-2 rounded-lg text-sm">
+                                <i className="far fa-square mr-2"></i>全选
+                            </button>
+                            <button className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+                                <i className="fas fa-trash mr-2"></i>批量删除
+                            </button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                                <i className="fas fa-download mr-2"></i>批量导出
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {getFilteredItems().map(item => (
+                            <RegularCard key={item.id} item={item} />
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const Statistics = () => {
+                const totalItems = 6;
+                const starredItems = 3;
+                const categoryCount = 9;
+                const monthlyNewItem = 0;
+
+                return (
+                    <div className="flex-1 p-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                            <div className="bg-slate-700 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold mb-4">收藏分类分布</h3>
+                                <div className="bg-slate-600 rounded-lg h-64 flex items-center justify-center">
+                                    <i className="fas fa-chart-pie text-gray-400 text-4xl"></i>
+                                </div>
+                            </div>
+                            <div className="bg-slate-700 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold mb-4">最近一周新增趋势</h3>
+                                <div className="bg-slate-600 rounded-lg h-64 flex items-center justify-center">
+                                    <i className="fas fa-chart-line text-gray-400 text-4xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-700 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold mb-6">收藏概况</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <StatsCard icon="fas fa-th-large" title="总收藏数" subtitle={totalItems}/>
+                                <StatsCard icon="fas fa-star" title="星标收藏" subtitle={starredItems}/>
+                                <StatsCard icon="fas fa-tag" title="分类数量" subtitle={categoryCount}/>
+                                <StatsCard icon="fas fa-calendar" title="本月新增" subtitle={monthlyNewItem}/>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const Help = () => {
+                const faqItems = [
+                    {
+                        question: "如何添加星标收藏？",
+                        answer: "在每个收藏卡片右上角有星标按钮，点击可以添加或取消星标。"
+                    },
+                    {
+                        question: "如何删除收藏？",
+                        answer: "点击收藏卡片右上角的垃圾桶图标，确认后即可删除。"
+                    },
+                    {
+                        question: "如何查看统计数据？",
+                        answer: "点击顶部导航栏中的"统计数据"选项卡，可以查看收藏的分布和趋势图表。"
+                    }
+                ];
+
+                return (
+                    <div className="flex-1 p-6">
+                        <h2 className="text-xl font-semibold mb-6">使用帮助指南</h2>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <div className="bg-slate-700 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold mb-4">添加收藏</h3>
+                                <p>点击页面上的"新增收藏"按钮，填写标题、描述、分类和缩略图链接后保存。</p>
+                                <div className="mt-4 p-4 bg-slate-800 rounded-lg">
+                                    <p className="text-cyan-400 font-medium">提示：</p>
+                                    <p className="text-sm text-gray-300">标题为必填项，其他字段为可选。</p>
+                                </div>
+                                <div className="mt-4">
+                                    <img src="https://picsum.photos/id/48/300/150" alt="添加收藏示例" className="w-full rounded-lg" />
+                                </div>
+                            </div>
+                            
+                            <div className="bg-slate-700 rounded-lg p-6">
+                                <h3 className="text-lg font-semibold mb-4">管理分类</h3>
+                                <p>添加或编辑收藏时，可以选择多个分类标签，您也可以通过左侧导航栏快速筛选不同分类。</p>
+                                <div className="mt-4 p-4 bg-slate-800 rounded-lg">
+                                    <p className="text-cyan-400 font-medium">提示：</p>
+                                    <p className="text-sm text-gray-300">为收藏添加分类可以更方便地组织和查找。</p>
+                                </div>
+                                <div className="mt-4">
+                                    <img src="https://picsum.photos/id/1/300/150" alt="管理分类示例" className="w-full rounded-lg" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-700 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold mb-4">导出/同步</h3>
+                            <p>通过批量选择和导出功能，您可以备份您的收藏数据或在多设备间同步。</p>
+                            <div className="mt-4 p-4 bg-slate-800 rounded-lg">
+                                <p className="text-cyan-400 font-medium">提示：</p>
+                                <p className="text-sm text-gray-300">定期导出备份可以保障您的数据安全。</p>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-800 rounded-lg p-6 mt-6">
+                            <h3 className="text-lg font-semibold mb-4">常见问题解答</h3>
+                            {faqItems.map((item, index) => (
+                                <div key={index} className="mb-4 p-4 bg-slate-700 rounded-lg">
+                                    <p className="text-cyan-400 font-medium mb-2">{item.question}</p>
+                                    <p className="text-sm text-gray-300">{item.answer}</p>
+                                </div>
+                            ))}
+                            
+                            <div className="flex items-center justify-center mt-6">
+                                <img src="https://picsum.photos/id/1/200/100" alt="帮助示例" className="rounded-lg" />
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-800 rounded-lg p-6 mt-6">
+                            <h3 className="text-lg font-semibold mb-4">联系我们</h3>
+                            <p className="text-sm text-gray-300 mb-4">如果您有任何问题或建议，请通过以下方式联系我们：</p>
+                            <div className="flex space-x-4">
+                                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-2">
+                                    <i className="fas fa-envelope"></i>
+                                    <span>support@collection-box.com</span>
+                                </button>
+                                <button className="bg-slate-600 text-gray-300 px-4 py-2 rounded-lg text-sm flex items-center space-x-2">
+                                    <i className="fas fa-comment"></i>
+                                    <span>反馈建议</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const Modal = () => (
+                showModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-slate-700 rounded-lg p-6 w-full max-w-2xl mx-4">
+                            <h2 className="text-xl font-semibold mb-4">新增收藏</h2>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-cyan-400 font-medium mb-2">标题 *</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入标题" 
+                                        className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg border border-slate-500 focus:border-cyan-400 focus:outline-none"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-cyan-400 font-medium mb-2">描述</label>
+                                    <textarea 
+                                        placeholder="输入描述信息" 
+                                        rows="4"
+                                        className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg border border-slate-500 focus:border-cyan-400 focus:outline-none resize-none"
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-cyan-400 font-medium mb-2">分类</label>
+                                    <div className="flex flex-wrap gap-2 flex-1">
+                                        {['设计', '开发', 'AI', '前端', '后端', '数据', '可视化', '产品', 'UI/UX'].map(category => (
+                                            <button 
+                                                key={category}
+                                                onClick={() => handleCategoryClick(category)}
+                                                className={`px-3 py-1 rounded-lg text-sm ${
+                                                    selectedCategories.includes(category) 
+                                                        ? 'bg-blue-600 text-white' 
+                                                        : 'bg-slate-600 text-gray-300 hover:bg-slate-500'
+                                                }`}
+                                            >
+                                                {category}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-cyan-400 font-medium mb-2">缩略图URL (可选)</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入图片URL" 
+                                        className="w-full bg-slate-600 text-white px-4 py-2 rounded-lg border border-slate-500 focus:border-cyan-400 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    className="bg-slate-600 text-gray-300 px-6 py-2 rounded-lg hover:bg-slate-500"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    className="bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-500"
+                                >
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const SidebarExpanded = () => (
+                <div className="flex-1 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-semibold">收藏列表</h2>
+                        <div className="flex space-x-3">
+                            <button className="bg-slate-600 text-gray-300 px-4 py-2 rounded-lg text-sm">
+                                <i className="far fa-square mr-2"></i>全选
+                            </button>
+                            <button className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+                                <i className="fas fa-trash mr-2"></i>批量删除
+                            </button>
+                            <button className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                                <i className="fas fa-download mr-2"></i>批量导出
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {getFilteredItems().map(item => (
+                            <RegularCard key={item.id} item={item} />
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const rightSidebar = () => (
+                <div className="w-80 bg-slate-700 rounded-lg p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                        <i className="fas fa-chart-bar text-cyan-400"></i>
+                        <h3 className="text-lg font-semibold">数据统计</h3>
+                    </div>
+                    
+                    <div className="space-y-4 mb-6">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-cyan-400 mb-1">{totalItems}</div>
+                            <div className="text-sm text-gray-300">收藏总数</div>
+                        </div>
+                        
+                        <StatsCard icon="fas fa-circle text-blue-400" title="分类分布" subtitle="9 个分类" />
+                        
+                        <div className="bg-slate-600 rounded-lg h-32 flex items-center justify-center">
+                            <div className="text-center">
+                                <div className="text-xl font-semibold text-cyan-400 mb-1">最近趋势</div>
+                                <div className="text-xs text-gray-400">新增收藏</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-slate-800">
+                    <Header />
+                    <div className="flex">
+                        <Sidebar />
+                        {currentView === 'help' ? <Help /> : 
+                         currentView === 'statistics' ? <Statistics /> : 
+                         currentView === 'recent-view' ? <SidebarExpanded /> : <CollectionList />}
+                        {rightSidebar()}
+                    </div>
+                    <Modal />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<CollectionBox />, document.getElementById('root'));
+    </script>
+</body>
+</html>

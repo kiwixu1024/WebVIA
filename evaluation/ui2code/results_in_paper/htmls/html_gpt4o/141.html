@@ -1,0 +1,187 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>游泳成绩记录</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const App = () => {
+        const [viewMode, setViewMode] = React.useState("table");
+        const [modal, setModal] = React.useState(null); // options: 'add', 'edit', 'delete'
+
+        const handleCardViewClick = () => setViewMode("card");
+        const handleTableViewClick = () => setViewMode("table");
+        const handleAddClick = () => setModal("add");
+        const handleEditClick = () => setModal("edit");
+        const handleDeleteClick = () => setModal("delete");
+        const closeModal = () => setModal(null);
+
+        return (
+          <div className="bg-gray-100 min-h-screen">
+            {/* Header */}
+            <header className="flex items-center justify-between bg-white shadow px-4 py-2">
+              <h1 className="text-xl text-blue-600 font-bold">🌀 游泳成绩记录</h1>
+              <div className="space-x-4">
+                <button className="text-blue-500">主页</button>
+                <button className="text-gray-500">成绩管理</button>
+                <button className="text-gray-500">统计报表</button>
+                <button className="text-gray-500">常问问题</button>
+              </div>
+            </header>
+
+            {/* Main content */}
+            <div className="flex">
+              {/* Sidebar navigation */}
+              <aside className="w-60 bg-white shadow p-4">
+                <nav>
+                  <ul>
+                    <li className="mb-2">
+                      <button className="block w-full text-left text-blue-500 hover:bg-blue-100 px-4 py-2 rounded">
+                        个人信息
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button className="block w-full text-left hover:bg-blue-100 px-4 py-2 rounded">
+                        游泳设置
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button className="block w-full text-left hover:bg-blue-100 px-4 py-2 rounded">
+                        历史记录
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button className="block w-full text-left hover:bg-blue-100 px-4 py-2 rounded">
+                        系统设置
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              </aside>
+
+              {/* Main Section */}
+              <main className="flex-1 p-6 space-y-6">
+                {/* Top Section */}
+                <section className="bg-white shadow p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-bold">游泳成绩记录</h2>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleTableViewClick}
+                        className={`px-4 py-2 border ${
+                          viewMode === "table"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600"
+                        } rounded-lg`}
+                      >
+                        表格视图
+                      </button>
+                      <button
+                        onClick={handleCardViewClick}
+                        className={`px-4 py-2 border ${
+                          viewMode === "card"
+                            ? "bg-blue-500 text-white"
+                            : "text-gray-600"
+                        } rounded-lg`}
+                      >
+                        卡片视图
+                      </button>
+                      <button
+                        onClick={handleAddClick}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                      >
+                        ➕ 添加成绩
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* View Logic */}
+                  {viewMode === "table" && (
+                    <table className="w-full mt-4 border-collapse">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left px-4 py-2">项目名称</th>
+                          <th className="text-left px-4 py-2">日期</th>
+                          <th className="text-left px-4 py-2">成绩（秒）</th>
+                          <th className="text-left px-4 py-2">备注</th>
+                          <th className="text-left px-4 py-2">操作</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-t bg-gray-50">
+                          <td className="px-4 py-2">50米自由泳</td>
+                          <td className="px-4 py-2">2024-06-01</td>
+                          <td className="px-4 py-2">23.45</td>
+                          <td className="px-4 py-2">状态良好</td>
+                          <td className="px-4 py-2 space-x-2">
+                            <button
+                              onClick={handleEditClick}
+                              className="text-blue-500"
+                            >
+                              编辑
+                            </button>
+                            <button
+                              onClick={handleDeleteClick}
+                              className="text-red-500"
+                            >
+                              删除
+                            </button>
+                          </td>
+                        </tr>
+                        {/* Additional rows can be added */}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {viewMode === "card" && (
+                    <div className="grid md:grid-cols-3 gap-6 mt-4">
+                      <div className="border p-4 rounded-lg bg-gray-50">
+                        <h3 className="font-bold text-lg">50米自由泳</h3>
+                        <p>日期: 2024-06-01</p>
+                        <p>成绩: 23.45 秒</p>
+                        <p>备注: 状态良好</p>
+                        <div className="flex space-x-2 mt-4">
+                          <button
+                            onClick={handleEditClick}
+                            className="text-blue-500"
+                          >
+                            编辑
+                          </button>
+                          <button
+                            onClick={handleDeleteClick}
+                            className="text-red-500"
+                          >
+                            删除
+                          </button>
+                        </div>
+                      </div>
+                      {/* Additional cards can be added */}
+                    </div>
+                  )}
+                </section>
+
+                {/* Statistics Section */}
+                <section className="bg-white shadow p-4 rounded-lg">
+                  <h2 className="font-bold text-lg">数据统计</h2>
+                  <p>图表部分可以使用 Chart.js 等库集成。</p>
+                </section>
+              </main>
+            </div>
+          </div>
+        );
+      };
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>

@@ -1,0 +1,517 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽毛球管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentTab, setCurrentTab] = useState('活动管理');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [deleteActivityName, setDeleteActivityName] = useState('');
+            
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200">
+                        <div className="flex items-center px-6 py-3">
+                            <div className="flex items-center space-x-8">
+                                <h1 className="text-lg font-semibold text-gray-900">羽毛球管理系统</h1>
+                                <nav className="flex space-x-1">
+                                    <button 
+                                        onClick={() => setCurrentTab('活动管理')}
+                                        className={`px-4 py-2 text-sm font-medium rounded-md ${currentTab === '活动管理' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        活动管理
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentTab('帮助说明')}
+                                        className={`px-4 py-2 text-sm font-medium rounded-md flex items-center ${currentTab === '帮助说明' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        <i className="fas fa-info-circle mr-1"></i>
+                                        帮助说明
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
+                            <nav className="mt-4 px-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-blue-50 rounded-md">
+                                        <i className="fas fa-running mr-3 text-blue-600"></i>
+                                        活动管理
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md">
+                                        <i className="fas fa-users mr-3"></i>
+                                        成员管理
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md">
+                                        <i className="fas fa-chart-bar mr-3"></i>
+                                        统计报表
+                                    </div>
+                                    <div className="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md">
+                                        <i className="fas fa-cog mr-3"></i>
+                                        系统设置
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {currentTab === '活动管理' ? (
+                                <ActivityManagement 
+                                    setShowEditModal={setShowEditModal}
+                                    setShowDeleteModal={setShowDeleteModal}
+                                    setShowAddModal={setShowAddModal}
+                                    setDeleteActivityName={setDeleteActivityName}
+                                />
+                            ) : (
+                                <HelpPage setShowAddModal={setShowAddModal} />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <div className="text-sm text-gray-600">
+                                共 2 个活动，已到 24 人
+                            </div>
+                            <div className="flex space-x-3">
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 flex items-center"
+                                >
+                                    <i className="fas fa-plus mr-2"></i>
+                                    新建活动
+                                </button>
+                                <button className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 flex items-center">
+                                    <i className="fas fa-upload mr-2"></i>
+                                    批量导入
+                                </button>
+                                <button className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 flex items-center">
+                                    <i className="fas fa-download mr-2"></i>
+                                    导出全部数据
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modals */}
+                    {showEditModal && <EditActivityModal onClose={() => setShowEditModal(false)} />}
+                    {showDeleteModal && <DeleteConfirmModal onClose={() => setShowDeleteModal(false)} activityName={deleteActivityName} />}
+                    {showAddModal && <AddActivityModal onClose={() => setShowAddModal(false)} />}
+                </div>
+            );
+        }
+
+        function ActivityManagement({ setShowEditModal, setShowDeleteModal, setShowAddModal, setDeleteActivityName }) {
+            const handleEdit = () => {
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (activityName) => {
+                setDeleteActivityName(activityName);
+                setShowDeleteModal(true);
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div>
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-2">羽毛球活动管理</h2>
+                        <p className="text-gray-600">智能化羽毛球赛事与训练全流程管理平台，实时统计、快速排赛、提升操作利用率。</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6">
+                        {/* 活动列表 */}
+                        <div className="col-span-1 bg-white rounded-lg border border-gray-200">
+                            <div className="p-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">活动列表</h3>
+                            </div>
+                            <div className="p-4 space-y-4">
+                                <div className="border border-gray-200 rounded-lg p-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-medium text-gray-900">春季友谊赛</h4>
+                                        <div className="flex space-x-1">
+                                            <button onClick={handleEdit} className="p-1 text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button onClick={() => handleDelete('春季友谊赛')} className="p-1 text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm text-gray-600 mb-2">
+                                        <div className="flex items-center mb-1">
+                                            <i className="fas fa-calendar mr-2"></i>
+                                            2024-06-15 10:00-12:00
+                                        </div>
+                                        <div className="flex items-center">
+                                            <i className="fas fa-map-marker-alt mr-2"></i>
+                                            羽毛球馆1号场
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <i className="fas fa-users mr-2 text-gray-400"></i>
+                                        16/20 人
+                                    </div>
+                                    <div className="mt-2">
+                                        <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
+                                            未开赛
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="border border-gray-200 rounded-lg p-3">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-medium text-gray-900">周末提升赛</h4>
+                                        <div className="flex space-x-1">
+                                            <button onClick={handleEdit} className="p-1 text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button onClick={() => handleDelete('周末提升赛')} className="p-1 text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm text-gray-600 mb-2">
+                                        <div className="flex items-center mb-1">
+                                            <i className="fas fa-calendar mr-2"></i>
+                                            2024-06-17 14:00-16:00
+                                        </div>
+                                        <div className="flex items-center">
+                                            <i className="fas fa-map-marker-alt mr-2"></i>
+                                            羽毛球馆2号场
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center text-sm">
+                                        <i className="fas fa-users mr-2 text-gray-400"></i>
+                                        8/12 人
+                                    </div>
+                                    <div className="mt-2">
+                                        <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                            进行中
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 活动详情 */}
+                        <div className="col-span-1 bg-white rounded-lg border border-gray-200">
+                            <div className="p-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">活动详情</h3>
+                            </div>
+                            <div className="p-8 flex flex-col items-center justify-center h-64">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                    <i className="fas fa-clipboard-list text-2xl text-gray-400"></i>
+                                </div>
+                                <p className="text-gray-500 text-center">请从左侧选择一个活动进行查看详情</p>
+                            </div>
+                        </div>
+
+                        {/* 活动统计 */}
+                        <div className="col-span-1 bg-white rounded-lg border border-gray-200">
+                            <div className="p-4 border-b border-gray-200">
+                                <h3 className="text-lg font-medium text-gray-900">活动统计</h3>
+                            </div>
+                            <div className="p-4">
+                                <div className="text-center mb-4">
+                                    <p className="text-sm text-gray-600 mb-2">今日场地使用率</p>
+                                    <div className="relative w-24 h-24 mx-auto">
+                                        <svg className="w-24 h-24 transform -rotate-90">
+                                            <circle cx="48" cy="48" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+                                            <circle cx="48" cy="48" r="40" stroke="#10b981" strokeWidth="8" fill="none" 
+                                                strokeDasharray="251" strokeDashoffset="63" strokeLinecap="round" />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-xl font-semibold text-gray-900">75%</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-center mt-2 text-sm">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                        <span className="text-gray-600">已使用</span>
+                                        <span className="w-2 h-2 bg-gray-300 rounded-full ml-4 mr-2"></span>
+                                        <span className="text-gray-600">未使用</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6">
+                                    <p className="text-sm text-gray-600 mb-3">近7天参与人数趋势</p>
+                                    <div className="h-32 flex items-end justify-between">
+                                        <svg className="w-full h-full">
+                                            <polyline points="10,120 30,110 50,105 70,100 90,95 110,90 130,110" 
+                                                fill="none" stroke="#10b981" strokeWidth="2" />
+                                            {[10, 30, 50, 70, 90, 110, 130].map((x, i) => (
+                                                <circle key={i} cx={x} cy={120 - (i * 5 + 10)} r="3" fill="#10b981" />
+                                            ))}
+                                        </svg>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                        <span>7天前</span>
+                                        <span>6天前</span>
+                                        <span>5天前</span>
+                                        <span>4天前</span>
+                                        <span>3天前</span>
+                                        <span>2天前</span>
+                                        <span>今天</span>
+                                    </div>
+                                </div>
+                                
+                                <button className="w-full mt-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 flex items-center justify-center">
+                                    <i className="fas fa-download mr-2"></i>
+                                    导出报表
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p className="text-sm text-yellow-800">
+                            <strong>Tip:</strong> 为了避免冲突，请使用 Chrome 浏览器且分辨率不小于 1366x768。
+                            更多帮助请联系开发团队或到官网查阅帮助信息 support@badminton.com。
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        function HelpPage({ setShowAddModal }) {
+            return (
+                <div className="max-w-4xl">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">帮助说明</h2>
+                    
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-lg font-semibold text-green-600 mb-3">【展示区】</h3>
+                            <p className="text-gray-700 mb-2">查看所有活动列表，支持按时间作为筛选条件或查询。</p>
+                            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>点击右上角可以<span className="text-blue-600">搜索按钮</span>进行活动名称或地点筛选</li>
+                                <li>点击右上角可以<span className="text-red-600">删除按钮</span>可删除活动</li>
+                                <li>活动列表具有页面、分页、搜索等丰富的信息浏览功能</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 className="text-lg font-semibold text-green-600 mb-3">【编辑区】</h3>
+                            <p className="text-gray-700 mb-2">在此页面发活动详情信息，数据即时的生效。</p>
+                            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>修改活动名称、日期、时间、场地、人数上限和状态</li>
+                                <li>点击<span className="text-green-600">保存修改</span>按钮提交变更</li>
+                                <li>点击顶部的提醒按钮可重新修改</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 className="text-lg font-semibold text-green-600 mb-3">【统计区】</h3>
+                            <p className="text-gray-700 mb-2">查看场地使用率与参与者，点击"导出报表"获取PDF或Excel文件。</p>
+                            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>图表显示今日场地使用率</li>
+                                <li>折线图显示近7天参与人数变化趋势</li>
+                                <li>点击导出按钮可保存详细统计数据</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 className="text-lg font-semibold text-green-600 mb-3">【操作】</h3>
+                            <p className="text-gray-700 mb-2">使用"新建活动"按钮添加新的赛事，"批量导入"支持Excel数据上传。</p>
+                            <ul className="list-disc list-inside text-gray-700 space-y-1 ml-4">
+                                <li>点击<button onClick={() => setShowAddModal(true)} className="text-green-600 underline">新建活动</button>按钮创建单个活动</li>
+                                <li>点击批量导入按钮可通过Excel导入多个活动</li>
+                                <li>点击导出全部数据按钮可备份所有活动信息</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p className="text-sm text-yellow-800">
+                            <strong>Tip:</strong> 为了避免冲突，请使用 Chrome 浏览器且分辨率不小于 1366x768。
+                            更多帮助请联系开发团队或到官网查阅帮助信息 support@badminton.com。
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        function EditActivityModal({ onClose }) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">编辑活动</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">活动名称</label>
+                                <input type="text" value="春季友谊赛" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                    <input type="date" value="2024-06-15" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">场地</label>
+                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>羽毛球馆1号场</option>
+                                        <option>羽毛球馆2号场</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                                    <input type="time" value="10:00" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
+                                    <input type="time" value="12:00" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">参与上限</label>
+                                <div className="flex items-center space-x-2">
+                                    <input type="range" min="1" max="50" value="20" className="flex-1" />
+                                    <span className="text-sm text-gray-600">20人</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">活动类型</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>友谊赛</option>
+                                    <option>比赛</option>
+                                    <option>训练</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">取消</button>
+                            <button className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                                <i className="fas fa-save mr-2"></i>
+                                保存修改
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function DeleteConfirmModal({ onClose, activityName }) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">确认删除</h3>
+                        <p className="text-gray-700 mb-6">
+                            您想要删除活动"<span className="font-medium">{activityName}</span>"吗？此操作无法撤销。
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">取消</button>
+                            <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                确认删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function AddActivityModal({ onClose }) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center mb-4">
+                            <i className="fas fa-plus-circle text-green-500 mr-2"></i>
+                            <h3 className="text-lg font-semibold text-gray-900">添加新活动</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">活动名称</label>
+                                <input type="text" placeholder="请输入活动名称" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                    <input type="text" placeholder="mm/dd/yyyy" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">场地</label>
+                                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>选择场地</option>
+                                        <option>羽毛球馆1号场</option>
+                                        <option>羽毛球馆2号场</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                                    <input type="text" placeholder="--:-- --" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
+                                    <input type="text" placeholder="--:-- --" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">参与上限</label>
+                                <div className="flex items-center space-x-2">
+                                    <input type="range" min="1" max="50" value="20" className="flex-1" />
+                                    <span className="text-sm text-gray-600">20人</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">活动类型</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>友谊赛</option>
+                                    <option>比赛</option>
+                                    <option>训练</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800">取消</button>
+                            <button className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                                <i className="fas fa-check mr-2"></i>
+                                创建活动
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>宠物档案系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+    <script type="text/babel">
+
+      // Sidebar component
+      const Sidebar = ({ menuItem, onSelect }) => {
+        return (
+          <div className="w-64 bg-green-100 text-gray-900 h-screen">
+            <div className="px-5 py-6">
+              <div className="text-lg font-bold">宠物档案系统</div>
+            </div>
+            <ul className="px-5 space-y-4 text-lg">
+              {menuItem.map((item, index) => (
+                <li
+                  key={index}
+                  className={`flex items-center cursor-pointer ${item.active ? "font-bold text-green-500" : ""}`}
+                  onClick={() => onSelect(item.label)}
+                >
+                  <i className={`fas fa-chevron-circle-right mr-3 ${item.active ? "" : "text-gray-400"}`} />
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+            <footer className="absolute bottom-5 px-5 text-gray-800 text-xs">
+              <div>宠物档案系统 v1.0.0</div>
+              <div>开发者: PetLover Team</div>
+              <div>
+                <a href="#" className="text-blue-500">联系我们</a>
+              </div>
+            </footer>
+          </div>
+        );
+      };
+
+      const TopBar = () => {
+        return (
+          <div className="w-full bg-gray-50 h-12 flex items-center px-6">
+            <button className="bg-pink-200 px-3 py-1 rounded-full mr-2 hover:bg-pink-300">新增档案</button>
+            <button className="bg-red-200 px-3 py-1 rounded-full mr-2 hover:bg-red-300">批量删除</button>
+            <button className="bg-green-200 px-3 py-1 rounded-full hover:bg-green-300">导出数据</button>
+          </div>
+        );
+      };
+
+      const PetCard = ({ pet }) => {
+        return (
+          <div className="shadow-md bg-white rounded-lg p-4">
+            <div className="text-center">
+              <img
+                src={pet.image}
+                alt={pet.name}
+                className="w-24 h-24 rounded-full mx-auto"
+              />
+              <div className="text-lg font-bold mt-2">{pet.name}</div>
+              <div className="text-gray-500">{pet.category}</div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div>
+                <div className="text-gray-400 text-sm">年龄</div>
+                <div>{pet.age}</div>
+              </div>
+              <div>
+                <div className="text-gray-400 text-sm">性别</div>
+                <div>{pet.gender}</div>
+              </div>
+              <div>
+                <div className="text-gray-400 text-sm">体重</div>
+                <div>{pet.weight}</div>
+              </div>
+              <div>
+                <div className="text-gray-400 text-sm">健康状况</div>
+                <div className={`${pet.health.statusColor}`}>{pet.health.status}</div>
+              </div>
+            </div>
+            <div className="absolute top-2 right-2">
+              <button className="mr-2 text-yellow-500">
+                <i className="fas fa-edit"></i>
+              </button>
+              <button className="text-red-500">
+                <i className="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      const HomePage = () => {
+        const pets = [
+          {
+            name: "雪球",
+            category: "仓鼠",
+            age: "2岁8个月",
+            gender: "公",
+            weight: "45g",
+            image: "https://picsum.photos/id/237/300/300",
+            health: { status: "良好", statusColor: "text-green-500" },
+          },
+          {
+            name: "小虎",
+            category: "金毛",
+            age: "4岁3个月",
+            gender: "母",
+            weight: "28kg",
+            image: "https://picsum.photos/id/1025/300/300",
+            health: { status: "需定期检查", statusColor: "text-orange-500" },
+          },
+          {
+            name: "毛球",
+            category: "加菲猫",
+            age: "2岁10个月",
+            gender: "母",
+            weight: "4.2kg",
+            image: "https://picsum.photos/id/433/300/300",
+            health: { status: "已完成免疫", statusColor: "text-blue-500" },
+          },
+        ];
+
+        return (
+          <div className="ml-64 p-6">
+            <div>
+              <TopBar />
+            </div>
+            <div className="mt-6">
+              <div className="text-xl font-bold">我的宠物家族</div>
+              <div className="grid grid-cols-3 gap-6 mt-4">
+                {pets.map((pet, index) => (
+                  <PetCard key={index} pet={pet} />
+                ))}
+              </div>
+            </div>
+            <div className="mt-6 bg-green-50 px-4 py-6 rounded-lg">
+              <div className="text-lg font-bold">
+                <i className="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                温馨提示
+              </div>
+              <ul className="text-sm mt-2 list-disc pl-4 text-gray-600">
+                <li>定期更新体重并可查看当前宠物健康状况</li>
+                <li>点击统计分析查看多维度统计数据（功能开发中）</li>
+                <li>宠物免疫信息直接锁定至系统提升科学规划效果</li>
+              </ul>
+              <div className="mt-6 text-sm text-gray-500">
+                当前共有共 3 个宠物档案
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const App = () => {
+        const menuItems = [
+          { label: "统计分析", active: false },
+          { label: "帮助中心", active: false },
+          { label: "主题介绍", active: false },
+        ];
+
+        const [refreshMenu, setMenu] = React.useState(menuItems);
+
+        console.log(menu==!!)
+
+<sectiontributes area

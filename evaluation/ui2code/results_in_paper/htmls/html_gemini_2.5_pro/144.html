@@ -1,0 +1,404 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容聚合平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialSubscriptions = [
+            {
+                id: 1,
+                title: "科技新闻日报",
+                source: "新浪科技",
+                frequency: "每日",
+                time: "上午 9:00",
+                color: "green-500",
+            },
+            {
+                id: 2,
+                title: "财经新闻周刊精选",
+                source: "新浪网",
+                frequency: "每周",
+                time: "周一 8:00",
+                color: "blue-500",
+            },
+            {
+                id: 3,
+                title: "生活小窍门",
+                source: "小红书",
+                frequency: "每3天",
+                time: "下午 3:00",
+                color: "yellow-500",
+            },
+        ];
+
+        const Sidebar = () => (
+            <div className="w-60 bg-white h-screen flex flex-col flex-shrink-0">
+                <div className="h-16 flex items-center justify-center text-xl font-bold text-blue-600">
+                    内容聚合平台
+                </div>
+                <nav className="flex-grow px-4">
+                    <ul>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-blue-600 bg-blue-50 rounded-lg">
+                                <i className="fas fa-bullhorn w-5 h-5 mr-3"></i>
+                                <span className="font-semibold">订阅管理</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-cogs w-5 h-5 mr-3"></i>
+                                <span>推送设置</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-history w-5 h-5 mr-3"></i>
+                                <span>历史记录</span>
+                            </a>
+                        </li>
+                        <li className="mb-2">
+                            <a href="#" className="flex items-center p-3 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                <i className="fas fa-question-circle w-5 h-5 mr-3"></i>
+                                <span>帮助中心</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div className="p-4 mb-4 mx-4 bg-gray-100 rounded-lg">
+                    <div className="flex items-center mb-2">
+                        <i className="fas fa-star text-yellow-400 mr-2"></i>
+                        <p className="text-sm font-semibold text-gray-800">使用订阅聚合功能，可集中管理多平台信息，提升内容获取效率。</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Header = () => (
+            <div className="bg-white shadow-sm p-6">
+                <h1 className="text-2xl font-bold text-gray-800">一站式订阅内容聚合与推送平台，实时同步，多端分发，智能统计。</h1>
+            </div>
+        );
+        
+        const AddSubscriptionModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+        
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div className="p-5 bg-blue-600 text-white flex justify-between items-center rounded-t-lg">
+                            <h2 className="text-lg font-semibold">新增订阅</h2>
+                            <button onClick={onClose} className="text-2xl font-light">&times;</button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">订阅名称</label>
+                                <input type="text" placeholder="输入订阅名称" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">来源渠道</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option>新浪科技</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">推送频率</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option>每日</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">推送时间</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option>上午 9:00</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">订阅状态</label>
+                                <div className="flex items-center space-x-6">
+                                     <label className="flex items-center">
+                                        <input type="radio" name="status" className="form-radio text-blue-600" defaultChecked />
+                                        <span className="ml-2 text-gray-700">开启</span>
+                                    </label>
+                                    <label className="flex items-center">
+                                        <input type="radio" name="status" className="form-radio text-blue-600" />
+                                        <span className="ml-2 text-gray-700">暂停</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
+                            <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">取消</button>
+                            <button onClick={onClose} className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const EditSubscriptionModal = ({ isOpen, onClose, subscription }) => {
+            if (!isOpen) return null;
+        
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div className="p-5 bg-blue-600 text-white flex justify-between items-center rounded-t-lg">
+                            <h2 className="text-lg font-semibold">编辑订阅</h2>
+                            <button onClick={onClose} className="text-2xl font-light">&times;</button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">订阅名称</label>
+                                <input type="text" value={subscription.title} className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500" readOnly />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">来源渠道</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option>{subscription.source}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">推送频率</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option>{subscription.frequency}</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">推送时间</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                    <option>{subscription.time}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">订阅状态</label>
+                                <div className="flex items-center space-x-6">
+                                     <label className="flex items-center">
+                                        <input type="radio" name="edit-status" className="form-radio text-blue-600" defaultChecked />
+                                        <span className="ml-2 text-gray-700">开启</span>
+                                    </label>
+                                    <label className="flex items-center">
+                                        <input type="radio" name="edit-status" className="form-radio text-blue-600" />
+                                        <span className="ml-2 text-gray-700">暂停</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3 rounded-b-lg">
+                            <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">取消</button>
+                            <button onClick={onClose} className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DeleteConfirmationModal = ({ isOpen, onClose }) => {
+            if (!isOpen) return null;
+        
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-2">确认删除</h2>
+                        <p className="text-sm text-gray-500 mb-6">您确定要删除这个订阅吗？此操作无法撤销。</p>
+                        <div className="flex justify-center space-x-4">
+                            <button onClick={onClose} className="px-6 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">取消</button>
+                            <button onClick={onClose} className="px-6 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">确认删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MainContent = ({ subscriptions, onAddClick, onEditClick, onDeleteClick, overviewImage, onRefreshClick }) => (
+            <div className="flex-grow flex flex-col">
+                <Header />
+                <div className="flex-grow p-6">
+                    <div className="border-b border-gray-200 mb-6">
+                        <nav className="-mb-px flex space-x-8">
+                            <a href="#" className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-500">
+                                订阅列表
+                            </a>
+                            <a href="#" className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                                推送调度
+                            </a>
+                            <a href="#" className="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                                统计报表
+                            </a>
+                        </nav>
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div className="xl:col-span-2">
+                             <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-lg font-semibold text-gray-800">我的订阅</h2>
+                                <button onClick={onAddClick} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center">
+                                    <i className="fas fa-plus mr-2"></i>
+                                    新增订阅
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {subscriptions.map(sub => (
+                                    <div key={sub.id} className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 relative">
+                                        <button onClick={() => onEditClick(sub)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                                            <i className="far fa-edit"></i>
+                                        </button>
+                                        <div className="flex items-start mb-3">
+                                            <span className={`w-2 h-2 rounded-full bg-${sub.color} mt-2 mr-3`}></span>
+                                            <h3 className="text-base font-semibold text-gray-800">{sub.title}</h3>
+                                        </div>
+                                        <div className="text-sm text-gray-500 space-y-1 pl-5 mb-4">
+                                            <p>来源：{sub.source}</p>
+                                            <p>频率：{sub.frequency}</p>
+                                            <p>推送时间：{sub.time}</p>
+                                        </div>
+                                        <div className="pl-5">
+                                            <button onClick={() => onDeleteClick(sub)} className="bg-red-50 text-red-600 px-3 py-1 rounded text-xs font-medium hover:bg-red-100">删除订阅</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-base font-semibold text-gray-800">数据概览</h2>
+                                    <button onClick={onRefreshClick} className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center">
+                                        <i className="fas fa-sync-alt mr-1 text-xs"></i>
+                                        刷新数据
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                                    <div className="flex items-center">
+                                        <i className="fas fa-bullhorn text-blue-500 mr-3"></i>
+                                        <div>
+                                            <p className="text-gray-500">订阅总数</p>
+                                            <p className="text-2xl font-bold text-gray-800">3</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <i className="fas fa-check-circle text-green-500 mr-3"></i>
+                                        <div>
+                                            <p className="text-gray-500">推送成功率</p>
+                                            <p className="text-2xl font-bold text-gray-800">92<span className="text-base font-medium">%</span></p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <i className="fas fa-sun text-yellow-500 mr-3"></i>
+                                        <div>
+                                            <p className="text-gray-500">当日新增订阅</p>
+                                            <p className="text-2xl font-bold text-gray-800">5</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <i className="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                                        <div>
+                                            <p className="text-gray-500">故障报警数</p>
+                                            <p className="text-2xl font-bold text-gray-800">1</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="p-5">
+                                    <h3 className="text-base font-semibold text-gray-800">实时推送统计</h3>
+                                </div>
+                                <img src={overviewImage} alt="Stats Image" className="w-full h-32 object-cover"/>
+                                <div className="p-5">
+                                    <p className="text-xs text-gray-500">点击生成或采用图表摘要视图，绝对掌握推送效果。</p>
+                                </div>
+                            </div>
+                            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                                <h3 className="text-base font-semibold text-gray-800 mb-3">常见问题</h3>
+                                <div className="space-y-2">
+                                    <a href="#" className="block text-sm text-blue-600 hover:underline">如何添加新订阅?</a>
+                                    <a href="#" className="block text-sm text-blue-600 hover:underline">如何调整推送频率?</a>
+                                    <a href="#" className="block text-sm text-blue-600 hover:underline">为什么我的订阅推送失败了?</a>
+                                    <a href="#" className="block text-sm text-blue-600 hover:underline">如何查看历史推送记录?</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer className="text-center py-4 text-xs text-gray-500">
+                    <p>© 2023 订阅内容聚合与推送平台 版权所有</p>
+                    <p>版本 1.2.3 | 联系邮箱: support@example.com</p>
+                    <p className="mt-1">
+                        <a href="#" className="text-blue-600 hover:underline">关于我们</a> · 
+                        <a href="#" className="text-blue-600 hover:underline">使用条款</a> · 
+                        <a href="#" className="text-blue-600 hover:underline">隐私政策</a>
+                    </p>
+                </footer>
+            </div>
+        );
+
+        const App = () => {
+            const [subscriptions, setSubscriptions] = useState(initialSubscriptions);
+            const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+            const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+            const [editingSubscription, setEditingSubscription] = useState(null);
+            const [deletingSubscription, setDeletingSubscription] = useState(null);
+            const [overviewImage, setOverviewImage] = useState("https://picsum.photos/id/1015/400/200");
+
+            const handleAddClick = () => setIsAddModalOpen(true);
+            const handleCloseAddModal = () => {
+                setIsAddModalOpen(false);
+                setOverviewImage("https://picsum.photos/id/1074/400/200");
+            };
+
+            const handleEditClick = (sub) => {
+                setEditingSubscription(sub);
+                setIsEditModalOpen(true);
+            };
+            const handleCloseEditModal = () => setIsEditModalOpen(false);
+
+            const handleDeleteClick = (sub) => {
+                setDeletingSubscription(sub);
+                setIsDeleteModalOpen(true);
+                setOverviewImage("https://picsum.photos/id/1/400/200");
+            };
+            const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
+
+            const handleRefreshClick = () => {
+                setOverviewImage("https://picsum.photos/id/2/400/200");
+            };
+
+            return (
+                <div className="flex min-h-screen">
+                    <Sidebar />
+                    <MainContent 
+                        subscriptions={subscriptions}
+                        onAddClick={handleAddClick}
+                        onEditClick={handleEditClick}
+                        onDeleteClick={handleDeleteClick}
+                        overviewImage={overviewImage}
+                        onRefreshClick={handleRefreshClick}
+                    />
+                    <AddSubscriptionModal isOpen={isAddModalOpen} onClose={handleCloseAddModal} />
+                    <EditSubscriptionModal isOpen={isEditModalOpen} onClose={handleCloseEditModal} subscription={editingSubscription} />
+                    <DeleteConfirmationModal isOpen={isDeleteModalOpen} onClose={handleCloseDeleteModal} />
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

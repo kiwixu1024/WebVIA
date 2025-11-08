@@ -1,0 +1,197 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云存储</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body class="bg-gray-100">
+<div id="root"></div>
+<script type="text/babel">
+
+const initialPhotos = [
+  { id: 1, title: "Family_Vacation.jpg", date: "2023-06-10", tags: ["旅行", "家庭"], image: "https://picsum.photos/id/1015/300/200" },
+  { id: 2, title: "Beach_Sunset.jpg", date: "2023-06-08", tags: ["旅行", "风景"], image: "https://picsum.photos/id/1016/300/200" },
+  { id: 3, title: "Mountain_Hiking.jpg", date: "2023-06-05", tags: ["运动", "风景"], image: "https://picsum.photos/id/1011/300/200" },
+  { id: 4, title: "Birthday_Cake.jpg", date: "2023-06-12", tags: ["生日", "家庭"], image: "https://picsum.photos/id/1021/300/200" },
+  { id: 5, title: "Office_Party.jpg", date: "2023-06-07", tags: ["工作", "聚会"], image: "https://picsum.photos/id/1019/300/200" },
+];
+
+const initialVideos = [
+  { id: 1, title: "Birthday_Party.mp4", date: "2023-06-12", tags: ["生日", "家庭"], duration: "2:30", image: "https://picsum.photos/id/1045/300/200" },
+  { id: 2, title: "Vacation_Highlights.mp4", date: "2023-06-09", tags: ["旅行"], duration: "5:12", image: "https://picsum.photos/id/1042/300/200" },
+  { id: 3, title: "Cooking_Tutorial.mp4", date: "2023-06-06", tags: ["家庭", "教程"], duration: "10:45", image: "https://picsum.photos/id/1052/300/200" },
+];
+
+function App() {
+  const [photos, setPhotos] = React.useState(initialPhotos);
+  const [videos, setVideos] = React.useState(initialVideos);
+  const [modalType, setModalType] = React.useState(null);
+  const [selected, setSelected] = React.useState(null);
+
+  const openModal = (type, item = null) => {
+    setModalType(type);
+    setSelected(item);
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setSelected(null);
+  };
+
+  const deletePhoto = (photo) => {
+    setPhotos(photos.filter(p => p.id !== photo.id));
+    closeModal();
+  };
+
+  return (
+    <div className="flex">
+      {/* Sidebar */}
+      <div className="w-1/5 bg-blue-500 text-white min-h-screen p-4">
+        <h1 className="text-lg font-bold mb-6">云存储</h1>
+        <ul>
+          <li className="mb-2">我的图库</li>
+          <li className="mb-2">我的视频</li>
+          <li className="mb-2">分享中心</li>
+          <li className="mb-2">设置</li>
+        </ul>
+      </div>
+
+      {/* Main Content */}
+      <div className="w-4/5 p-6">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">全部文件</h2>
+          {/* Action Buttons */}
+          <div className="flex justify-end mb-4">
+            <button onClick={() => openModal('addPhoto')} className="bg-blue-500 text-white px-4 py-2 rounded mr-2">添加照片</button>
+            <button onClick={() => openModal('uploadVideo')} className="bg-blue-500 text-white px-4 py-2 rounded">上传视频</button>
+          </div>
+
+          {/* Photo Section */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2">照片 (5)</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {photos.map(photo => (
+                <div key={photo.id} className="bg-white rounded shadow p-4">
+                  <img src={photo.image} alt={photo.title} className="rounded mb-2" />
+                  <h4 className="text-sm font-semibold">{photo.title}</h4>
+                  <p className="text-xs text-gray-500">{photo.date}</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {photo.tags.map(tag => (
+                      <span key={tag} className="text-xs bg-gray-200 px-2 py-1 rounded">{tag}</span>
+                    ))}
+                  </div>
+                  <button onClick={() => openModal('editPhoto', photo)} className="text-blue-500 text-sm mt-2">编辑</button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Video Section */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">视频 (3)</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {videos.map(video => (
+                <div key={video.id} className="bg-white rounded shadow p-4">
+                  <img src={video.image} alt={video.title} className="rounded mb-2" />
+                  <h4 className="text-sm font-semibold">{video.title}</h4>
+                  <p className="text-xs text-gray-500">{video.date}</p>
+                  <p className="text-xs text-gray-500">{video.duration}</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {video.tags.map(tag => (
+                      <span key={tag} className="text-xs bg-gray-200 px-2 py-1 rounded">{tag}</span>
+                    ))}
+                  </div>
+                  <button onClick={() => openModal('editVideo', video)} className="text-blue-500 text-sm mt-2">编辑</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalType && (
+        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+          <div className="bg-white rounded shadow-md p-6 w-96">
+            {modalType === 'addPhoto' && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">添加照片</h3>
+                <input type="text" placeholder="照片标题" className="w-full mb-2 p-2 border rounded" />
+                <textarea placeholder="描述" className="w-full mb-2 p-2 border rounded"></textarea>
+                <div className="w-full mb-2 p-2 border-dashed border rounded text-center">
+                  点击或拖动文件到此处
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {["旅行", "家庭", "生日", "工作", "聚会", "风景", "运动", "教程"].map(tag => (
+                    <button key={tag} className="text-sm bg-gray-200 px-2 py-1 rounded">{tag}</button>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={closeModal} className="text-gray-700">取消</button>
+                  <button onClick={closeModal} className="text-white bg-blue-500 px-4 py-2 rounded">上传</button>
+                </div>
+              </>
+            )}
+            {modalType === 'uploadVideo' && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">上传视频</h3>
+                <input type="text" placeholder="视频标题" className="w-full mb-2 p-2 border rounded" />
+                <textarea placeholder="描述" className="w-full mb-2 p-2 border rounded"></textarea>
+                <div className="w-full mb-2 p-2 border-dashed border rounded text-center">
+                  点击或拖动文件到此处
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {["旅行", "家庭", "生日", "工作", "聚会", "风景", "运动", "教程"].map(tag => (
+                    <button key={tag} className="text-sm bg-gray-200 px-2 py-1 rounded">{tag}</button>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={closeModal} className="text-gray-700">取消</button>
+                  <button onClick={closeModal} className="text-white bg-blue-500 px-4 py-2 rounded">上传</button>
+                </div>
+              </>
+            )}
+            {/* Edit Modal */}
+            {modalType === 'editPhoto' && selected && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">编辑照片</h3>
+                <input type="text" defaultValue={selected.title} className="w-full mb-2 p-2 border rounded" />
+                <textarea defaultValue={`去年的家庭旅行`} className="w-full mb-2 p-2 border rounded"></textarea>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {["旅行", "家庭", "生日", "工作", "聚会", "风景", "运动", "教程"].map(tag => (
+                    <button key={tag} className={`text-sm px-2 py-1 rounded ${selected.tags.includes(tag) ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}>{tag}</button>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={closeModal} className="text-gray-700">取消</button>
+                  <button onClick={closeModal} className="text-white bg-blue-500 px-4 py-2 rounded">保存</button>
+                </div>
+              </>
+            )}
+            {modalType === 'deletePhoto' && selected && (
+              <>
+                <h3 className="text-lg font-semibold mb-4">确认删除</h3>
+                <p className="text-sm text-gray-700 mb-4">您确定要删除"{selected.title}"吗? 此操作不可撤销.</p>
+                <div className="flex justify-end gap-2">
+                  <button onClick={closeModal} className="text-gray-700">取消</button>
+                  <button onClick={() => deletePhoto(selected)} className="text-white bg-red-500 px-4 py-2 rounded">确认删除</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
+</body>
+</html>

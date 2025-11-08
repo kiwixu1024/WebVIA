@@ -1,0 +1,411 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>生活妙招</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            background-color: #F8F9FA;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const { useState, useMemo } = React;
+
+        const initialHacksData = [
+            {
+                id: 1,
+                title: '用旧牙刷清洗水龙头',
+                description: '旧牙刷+小苏打，让水龙头光亮如新。',
+                category: '清洁',
+                rating: 4,
+                imageUrl: 'https://picsum.photos/id/1060/400/250',
+                badge: '热门'
+            },
+            {
+                id: 2,
+                title: '橡皮筋收纳筷子',
+                description: '两根橡皮筋固定筷子，收纳更整洁！',
+                category: '厨房',
+                rating: 3,
+                imageUrl: 'https://picsum.photos/id/292/400/250',
+                badge: '新'
+            },
+            {
+                id: 3,
+                title: '旧报纸去油污',
+                description: '旧报纸可吸油，抹布更耐用！',
+                category: '厨房',
+                rating: 4,
+                imageUrl: 'https://picsum.photos/id/1015/400/250'
+            },
+            {
+                id: 4,
+                title: '醋除水垢小窍门',
+                description: '食用白醋加热后浸泡在水垢处，静置10分钟后擦拭，轻松去除顽固水垢。',
+                category: '清洁',
+                rating: 5,
+                imageUrl: 'https://picsum.photos/id/1074/400/250',
+                badge: '热门'
+            },
+            {
+                id: 5,
+                title: '电视机发热处理',
+                description: '电视机背面定期用干布条匀力除尘，保持通风孔通畅，延长使用寿命。',
+                category: '家电',
+                rating: 4,
+                imageUrl: 'https://picsum.photos/id/10/400/250'
+            },
+            {
+                id: 6,
+                title: '衣物去皱技巧',
+                description: '没有熨斗时，可将衣物挂在浴室，利用热水澡产生的蒸汽自然去皱。',
+                category: '衣物',
+                rating: 4,
+                imageUrl: 'https://picsum.photos/id/219/400/250'
+            },
+        ];
+
+        const categories = [
+            { id: 'kitchen', name: '厨房', icon: 'fa-utensils' },
+            { id: 'home', name: '家居', icon: 'fa-home' },
+            { id: 'cleaning', name: '清洁', icon: 'fa-broom' },
+            { id: 'storage', name: '收纳', icon: 'fa-box-open' },
+            { id: 'clothing', name: '衣物', icon: 'fa-tshirt' },
+            { id: 'appliance', name: '家电', icon: 'fa-plug' },
+            { id: 'energy', name: '节能', icon: 'fa-leaf' },
+            { id: 'other', name: '其他', icon: 'fa-ellipsis-h' }
+        ];
+
+        const StarRating = ({ rating }) => {
+            const stars = [];
+            for (let i = 1; i <= 5; i++) {
+                stars.push(
+                    <i key={i} className={`fa fa-star ${i <= rating ? 'text-yellow-400' : 'text-gray-300'}`}></i>
+                );
+            }
+            return <div className="flex items-center space-x-1">{stars}</div>;
+        };
+        
+        const HackCard = ({ hack, onEdit, onDelete }) => {
+            const badgeColor = hack.badge === '热门' ? 'bg-red-500' : 'bg-green-500';
+            return (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                    <div className="relative">
+                        <img src={hack.imageUrl} alt={hack.title} className="w-full h-40 object-cover" />
+                         {hack.badge && (
+                            <span className={`absolute top-2 right-2 text-white text-xs font-bold px-2 py-1 rounded-full ${badgeColor}`}>
+                                {hack.badge}
+                            </span>
+                        )}
+                    </div>
+                    <div className="p-4 flex-grow flex flex-col">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-1">{hack.title}</h3>
+                        <p className="text-gray-600 text-sm mb-3 flex-grow">{hack.description}</p>
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-xs text-blue-500 bg-blue-100 px-2 py-1 rounded-full">{hack.category}</span>
+                            <StarRating rating={hack.rating} />
+                        </div>
+                        <div className="border-t border-gray-200 pt-3 flex justify-end space-x-6 text-sm text-gray-500">
+                             <button onClick={() => onEdit(hack)} className="hover:text-blue-600 flex items-center"><i className="far fa-edit mr-1"></i>编辑</button>
+                             <button onClick={() => onDelete(hack)} className="hover:text-red-600 flex items-center"><i className="far fa-trash-alt mr-1"></i>删除</button>
+                             <button className="hover:text-green-600 flex items-center"><i className="fa fa-share-alt mr-1"></i>分享</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const AddEditModal = ({ isOpen, onClose, onSave, hack }) => {
+            const [title, setTitle] = useState('');
+            const [details, setDetails] = useState('');
+            const [category, setCategory] = useState('厨房');
+            const [difficulty, setDifficulty] = useState(2);
+
+            React.useEffect(() => {
+                if (isOpen) {
+                    if (hack) { // Edit mode
+                        setTitle(hack.title);
+                        setDetails(hack.description);
+                        setCategory(hack.category);
+                        const ratingMap = {1:1, 2:1, 3:2, 4:2, 5:3};
+                        setDifficulty(ratingMap[hack.rating] || 2);
+                    } else { // Add mode
+                        setTitle('');
+                        setDetails('');
+                        setCategory('厨房');
+                        setDifficulty(2);
+                    }
+                }
+            }, [isOpen, hack]);
+
+            if (!isOpen) return null;
+
+            const handleSave = () => {
+                const ratingMap = {1:2, 2:4, 3:5};
+                const newHack = {
+                    ...(hack || {}),
+                    id: hack ? hack.id : Date.now(),
+                    title,
+                    description: details,
+                    category,
+                    rating: ratingMap[difficulty],
+                    imageUrl: hack?.imageUrl || `https://picsum.photos/id/${Math.floor(Math.random()*200 + 400)}/400/250`, // keep old image or generate new
+                };
+                 // For the specific test case
+                if (title === "测试标题") {
+                    newHack.imageUrl = "https://picsum.photos/id/431/400/250";
+                }
+                onSave(newHack);
+            };
+
+            const difficultyOptions = [
+                { label: '简单', value: 1, range: '1-3颗星' },
+                { label: '适中', value: 2, range: '3-4颗星' },
+                { label: '困难', value: 3, range: '5颗星' }
+            ];
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg">
+                        <h2 className="text-2xl font-bold mb-6 text-gray-800">{hack ? '编辑妙招' : '添加妙招'}</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">妙招标题 <span className="text-red-500">*</span></label>
+                                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="输入妙招标题" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">妙招详情</label>
+                                <textarea value={details} onChange={(e) => setDetails(e.target.value)} rows="3" placeholder="输入妙招详细内容" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">选择分类</label>
+                                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">难度等级 (0-5颗星)</label>
+                                <div className="flex space-x-2">
+                                    {difficultyOptions.map(opt => (
+                                        <button 
+                                            key={opt.value}
+                                            onClick={() => setDifficulty(opt.value)} 
+                                            className={`flex-1 py-2 px-4 text-center rounded-md border transition ${difficulty === opt.value ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={handleSave} className="px-6 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DeleteModal = ({ isOpen, onClose, onConfirm, hack }) => {
+            if (!isOpen) return null;
+            
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md text-center">
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">确认删除</h2>
+                        <p className="text-gray-600 mb-6">确定要删除【{hack?.title}】吗？此操作不可恢复。</p>
+                        <div className="flex justify-center space-x-4">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={() => onConfirm(hack.id)} className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">确认删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        function App() {
+            const [hacks, setHacks] = useState(initialHacksData);
+            const [modal, setModal] = useState({ type: null, data: null });
+
+            const categoryCounts = useMemo(() => {
+                const counts = categories.reduce((acc, cat) => {
+                    acc[cat.name] = 0;
+                    return acc;
+                }, {});
+                hacks.forEach(hack => {
+                    if (counts.hasOwnProperty(hack.category)) {
+                        counts[hack.category]++;
+                    } else {
+                        // Handle '其他' or unlisted categories if any
+                        counts['其他'] = (counts['其他'] || 0) + 1;
+                    }
+                });
+                return counts;
+            }, [hacks]);
+
+
+            const handleOpenAdd = () => setModal({ type: 'add', data: null });
+            const handleOpenEdit = (hack) => setModal({ type: 'edit', data: hack });
+            const handleOpenDelete = (hack) => setModal({ type: 'delete', data: hack });
+            const handleCloseModal = () => setModal({ type: null, data: null });
+
+            const handleSaveHack = (savedHack) => {
+                const isNew = !hacks.some(h => h.id === savedHack.id);
+                if (isNew) {
+                    setHacks([...hacks, savedHack]);
+                } else {
+                    setHacks(hacks.map(h => (h.id === savedHack.id ? savedHack : h)));
+                }
+                handleCloseModal();
+            };
+
+            const handleConfirmDelete = (hackId) => {
+                setHacks(hacks.filter(h => h.id !== hackId));
+                handleCloseModal();
+            };
+            
+
+            return (
+                <div className="min-h-screen font-sans text-gray-700">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm py-4 px-8 flex justify-between items-center">
+                        <div className="flex items-center space-x-3">
+                            <svg width="40" height="40" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#f87171" d="M729.6 627.2c-3.2-19.2 16-32 38.4-32s41.6 12.8 38.4 32c-3.2 22.4-22.4 35.2-38.4 35.2s-35.2-12.8-38.4-35.2zM512 800a288 288 0 1 0 0-576 288 288 0 0 0 0 576zm0 64a352 352 0 1 1 0-704 352 352 0 0 1 0 704z"></path><path fill="#fb923c" d="M835.2 457.6c-16-16-3.2-41.6 22.4-41.6s41.6 25.6 22.4 41.6c-16 16-32 3.2-44.8 0z"></path><path fill="#f87171" d="M832 550.4c0-19.2 16-35.2 35.2-35.2s35.2 16 35.2 35.2-16 35.2-35.2 35.2-35.2-16-35.2-35.2zM156.8 457.6c-16-16-3.2-41.6 22.4-41.6s41.6 25.6 22.4 41.6c-16 16-32 3.2-44.8 0zM156.8 550.4c0-19.2 16-35.2 35.2-35.2s35.2 16 35.2 35.2-16 35.2-35.2 35.2-35.2-16-35.2-35.2z"></path><path fill="#fb923c" d="M307.2 272c-19.2-3.2-32 16-32 38.4s12.8 38.4 32 38.4 35.2-19.2 35.2-38.4-16-35.2-35.2-38.4zM307.2 710.4c-19.2-3.2-32 16-32 38.4s12.8 38.4 32 38.4 35.2-19.2 35.2-38.4-16-35.2-35.2-38.4zM713.6 272c-19.2-3.2-32 16-32 38.4s12.8 38.4 32 38.4 35.2-19.2 35.2-38.4-16-35.2-35.2-38.4z"></path><path fill="#f87171" d="m512 403.2 41.6-41.6c16-16 41.6-16 57.6 0l41.6 41.6c16 16 16 41.6 0 57.6L595.2 512l57.6 57.6c16 16 16 41.6 0 57.6l-41.6 41.6c-16 16-41.6 16-57.6 0L512 627.2l-41.6 41.6c-16 16-41.6 16-57.6 0l-41.6-41.6c-16-16-16-41.6 0-57.6l57.6-57.6-57.6-57.6c-16-16-16-41.6 0-57.6l41.6-41.6c16-16 41.6-16 57.6 0l41.6 41.6z"></path>
+                            </svg>
+                            <span className="text-2xl font-bold text-gray-800">生活妙招</span>
+                        </div>
+                        <div className="flex items-center space-x-8 text-gray-600">
+                            <a href="#" className="hover:text-orange-500"><i className="far fa-file-alt mr-2"></i>首页</a>
+                            <a href="#" className="hover:text-orange-500"><i className="fa fa-th-large mr-2"></i>分类</a>
+                            <a href="#" className="hover:text-orange-500"><i className="far fa-star mr-2"></i>我的收藏</a>
+                        </div>
+                    </header>
+
+                    <main className="p-8 grid grid-cols-12 gap-8">
+                        {/* Left Sidebar */}
+                        <aside className="col-span-2">
+                            <button onClick={handleOpenAdd} className="w-full bg-orange-500 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-orange-600 transition flex items-center justify-center text-lg">
+                                <i className="fa fa-plus mr-2"></i>添加妙招
+                            </button>
+                            <nav className="mt-8 space-y-2">
+                                <a href="#" className="flex items-center justify-between p-3 rounded-lg bg-orange-100 text-orange-600 font-semibold">
+                                    <div className="flex items-center">
+                                        <i className="fa fa-list-ul mr-3"></i>
+                                        <span>全部妙招</span>
+                                    </div>
+                                </a>
+                                {categories.map(cat => (
+                                     <a href="#" key={cat.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 text-gray-600">
+                                        <div className="flex items-center">
+                                            <i className={`fa ${cat.icon} mr-3 text-orange-400 w-5 text-center`}></i>
+                                            <span>{cat.name}</span>
+                                        </div>
+                                        <span className="text-sm text-gray-500">{categoryCounts[cat.name] || 0}</span>
+                                    </a>
+                                ))}
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <div className="col-span-7">
+                            <div className="bg-white p-6 rounded-lg shadow-sm">
+                                <h2 className="text-xl font-bold text-gray-800">生活妙招经验集</h2>
+                                <p className="text-gray-500 mt-2 mb-4">在这里, 你可以随时新增、编辑或删除生活中的实用小窍门, 还能查看使用统计与社区热门推荐。</p>
+                                <div className="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-3 rounded-r-lg text-sm">
+                                    <i className="fa fa-star text-yellow-500 mr-2"></i>本周精选 10 条妙招已更新, 快来看看哪个最实用!
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                                {hacks.map(hack => <HackCard key={hack.id} hack={hack} onEdit={handleOpenEdit} onDelete={handleOpenDelete} />)}
+                            </div>
+
+                            <div className="text-center mt-8">
+                                <button className="bg-orange-200 text-orange-800 font-semibold py-2 px-8 rounded-full hover:bg-orange-300 transition">加载更多</button>
+                            </div>
+                        </div>
+
+                        {/* Right Stats Panel */}
+                        <aside className="col-span-3">
+                            <div className="bg-white p-6 rounded-lg shadow-sm sticky top-8">
+                                <h3 className="text-lg font-bold border-b pb-3 mb-4 text-gray-800">数据统计</h3>
+                                <div className="text-center my-6">
+                                    <p className="text-gray-500 text-sm">当前共收录</p>
+                                    <div className="my-2 mx-auto w-20 h-20 rounded-full bg-orange-100 flex flex-col items-center justify-center">
+                                        <span className="text-3xl font-bold text-orange-500">{hacks.length}</span>
+                                    </div>
+                                    <p className="text-gray-500 text-sm">条妙招</p>
+                                </div>
+                                
+                                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">本月变化</h3>
+                                <div className="flex justify-around text-center mb-6">
+                                    <div>
+                                        <p className="text-2xl font-bold text-blue-600">12</p>
+                                        <p className="text-sm text-gray-500">新增</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl font-bold text-red-500">3</p>
+                                        <p className="text-sm text-gray-500">删除</p>
+                                    </div>
+                                </div>
+                                
+                                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">分类分布</h3>
+                                <div className="space-y-2 text-sm">
+                                    {categories.map(cat => (
+                                        <div key={cat.id} className="flex justify-between items-center text-gray-600">
+                                            <span>{cat.name}</span>
+                                            <span className="font-mono text-gray-500">{categoryCounts[cat.name] || 0}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <button className="w-full mt-6 bg-orange-100 text-orange-600 font-bold py-3 px-4 rounded-lg hover:bg-orange-200 transition">
+                                    导出报告
+                                </button>
+                            </div>
+                        </aside>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="px-8 py-4 text-xs text-gray-500 flex justify-between items-center border-t mt-4">
+                        <p>操作指南：点击左侧“添加妙招”可记录新经验；在卡片上可直接编辑或删除；右侧统计随时查看数据变化。</p>
+                        <p>小贴士：定期整理妙招可保持专属徽章！</p>
+                        <p><i className="far fa-question-circle mr-1"></i>如有疑问，请点击联系管理员</p>
+                    </footer>
+                    
+                    <AddEditModal 
+                        isOpen={modal.type === 'add' || modal.type === 'edit'} 
+                        onClose={handleCloseModal}
+                        onSave={handleSaveHack}
+                        hack={modal.data}
+                    />
+                    <DeleteModal 
+                        isOpen={modal.type === 'delete'}
+                        onClose={handleCloseModal}
+                        onConfirm={handleConfirmDelete}
+                        hack={modal.data}
+                    />
+
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+</body>
+</html>

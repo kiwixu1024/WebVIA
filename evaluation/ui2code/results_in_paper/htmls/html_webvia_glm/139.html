@@ -1,0 +1,409 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特色主题表情日志</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('全部');
+            const [showModal, setShowModal] = useState(false);
+            const [sidebarNav, setSidebarNav] = useState('展示区');
+
+            const emotions = [
+                { emoji: '😊', label: '开心' },
+                { emoji: '😢', label: '伤感' },
+                { emoji: '😮', label: '惊讶' },
+                { emoji: '😐', label: '平静' },
+                { emoji: '😠', label: '喜爱' },
+                { emoji: '😡', label: '愤怒' },
+                { emoji: '🤔', label: '思考' },
+                { emoji: '😴', label: '疲倦' }
+            ];
+
+            const [logs, setLogs] = useState([
+                {
+                    id: 1,
+                    emoji: '😊',
+                    date: '2024-06-01',
+                    content: '今日工作顺利完成上线啦！',
+                    emotion: '开心',
+                    category: '开心'
+                },
+                {
+                    id: 2,
+                    emoji: '😢',
+                    date: '2024-05-30',
+                    content: '项目延期，有点沮丧...',
+                    emotion: '伤感',
+                    category: '伤感'
+                },
+                {
+                    id: 3,
+                    emoji: '😮',
+                    date: '2024-05-29',
+                    content: '收到意外惊喜，朋友送了我一本期待已久的书！',
+                    emotion: '惊讶',
+                    category: '惊讶'
+                }
+            ]);
+
+            const [newLog, setNewLog] = useState({
+                date: '09/23/2025',
+                emotion: '',
+                content: '',
+                category: '开心'
+            });
+
+            const filteredLogs = activeTab === '全部' ? logs : logs.filter(log => log.category === activeTab);
+
+            const getEmotionStats = () => {
+                const stats = {};
+                emotions.forEach(emotion => {
+                    stats[emotion.label] = logs.filter(log => log.emotion === emotion.label).length;
+                });
+                return stats;
+            };
+
+            const handleAddLog = () => {
+                if (newLog.emotion && newLog.content) {
+                    const log = {
+                        id: Date.now(),
+                        emoji: getEmojiByLabel(newLog.emotion),
+                        date: new Date().toISOString().split('T')[0],
+                        content: newLog.content,
+                        emotion: newLog.emotion,
+                        category: newLog.category
+                    };
+                    setLogs([log, ...logs]);
+                    setNewLog({
+                        date: '09/23/2025',
+                        emotion: '',
+                        content: '',
+                        category: '开心'
+                    });
+                    setShowModal(false);
+                }
+            };
+
+            const getEmojiByLabel = (label) => {
+                const emotion = emotions.find(e => e.label === label);
+                return emotion ? emotion.emoji : '😊';
+            };
+
+            const emotionStats = getEmotionStats();
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <img src="https://picsum.photos/id/100/40/40" alt="Logo" className="w-10 h-10 rounded-lg"/>
+                                <div>
+                                    <h1 className="text-xl font-semibold text-gray-900">特色主题表情日志</h1>
+                                    <p className="text-sm text-gray-500">每天记录心情情，汇聚大情感</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={() => setShowModal(true)}
+                                    className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2"
+                                >
+                                    <span>+</span>
+                                    <span>添加新日志</span>
+                                </button>
+                                <button className="bg-teal-400 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2">
+                                    <span>导出日志</span>
+                                </button>
+                                <button className="bg-gray-600 hover:bg-gray-700 text-white p-2 rounded-lg">
+                                    <i className="fas fa-cog"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-white border-r border-gray-200 min-h-screen">
+                            <nav className="p-4">
+                                <ul className="space-y-2">
+                                    <li>
+                                        <button 
+                                            onClick={() => setSidebarNav('展示区')}
+                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${sidebarNav === '展示区' ? 'bg-yellow-100 text-yellow-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            <i className="fas fa-home mr-2"></i>
+                                            展示区
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button 
+                                            onClick={() => setSidebarNav('编辑区')}
+                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${sidebarNav === '编辑区' ? 'bg-yellow-100 text-yellow-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            <i className="fas fa-edit mr-2"></i>
+                                            编辑区
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button 
+                                            onClick={() => setSidebarNav('统计区')}
+                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${sidebarNav === '统计区' ? 'bg-yellow-100 text-yellow-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            <i className="fas fa-chart-bar mr-2"></i>
+                                            统计区
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button 
+                                            onClick={() => setSidebarNav('帮助说明')}
+                                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${sidebarNav === '帮助说明' ? 'bg-yellow-100 text-yellow-800' : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >
+                                            <i className="fas fa-question-circle mr-2"></i>
+                                            帮助说明
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+
+                            {/* Theme Switcher */}
+                            <div className="mt-8 px-4">
+                                <div className="flex items-center mb-3">
+                                    <i className="fas fa-palette mr-2 text-gray-600"></i>
+                                    <span className="text-sm text-gray-600">主题切换</span>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <div className="w-6 h-6 bg-blue-400 rounded-full cursor-pointer"></div>
+                                    <div className="w-6 h-6 bg-green-400 rounded-full cursor-pointer"></div>
+                                    <div className="w-6 h-6 bg-purple-400 rounded-full cursor-pointer"></div>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            {/* Tabs */}
+                            <div className="mb-6">
+                                <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                                    {['全部', '开心', '伤感', '惊讶', '日常小记'].map(tab => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                                activeTab === tab 
+                                                    ? 'bg-yellow-200 text-yellow-800' 
+                                                    : 'text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            {tab}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Content Area */}
+                            {activeTab === '日常小记' ? (
+                                <div className="text-center py-20">
+                                    <img src="https://picsum.photos/id/101/300/200" alt="Nature scene" className="mx-auto mb-6 rounded-lg"/>
+                                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">暂无表情日志</h2>
+                                    <p className="text-gray-600 mb-6">点亮心情，记录生活瞬间，开始记录你的第一条表情日志吧！</p>
+                                    <button 
+                                        onClick={() => setShowModal(true)}
+                                        className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-medium"
+                                    >
+                                        + 立即添加日志
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {filteredLogs.map(log => (
+                                        <div key={log.id} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                            <div className="flex items-start justify-between mb-4">
+                                                <span className="text-4xl">{log.emoji}</span>
+                                                <div className="flex space-x-2">
+                                                    <button className="text-blue-500 hover:text-blue-700">
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button className="text-red-500 hover:text-red-700">
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="mb-3">
+                                                <p className="text-sm text-gray-500 mb-1">{log.date}</p>
+                                                <p className="text-gray-900 leading-relaxed">{log.content}</p>
+                                            </div>
+                                            <div>
+                                                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+                                                    {log.emotion}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-80 bg-white border-l border-gray-200 p-6">
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">情绪统计</h3>
+                                <div className="text-sm text-gray-600 mb-4">表情使用频率</div>
+                                <div className="space-y-2">
+                                    {emotions.map(emotion => (
+                                        <div key={emotion.label} className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <span className="text-lg mr-2">{emotion.emoji}</span>
+                                                <span>{emotion.label}</span>
+                                            </div>
+                                            <span className="text-sm text-gray-500">
+                                                {emotionStats[emotion.label]}次
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">本周情绪趋势</h3>
+                                <div className="flex justify-between text-xs text-gray-500 mb-4">
+                                    {['一', '二', '三', '四', '五', '六', '日'].map(day => (
+                                        <span key={day}>{day}</span>
+                                    ))}
+                                </div>
+                                <a href="#" className="text-blue-500 hover:text-blue-700 text-sm flex items-center">
+                                    查看完整统计数据 <i className="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t border-gray-200 py-4 px-6">
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                            <div>© 2024 表情日志团队·版本 v1.0.0</div>
+                            <div className="flex space-x-4">
+                                <a href="#" className="hover:text-gray-700">关于我们</a>
+                                <a href="#" className="hover:text-gray-700">使用条款</a>
+                                <a href="#" className="hover:text-gray-700">隐私政策</a>
+                                <a href="#" className="hover:text-gray-700">意见反馈</a>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-semibold">添加新日志</h2>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">日期</label>
+                                        <input 
+                                            type="date" 
+                                            value={newLog.date}
+                                            onChange={(e) => setNewLog({...newLog, date: e.target.value})}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">表情</label>
+                                        <div className="flex space-x-2">
+                                            {emotions.map(emotion => (
+                                                <button
+                                                    key={emotion.label}
+                                                    onClick={() => setNewLog({...newLog, emotion: emotion.label, category: emotion.label})}
+                                                    className={`px-4 py-2 rounded-lg text-sm border ${
+                                                        newLog.emotion === emotion.label 
+                                                            ? 'bg-yellow-200 border-yellow-500' 
+                                                            : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    {emotion.emoji} {emotion.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">内容</label>
+                                        <textarea 
+                                            value={newLog.content}
+                                            onChange={(e) => setNewLog({...newLog, content: e.target.value})}
+                                            placeholder="写下你此刻的心情..."
+                                            rows="4"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">分类</label>
+                                        <select 
+                                            value={newLog.category}
+                                            onChange={(e) => setNewLog({...newLog, category: e.target.value})}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        >
+                                            <option value="开心">开心</option>
+                                            <option value="伤感">伤感</option>
+                                            <option value="惊讶">惊讶</option>
+                                            <option value="日常小记">日常小记</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleAddLog}
+                                        className="flex-1 px-4 py-2 bg-gray-200 rounded-lg text-gray-700 hover:bg-gray-300"
+                                    >
+                                        重置
+                                    </button>
+                                    <button 
+                                        onClick={handleAddLog}
+                                        className="flex-1 px-4 py-2 bg-orange-400 rounded-lg text-white hover:bg-orange-500"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭理财计划</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [showModal, setShowModal] = useState(false);
+            const [isEditing, setIsEditing] = useState(false);
+            const [editingRecord, setEditingRecord] = useState(null);
+            const [formData, setFormData] = useState({
+                date: '',
+                category: '',
+                amount: '',
+                note: ''
+            });
+
+            const [records, setRecords] = useState([
+                { id: 1, date: '2023-10-15', category: '餐饮', amount: -200, note: '家庭聚餐', type: 'expense' },
+                { id: 2, date: '2023-10-10', category: '交通', amount: -50, note: '地铁月票', type: 'expense' },
+                { id: 3, date: '2023-10-05', category: '收入', amount: 10000, note: '工资', type: 'income' },
+                { id: 4, date: '2023-10-03', category: '购物', amount: -1500, note: '生活用品', type: 'expense' },
+                { id: 5, date: '2023-09-28', category: '家庭支出', amount: -2000, note: '水电费', type: 'expense' }
+            ]);
+
+            const handleAddBill = () => {
+                setIsEditing(false);
+                setShowModal(true);
+                setFormData({
+                    date: '09/23/2025',
+                    category: '选择类别',
+                    amount: '',
+                    note: ''
+                });
+            };
+
+            const handleEditRecord = (record) => {
+                setIsEditing(true);
+                setEditingRecord(record);
+                setFormData({
+                    date: record.date.replace(/-/g, '/').replace(/(\d{4})\/(\d{2})\/(\d{2})/, '$1/$2/$3'),
+                    category: record.category,
+                    amount: Math.abs(record.amount),
+                    note: record.note
+                });
+                setShowModal(true);
+            };
+
+            const handleSave = () => {
+                if (isEditing) {
+                    // 编辑现有记录
+                    setRecords(records.map(record => 
+                        record.id === editingRecord.id 
+                            ? { ...record, date: formData.date.replace(/\//g, '-'), category: formData.category, amount: formData.amount > 0 ? formData.amount : -formData.amount, note: formData.note }
+                            : record
+                    ));
+                } else {
+                    // 添加新记录
+                    const newRecord = {
+                        id: records.length + 1,
+                        date: '2025-09-23',
+                        category: '收入',
+                        amount: parseInt(formData.amount) > 0 ? parseInt(formData.amount) : -parseInt(formData.amount),
+                        note: formData.note || '测试账单',
+                        type: 'income'
+                    };
+                    setRecords([...records, newRecord]);
+                }
+                closeModal();
+            };
+
+            const closeModal = () => {
+                setShowModal(false);
+                setIsEditing(false);
+                setEditingRecord(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-gradient-to-r from-blue-500 to-orange-400 text-white p-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <i className="fas fa-chart-line text-xl"></i>
+                                <h1 className="text-xl font-bold">家庭理财计划</h1>
+                            </div>
+                            <div className="flex items-center space-x-6">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-home"></i>
+                                    <span>首页化家庭理财一站式管理</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-calculator"></i>
+                                    <span>实时数据统计与可定制预算</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-shield-alt"></i>
+                                    <span>安全便捷，支持多端同步</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-48 bg-white shadow-sm min-h-screen">
+                            <nav className="p-4">
+                                <ul className="space-y-2">
+                                    <li>
+                                        <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                            <i className="fas fa-chart-pie"></i>
+                                            <span>预算概览</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                            <i className="fas fa-receipt"></i>
+                                            <span>账单记录</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="w-full flex items-center space-x-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                            <i className="fas fa-wallet"></i>
+                                            <span>资产负债</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6">
+                            {/* Navigation Tabs */}
+                            <div className="mb-6">
+                                <div className="flex space-x-6">
+                                    <button className="px-4 py-2 bg-orange-500 text-white rounded-md">总览</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md">收入</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md">支出</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md">储蓄</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md">投资</button>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="mb-6">
+                                <div className="flex space-x-4">
+                                    <button className="px-4 py-2 bg-orange-500 text-white rounded-md">添加目标</button>
+                                    <button onClick={handleAddBill} className="px-4 py-2 bg-orange-500 text-white rounded-md">新增账单</button>
+                                    <button className="px-4 py-2 bg-orange-500 text-white rounded-md">添加理财产品</button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6">
+                                {/* Records Table */}
+                                <div className="col-span-2 bg-white rounded-lg shadow-sm p-6">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b">
+                                                <th className="text-left py-3">日期</th>
+                                                <th className="text-left py-3">类别</th>
+                                                <th className="text-right py-3">金额</th>
+                                                <th className="text-left py-3">项目名称</th>
+                                                <th className="text-left py-3"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {records.map((record) => (
+                                                <tr key={record.id} className="border-b">
+                                                    <td className="py-3">{record.date}</td>
+                                                    <td className="py-3">{record.category}</td>
+                                                    <td className={`py-3 text-right ${record.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {record.amount > 0 ? '+' : ''}{record.amount}
+                                                    </td>
+                                                    <td className="py-3">{record.note}</td>
+                                                    <td className="py-3">
+                                                        <button 
+                                                            onClick={() => handleEditRecord(record)}
+                                                            className="text-orange-500 hover:text-orange-700"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Chart */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="font-semibold mb-4">财务趋势</h3>
+                                    <div className="h-64 relative">
+                                        <svg width="100%" height="100%" viewBox="0 0 300 200">
+                                            <polyline
+                                                fill="none"
+                                                stroke="#10B981"
+                                                strokeWidth="2"
+                                                points="20,180 60,160 100,140 140,120 180,80 220,40"
+                                            />
+                                            <circle cx="20" cy="180" r="3" fill="#10B981" />
+                                            <circle cx="60" cy="160" r="3" fill="#10B981" />
+                                            <circle cx="100" cy="140" r="3" fill="#10B981" />
+                                            <circle cx="140" cy="120" r="3" fill="#10B981" />
+                                            <circle cx="180" cy="80" r="3" fill="#10B981" />
+                                            <circle cx="220" cy="40" r="3" fill="#10B981" />
+                                            
+                                            {/* Grid lines */}
+                                            <line x1="20" y1="180" x2="280" y2="180" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="160" x2="280" y2="160" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="140" x2="280" y2="140" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="120" x2="280" y2="120" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="100" x2="280" y2="100" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="80" x2="280" y2="80" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="60" x2="280" y2="60" stroke="#E5E7EB" strokeWidth="1" />
+                                            <line x1="20" y1="40" x2="280" y2="40" stroke="#E5E7EB" strokeWidth="1" />
+                                            
+                                            {/* X-axis labels */}
+                                            <text x="20" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">5月</text>
+                                            <text x="60" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">6月</text>
+                                            <text x="100" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">7月</text>
+                                            <text x="140" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">8月</text>
+                                            <text x="180" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">9月</text>
+                                            <text x="220" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">10月</text>
+                                            <text x="280" y="195" textAnchor="middle" fontSize="10" fill="#6B7280">11月</text>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Recommended Products */}
+                            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+                                <h3 className="font-semibold mb-4">推荐理财产品</h3>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-medium">余额宝</h4>
+                                            <div className="flex space-x-2">
+                                                <i className="fas fa-star text-yellow-400"></i>
+                                                <i className="fas fa-heart text-red-400"></i>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">预期收益：2.5% | 风险：低</p>
+                                        <p className="text-sm text-gray-600 mb-3">灵活存取，日收益结算</p>
+                                        <a href="#" className="text-blue-500 text-sm">查看详情 ></a>
+                                    </div>
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-medium">指数基金</h4>
+                                            <div className="flex space-x-2">
+                                                <i className="fas fa-star text-yellow-400"></i>
+                                                <i className="fas fa-heart text-red-400"></i>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">预期收益：8.0% | 风险：中</p>
+                                        <p className="text-sm text-gray-600 mb-3">长期投资，跟踪市场指数</p>
+                                        <a href="#" className="text-blue-500 text-sm">查看详情 ></a>
+                                    </div>
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-medium">定期存款</h4>
+                                            <div className="flex space-x-2">
+                                                <i className="fas fa-star text-yellow-400"></i>
+                                                <i className="fas fa-heart text-red-400"></i>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-2">预期收益：3.5% | 风险：低</p>
+                                        <p className="text-sm text-gray-600 mb-3">稳健收益，固定期限</p>
+                                        <a href="#" className="text-blue-500 text-sm">查看详情 ></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tips */}
+                            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+                                <h3 className="font-semibold mb-4">理财小贴士</h3>
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-check-circle text-green-500"></i>
+                                        <span className="text-sm">制定合理预算，量人为出是理财基础。</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-check-circle text-green-500"></i>
+                                        <span className="text-sm">建立应急资金，至少覆盖3-6个月生活费。</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-check-circle text-green-500"></i>
+                                        <span className="text-sm">分散投资，不要把所有鸡蛋放在一个篮子里。</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-check-circle text-green-500"></i>
+                                        <span className="text-sm">定期检查财务状况，及时调整理财策略。</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-check-circle text-green-500"></i>
+                                        <span className="text-sm">提前规划退休金，越早开始收益效果越好。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+
+                    {/* Bottom Section */}
+                    <div className="mx-6 mb-6">
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4">
+                                    <i className="fas fa-plus text-blue-500 text-2xl"></i>
+                                </div>
+                                <h3 className="font-semibold text-center mb-2">添加记录</h3>
+                                <p className="text-sm text-gray-600 text-center">点击顶部"添加目标"、"新增账单"或"添加理财产品"按钮，填写相关信息后即可保存。</p>
+                            </div>
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mx-auto mb-4">
+                                    <i className="fas fa-edit text-orange-500 text-2xl"></i>
+                                </div>
+                                <h3 className="font-semibold text-center mb-2">编辑记录</h3>
+                                <p className="text-sm text-gray-600 text-center">点击各记录上方的编辑图标，修改信息后点击保存即可更新记录。</p>
+                            </div>
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+                                    <i className="fas fa-trash text-red-500 text-2xl"></i>
+                                </div>
+                                <h3 className="font-semibold text-center mb-2">删除记录</h3>
+                                <p className="text-sm text-gray-600 text-center">点击各记录上方的删除图标，在确认框中点击"确定"即可删除记录。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t p-4">
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                            <div>
+                                <span>© 2023 家庭理财计划 版权所有</span>
+                            </div>
+                            <div className="flex space-x-4">
+                                <span>帮助中心</span>
+                                <span>联系我们</span>
+                                <span>隐私政策</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold">
+                                        {isEditing ? '编辑账单记录' : '添加账单记录'}
+                                    </h2>
+                                    <button 
+                                        onClick={closeModal}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">日期</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.date}
+                                            onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                            className="w-full border rounded-md px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">类别</label>
+                                        <select 
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                            className="w-full border rounded-md px-3 py-2"
+                                        >
+                                            <option>选择类别</option>
+                                            <option>收入</option>
+                                            <option>支出</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">金额 (¥)</label>
+                                        <input 
+                                            type="number" 
+                                            placeholder="收入为正数，支出为负数"
+                                            value={formData.amount}
+                                            onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                                            className="w-full border rounded-md px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">备注</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="账单备注"
+                                            value={formData.note}
+                                            onChange={(e) => setFormData({...formData, note: e.target.value})}
+                                            className="w-full border rounded-md px-3 py-2"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={closeModal}
+                                        className="flex-1 px-4 py-2 border rounded-md hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI角色创作本</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <style>
+    body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;}
+  </style>
+</head>
+<body class="bg-gray-100 h-screen">
+<div id="root" class="h-full"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+// 模拟角色数据
+const initialRoles = [
+  { id: 1, name: '艾拉(ELLA)', img: 'https://picsum.photos/id/237/300/150', status: '已完成', desc: '网络侦探', traits: ['冷静','好奇','果敢'] },
+  { id: 2, name: '马克斯(MAX)', img: 'https://picsum.photos/id/1025/300/150', status: '进行中', desc: '量子物理学家', traits: ['严谨','内向','执着'] },
+  { id: 3, name: '露娜(LUNA)', img: 'https://picsum.photos/id/1021/300/150', status: '进行中', desc: '星际生物学家', traits: ['富有同情心','勇敢','直觉敏锐'] },
+];
+
+function App() {
+  const [tab, setTab] = useState('列表');
+  const [roles, setRoles] = useState(initialRoles);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showDelConfirm, setShowDelConfirm] = useState(false);
+  const [toDeleteRole, setToDeleteRole] = useState(null);
+
+  // 添加角色表单状态
+  const [newRole, setNewRole] = useState({
+    name: '', age: '', gender: '', profession: '',
+    backstory: '', growth: '', traits: [], img: ''
+  });
+
+  const openEditPanel = () => setTab('编辑面板');
+  const openBulk = () => setTab('批量管理');
+  const openList = () => setTab('列表');
+
+  const handleAddClick = () => setShowAddModal(true);
+  const handleAddSave = () => {
+    // 新增角色
+    const id = roles.length + 1;
+    setRoles([...roles, {
+      id, name: newRole.name,
+      img: newRole.img || 'https://picsum.photos/id/1005/300/150',
+      status: '进行中', desc: newRole.profession || '',
+      traits: newRole.traits
+    }]);
+    setShowAddModal(false);
+    // 重置表单
+    setNewRole({ name:'', age:'', gender:'', profession:'', backstory:'', growth:'', traits:[], img:'' });
+    setTab('列表');
+  };
+
+  const confirmDelete = (role) => {
+    setToDeleteRole(role);
+    setShowDelConfirm(true);
+  };
+  const handleDelete = () => {
+    setRoles(roles.filter(r => r !== toDeleteRole));
+    setShowDelConfirm(false);
+    setToDeleteRole(null);
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* 顶部 */}
+      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 className="text-xl font-semibold">AI角色创作本</h1>
+        <div className="space-x-2">
+          <button className="bg-blue-500 hover:bg-blue-400 px-3 py-1 rounded">新建角色库</button>
+          <button className="bg-blue-500 hover:bg-blue-400 px-3 py-1 rounded">导出JSON</button>
+          <button className="bg-blue-500 hover:bg-blue-400 px-3 py-1 rounded">帮助</button>
+        </div>
+      </header>
+      <div className="flex flex-1 overflow-hidden">
+        {/* 侧栏 */}
+        <nav className="w-60 bg-white border-r p-4">
+          <ul>
+            <li className="mb-2"><button className="flex items-center w-full text-left text-blue-600"><i className="fas fa-th-large mr-2"></i>角色总览</button></li>
+            <li className="mb-2"><button className="flex items-center w-full text-left"><i className="fas fa-edit mr-2"></i>角色编辑</button></li>
+            <li className="mb-2"><button className="flex items-center w-full text-left"><i className="fas fa-book-open mr-2"></i>故事大纲</button></li>
+            <li className="mb-2"><button className="flex items-center w-full text-left"><i className="fas fa-video mr-2"></i>视觉参考</button></li>
+            <li><button className="flex items-center w-full text-left"><i className="fas fa-chart-bar mr-2"></i>统计分析</button></li>
+          </ul>
+          <div className="mt-6 text-gray-600 text-sm">
+            <h2 className="font-semibold mb-2">AI角色创作指引</h2>
+            <ul className="list-disc ml-4">
+              <li>为角色创作丰富的背景或事件可以提高可信度</li>
+              <li>考虑角色的动机和冲突，使其更立体</li>
+              <li>设计角色色彩和成长空间，增强发展潜力</li>
+            </ul>
+          </div>
+        </nav>
+        {/* 主体 */}
+        <main className="flex-1 p-6 overflow-auto">
+          {/* 顶部标签 */}
+          <div className="flex items-center mb-4">
+            <button onClick={openList} className={`px-4 py-2 ${tab==='列表'? 'border-b-2 border-blue-600 text-blue-600':'text-gray-600'}`}>角色列表</button>
+            <button onClick={openEditPanel} className={`px-4 py-2 ${tab==='编辑面板'? 'border-b-2 border-blue-600 text-blue-600':'text-gray-600'}`}>编辑面板</button>
+            <button onClick={openBulk} className={`px-4 py-2 ${tab==='批量管理'? 'border-b-2 border-blue-600 text-blue-600':'text-gray-600'}`}>批量管理</button>
+          </div>
+          {tab === '列表' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">角色列表</h2>
+                <button onClick={handleAddClick} className="bg-blue-500 text-white px-3 py-1 rounded"><i className="fas fa-plus mr-1"></i>添加新角色</button>
+              </div>
+              <div className="grid grid-cols-3 gap-6">
+                {roles.map(role => (
+                  <div key={role.id} className="bg-white rounded shadow">
+                    <img src={role.img} alt="" className="rounded-t w-full h-36 object-cover"/>
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-lg font-semibold">{role.name}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded ${role.status==='已完成'? 'bg-green-100 text-green-600':'bg-blue-100 text-blue-600'}`}>{role.status}</span>
+                      </div>
+                      <p className="text-gray-600 mb-2">{role.desc}</p>
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {role.traits.map((t,i) => <span key={i} className="text-xs bg-gray-100 px-2 py-0.5 rounded">{t}</span>)}
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <button className="text-blue-600"><i className="fas fa-edit mr-1"></i>编辑角色</button>
+                        <button onClick={()=>confirmDelete(role)} className="text-red-600"><i className="fas fa-trash-alt mr-1"></i>删除角色</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-white mt-6 p-4 rounded text-gray-600 text-sm">
+                <h4 className="font-semibold mb-2">场景化设定小贴士</h4>
+                <ol className="list-decimal ml-4 space-y-1">
+                  <li>角色的世界背景和时代是什么？</li>
+                  <li>该角色在社会中的角色是什么样的？</li>
+                  <li>角色的核心价值观和行为准则是什么？</li>
+                  <li>角色的语言风格、表达方式有什么特点？</li>
+                </ol>
+              </div>
+            </div>
+          )}
+          {tab === '编辑面板' && (
+            <div className="bg-white p-6 rounded text-gray-600">
+              <h2 className="text-xl font-semibold mb-4">角色编辑器</h2>
+              <div className="text-center text-gray-400">请从角色列表中选择一个角色进行编辑，或者创建新角色</div>
+              <div className="text-center mt-4">
+                <button onClick={handleAddClick} className="bg-blue-500 text-white px-4 py-2 rounded"><i className="fas fa-plus mr-1"></i>创建新角色</button>
+              </div>
+              <div className="mt-8 border-t pt-6">
+                <h3 className="font-semibold mb-2">个性化标签使用指南</h3>
+                <p className="mb-2 text-sm">性格标签能让你的角色更加立体和真实。选择主流或次流的特质可以创造出更有趣的角色。</p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <h4 className="font-semibold mb-1">常见性格组合：</h4>
+                    <ul className="list-disc ml-4 space-y-1">
+                      <li>外向+乐观+果断 – 适合领导者</li>
+                      <li>内向+严谨+理性 – 适合研究者</li>
+                      <li>好奇+探索+创新 – 适合创造者</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">冲突性格示例：</h4>
+                    <ul className="list-disc ml-4 space-y-1">
+                      <li>理性+感性 – 内心挣扎</li>
+                      <li>冒险+谨慎 – 选择困难</li>
+                      <li>严谨+随性 – 双面性格</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {tab === '批量管理' && (
+            <div className="bg-white p-6 rounded text-gray-600">
+              <h2 className="text-xl font-semibold mb-4">批量管理</h2>
+              <p className="text-center text-gray-400">批量管理功能正在开发中，敬请期待</p>
+              <div className="mt-6 border-t pt-6">
+                <h3 className="font-semibold mb-2">角色关系图谱</h3>
+                <p className="text-sm">构建角色之间的关系网可以让你的角色世界更具互动力。考虑以下关系类型：</p>
+                <ul className="list-disc ml-4 space-y-1 text-sm">
+                  <li>家庭关系：父母、兄弟姐妹、祖先</li>
+                  <li>社会关系：朋友、敌人、导师、学生</li>
+                  <li>职业关系：上司、下属、合作伙伴、竞争对手</li>
+                  <li>情感关系：爱人、忌惮、暗恋对象</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </main>
+        {/* 右侧统计 */}
+        <aside className="w-72 bg-white border-l p-6 space-y-6">
+          <div>
+            <h3 className="font-semibold mb-2">角色统计</h3>
+            <div className="flex justify-between mb-2">
+              <span>角色总数</span><span className="text-blue-600">{roles.length}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span>已完成</span><span className="text-green-600">{roles.filter(r=>r.status==='已完成').length}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span>进行中</span><span className="text-yellow-600">{roles.filter(r=>r.status==='进行中').length}</span>
+            </div>
+            <div className="bg-gray-100 h-2 rounded overflow-hidden mt-2">
+              <div className="bg-blue-600 h-full" style={{ width: `${Math.round((roles.filter(r=>r.status==='已完成').length/roles.length)*100)}%` }}/>
+            </div>
+            <div className="text-right text-xs text-gray-500 mt-1">{roles.length? Math.round((roles.filter(r=>r.status==='已完成').length/roles.length)*100):0}%</div>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">角色类型分布</h3>
+            <div className="text-sm text-gray-500">主角  / 配角 / 反派 / NPC</div>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">AI创作小贴士</h3>
+            <ul className="space-y-1 text-sm">
+              <li className="flex items-start"><i className="fas fa-exclamation-triangle text-yellow-500 mr-1"></i>避免创作完美无缺的角色，缺陷和矛盾让角色更真实</li>
+              <li className="flex items-start"><i className="fas fa-lightbulb text-blue-500 mr-1"></i>考虑角色的成长轨迹，让他们随着故事发展而改变</li>
+              <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-1"></i>确保角色的动机与行为一致，保持内在逻辑</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+
+      {/* 新增角色弹窗 */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="bg-white w-3/5 rounded shadow-lg p-6 overflow-auto max-h-full">
+            <h2 className="text-lg font-semibold mb-4">添加新角色</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1">角色名称</label>
+                <input type="text" placeholder="例如：艾拉(ELLA)" value={newRole.name}
+                       onChange={e=>setNewRole({...newRole,name:e.target.value})}
+                       className="w-full border rounded px-2 py-1"/>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">年龄</label>
+                <input type="text" placeholder="例如：28" value={newRole.age}
+                       onChange={e=>setNewRole({...newRole,age:e.target.value})}
+                       className="w-full border rounded px-2 py-1"/>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">性别</label>
+                <select value={newRole.gender} onChange={e=>setNewRole({...newRole,gender:e.target.value})}
+                        className="w-full border rounded px-2 py-1">
+                  <option value="">请选择</option>
+                  <option>男</option>
+                  <option>女</option>
+                  <option>其他</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">职业</label>
+                <input type="text" placeholder="例如：网络侦探" value={newRole.profession}
+                       onChange={e=>setNewRole({...newRole,profession:e.target.value})}
+                       className="w-full border rounded px-2 py-1"/>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm mb-1">背景故事</label>
+                <textarea rows="3" placeholder="描述角色的背景故事、身份和主要特质..." value={newRole.backstory}
+                          onChange={e=>setNewRole({...newRole,backstory:e.target.value})}
+                          className="w-full border rounded px-2 py-1"/>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm mb-1">成长经历</label>
+                <textarea rows="3" placeholder="描述角色的成长历程、关键事件和转折点..." value={newRole.growth}
+                          onChange={e=>setNewRole({...newRole,growth:e.target.value})}
+                          className="w-full border rounded px-2 py-1"/>
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm mb-1">性格特质 (可多选)</label>
+                <div className="flex flex-wrap gap-2">
+                  {['冷静','热情','好奇','果敢','严谨','内向','外向','执着','富有同情心','勇敢',
+                    '直觉敏锐','理性','感性','创造','乐观','悲观','神秘','开朗','谨慎','冒险','保守','叛逆'
+                  ].map(tag => (
+                    <button key={tag} type="button"
+                            onClick={() => {
+                              const arr = newRole.traits.includes(tag)
+                                ? newRole.traits.filter(t => t!==tag)
+                                : [...newRole.traits, tag];
+                              setNewRole({...newRole, traits: arr});
+                            }}
+                            className={`px-2 py-1 border rounded text-sm ${newRole.traits.includes(tag)? 'bg-blue-100 border-blue-300':'bg-gray-100'}`}>
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2 flex items-center gap-4">
+                <div className="flex-shrink-0">
+                  <img src={newRole.img || 'https://picsum.photos/id/1005/80/80'} alt="角色形象"
+                       className="w-20 h-20 object-cover rounded"/>
+                </div>
+                <input type="text" placeholder="https://picsum.photos/id/xxx/300/150" value={newRole.img}
+                       onChange={e=>setNewRole({...newRole,img:e.target.value})}
+                       className="flex-1 border rounded px-2 py-1"/>
+              </div>
+            </div>
+            <div className="mt-6 text-right">
+              <button onClick={()=>setShowAddModal(false)} className="px-4 py-2 mr-2 border rounded">取消</button>
+              <button onClick={handleAddSave} className="px-4 py-2 bg-blue-500 text-white rounded">保存</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 删除确认弹窗 */}
+      {showDelConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="bg-white w-1/3 rounded shadow-lg p-6 text-center">
+            <p className="mb-4">您确定要删除角色 {toDeleteRole?.name} 吗？此操作无法撤销。</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={()=>setShowDelConfirm(false)} className="px-4 py-2 border rounded">取消</button>
+              <button onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded">确认删除</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>, document.getElementById('root'));
+</script>
+</body>
+</html>

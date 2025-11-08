@@ -1,0 +1,172 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [title, setTitle] = useState('');
+            const [author, setAuthor] = useState('');
+            const [content, setContent] = useState('');
+            const [category, setCategory] = useState('技术讨论');
+            const [entries, setEntries] = useState([
+                {
+                    title: 'React 状态管理最佳实践',
+                    author: '测试',
+                    content: '在项目中，我发现Redux确实方便代码复用，但是在团队协作中单单靠清楚顺畅的状态流还远远不够，能否分享你的最佳实践?',
+                    tags: ['#React', '#状态管理', '#Redux'],
+                    category: '技术讨论',
+                    datetime: '2023-09-15 14:30'
+                },
+                {
+                    title: '求推荐：前端性能优化工具',
+                    author: '测试',
+                    content: '最近项目遇到性能问题有点头疼，想问一问好用的前端性能分析和优化工具，有经验的同学吗？',
+                    tags: ['#性能', '#工具开发'],
+                    category: '技术讨论',
+                    datetime: '2023-09-16 09:45'
+                },
+                {
+                    title: '分享：我的前端学习经验',
+                    author: '小白',
+                    content: '从0到前端小毕业已有一年了，这里想分享一下我的学习路线和一些用的资源，希望对新同学有所帮助！包括HTML,CSS基础，JavaScript进阶，框架选择等内容。',
+                    tags: ['#前端学习', '#经验', '#分享'],
+                    category: '经验分享',
+                    datetime: '2023-09-16 16:20'
+                }
+            ]);
+            const [modal, setModal] = useState(null);
+
+            const handleAddEntry = () => {
+                const now = new Date();
+                const datetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
+                const newEntry = {
+                    title,
+                    author,
+                    content,
+                    category,
+                    datetime,
+                    tags: ['#React', '#技术', '#经验']
+                };
+
+                setEntries([...entries, newEntry]);
+                setTitle('');
+                setAuthor('');
+                setContent('');
+            };
+
+            const handleDeleteEntry = (index) => {
+                setEntries(entries.filter((_, i) => i !== index));
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100 text-gray-800">
+                    <header className="bg-blue-600 text-white py-4">
+                        <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
+                            <h1 className="text-2xl font-bold"><i className="fas fa-comments"></i> 留言板</h1>
+                            <div>
+                                <a href="#" className="text-white hover:text-gray-200 mx-2">留言广场</a>
+                                <a href="#" className="text-white hover:text-gray-200 mx-2">我的留言</a>
+                                <a href="#" className="text-white hover:text-gray-200 mx-2">留言统计</a>
+                            </div>
+                        </div>
+                    </header>
+                    <main className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-3 gap-6">
+                        {/* Form */}
+                        <section className="col-span-1 bg-white shadow rounded-lg p-4">
+                            <h2 className="text-lg font-semibold text-gray-700 border-b pb-2">编辑留言</h2>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">标题</label>
+                                <input className="block w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="请输入标题(最多50字)" value={title} onChange={(e) => setTitle(e.target.value)} />
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">您的名字</label>
+                                <input className="block w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="请输入您的名字" value={author} onChange={(e) => setAuthor(e.target.value)} />
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">留言内容</label>
+                                <textarea className="block w-full p-2 border border-gray-300 rounded mt-1"
+                                    placeholder="请输入留言内容(最多500字)" value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">分类</label>
+                                <select className="block w-full p-2 border border-gray-300 rounded mt-1"
+                                    value={category} onChange={(e) => setCategory(e.target.value)}>
+                                    <option>技术讨论</option>
+                                    <option>经验分享</option>
+                                </select>
+                            </div>
+                            <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                onClick={handleAddEntry}>
+                                添加留言
+                            </button>
+                        </section>
+
+                        {/* Entries */}
+                        <section className="col-span-2">
+                            <h2 className="text-lg font-semibold text-gray-700 border-b pb-2">留言列表</h2>
+                            {entries.map((entry, index) => (
+                                <div key={index} className="bg-white p-4 mt-2 shadow rounded-lg">
+                                    <h3 className="text-xl font-bold">{entry.title}</h3>
+                                    <p className="text-sm text-gray-500">{entry.datetime} | 作者: {entry.author}</p>
+                                    <p className="mt-2">{entry.content}</p>
+                                    <div className="mt-2">
+                                        {entry.tags.map((tag, idx) => (
+                                            <span key={idx} className="text-sm text-blue-500 mr-2">{tag}</span>
+                                        ))}
+                                    </div>
+                                    <button className="mt-2 text-red-500 text-sm" onClick={() => setModal({
+                                        type: 'delete',
+                                        index
+                                    })}><i className="fas fa-trash"></i> 删除留言</button>
+                                </div>
+                            ))}
+                        </section>
+                    </main>
+                    <footer className="bg-gray-800 text-gray-400 py-6">
+                        <div className="max-w-6xl mx-auto px-4 grid grid-cols-3 gap-6">
+                            <div>
+                                <h4 className="text-white">关于我们</h4>
+                                <p className="mt-2 text-sm">留言板是一个分享开发经历交流平台，致力于分享知识、互助的交流平台。</p>
+                            </div>
+                            <div>
+                                <h4 className="text-white">联系方式</h4>
+                                <p className="mt-2 text-sm">contact@messageboard.com</p>
+                                <p className="text-sm">400-123-4567</p>
+                            </div>
+                            <div>
+                                <h4 className="text-white">友情链接</h4>
+                                <ul className="mt-2 text-sm">
+                                    <li><a href="#" className="hover:underline">技术社区</a></li>
+                                    <li><a href="#" className="hover:underline">技术大会</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(
+            <App />,
+            document.getElementById('root')
+        );
+    </script>
+</body>
+
+</html>

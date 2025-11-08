@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互动网页</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+<div id="root"></div>
+<script type="text/babel">
+const App = () => {
+    const [searchText, setSearchText] = React.useState("");
+    const [showAddModal, setShowAddModal] = React.useState(false);
+    const [editPaperData, setEditPaperData] = React.useState(null);
+
+    const papers = [
+        {
+            id: 1,
+            title: "基于深度学习的自然语言处理技术研究",
+            authors: ["张明"],
+            year: 2023,
+            keywords: ["深度学习", "自然语言处理", "人工智能"],
+            views: 1245,
+            downloads: 356,
+        },
+        {
+            id: 2,
+            title: "新冠疫情下逐程医疗服务的应用与挑战",
+            authors: ["王丽丽"],
+            year: 2021,
+            keywords: ["疫情", "COVID-19", "医疗服务"],
+            views: 2367,
+            downloads: 892,
+        },
+        {
+            id: 3,
+            title: "区块链技术在供应链金融中的应用研究",
+            authors: ["刘伟"],
+            year: 2021,
+            keywords: ["区块链技术", "供应链金融"],
+            views: 1832,
+            downloads: 642,
+        },
+        // Other papers...
+    ];
+
+    const filteredPapers = papers.filter((paper) =>
+        paper.title.includes(searchText)
+    );
+
+    const handleSearchChange = (e) => {
+        setSearchText(e.target.value);
+    };
+
+    const handleAddPaper = () => {
+        setShowAddModal(true);
+    };
+
+    const handleEditPaper = (paper) => {
+        setEditPaperData(paper);
+    };
+
+    const handleSavePaper = () => {
+        // Save logic...
+        setEditPaperData(null);
+    };
+
+    return (
+        <div className="flex flex-col h-screen">
+            <header className="bg-blue-600 text-white p-4 flex items-center justify-between">
+                <div className="text-lg font-bold">万方数据论文管理系统 v2.1.5</div>
+                <div className="flex items-center space-x-4">
+                    <input
+                        type="text"
+                        value={searchText}
+                        onChange={handleSearchChange}
+                        placeholder="搜索论文..."
+                        className="p-2 rounded bg-white text-gray-800 w-96"
+                    />
+                    <i className="fas fa-user-circle text-2xl"></i>
+                </div>
+            </header>
+            <div className="flex flex-1 overflow-hidden">
+                {/* Sidebar */}
+                <div className="w-60 bg-blue-800 text-white flex flex-col p-4 space-y-4">
+                    {["全部论文", "我的论文", "科学分类", "学术研究"].map((menu) => (
+                        <div key={menu} className="cursor-pointer hover:underline">
+                            {menu}
+                        </div>
+                    ))}
+                </div>
+                {/* Main Content */}
+                <div className="flex-1 flex flex-col">
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* Left Section */}
+                        <div className="flex-1 bg-white overflow-y-auto p-4 border-r">
+                            <div className="flex justify-between items-center mb-4">
+                                <h1 className="text-xl font-bold">论文列表</h1>
+                                <button
+                                    onClick={handleAddPaper}
+                                    className="bg-orange-500 text-white px-4 py-2 rounded"
+                                >
+                                    + 添加新论文
+                                </button>
+                            </div>
+                            <div className="space-y-4">
+                                {filteredPapers.map((paper) => (
+                                    <div
+                                        key={paper.id}
+                                        className="bg-gray-100 p-4 rounded shadow flex justify-between items-center"
+                                    >
+                                        <div>
+                                            <h2 className="text-lg font-bold">{paper.title}</h2>
+                                            <div className="text-sm text-gray-600">
+                                                作者: {paper.authors.join(", ")} | 年份: {paper.year}
+                                            </div>
+                                            <div className="text-sm text-gray-600">
+                                                浏览: {paper.views} | 下载: {paper.downloads}
+                                            </div>
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEditPaper(paper)}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded"
+                                            >
+                                                编辑
+                                            </button>
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded">
+                                                删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        {/* Right Section */}
+                        <div className="w-96 bg-gray-100 p-4">
+                            <h2 className="text-lg font-bold">论文阅读趋势</h2>
+                            {/* There could be SVG chart here */}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Modal */}
+            {showAddModal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded p-8 w-96 shadow">
+                        <h2 className="font-bold mb-4">添加新论文</h2>
+                        {/* Inputs */}
+                    </div>
+                </div>
+            )}
+        </React.Fragment>
+     );
+     
+React.renderRoot...

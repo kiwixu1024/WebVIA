@@ -1,0 +1,458 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听歌识曲练习</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [songs, setSongs] = useState([
+                {
+                    id: 1,
+                    name: "Shape of You",
+                    artist: "Ed Sheeran",
+                    difficulty: "中级",
+                    duration: "30分",
+                    image: "https://picsum.photos/id/1/60/60"
+                },
+                {
+                    id: 2,
+                    name: "Blinding Lights",
+                    artist: "The Weeknd",
+                    difficulty: "简单",
+                    duration: "20分",
+                    image: "https://picsum.photos/id/2/60/60"
+                },
+                {
+                    id: 3,
+                    name: "Bad Guy",
+                    artist: "Billie Eilish",
+                    difficulty: "高级",
+                    duration: "45分",
+                    image: "https://picsum.photos/id/3/60/60"
+                }
+            ]);
+
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [currentSong, setCurrentSong] = useState(null);
+            const [formData, setFormData] = useState({
+                name: '',
+                artist: '',
+                difficulty: '初级',
+                duration: 30
+            });
+
+            const difficulties = ['初级', '中级', '高级'];
+            const difficultyColors = {
+                '初级': 'bg-green-100 text-green-800',
+                '中级': 'bg-yellow-100 text-yellow-800',
+                '高级': 'bg-red-100 text-red-800',
+                '简单': 'bg-green-100 text-green-800'
+            };
+
+            const handleAddSong = () => {
+                setFormData({ name: '', artist: '', difficulty: '初级', duration: 30 });
+                setShowAddModal(true);
+            };
+
+            const handleEditSong = (song) => {
+                setCurrentSong(song);
+                setFormData({
+                    name: song.name,
+                    artist: song.artist,
+                    difficulty: song.difficulty,
+                    duration: parseInt(song.duration)
+                });
+                setShowEditModal(true);
+            };
+
+            const handleDeleteSong = (song) => {
+                setCurrentSong(song);
+                setShowDeleteModal(true);
+            };
+
+            const handleSaveSong = () => {
+                const newSong = {
+                    id: Date.now(),
+                    name: formData.name,
+                    artist: formData.artist,
+                    difficulty: formData.difficulty,
+                    duration: `${formData.duration}分`,
+                    image: "https://picsum.photos/id/4/60/60"
+                };
+                setSongs([...songs, newSong]);
+                setShowAddModal(false);
+            };
+
+            const handleUpdateSong = () => {
+                setSongs(songs.map(song => 
+                    song.id === currentSong.id 
+                        ? { ...song, name: formData.name, artist: formData.artist, difficulty: formData.difficulty, duration: `${formData.duration}分` }
+                        : song
+                ));
+                setShowEditModal(false);
+            };
+
+            const handleConfirmDelete = () => {
+                setSongs(songs.filter(song => song.id !== currentSong.id));
+                setShowDeleteModal(false);
+            };
+
+            const SongModal = ({ show, onClose, title, onSave, isEdit }) => {
+                if (!show) return null;
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 mx-4">
+                            <h3 className="text-lg font-semibold mb-4">{title}</h3>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">歌曲名</label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        placeholder="输入歌曲名称"
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">艺术家</label>
+                                    <input
+                                        type="text"
+                                        value={formData.artist}
+                                        onChange={(e) => setFormData({...formData, artist: e.target.value})}
+                                        placeholder="输入艺术家名称"
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">难度</label>
+                                    <select
+                                        value={formData.difficulty}
+                                        onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        {difficulties.map(diff => (
+                                            <option key={diff} value={diff}>{diff}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">时长: {formData.duration}分</label>
+                                    <input
+                                        type="range"
+                                        min="10"
+                                        max="60"
+                                        value={formData.duration}
+                                        onChange={(e) => setFormData({...formData, duration: parseInt(e.target.value)})}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                    />
+                                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                        <span>10分</span>
+                                        <span>60分</span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">预览图</label>
+                                    <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
+                                        <img 
+                                            src={isEdit ? currentSong?.image : "https://picsum.photos/id/5/200/100"} 
+                                            alt="预览图" 
+                                            className="w-full h-full object-cover rounded"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    onClick={onSave}
+                                    className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                                >
+                                    {isEdit ? '保存修改' : '确认保存'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const DeleteModal = ({ show, onClose, onConfirm, songName }) => {
+                if (!show) return null;
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-80 mx-4">
+                            <h3 className="text-lg font-semibold mb-4">删除确认</h3>
+                            <p className="text-gray-600 mb-6">确定要删除 "{songName}" 这个练习吗？</p>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    onClick={onConfirm}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                >
+                                    确定删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex">
+                    {/* Sidebar */}
+                    <div className="w-64 bg-blue-600 text-white">
+                        <div className="p-4">
+                            <div className="flex items-center space-x-2 mb-8">
+                                <i className="fas fa-music"></i>
+                                <span className="font-semibold">听歌识曲练习</span>
+                            </div>
+                            
+                            <nav className="space-y-2">
+                                <div className="flex items-center space-x-3 p-2 bg-blue-700 rounded">
+                                    <i className="fas fa-list"></i>
+                                    <span>练习清单</span>
+                                </div>
+                                <div className="flex items-center space-x-3 p-2 hover:bg-blue-700 rounded cursor-pointer">
+                                    <i className="fas fa-headphones"></i>
+                                    <span>我的练习</span>
+                                </div>
+                                <div className="flex items-center space-x-3 p-2 hover:bg-blue-700 rounded cursor-pointer">
+                                    <i className="fas fa-trophy"></i>
+                                    <span>排行榜</span>
+                                </div>
+                                <div className="flex items-center space-x-3 p-2 hover:bg-blue-700 rounded cursor-pointer">
+                                    <i className="fas fa-cog"></i>
+                                    <span>设置</span>
+                                </div>
+                            </nav>
+                        </div>
+
+                        <div className="absolute bottom-0 left-0 w-64 p-4 text-xs">
+                            <div className="text-blue-200">©2024 音乐练习平台</div>
+                            <div className="text-blue-200">专注于提升听力和音乐感知</div>
+                            <div className="text-blue-200">support@musicapp.com</div>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 p-6">
+                        {/* Header */}
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <div className="flex space-x-8 mb-4">
+                                    <span className="border-b-2 border-orange-500 pb-2 font-medium">练习清单</span>
+                                    <span className="text-gray-500 cursor-pointer">曲库管理</span>
+                                    <span className="text-gray-500 cursor-pointer">使用教程</span>
+                                </div>
+                                <h1 className="text-2xl font-bold">我的曲目练习</h1>
+                            </div>
+                            <div className="text-right text-gray-600">
+                                听歌识曲练习——体验理音乐的音乐听力
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between items-center mb-6">
+                            <div></div>
+                            <button
+                                onClick={handleAddSong}
+                                className="bg-orange-500 text-white px-4 py-2 rounded flex items-center space-x-2 hover:bg-orange-600"
+                            >
+                                <span>+</span>
+                                <span>添加曲目练习</span>
+                            </button>
+                        </div>
+
+                        {/* Songs List */}
+                        <div className="space-y-4 mb-8">
+                            {songs.map((song) => (
+                                <div key={song.id} className="bg-white p-4 rounded-lg shadow-sm flex items-center justify-between">
+                                    <div className="flex items-center space-x-4">
+                                        <img src={song.image} alt={song.name} className="w-15 h-15 rounded" />
+                                        <div>
+                                            <h3 className="font-medium">{song.name}</h3>
+                                            <p className="text-gray-600 text-sm">{song.artist}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-4">
+                                        <span className={`px-2 py-1 rounded text-xs ${difficultyColors[song.difficulty]}`}>
+                                            {song.difficulty}
+                                        </span>
+                                        <span className="text-gray-600 text-sm">{song.duration}</span>
+                                        
+                                        <div className="flex space-x-2">
+                                            <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
+                                                播放歌曲
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditSong(song)}
+                                                className="border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50"
+                                            >
+                                                编辑
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteSong(song)}
+                                                className="border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-50"
+                                            >
+                                                删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Right Sidebar Content */}
+                        <div className="fixed top-6 right-6 w-80">
+                            <div className="bg-white p-4 rounded-lg shadow-sm mb-4">
+                                <h3 className="font-semibold mb-4">练习统计</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="text-gray-600 text-sm">已完成练习</div>
+                                        <div className="text-2xl font-bold text-blue-600">128</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-gray-600 text-sm">正确率</div>
+                                        <div className="text-2xl font-bold text-orange-500">85%</div>
+                                    </div>
+                                </div>
+                                <div className="mt-4 text-gray-600 text-sm">近7日练习趋势</div>
+                                <div className="flex justify-between items-end h-16 mt-2">
+                                    {[4, 6, 3, 8, 5, 7, 9].map((height, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-blue-200 w-6 rounded-t"
+                                            style={{ height: `${height * 6}px` }}
+                                        ></div>
+                                    ))}
+                                </div>
+                                <div className="bg-orange-100 p-3 rounded mt-4">
+                                    <div className="text-orange-800 text-sm">已连续练习 3 天，继续保持好习惯！</div>
+                                </div>
+                                <div className="text-gray-500 text-xs mt-2">Tip：多样化练习可提升学习效果！</div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg shadow-sm">
+                                <img src="https://picsum.photos/id/10/300/150" alt="每日音乐推荐" className="w-full h-32 object-cover rounded mb-2" />
+                                <div className="text-center text-sm text-gray-600">每日音乐推荐</div>
+                            </div>
+
+                            <div className="flex justify-center space-x-8 mt-6">
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                        <i className="fas fa-chart-line text-blue-600"></i>
+                                    </div>
+                                    <div className="text-xs text-gray-600">学习效果</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                        <i className="fas fa-users text-blue-600"></i>
+                                    </div>
+                                    <div className="text-xs text-gray-600">分级练习</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                        <i className="fas fa-chart-pie text-blue-600"></i>
+                                    </div>
+                                    <div className="text-xs text-gray-600">可视化统计</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Usage Guide */}
+                        <div className="bg-white p-6 rounded-lg shadow-sm mt-8">
+                            <h3 className="font-semibold mb-4">使用指引</h3>
+                            <ul className="space-y-2 text-gray-600 text-sm">
+                                <li>• 点击练习可开始 30s 片段</li>
+                                <li>• 根据提示记忆歌曲音色概念</li>
+                                <li>• 实时查看对错音与辅助</li>
+                                <li>• 练习过程中可回放音频进行音乐音乐辅助练习</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Modals */}
+                    <SongModal
+                        show={showAddModal}
+                        onClose={() => setShowAddModal(false)}
+                        title="新增听歌识曲练习"
+                        onSave={handleSaveSong}
+                        isEdit={false}
+                    />
+
+                    <SongModal
+                        show={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                        title="编辑曲目练习"
+                        onSave={handleUpdateSong}
+                        isEdit={true}
+                    />
+
+                    <DeleteModal
+                        show={showDeleteModal}
+                        onClose={() => setShowDeleteModal(false)}
+                        onConfirm={handleConfirmDelete}
+                        songName={currentSong?.name}
+                    />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+    <style>
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</body>
+</html>

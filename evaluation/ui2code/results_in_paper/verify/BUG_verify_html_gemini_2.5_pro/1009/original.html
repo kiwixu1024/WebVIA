@@ -1,0 +1,353 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青少年运动成就</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const initialAchievementsData = [
+            {
+                id: 1,
+                title: '游泳比赛金牌',
+                date: '2023-06-15',
+                imageUrl: 'https://picsum.photos/id/431/400/300',
+                description: '在市级青少年游泳比赛中获得50米自由泳金牌'
+            },
+            {
+                id: 2,
+                title: '篮球联赛最佳射手',
+                date: '2023-04-22',
+                imageUrl: 'https://picsum.photos/id/1060/400/300',
+                description: '在学校篮球联赛中获得最佳射手称号，场均得分22.5分'
+            },
+            {
+                id: 3,
+                title: '校园马拉松完赛',
+                date: '2023-05-10',
+                imageUrl: 'https://picsum.photos/id/211/400/300',
+                description: '成功完成10公里校园马拉松，用时55分钟'
+            }
+        ];
+        
+        const getCategory = (title) => {
+            if (title.includes('游泳')) return '游泳';
+            if (title.includes('篮球')) return '篮球';
+            if (title.includes('马拉松') || title.includes('跑步')) return '跑步';
+            return '其他';
+        };
+
+        const AchievementModal = ({ modalState, onClose, onSave }) => {
+            const [formData, setFormData] = useState({
+                title: '',
+                date: '',
+                imageUrl: '',
+                description: ''
+            });
+
+            const isEditMode = modalState.mode === 'edit';
+
+            useEffect(() => {
+                if (isEditMode && modalState.data) {
+                    // Convert YYYY-MM-DD to MM/DD/YYYY for display in edit form
+                    const dateParts = modalState.data.date.split('-');
+                    const displayDate = dateParts.length === 3 ? `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}` : modalState.data.date;
+                    setFormData({...modalState.data, date: displayDate});
+                } else {
+                    setFormData({ title: '', date: '', imageUrl: '', description: '' });
+                }
+            }, [modalState]);
+
+            if (!modalState.isOpen) return null;
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSubmit = () => {
+                // Convert MM/DD/YYYY back to YYYY-MM-DD on save if it's in that format
+                const dateParts = formData.date.split('/');
+                let isoDate = formData.date;
+                if (dateParts.length === 3 && dateParts[2].length === 4) {
+                    isoDate = `${dateParts[2]}-${dateParts[0].padStart(2, '0')}-${dateParts[1].padStart(2, '0')}`;
+                }
+                onSave({ ...formData, date: isoDate });
+            };
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
+                        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-gray-800">
+                                <span className="text-orange-500">{isEditMode ? '编辑' : '添加新'}</span>成就
+                            </h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                                <i className="fas fa-times fa-lg"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">项目名称</label>
+                                <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="例如：100米短跑比赛" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">达成日期</label>
+                                <div className="relative">
+                                    <input type="text" name="date" value={formData.date} onChange={handleChange} placeholder="mm/dd/yyyy" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                                    <i className="far fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">照片 URL</label>
+                                <input type="text" name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="https://example.com/image.jpg" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"/>
+                                <p className="text-xs text-gray-500 mt-1">请粘贴有效的图片链接地址</p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">详细描述</label>
+                                <textarea name="description" value={formData.description} onChange={handleChange} rows="3" placeholder="描述你的成就细节..." className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                            </div>
+                        </div>
+                        <div className="p-6 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md font-semibold hover:bg-gray-50">取消</button>
+                            <button onClick={handleSubmit} className="px-4 py-2 bg-orange-500 text-white rounded-md font-semibold hover:bg-orange-600">保存{isEditMode ? '修改' : '成就'}</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const Header = () => (
+             <header className="bg-gradient-to-r from-orange-500 to-cyan-400 text-white p-6 shadow-lg">
+                <div className="container mx-auto flex justify-between items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold">青少年运动成就</h1>
+                        <p className="text-sm opacity-90 mt-1">记录青春的每一次突破</p>
+                    </div>
+                    <img src="https://picsum.photos/id/1/200/60" alt="Piano keys" className="w-48 h-16 object-cover rounded-lg shadow-md hidden md:block" />
+                </div>
+            </header>
+        );
+
+        const IntroCard = () => (
+            <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                <h2 className="text-orange-500 font-bold text-lg mb-4">为何记录运动成就？</h2>
+                <div className="grid md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700 text-sm leading-relaxed">
+                    <p><span className="font-bold">身心健康的基石</span> – 定期运动可以提升青少年的心肺功能、增强肌肉力量、帮助骨骼发育，同时减轻压力，提升自信心和社交能力。</p>
+                    <p><span className="font-bold">激励进步的动力</span> – 每一次成就记录都是对过去努力的认可，也是对未来挑战的动力。</p>
+                    <p><span className="font-bold">养成习惯的关键</span> – 通过记录和回顾成就，可以让运动变成一种习惯，建立长期健康的生活方式。</p>
+                    <p><span className="font-bold">成长历程的见证</span> – 运动记录构成了青少年成长的珍贵回忆，见证着每一次跨越与成长。</p>
+                </div>
+            </div>
+        );
+
+        const Sidebar = () => (
+            <div className="bg-white p-4 rounded-lg shadow-sm flex flex-col items-center space-y-6 lg:items-stretch">
+                <div className="flex flex-col items-center text-center">
+                    <img src="https://picsum.photos/id/237/100/100" alt="Avatar" className="w-20 h-20 rounded-full mb-3"/>
+                    <h3 className="font-bold text-gray-800">青春运动记录</h3>
+                </div>
+                <nav className="w-full">
+                    <ul className="space-y-2">
+                        <li><a href="#" className="flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-cyan-50 hover:text-cyan-600"><i className="fas fa-home w-6 text-center"></i><span className="ml-3 font-medium">主页</span></a></li>
+                        <li><a href="#" className="flex items-center px-4 py-2 text-white bg-cyan-400 rounded-md shadow"><i className="fas fa-trophy w-6 text-center"></i><span className="ml-3 font-bold">我的成就</span></a></li>
+                        <li><a href="#" className="flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-cyan-50 hover:text-cyan-600"><i className="fas fa-chart-line w-6 text-center"></i><span className="ml-3 font-medium">统计分析</span></a></li>
+                        <li><a href="#" className="flex items-center px-4 py-2 text-gray-700 rounded-md hover:bg-cyan-50 hover:text-cyan-600"><i className="fas fa-question-circle w-6 text-center"></i><span className="ml-3 font-medium">帮助说明</span></a></li>
+                    </ul>
+                </nav>
+            </div>
+        );
+
+        const AchievementCard = ({ achievement, onDelete, onEdit }) => (
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
+                <img src={achievement.imageUrl} alt={achievement.title} className="w-full h-40 object-cover" />
+                <div className="p-4 flex-grow">
+                    <div className="flex justify-between items-start">
+                        <h4 className="font-bold text-gray-800 text-base mb-1">{achievement.title}</h4>
+                        <button onClick={() => onEdit(achievement)} className="text-gray-400 hover:text-orange-500 p-1 -mt-1 -mr-1">
+                            <i className="fas fa-pencil-alt text-xs"></i>
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">{achievement.date}</p>
+                    <p className="text-sm text-gray-600">{achievement.description}</p>
+                </div>
+                <div className="px-4 pb-4">
+                    <button onClick={() => onDelete(achievement.id)} className="text-red-500 text-sm font-medium hover:underline">
+                        <i className="fas fa-trash-alt mr-1 text-xs"></i>删除
+                    </button>
+                </div>
+            </div>
+        );
+
+        const AchievementsFeed = ({ achievements, onAdd, onDelete, onEdit }) => (
+            <div>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-800">我的成就记录</h2>
+                    <button onClick={onAdd} className="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg shadow-sm hover:bg-orange-600 transition-colors flex items-center">
+                        <i className="fas fa-plus mr-2"></i>添加成就
+                    </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {achievements.map(ach => (
+                        <AchievementCard key={ach.id} achievement={ach} onDelete={onDelete} onEdit={onEdit} />
+                    ))}
+                </div>
+                <div className="text-center mt-8 text-gray-500">
+                    <p className="font-semibold">“每一次突破，都是青春的勋章”</p>
+                    <p className="text-sm">记录成长，见证未来</p>
+                </div>
+            </div>
+        );
+
+        const StatsPanel = ({ achievements }) => {
+            const stats = useMemo(() => {
+                const categoryCounts = achievements.reduce((acc, ach) => {
+                    const category = getCategory(ach.title);
+                    acc[category] = (acc[category] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                return {
+                    categoryCounts: Object.entries(categoryCounts).sort((a, b) => a[0].localeCompare(b[0])),
+                    totalAchievements: achievements.length,
+                    totalCategories: Object.keys(categoryCounts).length
+                };
+            }, [achievements]);
+
+            return (
+                 <div className="bg-white p-5 rounded-lg shadow-sm">
+                    <h3 className="font-bold text-gray-800 mb-4 border-b pb-2 flex items-center"><i className="fas fa-poll-h mr-2 text-cyan-500"></i>成就统计</h3>
+                    
+                    <div className="mb-6">
+                        <p className="text-sm font-semibold text-gray-600 mb-2">项目分布</p>
+                        <div className="space-y-2">
+                             {stats.categoryCounts.map(([category, count]) => (
+                                <div key={category} className="flex items-center justify-between text-sm">
+                                    <span className="text-gray-700">{category}</span>
+                                    <div className="flex items-center">
+                                        <div className="w-16 h-2 bg-blue-100 rounded-full mr-2">
+                                            <div className="h-2 bg-blue-500 rounded-full" style={{width: '100%'}}></div>
+                                        </div>
+                                        <span className="font-medium text-gray-500">{count}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                         <p className="text-sm font-semibold text-gray-600 mb-3">总体数据</p>
+                         <div className="flex justify-around text-center">
+                            <div>
+                                <p className="text-2xl font-bold text-cyan-500">{stats.totalAchievements}</p>
+                                <p className="text-xs text-gray-500">总成就数</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-cyan-500">{stats.totalCategories}</p>
+                                <p className="text-xs text-gray-500">运动种类</p>
+                            </div>
+                         </div>
+                    </div>
+                    
+                    <button className="w-full bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm">
+                       <i className="fas fa-download mr-2"></i> 导出统计
+                    </button>
+                </div>
+            );
+        };
+        
+        const HelpPanel = () => (
+             <div className="bg-white p-5 rounded-lg shadow-sm mt-6">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center"><i className="fas fa-life-ring mr-2 text-orange-500"></i>使用帮助</h3>
+                <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-center"><i className="far fa-check-circle text-orange-500 mr-2"></i>点击“添加成就”新增记录</li>
+                    <li className="flex items-center"><i className="far fa-check-circle text-orange-500 mr-2"></i>在卡片上点击“铅笔”可修改内容</li>
+                    <li className="flex items-center"><i className="far fa-check-circle text-orange-500 mr-2"></i>点击“删除”按钮移除无效记录</li>
+                    <li className="flex items-center"><i className="far fa-check-circle text-orange-500 mr-2"></i>图表区可导出CSV数据</li>
+                </ul>
+            </div>
+        );
+
+        function App() {
+            const [achievements, setAchievements] = useState(initialAchievementsData);
+            const [modalState, setModalState] = useState({ isOpen: false, mode: 'add', data: null });
+
+            const handleOpenAddModal = () => {
+                setModalState({ isOpen: true, mode: 'add', data: null });
+            };
+
+            const handleOpenEditModal = (achievement) => {
+                setModalState({ isOpen: true, mode: 'edit', data: achievement });
+            };
+
+            const handleCloseModal = () => {
+                setModalState({ isOpen: false, mode: 'add', data: null });
+            };
+            
+            const handleDelete = (id) => {
+                setAchievements(prev => prev.filter(ach => ach.id !== id));
+            };
+
+            const handleSave = (formData) => {
+                if (modalState.mode === 'add') {
+                     const newAchievement = {
+                        ...formData,
+                        id: Date.now()
+                    };
+                    setAchievements(prev => [...prev, newAchievement]);
+                } else {
+                    setAchievements(prev => prev.map(ach => ach.id === modalState.data.id ? { ...ach, ...formData } : ach));
+                }
+                handleCloseModal();
+            };
+
+            return (
+                <div>
+                    <AchievementModal modalState={modalState} onClose={handleCloseModal} onSave={handleSave} />
+                    <Header />
+                    <main className="container mx-auto p-4 md:p-6">
+                        <IntroCard />
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <div className="lg:col-span-2">
+                                <Sidebar />
+                            </div>
+                            <div className="lg:col-span-7">
+                                <AchievementsFeed 
+                                    achievements={achievements}
+                                    onAdd={handleOpenAddModal}
+                                    onDelete={handleDelete}
+                                    onEdit={handleOpenEditModal}
+                                />
+                            </div>
+                            <div className="lg:col-span-3">
+                                <StatsPanel achievements={achievements}/>
+                                <HelpPanel />
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+
+</body>
+</html>

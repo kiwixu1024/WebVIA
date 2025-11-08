@@ -1,0 +1,197 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>笔记同步</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body class="bg-gray-100">
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('home');
+  const [modalType, setModalType] = useState(null);
+  const [notes, setNotes] = useState([
+    {
+      id: 1,
+      title: '项目周报',
+      tags: ['工作'],
+      content: '完成了模块开发，发现问题需要解决，下周将继续优化改功能，团队协作顺利。',
+      status: '已同步',
+      timestamp: '2024-06-10 14:32',
+      image: 'https://picsum.photos/id/1/100/100',
+    },
+    {
+      id: 2,
+      title: '旅行计划',
+      tags: ['生活'],
+      content: '计划了下周旅行云南，包含路线图，大理、丽江三地，预计10天行程，需准备防晒、用品等装备。',
+      status: '待同步',
+      timestamp: '2024-06-09 09:15',
+      image: 'https://picsum.photos/id/2/100/100',
+    },
+    {
+      id: 3,
+      title: '读书笔记-影响学习',
+      tags: ['学习'],
+      content:
+        '关注影响习惯的因素，培养思维点，进入舒适区，这本书让我们重新思考学习的方法。',
+      status: '已同步',
+      timestamp: '2024-06-08 21:45',
+      image: 'https://picsum.photos/id/3/100/100',
+    },
+  ]);
+  const [editedNote, setEditedNote] = useState(null);
+
+  const openModal = (type, note = null) => {
+    setModalType(type);
+    setEditedNote(note);
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setEditedNote(null);
+  };
+
+  const handleSaveNote = () => {
+    if (editedNote?.id) {
+      setNotes(
+        notes.map((note) =>
+          note.id === editedNote.id ? { ...note, ...editedNote } : note
+        )
+      );
+    } else {
+      const newNote = { ...editedNote, id: Date.now(), status: '待同步' };
+      setNotes([newNote, ...notes]);
+    }
+    closeModal();
+  };
+
+  const changeTab = (tab) => {
+    setActiveTab(tab);
+  };
+
+  return (
+    <div className="flex">
+      <div className="w-64 bg-white border-r">
+        <div className="p-4 bg-green-100 flex items-center">
+          <i className="fas fa-book text-green-600 mr-2"></i>
+          <h1 className="font-bold text-lg text-green-600">印象笔记同步</h1>
+        </div>
+        <ul className="space-y-2 p-4">
+          <li className="text-gray-800 cursor-pointer">工作 <span className="text-gray-400 ml-2">{notes.filter(note => note.tags.includes('工作')).length}</span></li>
+          <li className="text-gray-800 cursor-pointer">生活 <span className="text-gray-400 ml-2">{notes.filter(note => note.tags.includes('生活')).length}</span></li>
+          <li className="text-gray-800 cursor-pointer">学习 <span className="text-gray-400 ml-2">{notes.filter(note => note.tags.includes('学习')).length}</span></li>
+        </ul>
+        <button className="w-full bg-green-600 text-white py-2 px-4 rounded" onClick={() => openModal('new')}>+ 新建笔记</button>
+      </div>
+      <div className="flex-1 p-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-700">展示区 - 在这里查看同步后的笔记清单，轻松管理您的内容</h2>
+          <div>
+            <button className="bg-gray-200 px-3 py-1 rounded">批量删除</button>
+            <button className="bg-gray-200 px-3 py-1 rounded ml-2">批量同步</button>
+          </div>
+        </div>
+        <ul className="mt-4">
+          {notes.map((note) => (
+            <li key={note.id} className="flex justify-between items-center border-b py-4">
+              <div className="flex items-center">
+                <input type="checkbox" className="mr-4" />
+                <img src={note.image} alt={note.title} className="w-20 h-20 object-cover mr-4" />
+                <div>
+                  <h3 className="text-lg font-bold text-gray-700">{note.title}</h3>
+                  <p className="text-sm text-gray-500">{note.content}</p>
+                  <div className="flex items-center mt-2">
+                    {note.tags.map((tag) => (
+                      <span key={tag} className="text-xs bg-gray-200 rounded-full px-2 py-1 mr-2">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">{note.timestamp}</p>
+                <p className={`text-xs ${note.status === '已同步' ? 'text-green-500' : 'text-yellow-600'}`}>{note.status}</p>
+              </div>
+              <button
+                className="text-blue-500 hover:underline"
+                onClick={() => openModal('edit', note)}
+              >
+                编辑
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {modalType && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+          <div className="bg-white rounded shadow-lg p-6 w-2/3">
+            <h2 className="text-lg font-bold mb-4">
+              {modalType === 'edit' ? '编辑笔记' : '新建笔记'}
+            </h2>
+            <div>
+              <label className="block text-gray-700">标题</label>
+              <input
+                type="text"
+                className="w-full border rounded px-3 py-2"
+                value={editedNote?.title || ''}
+                onChange={(e) => setEditedNote({ ...editedNote, title: e.target.value })}
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-gray-700">标签</label>
+              <div className="flex flex-wrap mt-2">
+                {['工作', '生活', '学习', '旅游', '读书笔记'].map((tag) => (
+                  <span
+                    key={tag}
+                    className={`px-3 py-1 mr-2 rounded-full cursor-pointer ${editedNote?.tags?.includes(tag) ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+                    onClick={() =>
+                      setEditedNote({
+                        ...editedNote,
+                        tags: editedNote?.tags?.includes(tag)
+                          ? editedNote.tags.filter((t) => t !== tag)
+                          : [...(editedNote?.tags || []), tag],
+                      })
+                    }
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="block text-gray-700">内容</label>
+              <textarea
+                className="w-full border rounded px-3 py-2"
+                value={editedNote?.content || ''}
+                onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+              ></textarea>
+            </div>
+            <div className="flex items-center justify-end mt-6">
+              <button className="bg-gray-200 px-3 py-1 rounded mr-4" onClick={closeModal}>
+                取消
+              </button>
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded"
+                onClick={handleSaveNote}
+              >
+                保存笔记
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>

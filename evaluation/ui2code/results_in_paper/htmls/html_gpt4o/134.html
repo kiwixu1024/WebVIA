@@ -1,0 +1,231 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>植物养护日志</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+
+<body class="font-sans bg-[#f7f7f5] text-sm">
+  <div id="root"></div>
+  <script type="text/babel">
+    const App = () => {
+      const [modalState, setModalState] = React.useState(null);
+      const [plants, setPlants] = React.useState([
+        {
+          id: '1',
+          name: '绿萝',
+          date: '2024-06-01',
+          content: '今天阳光充足，给绿萝浇了水，长势良好！',
+          water: '200ml',
+          condition: '健康',
+          light: '中等光照',
+          imageUrl: 'https://picsum.photos/id/243/400/200'
+        },
+        {
+          id: '2',
+          name: '虎皮兰',
+          date: '2024-06-03',
+          content: '叶子有点发黄，可能缺水了。',
+          water: '100ml',
+          condition: '健康',
+          light: '弱光',
+          imageUrl: 'https://picsum.photos/id/1025/400/200'
+        },
+        {
+          id: '3',
+          name: '多肉',
+          date: '2024-06-05',
+          content: '多肉长势喜人，颜色非常漂亮！',
+          water: '50ml',
+          condition: '健康',
+          light: '强光',
+          imageUrl: 'https://picsum.photos/id/10/400/200'
+        },
+      ]);
+
+      const openModal = (type) => setModalState(type);
+      const closeModal = () => setModalState(null);
+
+      const deletePlant = (id) => {
+        setPlants((prevPlants) => prevPlants.filter((plant) => plant.id !== id));
+        closeModal();
+      };
+
+      const renderModalContent = () => {
+        switch (modalState) {
+          case 'add':
+            return <AddPlantModal closeModal={closeModal} />;
+          case 'delete':
+            return <DeleteConfirmModal
+              closeModal={closeModal}
+              deletePlant={() => deletePlant('1')}
+            />;
+          case 'detail':
+            return <DetailsModal />;
+          default:
+            return null;
+        }
+      };
+
+      return (
+        <div className="relative">
+          {/* Main Layout */}
+          <div className="flex">
+            <Sidebar />
+            <div className="flex-1 p-6">
+              <Header openModal={() => openModal('add')} />
+              <PlantGrid
+                plants={plants}
+                openDeleteModal={() => openModal('delete')}
+                openEditModal={() => openModal('add')}
+              />
+            </div>
+          </div>
+
+          {/* Modals */}
+          {modalState && (
+            <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
+              {renderModalContent()}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const Sidebar = () => (
+      <div className="bg-[#e2ede6] w-64 h-full flex flex-col px-4 py-6">
+        <h1 className="font-bold text-lg text-green-800 mb-6">植物养护日志</h1>
+        <ul>
+          <li className="py-2">
+            <i className="fas fa-book mr-2"></i> 今日记录
+          </li>
+          <li className="py-2">
+            <i className="fas fa-history mr-2"></i> 历史记录
+          </li>
+          <li className="py-2">
+            <i className="fas fa-seedling mr-2"></i> 植物库
+          </li>
+          <li className="py-2">
+            <i className="fas fa-cogs mr-2"></i> 我的设置
+          </li>
+        </ul>
+      </div>
+    );
+
+    const Header = ({ openModal }) => (
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-lg font-bold mb-1">记录每一滴水，每一缕阳光，让绿意常在。</h2>
+        </div>
+        <button
+          className="bg-green-500 text-white px-4 py-2 rounded-md shadow-md focus:outline-none"
+          onClick={() => openModal()}
+        >
+          + 添加新日志
+        </button>
+      </div>
+    );
+
+    const PlantGrid = ({ plants, openDeleteModal, openEditModal }) => (
+      <div className="grid grid-cols-2 gap-4">
+        {plants.map((plant) => (
+          <div
+            key={plant.id}
+            className="border rounded-lg shadow-sm overflow-hidden bg-white"
+          >
+            <img
+              src={plant.imageUrl}
+              alt={plant.name}
+              className="w-full h-32 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="font-bold text-lg">{plant.name}</h3>
+              <p className="text-xs text-gray-600 mt-1">日期: {plant.date}</p>
+              <p className="text-sm mt-2">{plant.content}</p>
+              <div className="flex mt-4">
+                <button
+                  className="bg-yellow-500 text-white py-1 px-3 rounded-md mr-2"
+                  onClick={openEditModal}
+                >
+                  编辑
+                </button>
+                <button
+                  className="bg-red-500 text-white py-1 px-3 rounded-md"
+                  onClick={openDeleteModal}
+                >
+                  删除
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+
+    const AddPlantModal = ({ closeModal }) => (
+      <div className="bg-white w-96 p-6 rounded-lg">
+        <h2 className="font-bold text-lg mb-4">添加新的植物记录</h2>
+        <form className="space-y-4">
+          <input
+            type="text"
+            placeholder="请输入植物名称"
+            className="w-full border rounded-lg px-4 py-2"
+          />
+          <input
+            type="date"
+            className="w-full border rounded-lg px-4 py-2"
+          />
+          <input
+            type="text"
+            placeholder="输入养护细节"
+            className="w-full border rounded-lg px-4 py-2"
+          />
+          <button type="submit" className="bg-green-500 text-white rounded-md px-4 py-2">保存</button>
+        </form>
+        <button onClick={closeModal} className="mt-4 text-sm text-gray-500">取消</button>
+      </div>
+    );
+
+    const DeleteConfirmModal = ({ closeModal, deletePlant }) => (
+      <div className="bg-white w-96 p-6 rounded-lg">
+        <h2 className="font-bold text-lg text-red-500 mb-4">确认删除此记录吗？</h2>
+        <p>您即将删除此植物记录，此操作不可撤销。</p>
+        <div className="flex mt-6">
+          <button
+            onClick={deletePlant}
+            className="bg-red-500 text-white rounded-md px-4 py-2 mr-2"
+          >
+            确认删除
+          </button>
+          <button
+            onClick={closeModal}
+            className="border rounded-md px-4 py-2"
+          >
+            取消
+          </button>
+        </div>
+      </div>
+    );
+
+    const DetailsModal = () => (
+      <div className="bg-white w-96 p-6 rounded-lg">
+        <h2 className="font-bold text-lg mb-4">植物详细统计数据</h2>
+        <div>
+          <p>数据统计将分析您的养护记录，为您的植物健康提供支持！</p>
+        </div>
+      </div>
+    );
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+
+</html>

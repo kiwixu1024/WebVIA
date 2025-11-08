@@ -1,0 +1,347 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>家庭理财计划</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialTransactions = [
+            { id: 1, date: '2023-10-15', category: '餐饮', amount: -200, remark: '家庭聚餐' },
+            { id: 2, date: '2023-10-10', category: '交通', amount: -50, remark: '地铁月票' },
+            { id: 3, date: '2023-10-05', category: '收入', amount: 10000, remark: '工资' },
+            { id: 4, date: '2023-10-03', category: '购物', amount: -1500, remark: '生活用品' },
+            { id: 5, date: '2023-09-28', category: '家庭支出', amount: -2000, remark: '水电费' },
+        ];
+
+        const Header = () => (
+            <header className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 shadow-md">
+                <div className="container mx-auto flex justify-between items-center">
+                    <h1 className="text-2xl font-bold">家庭理财计划</h1>
+                    <nav className="flex items-center space-x-6 text-sm">
+                        <a href="#" className="flex items-center space-x-1 hover:text-gray-200">
+                            <i className="fas fa-th-large"></i>
+                            <span>可定制化家庭理财一站式管理</span>
+                        </a>
+                        <a href="#" className="flex items-center space-x-1 hover:text-gray-200">
+                            <i className="fas fa-database"></i>
+                            <span>实时数据统计与可定制预算</span>
+                        </a>
+                        <a href="#" className="flex items-center space-x-1 hover:text-gray-200">
+                            <i className="fas fa-shield-alt"></i>
+                            <span>安全便捷、支持多端同步</span>
+                        </a>
+                    </nav>
+                </div>
+            </header>
+        );
+
+        const Sidebar = () => (
+            <aside className="w-56 bg-white p-4 flex-shrink-0">
+                <nav>
+                    <ul>
+                        <li className="mb-4">
+                            <a href="#" className="flex justify-between items-center text-gray-700 hover:text-blue-600 font-semibold">
+                                <span><i className="fas fa-th w-6"></i>预算模板</span>
+                                <i className="fas fa-chevron-down text-xs"></i>
+                            </a>
+                        </li>
+                        <li className="mb-4">
+                            <a href="#" className="flex justify-between items-center text-blue-600 font-bold">
+                                <span><i className="fas fa-file-invoice-dollar w-6"></i>账单记录</span>
+                                <i className="fas fa-chevron-down text-xs"></i>
+                            </a>
+                        </li>
+                        <li className="mb-4">
+                            <a href="#" className="flex justify-between items-center text-gray-700 hover:text-blue-600 font-semibold">
+                                <span><i className="fas fa-wallet w-6"></i>资产负债</span>
+                                <i className="fas fa-chevron-down text-xs"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+        );
+
+        const Footer = () => (
+            <footer className="text-center text-gray-500 text-sm py-8 space-y-4">
+                 <p>© 2023 家庭理财计划 版权所有</p>
+                 <div className="flex justify-center space-x-4">
+                    <a href="#" className="hover:underline">帮助中心</a>
+                    <a href="#" className="hover:underline">联系我们</a>
+                    <a href="#" className="hover:underline">隐私条款</a>
+                 </div>
+            </footer>
+        );
+        
+        const BillModal = ({ isOpen, onClose, onSave, initialData, title }) => {
+            const [formData, setFormData] = useState({});
+            
+            useEffect(() => {
+                if (initialData) {
+                    setFormData(initialData);
+                } else {
+                     setFormData({
+                        date: '09/23/2025',
+                        category: '选择类别',
+                        amount: '',
+                        remark: ''
+                    });
+                }
+            }, [isOpen, initialData]);
+
+            if (!isOpen) return null;
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleSave = () => {
+                onSave(formData);
+                onClose();
+            };
+            
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        <div className="p-5 border-b flex justify-between items-center">
+                            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                                <i className="fas fa-times fa-lg"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                <div className="relative">
+                                    <input type="text" name="date" value={formData.date || ''} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+                                    <i className="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">类别</label>
+                                <select name="category" value={formData.category || '选择类别'} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                    <option disabled>选择类别</option>
+                                    <option>餐饮</option>
+                                    <option>交通</option>
+                                    <option>收入</option>
+                                    <option>购物</option>
+                                    <option>家庭支出</option>
+                                </select>
+                                {title === '添加账单记录' && <p className="text-xs text-gray-500 mt-1">收入为正数, 支出为负数</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">金额 (¥)</label>
+                                <input type="number" name="amount" value={formData.amount || ''} onChange={handleChange} placeholder={title === '编辑账单记录' ? '' : '收入为正数, 支出为负数'} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                                <textarea name="remark" value={formData.remark || ''} onChange={handleChange} placeholder="账单备注" rows="3" className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 border-t flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        function App() {
+            const [transactions, setTransactions] = useState(initialTransactions);
+            const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+            const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [editingTransaction, setEditingTransaction] = useState(null);
+
+            const handleEditClick = (transaction) => {
+                setEditingTransaction(transaction);
+                setIsEditModalOpen(true);
+            };
+
+            const handleSaveNew = (formData) => {
+                const newTransaction = {
+                    id: Math.max(...transactions.map(t => t.id), 0) + 1,
+                    date: '2023-09-23', // As per screenshot 5
+                    category: formData.category,
+                    amount: Number(formData.amount),
+                    remark: formData.remark,
+                };
+                setTransactions([...transactions, newTransaction]);
+            };
+
+            const handleUpdate = (formData) => {
+                 setTransactions(transactions.map(t => t.id === formData.id ? { ...t, ...formData } : t));
+            };
+
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Header />
+                    <div className="flex-grow container mx-auto flex py-6 space-x-6">
+                        <Sidebar />
+                        <main className="flex-grow flex flex-col space-y-6">
+                            {/* Bills Section */}
+                            <section className="bg-white p-6 rounded-lg shadow">
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center border border-gray-200 rounded-md">
+                                        <button className="px-4 py-2 text-sm font-semibold bg-gray-100 border-r border-gray-200">总览</button>
+                                        <button className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">收入</button>
+                                        <button className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">支出</button>
+                                        <button className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">储蓄</button>
+                                        <button className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">投资</button>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button className="px-4 py-2 text-sm bg-orange-400 text-white rounded-md hover:bg-orange-500">添加目标</button>
+                                        <button onClick={() => setIsAddModalOpen(true)} className="px-4 py-2 text-sm bg-orange-400 text-white rounded-md hover:bg-orange-500"><i className="fas fa-plus mr-1"></i>新增账单</button>
+                                        <button className="px-4 py-2 text-sm bg-orange-400 text-white rounded-md hover:bg-orange-500">添加理财产品</button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="md:col-span-2">
+                                        <div className="space-y-2">
+                                            {transactions.map(tx => (
+                                                <div key={tx.id} className="grid grid-cols-12 gap-4 items-center p-3 hover:bg-gray-50 border-b last:border-b-0">
+                                                    <div className="col-span-2 text-gray-600 text-sm">{tx.date}</div>
+                                                    <div className="col-span-2 font-semibold text-gray-800">{tx.category}</div>
+                                                    <div className={`col-span-2 font-semibold text-right ${tx.amount > 0 ? 'text-green-500' : 'text-gray-800'}`}>
+                                                        {tx.amount > 0 ? `+${tx.amount.toLocaleString()}` : tx.amount.toLocaleString()}
+                                                    </div>
+                                                    <div className="col-span-4 text-gray-500">{tx.remark}</div>
+                                                    <div className="col-span-2 flex justify-end space-x-4 text-gray-400">
+                                                        <button onClick={() => handleEditClick(tx)} className="hover:text-blue-500"><i className="fas fa-edit"></i></button>
+                                                        <button className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-1 space-y-4">
+                                        <img src="https://picsum.photos/id/1040/300/200" alt="Chart" className="rounded-lg w-full" />
+                                        <div className="p-4 bg-gray-50 rounded-lg">
+                                            <h4 className="font-bold text-gray-800 mb-2">理财小贴士</h4>
+                                            <ul className="space-y-2 text-sm text-gray-600">
+                                                <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>制定合理预算，量入为出是理财基础。</span></li>
+                                                <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>建立应急基金，至少覆盖3-6个月生活费。</span></li>
+                                                <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>分散投资，不要把所有鸡蛋放在一个篮子里。</span></li>
+                                                <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>定期检查财务状况，及时调整理财策略。</span></li>
+                                                <li className="flex items-start"><i className="fas fa-check-circle text-green-500 mr-2 mt-1"></i><span>尽早开始退休储蓄，越早开始复利效应越明显。</span></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Recommended Products */}
+                            <section className="bg-white p-6 rounded-lg shadow">
+                                <h3 className="font-bold text-lg text-gray-800 mb-4">推荐理财产品</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="border border-gray-200 rounded-lg p-4 relative">
+                                        <div className="absolute top-4 right-4 text-gray-400 space-x-3">
+                                            <button className="hover:text-blue-500"><i className="fas fa-edit"></i></button>
+                                            <button className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800">余额宝</h4>
+                                        <p className="text-sm text-gray-500">预期收益: 2.5% | 风险: 低</p>
+                                        <p className="text-sm text-gray-500 mt-1">灵活存取、日益业结算</p>
+                                        <a href="#" className="text-sm text-blue-600 hover:underline mt-3 inline-block">查看详情 ></a>
+                                    </div>
+                                    <div className="border border-gray-200 rounded-lg p-4 relative">
+                                        <div className="absolute top-4 right-4 text-gray-400 space-x-3">
+                                            <button className="hover:text-blue-500"><i className="fas fa-edit"></i></button>
+                                            <button className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800">指数基金</h4>
+                                        <p className="text-sm text-gray-500">预期收益: 8.0% | 风险: 中</p>
+                                        <p className="text-sm text-gray-500 mt-1">长期投资、跟踪市场指数</p>
+                                        <a href="#" className="text-sm text-blue-600 hover:underline mt-3 inline-block">查看详情 ></a>
+                                    </div>
+                                    <div className="border border-gray-200 rounded-lg p-4 relative">
+                                        <div className="absolute top-4 right-4 text-gray-400 space-x-3">
+                                            <button className="hover:text-blue-500"><i className="fas fa-edit"></i></button>
+                                            <button className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                                        </div>
+                                        <h4 className="font-bold text-gray-800">定期存款</h4>
+                                        <p className="text-sm text-gray-500">预期收益: 3.0% | 风险: 低</p>
+                                        <p className="text-sm text-gray-500 mt-1">稳健收益、固定期限</p>
+                                        <a href="#" className="text-sm text-blue-600 hover:underline mt-3 inline-block">查看详情 ></a>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Action Guides */}
+                             <section className="bg-white p-6 rounded-lg shadow">
+                                <h3 className="font-bold text-lg text-gray-800 mb-4">操作指引</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                                    <div>
+                                        <div className="mx-auto bg-gray-100 rounded-full h-24 w-24 flex items-center justify-center">
+                                            <i className="fas fa-plus-circle text-4xl text-blue-500"></i>
+                                        </div>
+                                        <h4 className="font-semibold text-gray-800 mt-4 mb-2">添加记录</h4>
+                                        <p className="text-sm text-gray-500">点击顶部"添加目标"、"新增账单"或"添加理财产品"按钮，即可相关信息后保存。</p>
+                                    </div>
+                                    <div>
+                                        <div className="mx-auto bg-gray-100 rounded-full h-24 w-24 flex items-center justify-center">
+                                            <i className="fas fa-edit text-4xl text-orange-500"></i>
+                                        </div>
+                                        <h4 className="font-semibold text-gray-800 mt-4 mb-2">编辑记录</h4>
+                                        <p className="text-sm text-gray-500">点击各记录右上角的编辑图标，修改信息后保存即可更新记录。</p>
+                                    </div>
+                                    <div>
+                                        <div className="mx-auto bg-gray-100 rounded-full h-24 w-24 flex items-center justify-center">
+                                            <i className="fas fa-trash-alt text-4xl text-red-500"></i>
+                                        </div>
+                                        <h4 className="font-semibold text-gray-800 mt-4 mb-2">删除记录</h4>
+                                        <p className="text-sm text-gray-500">点击各记录右上角的删除图标，在确认提示框中点击"确定"即可删除记录。</p>
+                                    </div>
+                                </div>
+                            </section>
+                            
+                            {/* Little Helper */}
+                            <div className="fixed bottom-5 left-5 bg-white p-4 rounded-lg shadow-lg w-56 border-l-4 border-blue-500">
+                                <h4 className="font-bold text-gray-800">理财小助手</h4>
+                                <p className="text-sm text-gray-600 mt-2">您的本月预算已使用80%，请控制支出。</p>
+                            </div>
+
+                        </main>
+                    </div>
+                    <Footer/>
+
+                    <BillModal
+                        isOpen={isAddModalOpen}
+                        onClose={() => setIsAddModalOpen(false)}
+                        onSave={handleSaveNew}
+                        title="添加账单记录"
+                    />
+                    
+                    <BillModal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onSave={handleUpdate}
+                        initialData={editingTransaction}
+                        title="编辑账单记录"
+                    />
+
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>羽毛球活动管理系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="text/babel">
+      const App = () => {
+        const [currentView, setCurrentView] = React.useState("main");
+        const [editingActivity, setEditingActivity] = React.useState(null);
+        const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+        const [addActivityModal, setAddActivityModal] = React.useState(false);
+
+        const handleClick = (view) => {
+          setCurrentView(view);
+        };
+
+        const handleEditActivity = (activity) => {
+          setEditingActivity(activity);
+          setCurrentView("edit_activity");
+        };
+
+        const handleAddActivity = () => {
+          setAddActivityModal(true);
+        };
+
+        const closeAddActivityModal = () => {
+          setAddActivityModal(false);
+        };
+
+        const deleteActivity = () => {
+          setShowDeleteModal(true);
+        };
+
+        const cancelDelete = () => {
+          setShowDeleteModal(false);
+        };
+
+        // Sample activities
+        const activities = [
+          {
+            id: 1,
+            name: "春季友谊赛",
+            date: "2024-06-15",
+            time: "10:00–12:00",
+            location: "羽毛球馆1号场",
+            participants: "16/20 人",
+          },
+          {
+            id: 2,
+            name: "周末提升课",
+            date: "2024-06-17",
+            time: "14:00–16:00",
+            location: "羽毛球馆2号场",
+            participants: "8/12 人",
+          },
+        ];
+
+        const MainScreen = () => (
+          <div className="p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">羽毛球活动管理</h2>
+              <div className="space-x-4">
+                <button
+                  className="text-blue-600"
+                  onClick={() => handleClick("help")}
+                >
+                  帮助说明
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-3">
+                <h3 className="text-base font-semibold mb-2">活动列表</h3>
+                {activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="bg-white border p-3 rounded-md shadow-sm flex justify-between items-center"
+                  >
+                    <div>
+                      <h4 className="font-medium mb-1">{activity.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {activity.date} {activity.time}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {activity.location}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {activity.participants}
+                      </p>
+                    </div>
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => handleEditActivity(activity)}
+                        className="text-green-600"
+                      >
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button
+                        onClick={deleteActivity}
+                        className="text-red-600"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <h3 className="text-base font-semibold mb-2">活动详情</h3>
+                <div className="border-2 border-dashed rounded-md flex items-center justify-center h-48">
+                  <p className="text-gray-400">请选择一个活动进行编辑</p>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-base font-semibold mb-2">活动统计</h3>
+                <div className="bg-white border p-3 rounded-md shadow-sm">
+                  <p className="mb-2">今日场地使用率</p>
+                  <div className="relative w-16 h-16 mx-auto mb-4">
+                    <div
+                      className="absolute inset-0 text-green-500 flex items-center justify-center"
+                      style={{ fontSize: "12px" }}
+                    >
+                      75%
+                    </div>
+                    <svg
+                      className="block max-w-full max-h-full"
+                      viewBox="0 0 36 36"
+                    >
+                      <circle
+                        cx="18"
+                        cy="18"
+                        r="15.9155"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        fill="none"
+                        strokeDasharray="75,100"
+                      />
+                    </svg>
+                  </div>
+                  <button className="mt-2 text-blue-500" type="button">
+                    导出报表
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-between">
+              <button
+                className="px-4 py-2 bg-green-500 text-white rounded-md"
+                onClick={handleAddActivity}
+              >
+                新建活动
+              </button>
+              <button disabled className="px-4 py-2 bg-gray-300 text-white">
+                批量导入
+              </button>
+              <button disabled className="px-4 py-2 bg-gray-300 text-white">
+                导出全部数据
+              </button>
+            </div>
+          </div>
+        );
+
+        return (
+          <div className="min-h-screen bg-gray-50">
+            {currentView === "main" && <MainScreen />}
+          </div>
+        );
+      };
+
+      ReactDOM.render(<App />, document.getElementById("app"));
+    </script>
+  </body>
+</html>

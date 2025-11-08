@@ -1,0 +1,219 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表情日志</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+
+<body class="bg-gray-50">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [filter, setFilter] = useState('全部');
+            const [showModal, setShowModal] = useState(false);
+            const [entries, setEntries] = useState([
+                { id: 1, emoji: '😊', date: '2024-06-01', content: '今日工作顺利完成上线啦！', category: '开心' },
+                { id: 2, emoji: '😢', date: '2024-05-30', content: '项目延期，有点沮丧...', category: '伤感' },
+                { id: 3, emoji: '😲', date: '2024-05-29', content: '收到意外惊喜，朋友送了我一本期盼已久的书！', category: '惊讶' },
+            ]);
+
+            const handleAddMood = () => {
+                setShowModal(true);
+            };
+
+            const handleSaveEntry = (newEntry) => {
+                setEntries((prevEntries) => [...prevEntries, newEntry]);
+                setShowModal(false);
+            };
+
+            const filteredEntries = filter === '全部' ? entries : entries.filter(entry => entry.category === filter);
+
+            return (
+                <div className="flex flex-col h-screen">
+                    <header className="bg-white shadow p-4 flex justify-between items-center">
+                        <div className="text-xl font-semibold text-gray-800">特色主题表情日志</div>
+                        <button
+                            className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded shadow">
+                            导出日志
+                        </button>
+                    </header>
+
+                    <div className="flex flex-1">
+                        <aside className="bg-white w-64 shadow p-4">
+                            <nav className="space-y-4">
+                                <div className="text-gray-700 font-semibold">
+                                    <span className="block text-xl">展示区</span>
+                                    <span className="block mt-2">编辑区</span>
+                                    <span className="block">统计区</span>
+                                    <span className="block">帮助说明</span>
+                                </div>
+                            </nav>
+
+                            <div className="absolute bottom-0 left-0 p-4 space-x-2">
+                                <span className="p-2 bg-red-200 rounded-full"></span>
+                                <span className="p-2 bg-blue-200 rounded-full"></span>
+                                <span className="p-2 bg-yellow-200 rounded-full"></span>
+                                <span className="p-2 bg-pink-200 rounded-full"></span>
+                            </div>
+                        </aside>
+
+                        <main className="flex-1 p-6 bg-gray-100">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex space-x-4">
+                                    {['全部', '开心', '伤感', '惊讶', '日常小记'].map((category) => (
+                                        <button
+                                            key={category}
+                                            onClick={() => setFilter(category)}
+                                            className={`px-4 py-2 rounded ${filter === category
+                                                ? 'bg-yellow-500 text-white'
+                                                : 'bg-white border border-gray-300 text-gray-600'
+                                                }`}>
+                                            {category}
+                                        </button>
+                                    ))}
+                                </div>
+                                {filter === '日常小记' && filteredEntries.length === 0 ? (
+                                    <div className="text-center p-6 bg-white rounded shadow-md">
+                                        <img src="https://picsum.photos/id/118/200/100" alt="No entries"
+                                            className="mx-auto mb-4 rounded" />
+                                        <h3 className="font-semibold text-gray-700 mb-2">暂无表情日志</h3>
+                                        <p className="text-gray-500 mb-4">点亮心情，刻录生活瞬间，开始记录你的第一条表情日志吧！</p>
+                                        <button
+                                            onClick={handleAddMood}
+                                            className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded shadow">
+                                            立即添加日志
+                                        </button>
+                                    </div>
+                                ) : null}
+                                <button
+                                    onClick={handleAddMood}
+                                    className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded shadow">
+                                    + 添加新日志
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-4">
+                                {filteredEntries.map((entry) => (
+                                    <div key={entry.id} className="p-4 bg-white rounded shadow">
+                                        <div className="text-2xl">{entry.emoji}</div>
+                                        <div className="text-gray-600 font-medium mt-2">{entry.date}</div>
+                                        <div className="text-gray-700">{entry.content}</div>
+                                        <span className="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 text-xs rounded mt-2">
+                                            {entry.category}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+                    </div>
+
+                    {showModal && (
+                        <Modal onSave={handleSaveEntry} onCancel={() => setShowModal(false)} />
+                    )}
+                </div>
+            );
+        }
+
+        function Modal({ onSave, onCancel }) {
+            const [emoji, setEmoji] = useState('');
+            const [date, setDate] = useState('');
+            const [content, setContent] = useState('');
+            const [category, setCategory] = useState('开心');
+
+            const handleSave = () => {
+                const newEntry = {
+                    id: Date.now(),
+                    emoji,
+                    date,
+                    content,
+                    category,
+                };
+                onSave(newEntry);
+            };
+
+            return (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-gray-700">添加新日志</h2>
+                            <button
+                                onClick={onCancel}
+                                className="text-gray-500 hover:text-gray-700">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-sm text-gray-600">日期</label>
+                                <input
+                                    type="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    className="w-full mt-1 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-500" />
+                            </div>
+                            <div>
+                                <label className="text-sm text-gray-600">表情</label>
+                                <div className="flex space-x-2 mt-1">
+                                    {['😊', '😢', '😲', '😡', '😃', '🥺', '❤️'].map((e) => (
+                                        <button
+                                            key={e}
+                                            onClick={() => setEmoji(e)}
+                                            className="text-2xl hover:bg-gray-100 px-2 py-1 rounded">
+                                            {e}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-sm text-gray-600">内容</label>
+                                <textarea
+                                    value={content}
+                                    onChange={(e) => setContent(e.target.value)}
+                                    className="w-full mt-1 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-500" />
+                            </div>
+                            <div>
+                                <label className="text-sm text-gray-600">分类</label>
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="w-full mt-1 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                    <option>开心</option>
+                                    <option>伤感</option>
+                                    <option>惊讶</option>
+                                    <option>日常小记</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="flex justify-end space-x-4 mt-6">
+                            <button
+                                onClick={onCancel}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">
+                                取消
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded">
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body>
+
+</html>

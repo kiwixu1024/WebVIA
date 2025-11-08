@@ -1,0 +1,531 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI面试助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const Dashboard = () => {
+            const [currentView, setCurrentView] = useState('today');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [selectedQuestion, setSelectedQuestion] = useState(null);
+            const [editingTitle, setEditingTitle] = useState('');
+            const [editingDescription, setEditingDescription] = useState('');
+            const [editingDifficulty, setEditingDifficulty] = useState(5);
+            const [editReferenceAnswer, setEditReferenceAnswer] = useState('');
+
+            const exercises = [
+                {
+                    id: 1,
+                    title: "请介绍一下你对二分查找算法的理解。",
+                    description: "这道题目需要你解释二分查找的原理、时间复杂度和适用条件。请详细分析。",
+                    difficulty: [5, 5],
+                    recommended: "我们将为您推荐最佳答题方案。",
+                    tag: "算法",
+                    action: "开始练习"
+                },
+                {
+                    id: 2,
+                    title: "如何设计一个高并发面试系统？",
+                    description: "请详细描述你会如何设计一个能够支持百万用户同时在线的面试系统，考虑其架构、数据存储和扩展性。",
+                    difficulty: [5, 5],
+                    recommended: "我们将为您推荐最佳答题方案。",
+                    tag: "系统设计",
+                    action: "开始练习"
+                },
+                {
+                    id: 3,
+                    title: "React中的状态管理方案有哪些？",
+                    description: "请比较不同的React状态管理方案（如Context、Redux、MobX等）的优缺点和适用场景。",
+                    difficulty: [5, 5],
+                    recommended: "我们将为您推荐最佳答题方案。",
+                    tag: "前端",
+                    action: "开始练习"
+                }
+            ];
+
+            const Header = () => (
+                <div className="bg-white shadow-sm border-b">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center">
+                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-3">
+                                    <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-semibold text-gray-900">AI面试助手</h1>
+                                    <p className="text-sm text-gray-500">提升面试技能，开启职业新篇章</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center">
+                                <img src="https://picsum.photos/id/64/40/40" alt="Profile" className="w-10 h-10 rounded-full mr-2" />
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">张三</p>
+                                    <p className="text-xs text-gray-500">高级算法工程师</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 mt-8">
+                            <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                                <img src="https://picsum.photos/id/180/60/60" alt="Algorithm" className="w-16 h-16 rounded-lg mx-auto mb-3" />
+                                <h3 className="font-medium text-gray-900 mb-1">算法基础</h3>
+                                <p className="text-sm text-blue-600">78%</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                                <img src="https://picsum.photos/id/200/60/60" alt="System Design" className="w-16 h-16 rounded-lg mx-auto mb-3" />
+                                <h3 className="font-medium text-gray-900 mb-1">系统设计</h3>
+                                <p className="text-sm text-green-600">65%</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                                <img src="https://picsum.photos/id/300/60/60" alt="Frontend" className="w-16 h-16 rounded-lg mx-auto mb-3" />
+                                <h3 className="font-medium text-gray-900 mb-1">前端框架</h3>
+                                <p className="text-sm text-purple-600">82%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const Sidebar = () => (
+                <div className="w-80 bg-gray-50 h-screen border-r">
+                    <div className="bg-blue-600 text-white p-4 rounded-lg mb-6">
+                        <div className="flex items-center">
+                            <i className="fas fa-book mr-3"></i>
+                            <span className="text-lg font-medium">练习题库</span>
+                        </div>
+                    </div>
+                    <nav className="space-y-1">
+                        <div 
+                            className={`flex items-center px-4 py-2 rounded-lg cursor-pointer ${currentView === 'today' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                            onClick={() => setCurrentView('today')}
+                        >
+                            <i className="fas fa-home mr-3"></i>
+                            <span>今日推荐</span>
+                        </div>
+                        <div 
+                            className={`flex items-center px-4 py-2 rounded-lg cursor-pointer ${currentView === 'custom' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                            onClick={() => setCurrentView('custom')}
+                        >
+                            <i className="fas fa-star mr-3"></i>
+                            <span>自定义练习</span>
+                        </div>
+                        <div 
+                            className={`flex items-center px-4 py-2 rounded-lg cursor-pointer ${currentView === 'history' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                            onClick={() => setCurrentView('history')}
+                        >
+                            <i className="fas fa-history mr-3"></i>
+                            <span>历史记录</span>
+                        </div>
+                    </nav>
+                    
+                    <div className="mt-8">
+                        <div className="bg-gray-100 p-3 rounded-lg mb-4">
+                            <img src="https://picsum.photos/id/400/300/150" alt="Interview" className="w-full h-20 object-cover rounded mb-3" />
+                            <p className="text-xs text-gray-500 text-center">快速开始面试练习</p>
+                        </div>
+                        <footer className="bg-white border-t p-4 text-center">
+                            <p className="text-sm text-gray-500">© 2023 AI面试助手，版权所有权利</p>
+                        </footer>
+                    </div>
+                </div>
+            );
+
+            const QuestionCard = (exercise) => (
+                <div key={exercise.id} className="bg-white rounded-lg shadow-sm border mb-4">
+                    <div className="p-6">
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded mb-2">
+                                    {exercise.tag}
+                                </span>
+                            </div>
+                            <div className="flex space-x-2">
+                                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded cursor-pointer">
+                                    <i className="fas fa-edit mr-1"></i>编辑
+                                </span>
+                                <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer">
+                                    <i className="fas fa-trash mr-1"></i>删除
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <h3 className="text-lg font-medium text-gray-900 mb-3">
+                            {editingTitle || exercise.title || '请介绍一下你对二分查找算法的理解。'}
+                        </h3>
+                        
+                        <p className="text-gray-700 mb-4 leading-relaxed">
+                            {editingDescription || exercise.description || '这道题目需要你解释二分查找的原理、时间复杂度和适用条件。请详细分析。'}
+                        </p>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center">
+                                <span className="text-yellow-400 mr-1">★</span>
+                                <span className="text-sm text-gray-600 mr-2">难度：{exercise.difficulty[0]}★{''.repeat(Math.max(0, exercise.difficulty[1] - 5))}</span>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                            onClick={() => {
+                                setSelectedQuestion(exercise.id);
+                            }}
+                        >
+                            开始模考
+                        </button>
+                    </div>
+                </div>
+            );
+
+            const Content = () => {
+                switch(currentView) {
+                    case 'today':
+                        return (
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-6">今日推荐面试题</h2>
+                                <div className="space-y-6">
+                                    {exercises.map(exercise => QuestionCard(exercise))}
+                                </div>
+                            </div>
+                        );
+                    
+                    case 'custom':
+                        return (
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-6">自定义面试题</h2>
+                                <div className="space-y-6">
+                                    {exercises.map(exercise => (
+                                        <div key={exercise.id} className="bg-white rounded-lg shadow-sm border p-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded mb-2">
+                                                        {exercise.tag}
+                                                    </span>
+                                                </div>
+                                                <div className="flex space-x-2">
+                                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded cursor-pointer">
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </span>
+                                                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer">
+                                                        <i className="fas fa-trash mr-1"></i>删除
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h3 className="text-lg font-medium text-gray-900 mb-3">
+                                                {editingTitle || exercise.title || '请介绍一下你对二分查找算法的理解。'}
+                                            </h3>
+                                            <p className="text-gray-700 mb-4 leading-relaxed">
+                                                {editingDescription || exercise.description || '这道题目需要你解释二分查找的原理、时间复杂度和适用条件。请详细分析。'}
+                                            </p>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center">
+                                                    <span className="text-yellow-400 mr-1">★</span>
+                                                    <span className="text-sm text-gray-600 mr-2">难度：{exercise.difficulty[0]}★{''.repeat(Math.max(0, exercise.difficulty[1] - 5))}</span>
+                                                </div>
+                                                <button 
+                                                    className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+                                                    onClick={() => {
+                                                        setSelectedQuestion(exercise.id);
+                                                    }}
+                                                >
+                                                    开始模考
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    
+                    case 'history':
+                        return (
+                            <div className="p-6">
+                                <h2 className="text-xl font-semibold text-gray-900 mb-6">历史练习记录</h2>
+                                <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                        <i className="fas fa-folder-open text-gray-400 text-2xl"></i>
+                                    </div>
+                                    <p className="text-gray-500 mb-2">暂无历史练习记录</p>
+                                    <p className="text-sm text-gray-400">您还没有进行任何练习，快去学习吧！</p>
+                                </div>
+                            </div>
+                        );
+                    default:
+                        return null;
+                }
+            };
+
+            const AddModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center">
+                                <i className="fas fa-plus-circle text-blue-600 mr-3"></i>
+                                <h3 className="text-lg font-semibold text-gray-900">新增面试题</h3>
+                            </div>
+                            <button 
+                                onClick={() => setShowAddModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">题目标题</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入题目标题"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">难度等级</label>
+                                <div className="flex items-center mb-3">
+                                    <span className="text-sm text-gray-600 mr-2">4/5</span>
+                                    <div className="w-32 bg-gray-200 rounded-full h-1">
+                                        <div className="bg-blue-600 h-1 rounded-full" style={{width: '60%'}}></div>
+                                    </div>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="5" 
+                                    className="w-full"
+                                    defaultValue={editingDifficulty}
+                                    onChange={(e) => setEditingDifficulty(parseInt(e.target.value))}
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">题目描述</label>
+                                <textarea 
+                                    placeholder="请输入题目详细描述"
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">参考答案</label>
+                                <textarea 
+                                    placeholder="请输入参考答案"
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button 
+                                onClick={() => setShowAddModal(false)}
+                                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={() => setShowAddModal(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const EditModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center">
+                                <i className="fas fa-edit text-blue-600 mr-3"></i>
+                                <h3 className="text-lg font-semibold text-gray-900">编辑面试题</h3>
+                            </div>
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">题目标题</label>
+                                <input 
+                                    value={editingTitle || exercises[0].title || '请介绍一下你对二分查找算法的理解。'}
+                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">难度等级</label>
+                                <div className="flex items-center mb-3">
+                                    <span className="text-sm text-gray-600 mr-2">{editingTitle ? '4' : '3'} / 5</span>
+                                    <div className="w-32 bg-gray-200 rounded-full h-1">
+                                        <div 
+                                            className="bg-blue-600 h-1 rounded-full cursor-pointer"
+                                            style={{width: `${(editingDifficulty || 5) * 20}%`}}
+                                            onClick={(e) => {
+                                                if (e.target.offsetWidth > e.target.scrollWidth) {
+                                                    setEditingDifficulty(editingDifficulty || 5);
+                                                }
+                                            }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                <input 
+                                    type="range" 
+                                    min="1" 
+                                    max="5" 
+                                    className="w-full"
+                                    defaultValue={editingDifficulty}
+                                    onChange={(e) => setEditingDifficulty(parseInt(e.target.value))}
+                                    onFocus={(e) => {
+                                        e.target.style.background = '';
+                                        e.target.style.backgroundColor = 'transparent';
+                                    }}
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">题目描述</label>
+                                <textarea 
+                                    value={editingDescription || exercises[0].description || '这道题目需要你解释二分查找的原理、时间复杂度和适用条件。请详细分析。'}
+                                    onChange={(e) => setEditingDescription(e.target.value)}
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                ></textarea>
+                            </div>
+                            
+                            <div className="text-gray-600 text-sm">
+                                二分查找是一种效率较高的查找算法。要求数据必须是有序的。其基本思想是：每次取中间位置的值与目标值比较，如果相等则查找成功；如果目标值小于中间值，则在左半部分继续查找；如果目标值大于中间
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 mt-6">
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            >
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const DeleteModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-sm mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center">
+                                <i className="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>
+                                <h3 className="text-lg font-semibold text-gray-900">确认删除</h3>
+                            </div>
+                            <button 
+                                onClick={() => setShowDeleteModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <p className="text-gray-600 mb-6">您确定要删除这道面试题目吗？此操作无法撤销。</p>
+                        
+                        <div className="flex justify-end space-x-3">
+                            <button 
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={() => setShowDeleteModal(false)}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                                确认删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-100 flex flex-col">
+                    <Header />
+                    <div className="flex-1 flex">
+                        <Sidebar />
+                        <div className="flex-1">
+                            <Content />
+                            
+                            {currentView === 'today' && !showAddModal && !showEditModal && !showDeleteModal && <AddModal />}
+                            {currentView === 'today' && selectedQuestion && showEditModal && showQuestion === exercises[0].id < 6 && <EditModal />}
+                            {currentView === 'today' && selectedQuestion && showDeleteModal && showQuestion === exercises[0].id < 6 && <DeleteModal />}
+                        </div>
+                    </div>
+                    
+                    {currentView === 'today' && !showAddModal && !showEditModal && !showDeleteModal && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
+                            <div className="max-w-7xl mx-auto flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                        <i className="fas fa-home mr-2"></i>今日推荐
+                                    </button>
+                                    <button 
+                                        className={`px-4 py-2 rounded-lg ${currentView === 'custom' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                        onClick={() => setCurrentView('custom')}
+                                    >
+                                        <i className="fas fa-star mr-2"></i>自定义练习
+                                    </button>
+                                    <button 
+                                        className={`px-4 py-2 rounded-lg ${currentView === 'history' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}
+                                        onClick={() => setCurrentView('history')}
+                                    >
+                                        <i className="fas fa-history mr-2"></i>历史记录
+                                    </button>
+                                </div>
+                                <button 
+                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                    onClick={() => setShowAddModal(true)}
+                                >
+                                    <i className="fas fa-plus mr-2"></i>新增面试题
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <Sidebar />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<Dashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>

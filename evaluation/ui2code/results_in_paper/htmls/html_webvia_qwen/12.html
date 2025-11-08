@@ -1,0 +1,599 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亲友合影留念相册</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function PhotoAlbumManager() {
+            const [albums] = useState([
+                {
+                    id: 1,
+                    title: "全家福2023",
+                    description: "我们的年夜饭合照",
+                    date: "2023-12-25",
+                    tags: ["家庭", "团聚"],
+                    image: "https://picsum.photos/id/1/400/300",
+                    count: 7
+                },
+                {
+                    id: 2,
+                    title: "毕业派对",
+                    description: "大学四年青春合影",
+                    date: "2024-06-15",
+                    tags: ["同学", "友谊"],
+                    image: "https://picsum.photos/id/2/400/300",
+                    count: 12
+                },
+                {
+                    id: 3,
+                    title: "夏日旅行",
+                    description: "帐篷露营的快乐时光",
+                    date: "2024-07-10",
+                    tags: ["旅行", "风景"],
+                    image: "https://picsum.photos/id/3/400/300",
+                    count: 8
+                }
+            ]);
+            
+            const [showNewAlbumModal, setShowNewAlbumModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingAlbum, setEditingAlbum] = useState(null);
+            const [deletingAlbum, setDeletingAlbum] = useState(null);
+            
+            const [newAlbum, setNewAlbum] = useState({
+                title: "",
+                description: "",
+                tags: ["家庭", "团聚"],
+                tagInput: "",
+                isPublic: true
+            });
+            
+            const [editingAlbumData, setEditingAlbumData] = useState({
+                title: "",
+                description: "",
+                tags: [],
+                showPreview: false
+            });
+            
+            const [stats, setStats] = useState({
+                albumCount: 3,
+                photoCount: 101,
+                uploads: 18
+            });
+            
+            const handleNewAlbum = () => {
+                setNewAlbum({
+                    title: "",
+                    description: "",
+                    tags: ["家庭", "团聚"],
+                    tagInput: "",
+                    isPublic: true
+                });
+                setShowNewAlbumModal(true);
+            };
+            
+            const handleEditAlbum = (album) => {
+                setEditingAlbum(album);
+                setEditingAlbumData({
+                    title: album.title,
+                    description: album.description,
+                    tags: album.tags,
+                    showPreview: true
+                });
+                setShowEditModal(true);
+            };
+            
+            const handleDeleteAlbum = (album) => {
+                setDeletingAlbum(album);
+                setShowDeleteModal(true);
+            };
+            
+            const confirmCreateAlbum = () => {
+                if (newAlbum.title.trim()) {
+                    const count = Math.floor(Math.random() * 20) + 3;
+                    const album = {
+                        id: Date.now(),
+                        title: newAlbum.title,
+                        description: newAlbum.description || "新创建的相册",
+                        date: "2024-01-15",
+                        tags: newAlbum.tags.length > 0 ? newAlbum.tags : ["朋友", "同事"],
+                        image: `https://picsum.photos/id/${Math.floor(Math.random() * 300)}/400/300`,
+                        count: count
+                    };
+                    
+                    setAlbums([...albums, album]);
+                    setStats({
+                        albumCount: stats.albumCount + 1,
+                        photoCount: stats.photoCount + album.count,
+                        uploads: stats.uploads + 1
+                    });
+                    setShowNewAlbumModal(false);
+                }
+            };
+            
+            const confirmSaveChanges = () => {
+                if (editingAlbum) {
+                    const updatedAlbum = {...editingAlbum};
+                    if (editingAlbumData.title) {
+                        updatedAlbum.title = editingAlbumData.title;
+                    }
+                    if (editingAlbumData.description) {
+                        updatedAlbum.description = editingAlbumData.description;
+                    } 
+                    if (editingAlbumData.tags.length > 0) {
+                        updatedAlbum.tags = editingAlbumData.tags;
+                    }
+                    
+                    setAlbums(albums.map(album => 
+                        album.id === editingAlbum.id ? updatedAlbum : album
+                    ));
+                    setShowEditModal(false);
+                }
+            };
+            
+            const confirmDelete = () => {
+                setAlbums(albums.filter(album => album.id !== deletingAlbum.id));
+                setStats({
+                    albumCount: stats.albumCount - 1,
+                    photoCount: stats.photoCount - deletingAlbum.count,
+                    uploads: stats.uploads - 1
+                });
+                setShowDeleteModal(false);
+                setDeletingAlbum(null);
+            };
+            
+            const cancelNewAlbum = () => {
+                setShowNewAlbumModal(false);
+                setNewAlbum({
+                    title: "",
+                    description: "",
+                    tags: ["家庭", "团聚"],
+                    tagInput: "",
+                    isPublic: true
+                });
+            };
+            
+            const openImageGallery = () => {
+                window.open(albums[0].image, 'Image Gallery');
+            };
+            
+            return (
+                <div className="min-h-screen bg-yellow-50">
+                    {/* Header */}
+                    <header className="bg-white px-6 py-4">
+                        <div className="flex items-center justify-between max-w-7xl mx-auto">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+                                    <i className="fas fa-camera text-white text-sm"></i>
+                                </div>
+                                <span className="text-lg font-medium text-gray-800">相册管家</span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <h1 className="text-xl font-medium text-gray-800">亲友合影留念相册</h1>
+                                
+                                <div className="flex items-center space-x-2">
+                                    <button 
+                                        onClick={handleNewAlbum}
+                                        className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                                    >
+                                        <i className="fas fa-plus text-sm"></i>
+                                        <span>新建相册</span>
+                                    </button>
+                                    <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+                                        <i className="fas fa-user-circle"></i>
+                                        <span>我的相册</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    {/* Main Content */}
+                    <main className="max-w-7xl mx-auto px-6 py-8">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-medium text-gray-800">相册总览</h2>
+                            <p className="text-gray-600">共 {stats.albumCount} 个相册</p>
+                        </div>
+                        
+                        {/* Description Card */}
+                        <div className="bg-white rounded-xl p-6 mb-8 border-l-4 border-orange-400">
+                            <div className="flex items-start space-x-4">
+                                <img src="https://picsum.photos/id/100/100/100" alt="Discription" className="w-16 h-16 rounded-lg object-cover" />
+                                <div>
+                                    <h3 className="font-medium text-gray-800 mb-2">记录每一次与亲友的温暖时刻</h3>
+                                    <p className="text-gray-600 text-sm">让回忆定格在美好的光影里。</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Albums Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            {albums.map((album) => (
+                                <div key={album.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+                                    <div className="relative">
+                                        <img src={album.image} alt={album.title} className="w-full h-64 object-cover" />
+                                        <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
+                                            <span className="font-medium">{album.count}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="p-6">
+                                        <h3 className="font-medium text-gray-800 mb-2">{album.title}</h3>
+                                        <p className="text-gray-600 text-sm mb-4">{album.description}</p>
+                                        
+                                        <div className="flex items-center justify-between mb-4 text-xs text-gray-500">
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-calendar text-orange-500"></i>
+                                                <span>创建于 {album.date}</span>
+                                            </div>
+                                            <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs">已阅览</span>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                {album.tags.map((tag, index) => (
+                                                    <span key={index} className="text-blue-500 text-xs hover:underline cursor-pointer">{tag}</span>
+                                                ))}
+                                            </div>
+                                            <div className="flex space-x-3">
+                                                <button 
+                                                    onClick={() => handleEditAlbum(album)}
+                                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors"
+                                                >
+                                                    <i className="fas fa-edit mr-1"></i>
+                                                    编辑
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteAlbum(album)}
+                                                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors"
+                                                >
+                                                    <i className="fas fa-trash mr-1"></i>
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* Add New Album Section */}
+                        <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+                            <h3 className="text-lg font-medium text-gray-800 mb-6">添加新相册</h3>
+                            <div className="text-center">
+                                <button 
+                                    onClick={handleNewAlbum}
+                                    className="bg-pink-500 hover:bg-pink-600 text-white w-16 h-16 rounded-full shadow-lg transition-all flex items-center justify-center"
+                                >
+                                    <i className="fas fa-plus text-xl"></i>
+                                </button>
+                                <p className="text-gray-600 mt-4">添加新相册</p>
+                            </div>
+                        </div>
+                        
+                        {/* Gallery Section */}
+                        <div className="text-center mt-8">
+                            <button onClick={openImageGallery} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg inline-flex items-center space-x-2 transition-colors">
+                                <i className="fas fa-image"></i>
+                                <span>查看合影</span>
+                            </button>
+                        </div>
+                    </main>
+                    
+                    {/* Sidebar */}
+                    <aside className="w-86 ml-8 bg-white rounded-xl p-6 shadow-sm border border-gray-200 h-fit">
+                        <div className="flex items-center space-x-2 mb-6">
+                            <i className="fas fa-chart-bar text-pink-500"></i>
+                            <h3 className="text-base font-medium text-gray-800">统计信息</h3>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            <div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-700 font-medium">总相册数</span>
+                                    <span className="text-pink-500 font-bold text-xl">{stats.albumCount}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600 text-sm">
+                                    <i className="fas fa-sync-alt text-gray-400"></i>
+                                    <span>刷新数据</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-700 font-medium">总照片数</span>
+                                    <span className="text-blue-500 font-bold text-xl">{stats.photoCount}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600 text-sm">
+                                    <i className="fas fa-sync-alt text-gray-400"></i>
+                                    <span>刷新数据</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <span className="text-gray-700 font-medium">最近一周上传量</span>
+                                    <span className="text-green-500 font-bold text-xl">{stats.uploads}</span>
+                                </div>
+                                <div className="flex items-center space-x-2 text-gray-600 text-sm">
+                                    <i className="fas fa-sync-alt text-gray-400"></i>
+                                    <span>刷新数据</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="text-gray-700 font-medium mb-3">标签分布</div>
+                                <div className="text-gray-500 text-sm">饼图展示区</div>
+                            </div>
+                        </div>
+                    </aside>
+                    
+                    {/* New Album Modal */}
+                    {showNewAlbumModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                            <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-medium text-gray-800">新建相册</h3>
+                                    <button 
+                                        onClick={cancelNewAlbum}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">相册名称</label>
+                                        <input
+                                            type="text"
+                                            value={newAlbum.title}
+                                            onChange={(e) => setNewAlbum({...newAlbum, title: e.target.value})}
+                                            placeholder="请输入相册名称"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">描述</label>
+                                        <textarea
+                                            value={newAlbum.description}
+                                            onChange={(e) => setNewAlbum({...newAlbum, description: e.target.value})}
+                                            placeholder="请输入相册描述"
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                                        <select
+                                            value={newAlbum.tagInput}
+                                            onChange={(e) => setNewAlbum({...newAlbum, tagInput: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        >
+                                            <option value="">选择标签</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="pt-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">相册描述</label>
+                                        <textarea
+                                            value={newAlbum.description}
+                                            onChange={(e) => setNewAlbum({...newAlbum, description: e.target.value})}
+                                            placeholder="请描述相册..."
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                                    <label className="flex items-center space-x-2">
+                                        <input type="checkbox" checked={newAlbum.isPublic} readOnly className="rounded" />
+                                        <span className="text-sm text-gray-700">公开相册</span>
+                                    </label>
+                                    
+                                    <div className="flex space-x-3 mt-4">
+                                        <button
+                                            onClick={cancelNewAlbum}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={confirmCreateAlbum}
+                                            className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+                                        >
+                                            确认创建
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Edit Album Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-medium text-gray-800">编辑相册</h3>
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">相册名称</label>
+                                        <input
+                                            type="text"
+                                            value={editingAlbumData.title}
+                                            onChange={(e) => setEditingAlbumData({...editingAlbumData, title: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">描述</label>
+                                        <textarea
+                                            value={editingAlbumData.description}
+                                            onChange={(e) => setEditingAlbumData({...editingAlbumData, description: e.target.value})}
+                                            rows="3"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {editingAlbumData.tags.map((tag, index) => (
+                                                <span key={index} className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
+                                                    {tag}
+                                                    <button 
+                                                        onClick={() => {
+                                                            const newTags = editingAlbumData.tags.filter((_, i) => i !== index);
+                                                            setEditingAlbumData({...editingAlbumData, tags: newTags});
+                                                        }}
+                                                        className="ml-1 text-green-500 hover:text-green-700"
+                                                    >
+                                                        <i className="fas fa-times text-xs"></i>
+                                                    </button>
+                                                </span>
+                                            ))}
+                                            <button className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                                                家庭
+                                                <i className="fas fa-times text-xs ml-1"></i>
+                                            </button>
+                                            <button className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
+                                                团聚
+                                                <i className="fas fa-times text-xs ml-1"></i>
+                                            </button>
+                                        </div>
+                                        <div className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent mt-2">
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-plus text-green-500"></i>
+                                                <span className="text-xs text-green-600">添加标签</span>
+                                            </div>
+                                            <input type="text" value={editingAlbumData.tagInput} readOnly className="w-full text-xs ml-10" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                                    <div className="flex items-center space-x-2">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={editingAlbumData.title} 
+                                            readOnly 
+                                            className="rounded" 
+                                        />
+                                        <span className="text-sm text-gray-700">公开此册</span>
+                                    </div>
+                                    
+                                    <div className="flex space-x-3 mt-4">
+                                        <button
+                                            onClick={() => setShowEditModal(false)}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={confirmSaveChanges}
+                                            className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors"
+                                        >
+                                            保存更改
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl p-6 w-full max-w-sm">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-800 mb-3">确认删除？</h3>
+                                    <p className="text-gray-600 text-sm mb-6">您确定要删除相册"{deletingAlbum?.title}"吗？此操作无法撤销。</p>
+                                    
+                                    <div className="flex space-x-3">
+                                        <button
+                                            onClick={() => setShowDeleteModal(false)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={confirmDelete}
+                                            className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Footer */}
+                    <footer className="mt-20 border-t border-gray-200 pt-6">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="flex items-center justify-between text-sm text-gray-500">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-6 h-6 bg-pink-500 rounded-lg flex items-center justify-center">
+                                        <i className="fas fa-camera text-white text-xs"></i>
+                                    </div>
+                                    <span>亲友合影留念相册</span>
+                                </div>
+                                <div className="text-right">
+                                    <p>© 2024 亲友相册管家</p>
+                                    <p>联系我们：contact@album.example.com</p>
+                                </div>
+                            </div>
+                            <div className="text-center text-sm text-gray-500 mt-4">
+                                如何快速创建相册？点击右上'新建相册'按钮，输入标题+上传照片即可。
+                                ⭢一健管理，轻松回看。
+                            </div>
+                            <div className="text-center text-xs text-gray-400 mt-1">
+                                查看更多帮助 &nbsp; <img src="https://picsum.photos/id/200/20/20" alt="Example" className="w-5 h-5 mx-1" />
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<PhotoAlbumManager />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容聚合平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div id="root"></div>
+    <script type="text/babel">
+        const App = () => {
+            const [subscriptions, setSubscriptions] = React.useState([
+                {
+                    id: 1,
+                    title: "科技新闻日报",
+                    source: "新华科技",
+                    frequency: "每日",
+                    time: "上午 9:00",
+                    status: "active",
+                },
+                {
+                    id: 2,
+                    title: "生活小窍门",
+                    source: "小红书",
+                    frequency: "每周",
+                    time: "下午 3:00",
+                    status: "active",
+                },
+                {
+                    id: 3,
+                    title: "财经周刊精选",
+                    source: "财视网",
+                    frequency: "周一",
+                    time: "周一 8:00",
+                    status: "active",
+                },
+            ]);
+
+            const [showAddModal, setShowAddModal] = React.useState(false);
+            const [showEditModal, setShowEditModal] = React.useState(false);
+            const [editingItemId, setEditingItemId] = React.useState(null);
+
+            const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+            const [deletingItemId, setDeletingItemId] = React.useState(null);
+
+            const handleAddSubscription = () => {
+                setShowAddModal(true);
+            };
+
+            const handleSaveSubscription = (newSubscription) => {
+                setSubscriptions([...subscriptions, newSubscription]);
+                setShowAddModal(false);
+            };
+
+            const handleDeleteSubscription = (id) => {
+                setDeletingItemId(null);
+                setShowDeleteModal(false);
+                setSubscriptions(subscriptions.filter((sub) => sub.id !== id));
+            };
+
+            const handleEditSubscription = (id) => {
+                setEditingItemId(id);
+                setShowEditModal(true);
+            };
+
+            return (
+                <div className="flex h-screen flex-col">
+                    {/* Header */}
+                    <header className="bg-white shadow">
+                        <div className="container mx-auto py-4">
+                            <h1 className="text-center text-lg font-semibold">
+                                一站式订阅内容聚合与推送平台，实时同步，多端分发，智能统计。
+                            </h1>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <div className="flex flex-1">
+                        {/* Sidebar */}
+                        <aside className="w-1/5 bg-gray-200 p-4">
+                            <nav>
+                                <ul>
+                                    <li className="mb-4">
+                                        <i className="fas fa-rss text-blue-500 mr-2"></i>
+                                        <span>订阅管理</span>
+                                    </li>
+                                    <li className="mb-4">
+                                        <i className="fas fa-sliders-h text-gray-600 mr-2"></i>
+                                        推送设置
+                                    </li>
+                                    <li className="mb-4">
+                                        <i className="fas fa-history text-gray-600 mr-2"></i>
+                                        历史记录
+                                    </li>
+                                    <li className="mb-4">
+                                        <i className="fas fa-question-circle text-gray-600 mr-2"></i>
+                                        帮助中心
+                                    </li>
+                                </ul>
+                            </nav>
+                        </aside>
+
+                        {/* Content */}
+                        <div className="flex-1 p-4">
+                            <div className="flex justify-between">
+                                {/* Left Section */}
+                                <div className="w-3/5">
+                                    <h2 className="text-lg font-semibold mb-4">我的订阅</h2>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {subscriptions.map((sub) => (
+                                            <div key={sub.id} className="bg-white shadow p-4 rounded-md">
+                                                <h4 className="font-semibold text-gray-700">{sub.title}</h4>
+                                                <p className="text-sm text-gray-600">来源：{sub.source}</p>
+                                                <p className="text-sm text-gray-600">频率：{sub.frequency}</p>
+                                                <p className="text-sm text-gray-600">推送时间：{sub.time}</p>
+                                                <button
+                                                    className="mt-4 text-red-500 text-sm"
+                                                    onClick={() => {
+                                                        setDeletingItemId(sub.id);
+                                                        setShowDeleteModal(true);
+                                                    }}
+                                                >
+                                                    删除订阅
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Right Section */}
+                                <div className="w-2/5">
+                                    <button
+                                        className="mb-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded shadow"
+                                        onClick={handleAddSubscription}
+                                    >
+                                        新增订阅
+                                    </button>
+                                    <div className="bg-white rounded shadow p-4 mb-4">
+                                        <h3 className="font-semibold mb-2">数据概览</h3>
+                                        <ul>
+                                            <li className="text-sm mb-2">订阅总数：3</li>
+                                            <li className="text-sm mb-2">推送成功率：92%</li>
+                                            <li className="text-sm mb-2">当日新增订阅：5</li>
+                                            <li className="text-sm mb-2">故障报警数：1</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

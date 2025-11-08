@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>万方数据 - 论文管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .sidebar-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function App() {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [isCollapsed, setIsCollapsed] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [currentPaper, setCurrentPaper] = useState(null);
+            
+            const toggleSidebar = () => {
+                setIsCollapsed(!isCollapsed);
+            };
+            
+            const handleSearch = (e) => {
+                setSearchQuery(e.target.value);
+            };
+            
+            const handleAddPaper = () => {
+                setShowAddModal(true);
+            };
+            
+            const handleViewDetails = (paper) => {
+                setCurrentPaper(paper);
+                setShowEditModal(true);
+            };
+            
+            const papers = [
+                {
+                    id: 1,
+                    title: '基于深度学习的自然语言处理技术研究',
+                    authors: '张明, 李华',
+                    year: '2023',
+                    tags: ['深度学习', '自然语言处理', '人工智能'],
+                    views: 1245,
+                    downloads: 356
+                },
+                {
+                    id: 2,
+                    title: '新冠肺炎疫情下远程医疗服务的应用与挑战',
+                    authors: '王亮明, 陈勇, 赵明',
+                    year: '2022',
+                    tags: ['远程医疗', 'COVID-19', '医疗信息化'],
+                    views: 2367,
+                    downloads: 892
+                },
+                {
+                    id: 3,
+                    title: '区块链技术在供应链金融中的应用研究',
+                    authors: '刘伟, 张小红',
+                    year: '2021',
+                    tags: ['区块链', '供应链金融', '金融科技'],
+                    views: 1832,
+                    downloads: 647
+                },
+                {
+                    id: 4,
+                    title: '中国农村电子商务发展现状与对策研究',
+                    authors: '李明, 王亮',
+                    year: '2023',
+                    tags: ['农村电商', '乡村振兴', '数字经济'],
+                    views: 1056,
+                    downloads: 423
+                },
+                {
+                    id: 5,
+                    title: '基于物联网的智能家居安全风险评估框架',
+                    authors: '陈兰, 李明, 王玉',
+                    year: '2022',
+                    tags: ['物联网', '智能家居', '安全风险', '评估框架'],
+                    views: 1678,
+                    downloads: 589
+                }
+            ];
+            
+            const filteredPapers = papers.filter(paper => 
+                searchQuery === '' || paper.title.includes(searchQuery)
+            );
+            
+            return (
+                <div className="flex flex-col h-screen bg-gray-100">
+                    {/* 顶部导航栏 */}
+                    <header className="bg-blue-700 text-white py-2 px-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                            <i className="fas fa-database mr-2"></i>
+                            <span className="font-bold text-lg">万方数据</span>
+                            
+                            <div className="ml-8 flex space-x-6">
+                                <button className="px-2 py-1">我的论文</button>
+                                <button className="px-2 py-1">文献检索</button>
+                                <button className="px-2 py-1">数据分析</button>
+                                <button className="px-2 py-1">引用管理</button>
+                            </div>
+                        </div>
+                        
+                        <div className="flex items-center">
+                            <div className="relative mr-4">
+                                <input
+                                    type="text"
+                                    className="bg-blue-600 text-white px-3 py-1 rounded-md w-48 placeholder-blue-200"
+                                    placeholder="搜索论文..."
+                                    value={searchQuery}
+                                    onChange={handleSearch}
+                                />
+                                <button className="absolute right-2 top-1 text-blue-200">
+                                    <i className="fas fa-search"></i>
+                                </button>
+                            </div>
+                            
+                            <div className="flex items-center">
+                                <img src="https://picsum.photos/id/1005/32/32" className="w-8 h-8 rounded-full" />
+                                <span className="ml-2 text-sm">徐教授 <i className="fas fa-caret-down ml-1"></i></span>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* 左侧菜单 */}
+                        <aside className={`bg-blue-800 text-white ${isCollapsed ? 'w-16' : 'w-40'} transition-all duration-300 flex flex-col`}>
+                            <button onClick={toggleSidebar} className="text-white p-2 self-start">
+                                <i className={`fas ${isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`}></i>
+                            </button>
+                            
+                            <nav className="flex-1">
+                                <ul>
+                                    <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                        <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                            <div className="sidebar-icon bg-blue-100 text-blue-800 rounded-md">
+                                                <i className="fas fa-file-alt"></i>
+                                            </div>
+                                            {!isCollapsed && <span className="ml-2">全部论文</span>}
+                                        </a>
+                                    </li>
+                                    <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                        <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                            <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                <i className="fas fa-star"></i>
+                                            </div>
+                                            {!isCollapsed && <span className="ml-2">收藏论文</span>}
+                                        </a>
+                                    </li>
+                                    <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                        <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                            <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                <i className="fas fa-download"></i>
+                                            </div>
+                                            {!isCollapsed && <span className="ml-2">最近使用</span>}
+                                        </a>
+                                    </li>
+                                    <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                        <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                            <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                <i className="fas fa-folder"></i>
+                                            </div>
+                                            {!isCollapsed && <span className="ml-2">我的分类</span>}
+                                        </a>
+                                    </li>
+                                </ul>
+                                
+                                <div className="mt-4 border-t border-blue-700 pt-4">
+                                    <h3 className={`text-sm text-blue-300 ${isCollapsed ? 'text-center' : 'px-4'} mb-2`}>
+                                        {!isCollapsed && '管理功能'}
+                                    </h3>
+                                    <ul>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-graduation-cap"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">科学研究</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-book"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">医学搜索</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-user-friends"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">人文社科</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-chart-line"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">经济管理</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-cogs"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">工程技术</span>}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div className="mt-4 border-t border-blue-700 pt-4">
+                                    <h3 className={`text-sm text-blue-300 ${isCollapsed ? 'text-center' : 'px-4'} mb-2`}>
+                                        {!isCollapsed && '常用工具'}
+                                    </h3>
+                                    <ul>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-sign-out-alt"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">批量导出</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-chart-pie"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">文献分类</span>}
+                                            </a>
+                                        </li>
+                                        <li className={`py-3 hover:bg-blue-900 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+                                            <a href="#" className={`flex ${isCollapsed ? 'flex-col' : 'items-center'}`}>
+                                                <div className="sidebar-icon bg-white text-blue-800 rounded-md">
+                                                    <i className="fas fa-cog"></i>
+                                                </div>
+                                                {!isCollapsed && <span className="ml-2">系统设置</span>}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </nav>
+                            
+                            <div className="p-3 bg-blue-900 text-xs text-center">
+                                <div className="bg-blue-800 rounded-md p-1 mb-1">
+                                    <span className="text-blue-300">可用空间: 68% </span>
+                                    <div className="w-full h-1 bg-blue-600 rounded-full mt-1">
+                                        <div className="h-1 bg-blue-400 rounded-full" style={{width: '68%'}}></div>
+                                    </div>
+                                </div>
+                                <span className="text-blue-300">(1,708/2.5GB)</span>
+                            </div>
+                        </aside>
+                        
+                        {/* 主内容区域 */}
+                        <main className="flex-1 overflow-auto p-6 bg-gray-100">
+                            <div className="flex mb-4 items-center">
+                                <button className="text-blue-700 mr-2">
+                                    <i className="fas fa-chevron-left"></i>
+                                </button>
+                                <h1 className="text-xl font-medium">论文列表</h1>
+                            </div>
+                            
+                            <div className="flex flex-1 overflow-hidden">
+                                {/* 论文列表 */}
+                                <div className="flex-1 overflow-auto pr-6">
+                                    <div className="bg-white rounded-md shadow mb-4">
+                                        <div className="flex justify-between items-center p-4 border-b">
+                                            <h2 className="text-lg font-medium">论文列表</h2>
+                                            <button 
+                                                onClick={handleAddPaper}
+                                                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-md text-sm flex items-center"
+                                            >
+                                                <i className="fas fa-plus mr-1"></i>
+                                                <span>添加新论文</span>
+                                            </button>
+                                        </div>
+                                        
+                                        <div>
+                                            {filteredPapers.map(paper => (
+                                                <div key={paper.id} className="p-4 border-b">
+                                                    <div className="flex justify-between">
+                                                        <h3 className="font-medium text-blue-900 mb-1">
+                                                            {paper.title}
+                                                        </h3>
+                                                        <div className="flex space-x-2">
+                                                            <button className="text-gray-500">
+                                                                <i className="far fa-edit"></i>
+                                                            </button>
+                                                            <button className="text-red-500">
+                                                                <i className="far fa-trash-alt"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                                                        <i className="fas fa-user-edit mr-1"></i>
+                                                        <span>{paper.authors}</span>
+                                                        <span className="mx-2">|</span>
+                                                        <i className="far fa-calendar mr-1"></i>
+                                                        <span>{paper.year}</span>
+                                                    </div>
+                                                    
+                                                    <div className="mb-3 flex flex-wrap">
+                                                        {paper.tags.map((tag, i) => (
+                                                            <span 
+                                                                key={i} 
+                                                                className={`
+                                                                    text-xs px-2 py-1 rounded-md mr-1.5 mb-1
+                                                                    ${i === 0 ? 'bg-blue-100 text-blue-600' : 
+                                                                     i === 1 ? 'bg-gray-100 text-gray-600' : 
+                                                                     'bg-blue-50 text-blue-600'}
+                                                                `}
+                                                            >
+                                                                {tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-between text-sm">
+                                                        <div className="flex space-x-4">
+                                                            <span className="text-gray-500">
+                                                                <i className="far fa-eye mr-1"></i>{paper.views}
+                                                            </span>
+                                                            <span className="text-gray-500">
+                                                                <i className="fas fa-download mr-1"></i>{paper.downloads}
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <button 
+                                                            onClick={() => handleViewDetails(paper)}
+                                                            className="text-blue-500"
+                                                        >
+                                                            查看详情 <i className="fas fa-chevron-right ml-1"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* 右侧统计数据 */}
+                                <div className="w-96 overflow-auto">
+                                    <div className="bg-white rounded-md shadow mb-4">
+                                        <div className="flex justify-between items-center p-4 border-b">
+                                            <h2 className="text-base font-medium">论文阅读趋势</h2>
+                                            <button className="text-blue-500">
+                                                <i className="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="h-40 relative">
+                                                <div className="absolute top-0 right-0 bottom-0 left-0">
+                                                    {/* 简化的折线图 */}
+                                                    <div className="w-full h-full flex flex-col justify-between">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-500">384</span>
+                                                            <div className="w-full border-t border-dashed border-gray-200 ml-2"></div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-500">192</span>
+                                                            <div className="w-full border-t border-dashed border-gray-200 ml-2"></div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs text-gray-500">0</span>
+                                                            <div className="w-full border-t border-dashed border-gray-200 ml-2"></div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* 折线 */}
+                                                    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                                        <path d="M0,80 L16.7,70 L33.3,65 L50,60 L66.7,50 L83.3,30 L100,20" stroke="blue" fill="none" strokeWidth="2" />
+                                                        <circle cx="0" cy="80" r="2" fill="blue" />
+                                                        <circle cx="16.7" cy="70" r="2" fill="blue" />
+                                                        <circle cx="33.3" cy="65" r="2" fill="blue" />
+                                                        <circle cx="50" cy="60" r="2" fill="blue" />
+                                                        <circle cx="66.7" cy="50" r="2" fill="blue" />
+                                                        <circle cx="83.3" cy="30" r="2" fill="blue" />
+                                                        <circle cx="100" cy="20" r="2" fill="blue" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-between mt-2 text-xs text-gray-500">
+                                                <span>6月</span>
+                                                <span>7月</span>
+                                                <span>8月</span>
+                                                <span>9月</span>
+                                                <span>10月</span>
+                                                <span>11月</span>
+                                                <span>12月</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-white rounded-md shadow mb-4">
+                                        <div className="flex justify-between items-center p-4 border-b">
+                                            <h2 className="text-base font-medium">下载排行榜</h2>
+                                            <button className="text-blue-500">
+                                                <i className="fas fa-sync-alt"></i>
+                                            </button>
+                                        </div>
+                                        <div className="p-4">
+                                            {/* 柱状图 */}
+                                            <div className="h-40 flex items-end justify-between space-x-2">
+                                                <div className="flex flex-col items-center">
+                                                    <div className="bg-orange-200 w-10 h-16" style={{ height: '40px' }}></div>
+                                                    <span className="text-xs mt-1">356</span>
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <div className="bg-orange-400 w-10" style={{ height: '80px' }}></div>
+                                                    <span className="text-xs mt-1">647</span>
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <div className="bg-orange-200 w-10" style={{ height: '50px' }}></div>
+                                                    <span className="text-xs mt-1">423</span>
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <div className="bg-orange-400 w-10" style={{ height: '70px' }}></div>
+                                                    <span className="text-xs mt-1">589</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="text-xs text-gray-500 mt-4 border-t pt-2">
+                                                <span>● 各学科下载排行前5的论文（含已删除）平均下载量</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <div className="bg-white rounded-md shadow p-3 flex flex-col items-center">
+                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                                <i className="fas fa-file-alt text-blue-500"></i>
+                                            </div>
+                                            <div className="text-2xl font-semibold">5</div>
+                                            <div className="text-xs text-gray-500">论文总数 <i className="fas fa-arrow-up text-blue-500"></i></div>
+                                        </div>
+                                        
+                                        <div className="bg-white rounded-md shadow p-3 flex flex-col items-center">
+                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                                <i className="fas fa-file-alt text-blue-500"></i>
+                                            </div>
+                                            <div className="text-2xl font-semibold">12</div>
+                                            <div className="text-xs text-gray-500">作者总数 <i className="fas fa-arrow-up text-blue-500"></i></div>
+                                        </div>
+                                        
+                                        <div className="bg-white rounded-md shadow p-3 flex flex-col items-center">
+                                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+                                                <i className="fas fa-file-download text-blue-500"></i>
+                                            </div>
+                                            <div className="text-2xl font-semibold">2907</div>
+                                            <div className="text-xs text-gray-500">总下载次数 <i className="fas fa-arrow-up text-blue-500"></i></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-orange-50 rounded-md shadow p-4">
+                                        <h2 className="text-base font-medium mb-3">万方数据论文管理特色</h2>
+                                        <ul className="text-sm space-y-2">
+                                            <li className="flex items-center">
+                                                <span className="w-4 h-4 rounded-full bg-orange-500 mr-2 flex-shrink-0"></span>
+                                                <span>全面支持各类文献数据管理</span>
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-4 h-4 rounded-full bg-orange-500 mr-2 flex-shrink-0"></span>
+                                                <span>一键导出报告</span>
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-4 h-4 rounded-full bg-orange-500 mr-2 flex-shrink-0"></span>
+                                                <span>海量安全存储</span>
+                                            </li>
+                                            <li className="flex items-center">
+                                                <span className="w-4 h-4 rounded-full bg-orange-500 mr-2 flex-shrink-0"></span>
+                                                <span>智能论文分析</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                    
+                    <footer className="bg-gray-800 text-white py-1 px-4 text-xs flex justify-between items-center">
+                        <div>© 2023 万方数据 - 论文管理系统 v2.1.5</div>
+                        <div className="flex space-x-4">
+                            <span>服务条款</span>
+                            <span>隐私政策</span>
+                            <span>投诉反馈</span>
+                            <span>帮助中心</span>
+                        </div>
+                    </footer>
+                    
+                    {/* 添加新论文模态框 */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg w-[600px] relative">
+                                <div className="bg-blue-600 text-white py-3 px-4 rounded-t-lg flex justify-between items-center">
+                                    <h3 className="font-medium">添加新论文</h3>
+                                    <button onClick={() => setShowAddModal(false)} className="text-white">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="p-6">
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-700 mb-1">论文标题</label>
+                                        <input type="text" className="w-full border rounded-md p-2" />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-700 mb-1">作者</label>
+                                        <input type="text" className="w-full border rounded-md p-2" placeholder="多个作者请用逗号分隔" />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-700 mb-1">发表年份</label>
+                                        <input type="text" className="w-full border rounded-md p-2" value="2000" />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-700 mb-1">关键词</label>
+                                        <input type="text" className="w-full border rounded-md p-2" placeholder="请输入关键词" />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-700 mb-1">摘要</label>
+                                        <textarea className="w-full border rounded-md p-2 h-24"></textarea>
+                                    </div>
+                                    
+                                    <div className="flex items-center text-sm text-gray-500 mt-6">
+                                        <input type="checkbox" className="mr-2" checked />
+                                        <span>若有对应的公开出版，则最多能上传1000字符</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-gray-100 py-3 px-6 rounded-b-lg flex justify-end space-x-2">
+                                    <button onClick={() => setShowAddModal(false)} className="px-4 py-2 border rounded-md bg-gray-200 hover:bg-gray-300">
+                                        取消
+                                    </button>
+                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                        添加论文
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* 编辑论文模态框 */}
+                    {showEditModal && currentPaper && (
+                        <div className="fixed inset-0 flex items-start justify-center z-50">
+                            <div className="bg-white w-full h-full">
+                                <div className="p-6">
+                                    <h2 className="text-lg font-medium mb-6">正在编辑: {currentPaper.title}</h2>
+                                    
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm text-gray-700 mb-1">论文标题</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="w-full border rounded-md p-2" 
+                                                    value={currentPaper.title}
+                                                />
+                                                <div className="text-right text-xs text-gray-500 mt-1">17700</div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm text-gray-700 mb-1">作者

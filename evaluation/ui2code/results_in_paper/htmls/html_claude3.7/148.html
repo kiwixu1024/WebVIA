@@ -1,0 +1,597 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+    }
+    .sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .sidebar-item.active {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background-color: #e2e8f0;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #00b4eb;
+      border-radius: 4px;
+    }
+    .character-card {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #f8fafc;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .tag {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-right: 5px;
+      display: inline-block;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+    }
+    .btn-primary {
+      background-color: #00b4eb;
+      color: white;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: #334155;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .tag-cold {
+      background-color: #e0f7fa;
+      color: #0288d1;
+    }
+    .tag-warm {
+      background-color: #fff8e1;
+      color: #ffa000;
+    }
+    .tag-blue {
+      background-color: #e3f2fd;
+      color: #1976d2;
+    }
+    .personality-tag {
+      background-color: #f1f5f9;
+      color: #475569;
+      border-radius: 4px;
+      padding: 3px 8px;
+      margin: 3px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .personality-tag.active {
+      background-color: #e0f7fa;
+      color: #0288d1;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('角色列表');
+      const [showAddModal, setShowAddModal] = useState(false);
+      const [showDeleteModal, setShowDeleteModal] = useState(false);
+      const [currentView, setCurrentView] = useState('list'); // list, editor, batch
+      
+      // Switching views based on the operations described
+      const handleTabClick = (tab) => {
+        setActiveTab(tab);
+        
+        if (tab === '角色列表') {
+          setCurrentView('list');
+        } else if (tab === '编辑面板') {
+          setCurrentView('editor');
+        } else if (tab === '批量管理') {
+          setCurrentView('batch');
+        }
+      };
+      
+      const handleAddCharacter = () => {
+        setShowAddModal(true);
+      };
+      
+      const handleCloseModal = () => {
+        setShowAddModal(false);
+        setShowDeleteModal(false);
+      };
+      
+      const handleDeleteCharacter = () => {
+        setShowDeleteModal(true);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-[#005274] text-white p-3 flex justify-between items-center">
+            <div className="flex items-center">
+              <i className="fas fa-cube mr-2"></i>
+              <span className="font-bold text-lg">AI角色创作士</span>
+            </div>
+            <div className="flex">
+              <button className="bg-[#00a1d6] text-white px-3 py-1 rounded flex items-center mr-2">
+                <i className="fas fa-cloud-upload-alt mr-1"></i>
+                <span>新建角色</span>
+              </button>
+              <button className="bg-[#00a1d6] text-white px-3 py-1 rounded flex items-center mr-2">
+                <i className="fas fa-file-export mr-1"></i>
+                <span>导出JSON</span>
+              </button>
+              <button className="bg-[#00a1d6] text-white px-3 py-1 rounded flex items-center">
+                <i className="fas fa-question-circle mr-1"></i>
+                <span>帮助</span>
+              </button>
+            </div>
+          </header>
+          
+          <div className="flex flex-1">
+            {/* Sidebar */}
+            <aside className="w-36 bg-white shadow p-4">
+              <div className={`sidebar-item ${activeTab === '角色总览' ? 'active' : ''}`}>
+                <i className="fas fa-home mr-2"></i>
+                <span>角色总览</span>
+              </div>
+              <div className={`sidebar-item ${activeTab === '角色编组' ? 'active' : ''}`}>
+                <i className="fas fa-layer-group mr-2"></i>
+                <span>角色编组</span>
+              </div>
+              <div className={`sidebar-item ${activeTab === '故事大纲' ? 'active' : ''}`}>
+                <i className="fas fa-book mr-2"></i>
+                <span>故事大纲</span>
+              </div>
+              <div className={`sidebar-item ${activeTab === '视觉参考' ? 'active' : ''}`}>
+                <i className="fas fa-image mr-2"></i>
+                <span>视觉参考</span>
+              </div>
+              <div className={`sidebar-item ${activeTab === '统计分析' ? 'active' : ''}`}>
+                <i className="fas fa-chart-bar mr-2"></i>
+                <span>统计分析</span>
+              </div>
+              
+              <div className="mt-8 p-2 bg-[#f8f9fa] rounded">
+                <h3 className="text-sm font-semibold mb-2">AI角色创作指南</h3>
+                <ul className="text-xs text-gray-600 space-y-1">
+                  <li>• 为角色创建丰富的内容使创作可以更加真实流畅</li>
+                  <li>• 考虑角色的历史和动机，使其更加立体</li>
+                  <li>• 设计角色后的任务空间，增加互动能力</li>
+                </ul>
+              </div>
+            </aside>
+            
+            {/* Main Content */}
+            <main className="flex-1 p-4">
+              {/* Tabs */}
+              <div className="mb-4 border-b">
+                <div className="flex">
+                  <button 
+                    className={`px-4 py-2 ${activeTab === '角色列表' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+                    onClick={() => handleTabClick('角色列表')}
+                  >
+                    角色列表
+                  </button>
+                  <button 
+                    className={`px-4 py-2 ${activeTab === '编辑面板' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+                    onClick={() => handleTabClick('编辑面板')}
+                  >
+                    编辑面板
+                  </button>
+                  <button 
+                    className={`px-4 py-2 ${activeTab === '批量管理' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
+                    onClick={() => handleTabClick('批量管理')}
+                  >
+                    批量管理
+                  </button>
+                </div>
+              </div>
+              
+              {/* Content based on view */}
+              {currentView === 'list' && (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">角色列表</h2>
+                    <button 
+                      className="bg-[#00a1d6] text-white px-3 py-1 rounded flex items-center"
+                      onClick={handleAddCharacter}
+                    >
+                      <i className="fas fa-plus mr-1"></i>
+                      <span>添加新角色</span>
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="character-card">
+                      <div className="absolute top-2 right-2 bg-[#edf2f7] px-2 py-1 text-xs rounded">已完成</div>
+                      <img src="https://picsum.photos/id/237/300/180" alt="艾拉" className="w-full h-36 object-cover" />
+                      <div className="p-3">
+                        <h3 className="font-bold text-lg">艾拉(ELLA)</h3>
+                        <p className="text-sm text-gray-600">网络偶像</p>
+                        <div className="mt-2 mb-2">
+                          <span className="tag tag-cold">冷静</span>
+                          <span className="tag tag-warm">好奇</span>
+                          <span className="tag tag-blue">聪明</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-3">出生于未来数字世界，精通网络科技与流量玩法。艾拉创建的虚拟公司成为社交网络的重要一环。面对复杂的公司内部争斗，她总能冷静分析找到最佳解决方案，是一个文雅。</p>
+                        <button className="mt-3 text-[#00a1d6] text-sm flex items-center" onClick={handleDeleteCharacter}>
+                          <i className="fas fa-edit mr-1"></i>
+                          <span>编辑角色</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="character-card">
+                      <div className="absolute top-2 right-2 bg-[#1a365d] text-white px-2 py-1 text-xs rounded">进行中</div>
+                      <img src="https://picsum.photos/id/1005/300/180" alt="马克斯" className="w-full h-36 object-cover" />
+                      <div className="p-3">
+                        <h3 className="font-bold text-lg">马克斯(MAX)</h3>
+                        <p className="text-sm text-gray-600">男子物理学家</p>
+                        <div className="mt-2 mb-2">
+                          <span className="tag tag-blue">严谨</span>
+                          <span className="tag tag-warm">内向</span>
+                          <span className="tag tag-cold">独特</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-3">马克斯是一个物理学家，极其善于理性思维和科学探索。为了宇宙起源的真相他不断努力。</p>
+                        <div className="mt-3 text-sm flex justify-between">
+                          <span className="text-gray-500">确认删除</span>
+                          <div className="flex">
+                            <button className="mr-2 px-2 py-1 bg-gray-200 rounded text-gray-700">取消</button>
+                            <button className="px-2 py-1 bg-red-500 text-white rounded">确认删除</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="character-card">
+                      <div className="absolute top-2 right-2 bg-[#1a365d] text-white px-2 py-1 text-xs rounded">进行中</div>
+                      <img src="https://picsum.photos/id/1018/300/180" alt="露娜" className="w-full h-36 object-cover" />
+                      <div className="p-3">
+                        <h3 className="font-bold text-lg">露娜(LUNA)</h3>
+                        <p className="text-sm text-gray-600">森林生物学家</p>
+                        <div className="mt-2 mb-2">
+                          <span className="tag tag-cold">富有好奇心</span>
+                          <span className="tag tag-warm">勇敢</span>
+                          <span className="tag tag-blue">富有韧性</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-3">在天空站起生态永续一代保护计划，为的是生物物种多元化而努力。露娜擅长记录各种动物特性，是一个接触大自然的守护人。</p>
+                        <button className="mt-3 text-[#00a1d6] text-sm flex items-center">
+                          <i className="fas fa-edit mr-1"></i>
+                          <span>编辑角色</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8">
+                    <h3 className="font-semibold mb-3">场景化设定小贴士</h3>
+                    <p className="text-sm text-gray-600 mb-2">在创作角色要素时请按照以下维度进行，考虑以下几点：</p>
+                    <ol className="text-sm text-gray-600 list-decimal pl-6">
+                      <li>角色在行动中所表现展现的状态是什么？</li>
+                      <li>该角色在社会环境中承担什么样的角色？</li>
+                      <li>角色的核心价值观和行为模式是什么？</li>
+                      <li>角色的言谈方式、表达方式有什么特点？</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+              
+              {currentView === 'editor' && (
+                <div>
+                  <h2 className="text-xl font-bold mb-6">角色编辑器</h2>
+                  <div className="bg-gray-100 p-6 text-center rounded">
+                    <p className="text-gray-600 mb-4">请从角色列表中选择一个角色进行编辑，或者创建新角色</p>
+                    <button 
+                      className="bg-[#00a1d6] text-white px-4 py-2 rounded"
+                      onClick={handleAddCharacter}
+                    >
+                      <i className="fas fa-plus mr-1"></i>
+                      <span>创建新角色</span>
+                    </button>
+                  </div>
+                  
+                  <div className="mt-8 bg-gray-50 p-4 rounded">
+                    <h3 className="font-semibold mb-4">个性化场景使用指南</h3>
+                    <p className="text-sm text-gray-600 mb-4">性格特质与场景使用的角色要素加以匹配设定，为故事注入更多的丰富性和真实感。</p>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="font-medium mb-2">常见性格组合:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• 外向+乐观+阳光 → 适合领导者</li>
+                          <li>• 内向+严谨+坚持 → 适合研究者</li>
+                          <li>• 好奇+敏感+创新 → 适合创造者</li>
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2">决定性格的因素:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• 智识+情绪 → 内心决策力</li>
+                          <li>• 勇敢+谨慎 → 冒险倾向</li>
+                          <li>• 严谨+冲动 → 决断模式</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {currentView === 'batch' && (
+                <div>
+                  <h2 className="text-xl font-bold mb-6">批量管理</h2>
+                  <div className="bg-gray-100 p-6 text-center rounded mb-8">
+                    <p className="text-gray-600">批量管理功能正在开发中，请稍候</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded">
+                    <h3 className="font-semibold mb-4">角色关系图谱</h3>
+                    <p className="text-sm text-gray-600 mb-2">构建角色之间关系网络可以让故事的角色更有厚度，考虑以下关系类型：</p>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                      <li>• 家庭关系: 父母，兄弟姐妹，祖孙</li>
+                      <li>• 社会关系: 朋友，敌人，伙伴，学生</li>
+                      <li>• 职业关系: 上司，下属，合作伙伴，竞争对手</li>
+                      <li>• 情感关系: 恋人，前任，暗恋对象</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </main>
+            
+            {/* Right sidebar */}
+            <aside className="w-64 bg-white shadow p-4">
+              <h2 className="font-bold text-lg text-center mb-4">角色统计</h2>
+              
+              <div className="flex justify-around text-center mb-6">
+                <div>
+                  <div className="text-3xl font-bold text-blue-500">3</div>
+                  <div className="text-sm text-gray-600">角色总数</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-500">1</div>
+                  <div className="text-sm text-gray-600">已完成</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-yellow-500">2</div>
+                  <div className="text-sm text-gray-600">进行中</div>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>完成进度</span>
+                  <span>33%</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-bar-fill" style={{width: '33%'}}></div>
+                </div>
+              </div>
+              
+              <h3 className="font-semibold mb-4">角色类型分布</h3>
+              <div className="flex justify-between text-xs text-gray-600 mb-8">
+                <span>主角</span>
+                <span>配角</span>
+                <span>反派</span>
+                <span>NPC</span>
+              </div>
+              
+              <div className="mt-12">
+                <h3 className="font-semibold mb-3">AI创作小贴士</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <div className="text-yellow-500 mr-2 mt-0.5"><i className="fas fa-exclamation-triangle"></i></div>
+                    <p className="text-xs text-gray-700">增加多维度的性格特点，以防角色形象过于扁平</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="text-yellow-500 mr-2 mt-0.5"><i className="fas fa-lightbulb"></i></div>
+                    <p className="text-xs text-gray-700">考虑角色的成长轨迹，让他们有前后变化</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="text-green-500 mr-2 mt-0.5"><i className="fas fa-check-circle"></i></div>
+                    <p className="text-xs text-gray-700">确保角色的动机行为方一致，保持内在逻辑</p>
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+          
+          <footer className="bg-[#005274] text-white text-sm py-2 px-4 text-center">
+            AI角色创作士 v1.0.0 | © 2023 AI创作工作室 | 联系我们：contact@aicreation.com
+          </footer>
+          
+          {/* Add Character Modal */}
+          {showAddModal && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="flex justify-between items-center border-b p-4">
+                  <h3 className="font-bold text-lg">添加新角色</h3>
+                  <button onClick={handleCloseModal}>
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <div className="p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">角色名称</label>
+                      <input 
+                        type="text" 
+                        className="w-full border rounded px-3 py-2"
+                        placeholder="例如: 艾拉(ELLA)"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">背景故事</label>
+                      <textarea 
+                        className="w-full border rounded px-3 py-2 h-24"
+                        placeholder="描述角色的背景故事，身份和主要特点..."
+                      ></textarea>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">年龄</label>
+                      <input 
+                        type="text" 
+                        className="w-full border rounded px-3 py-2"
+                        placeholder="例如: 28"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">性别</label>
+                      <select className="w-full border rounded px-3 py-2">
+                        <option>请选择</option>
+                        <option>男</option>
+                        <option>女</option>
+                        <option>其他</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">职业</label>
+                      <input 
+                        type="text" 
+                        className="w-full border rounded px-3 py-2"
+                        placeholder="例如: 网络偶像"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">成长历程</label>
+                      <textarea 
+                        className="w-full border rounded px-3 py-2 h-24"
+                        placeholder="描述角色的成长历程、关键事件和转折点..."
+                      ></textarea>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium mb-2">性格特质 (可多选)</label>
+                    <div className="flex flex-wrap">
+                      <span className="personality-tag">冷静</span>
+                      <span className="personality-tag">热情</span>
+                      <span className="personality-tag">好奇</span>
+                      <span className="personality-tag">果敢</span>
+                      <span className="personality-tag">严谨</span>
+                      <span className="personality-tag">内向</span>
+                      <span className="personality-tag active">外向</span>
+                      <span className="personality-tag">友善</span>
+                      <span className="personality-tag">富有同情心</span>
+                      <span className="personality-tag">勇敢</span>
+                      <span className="personality-tag">直观敏锐</span>
+                      <span className="personality-tag">理性</span>
+                      <span className="personality-tag">感性</span>
+                      <span className="personality-tag">幽默</span>
+                      <span className="personality-tag">忧虑</span>
+                      <span className="personality-tag">乐观</span>
+                      <span className="personality-tag">悲观</span>
+                      <span className="personality-tag">神秘</span>
+                      <span className="personality-tag">开朗</span>
+                      <span className="personality-tag">谨慎</span>
+                      <span className="personality-tag">智慧</span>
+                      <span className="personality-tag">倔强</span>
+                      <span className="personality-tag">坚定</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium mb-1">角色形象</label>
+                    <div className="border rounded p-2 flex items-center">
+                      <img src="https://picsum.photos/id/1025/300/300" alt="角色形象" className="w-16 h-16 object-cover rounded" />
+                      <span className="ml-2 text-sm text-gray-600">https://picsum.photos/id/1025/300/300</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end p-4 border-t bg-gray-50">
+                  <button className="btn-secondary mr-2" onClick={handleCloseModal}>取消</button>
+                  <button className="btn-primary">保存</button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Delete Confirmation Modal */}
+          {showDeleteModal && (
+            <div className="modal-overlay">
+              <div className="modal-content max-w-md">
+                <div className="p-4 text-center">
+                  <h3 className="font-bold text-lg mb-2">确认删除</h3>
+                  <p className="text-gray-600 mb-4">您确定要删除角色 艾拉(ELLA) 吗? 此操作不可逆操作。</p>
+                  
+                  <div className="flex justify-center">
+                    <button className="btn-secondary mr-2" onClick={handleCloseModal}>取消</button>
+                    <button className="btn-danger">确认删除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

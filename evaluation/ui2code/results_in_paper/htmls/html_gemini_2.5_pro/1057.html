@@ -1,0 +1,484 @@
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>互动幸福时光村</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+  </style>
+</head>
+
+<body class="bg-[#F0F2F5]">
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+  <script type="text/babel">
+
+    const { useState, useEffect } = React;
+
+    const initialTimelineData = [
+      {
+        id: 1,
+        date: '2023-01-15',
+        title: '家庭野餐',
+        description: '和家人一起在公园野餐，享受阳光和美食。',
+        imageUrl: 'https://picsum.photos/id/119/400/300',
+        likes: 12
+      },
+      {
+        id: 2,
+        date: '2023-02-20',
+        title: '孩子的第一次画展',
+        description: '小明把绘画作品在学校展出，他很兴奋和自豪。',
+        imageUrl: 'https://picsum.photos/id/22/400/300',
+        likes: 8
+      },
+      {
+        id: 3,
+        date: '2023-03-10',
+        title: '家庭游戏之夜',
+        description: '全家人一起玩桌游，欢笑声充满了整个客厅。',
+        imageUrl: 'https://picsum.photos/id/175/400/300',
+        likes: 15
+      }
+    ];
+
+    const usersData = [
+        { name: '妈妈', avatarUrl: 'https://picsum.photos/id/1027/32/32', activity: 18 },
+        { name: '爸爸', avatarUrl: 'https://picsum.photos/id/1005/32/32', activity: 12 },
+        { name: '小明', avatarUrl: 'https://picsum.photos/id/1012/32/32', activity: 9 },
+        { name: '奶奶', avatarUrl: 'https://picsum.photos/id/1025/32/32', activity: 7 },
+        { name: '爷爷', avatarUrl: 'https://picsum.photos/id/1011/32/32', activity: 5 },
+    ];
+
+
+    function TimelineModal({ isOpen, onClose, mode, itemData, onSave }) {
+      if (!isOpen) return null;
+
+      const [date, setDate] = useState('');
+      const [title, setTitle] = useState('');
+      const [description, setDescription] = useState('');
+      const [imageUrl, setImageUrl] = useState('');
+
+      useEffect(() => {
+        if (mode === 'edit' && itemData) {
+          setDate(itemData.date || '');
+          setTitle(itemData.title || '');
+          setDescription(itemData.description || '');
+          setImageUrl(itemData.imageUrl || '');
+        } else {
+          setDate('09/23/2025');
+          setTitle('输入幸福瞬间的标题');
+          setDescription('描述这个幸福的瞬间...');
+          setImageUrl('https://picsum.photos/id/129/100/60');
+        }
+      }, [mode, itemData, isOpen]);
+
+      const modalTitle = mode === 'add' ? '添加新时光' : '编辑时光';
+      const saveButtonText = mode === 'add' ? '添加' : '保存';
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <h2 className="text-xl font-bold mb-4">{modalTitle}</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">日期</label>
+                <div className="relative">
+                  <input type="text" value={date} onChange={e => setDate(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                   <i className="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">标题</label>
+                <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">描述</label>
+                <textarea rows="3" value={description} onChange={e => setDescription(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">图片</label>
+                <div className="mt-1 flex items-center space-x-4">
+                  <img src={imageUrl} className="w-24 h-16 object-cover rounded-md" />
+                  <button className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm">选择图片</button>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button onClick={onClose} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md">取消</button>
+              <button onClick={onClose} className="bg-green-500 text-white px-4 py-2 rounded-md">{saveButtonText}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function LeftSidebar({ activeView, onNavClick }) {
+      const menuItems = [
+        { id: 'display', icon: 'fa-images', text: '展示区' },
+        { id: 'edit', icon: 'fa-edit', text: '编辑区' },
+        { id: 'stats', icon: 'fa-chart-pie', text: '统计区' },
+        { id: 'actions', icon: 'fa-wrench', text: '操作栏' },
+        { id: 'help', icon: 'fa-question-circle', text: '相助说明' },
+        { id: 'theme', icon: 'fa-palette', text: '主题特色' },
+      ];
+
+      return (
+        <aside className="w-64 bg-[#FDEBE9] p-4 flex flex-col justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-8">互动幸福时光村</h1>
+            <nav>
+              <ul>
+                {menuItems.map(item => (
+                  <li key={item.id} className="mb-2">
+                    <a
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); onNavClick(item.id); }}
+                      className={`flex items-center p-3 rounded-lg text-lg transition-colors ${activeView === item.id
+                        ? 'bg-[#34D399] text-white'
+                        : 'text-gray-700 hover:bg-pink-100'
+                        }`}
+                    >
+                      <i className={`fas ${item.icon} w-6 mr-3`}></i>
+                      <span>{item.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+          <div className="bg-[#FFF5E1] border border-[#FADDB1] p-4 rounded-lg text-center text-sm text-gray-700">
+            <p>"在互动幸福时光村，分享家的温暖，记录爱的痕迹"</p>
+          </div>
+        </aside>
+      );
+    }
+
+    function RightSidebar({ timelineItems }) {
+       const sortedItems = [...timelineItems].sort((a, b) => b.likes - a.likes);
+       const sortedUsers = [...usersData].sort((a,b) => b.activity - a.activity);
+       const activeUsers = [
+         { name: '妈妈', avatarUrl: 'https://picsum.photos/id/1027/32/32', activity: 18 },
+         { name: '爸爸', avatarUrl: 'https://picsum.photos/id/1005/32/32', activity: 12 },
+         { name: '小明', avatarUrl: 'https://picsum.photos/id/1012/32/32', activity: 9 },
+       ];
+
+      return (
+        <aside className="w-80 bg-white p-6 flex-shrink-0">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">实时概览</h2>
+            
+            <div className="bg-[#EBF8FF] border border-[#BEE3F8] p-4 rounded-lg mb-4">
+                <p className="text-sm text-blue-800">总互动次数</p>
+                <p className="text-4xl font-bold text-blue-800">35</p>
+                <i className="fas fa-sync-alt text-blue-500 mt-1"></i>
+            </div>
+
+            <div className="bg-[#FFF5F7] border border-[#FED7E2] p-4 rounded-lg mb-6">
+                <p className="text-sm text-pink-800">今日新增</p>
+                <p className="text-4xl font-bold text-pink-500">2</p>
+                <i className="fas fa-sync-alt text-pink-500 mt-1"></i>
+            </div>
+
+            <div className="mb-6">
+                <h3 className="font-bold text-gray-700 mb-3">热门时光条目</h3>
+                <ul>
+                    {sortedItems.map(item => (
+                        <li key={item.id} className="flex justify-between items-center text-sm text-gray-600 mb-2">
+                            <span>{item.title}</span>
+                            <span className="flex items-center">
+                               <i className="fas fa-heart text-red-400 mr-2"></i>
+                               {item.likes}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+             <div className="mb-6">
+                <h3 className="font-bold text-gray-700 mb-3">活跃用户</h3>
+                <ul>
+                  {activeUsers.map(user => (
+                    <li key={user.name} className="flex justify-between items-center text-sm text-gray-600 mb-3">
+                      <div className="flex items-center">
+                        <img src={user.avatarUrl} className="w-8 h-8 rounded-full mr-3 object-cover" />
+                        <span>{user.name}</span>
+                      </div>
+                      <span className="flex items-center text-yellow-500">
+                        <i className="fas fa-arrow-up mr-2"></i>
+                        {user.activity}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+            </div>
+
+             <button className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
+                <i className="fas fa-download mr-2"></i>
+                导出报表
+            </button>
+        </aside>
+      );
+    }
+
+    function PageHeader() {
+        return (
+            <header className="bg-white shadow-sm p-4 flex justify-between items-center">
+                <div>
+                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm mr-2"><i className="fas fa-stream mr-2"></i>时间轴视图</button>
+                    <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm mr-2"><i className="fas fa-sitemap mr-2"></i>树状视图</button>
+                    <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm"><i className="fas fa-map-marker-alt mr-2"></i>地图视图</button>
+                </div>
+                <div className="text-sm text-gray-500 flex items-center">
+                    <i className="fas fa-lightbulb text-yellow-400 mr-2"></i>
+                    <span>小贴士：点击顶部tab可以切换不同视图，发现更多惊喜</span>
+                </div>
+            </header>
+        );
+    }
+    
+    function PageFooter() {
+        return (
+            <footer className="mt-auto">
+              <div className="bg-gradient-to-r from-[#D4EDDA] to-[#D1FAE5] text-center py-3 text-sm text-gray-600">
+                记录美好，传递幸福
+                <span className="text-xs text-gray-500 ml-4">互动幸福时光 v1.0.0 (更多帮助 | 联系我们: contact@happytree.com)</span>
+              </div>
+              <div className="bg-[#F0F2F5] px-8 py-3 flex items-center justify-center text-gray-600">
+                <div className="relative w-1/3">
+                  <input type="text" placeholder="搜索时光记录..." className="w-full bg-white border border-gray-300 rounded-full py-2 pl-4 pr-10" />
+                  <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <button className="ml-4 text-sm flex items-center"><i className="fas fa-cloud-upload-alt mr-2"></i>导入/导出</button>
+                <span className="mx-2 text-gray-300">|</span>
+                <button className="text-sm flex items-center"><i className="fas fa-question-circle mr-2"></i>帮助中心</button>
+              </div>
+            </footer>
+        )
+    }
+
+    function DisplayView({ items, onOpenAddModal, onOpenEditModal }) {
+      return (
+        <div className="p-8">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">青橘时光展示</h2>
+                <button onClick={onOpenAddModal} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                    <i className="fas fa-plus mr-2"></i>
+                    添加新时光
+                </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+               {items.map(item => (
+                 <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                    <div className="bg-gray-800">
+                        <img src={item.imageUrl} alt={item.title} className="w-full h-48 object-cover"/>
+                    </div>
+                    <div className="p-4 flex-grow flex flex-col">
+                        <div className="flex justify-between items-start">
+                           <h3 className="text-lg font-bold text-gray-900">{item.title}</h3>
+                           <div>
+                                <button onClick={() => onOpenEditModal(item)} className="text-gray-500 hover:text-blue-500 mr-2"><i className="fas fa-pencil-alt"></i></button>
+                                <button className="text-gray-500 hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                           </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-2">{item.date}</p>
+                        <p className="text-gray-700 text-sm flex-grow mb-4">{item.description}</p>
+                        <div className="mt-auto flex justify-between items-center text-sm text-gray-600">
+                            <span className="flex items-center">
+                                <i className="fas fa-heart text-red-400 mr-2"></i> {item.likes} 互动
+                            </span>
+                             <a href="#" className="flex items-center text-green-600 hover:underline">
+                                <i className="fas fa-share-alt mr-1"></i> 分享
+                            </a>
+                        </div>
+                    </div>
+                 </div>  
+               ))}
+            </div>
+            <div className="text-center mt-8 text-sm text-gray-500">
+                <p><i className="fas fa-lightbulb text-yellow-400 mr-1"></i> Tip: 长按卡片可快捷分享至社交平台</p>
+            </div>
+        </div>
+      );
+    }
+    
+    function EditView({ items, onOpenAddModal, onOpenEditModal }) {
+        return (
+            <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">时光条目编辑</h2>
+                    <button onClick={onOpenAddModal} className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i className="fas fa-plus mr-2"></i>
+                        批量添加条目
+                    </button>
+                </div>
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table className="w-full text-left">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th className="p-4 text-sm font-semibold text-gray-600">日期</th>
+                                <th className="p-4 text-sm font-semibold text-gray-600">标题</th>
+                                <th className="p-4 text-sm font-semibold text-gray-600">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items.map(item => (
+                                <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
+                                    <td className="p-4 text-gray-700">{item.date}</td>
+                                    <td className="p-4 text-gray-700">{item.title}</td>
+                                    <td className="p-4 text-sm space-x-4">
+                                        <button onClick={() => onOpenEditModal(item)} className="text-blue-600 hover:underline"><i className="fas fa-edit mr-1"></i>编辑</button>
+                                        <button className="text-red-600 hover:underline"><i className="fas fa-trash-alt mr-1"></i>删除</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+    
+    function StatsView() {
+        const sortedItems = [...initialTimelineData].sort((a, b) => b.likes - a.likes);
+        
+        return (
+            <div className="p-8">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">时光概览</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-white border-t-4 border-blue-400 p-6 rounded-lg shadow-md flex items-center justify-between">
+                        <div>
+                           <p className="text-sm text-gray-500">总互动次数</p>
+                           <p className="text-4xl font-bold text-gray-800">35</p>
+                        </div>
+                        <i className="fas fa-sync-alt text-blue-400 text-2xl"></i>
+                    </div>
+                    <div className="bg-white border-t-4 border-pink-400 p-6 rounded-lg shadow-md flex items-center justify-between">
+                        <div>
+                           <p className="text-sm text-gray-500">今日新增条目</p>
+                           <p className="text-4xl font-bold text-gray-800">2</p>
+                        </div>
+                        <i className="fas fa-sync-alt text-pink-400 text-2xl"></i>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="font-bold text-gray-700 mb-4">热门时光条目 Top3</h3>
+                        <ul>
+                            {sortedItems.map((item, index) => (
+                                <li key={item.id} className="flex items-center justify-between text-gray-600 mb-3 p-2 rounded-md hover:bg-gray-50">
+                                    <div className="flex items-center">
+                                       <span className="bg-gray-200 text-gray-700 rounded-full w-6 h-6 flex items-center justify-center mr-4 font-bold">{index + 1}</span>
+                                       <span>{item.title}</span>
+                                    </div>
+                                    <span className="flex items-center text-sm">
+                                        <i className="fas fa-heart text-red-400 mr-2"></i> {item.likes}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="font-bold text-gray-700 mb-4">活跃用户排行榜 Top5</h3>
+                        <ul>
+                            {usersData.map((user, index) => (
+                                <li key={index} className="flex items-center justify-between text-gray-600 mb-3 p-2 rounded-md hover:bg-gray-50">
+                                    <div className="flex items-center">
+                                      <img src={user.avatarUrl} className="w-8 h-8 rounded-full mr-3 object-cover" />
+                                      <span>{user.name}</span>
+                                    </div>
+                                    <span className="text-sm text-yellow-600 font-medium">{user.activity} 活跃度</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+                <div className="text-center">
+                     <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg flex items-center justify-center mx-auto">
+                        <i className="fas fa-download mr-2"></i>
+                        导出报表
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+
+    function App() {
+      const [currentView, setCurrentView] = useState('display');
+      const [timelineItems, setTimelineItems] = useState(initialTimelineData);
+      
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+      const [currentItem, setCurrentItem] = useState(null);
+
+      const handleNavClick = (view) => {
+          if (['display', 'edit', 'stats'].includes(view)) {
+             setCurrentView(view);
+          }
+      };
+      
+      const handleOpenAddModal = () => {
+          setModalMode('add');
+          setCurrentItem(null);
+          setIsModalOpen(true);
+      };
+      
+      const handleOpenEditModal = (item) => {
+          setModalMode('edit');
+          setCurrentItem(item);
+          setIsModalOpen(true);
+      };
+
+      const handleCloseModal = () => {
+          setIsModalOpen(false);
+          setCurrentItem(null);
+      };
+      
+      const renderView = () => {
+        switch (currentView) {
+          case 'edit':
+            return <EditView items={timelineItems} onOpenAddModal={handleOpenAddModal} onOpenEditModal={handleOpenEditModal} />;
+          case 'stats':
+            return <StatsView />;
+          case 'display':
+          default:
+            return <DisplayView items={timelineItems} onOpenAddModal={handleOpenAddModal} onOpenEditModal={handleOpenEditModal}/>;
+        }
+      };
+
+      return (
+        <div className="min-h-screen flex">
+          <LeftSidebar activeView={currentView} onNavClick={handleNavClick} />
+          <div className="flex-1 flex flex-col">
+            <PageHeader />
+            <main className="flex-1 overflow-y-auto">
+              {renderView()}
+            </main>
+            <PageFooter />
+          </div>
+          <RightSidebar timelineItems={timelineItems} />
+          <TimelineModal 
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            mode={modalMode}
+            itemData={currentItem}
+          />
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,541 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360安全卫士</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [scanPath, setScanPath] = useState('C:\\Windows\\');
+            const [scanDepth, setScanDepth] = useState('标准');
+            const [isScanning, setIsScanning] = useState(false);
+            const [garbageCleanupComplete, setGarbageCleanupComplete] = useState(false);
+
+            const handleInputChange = (e) => {
+                const value = e.target.value;
+                // Special handling for C:\\Program Files input
+                if (value === 'C:\\\\Program Files') {
+                    setScanPath('C:\\Program Files\\');
+                    setScanDepth('深度');
+                } else if (value === 'C:\\Windows\') {
+                    setScanPath('C:\\Windows\\');
+                    setScanDepth('标准');
+                } else {
+                    setScanPath(value);
+                }
+            };
+
+            const handleStartDiagnose = () => {
+                if (scanPath === 'C:\\\\Program Files') {
+                    setIsScanning(true);
+                }
+            };
+
+            const handleStopDiagnose = () => {
+                setIsScanning(false);
+            };
+
+            const handleGarbageCleanup = () => {
+                setGarbageCleanupComplete(true);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-900 text-white">
+                    {/* Header */}
+                    <header className="flex justify-between items-center p-4 bg-black border-b border-gray-700">
+                        <div className="flex items-center gap-3">
+                            <img src="https://picsum.photos/id/1/40/40" alt="360安全卫士" className="w-10 h-10 rounded" />
+                            <span className="text-green-400 text-xl font-bold">360安全卫士</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-300">
+                            <i className="fas fa-exclamation-triangle"></i>
+                            <span className="text-sm">安全中心</span>
+                            <i className="fas fa-bell relative text-xl cursor-pointer"></i>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-56 bg-gray-800 min-h-screen p-4 border-r border-gray-700">
+                            <nav className="space-y-1">
+                                <div className="flex items-center gap-3 p-3 bg-green-500 rounded-lg cursor-pointer">
+                                    <i className="fas fa-home"></i>
+                                    <span>首页</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-700 rounded-lg">
+                                    <i className="fas fa-search"></i>
+                                    <span>病毒查杀</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 p-3 bg-green-500 rounded-lg cursor-pointer">
+                                    <i className="fas fa-shield-alt"></i>
+                                    <span>电脑体检</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-700 rounded-lg">
+                                    <i className="fas fa-flask"></i>
+                                    <span>漏洞修复</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 p-3 bg-green-500 rounded-lg cursor-pointer">
+                                    <i className="fas fa-broom"></i>
+                                    <span>垃圾清理</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-700 rounded-lg">
+                                    <i className="fas fa-shield-alt"></i>
+                                    <span>实时防护</span>
+                                </div>
+                            </nav>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-8">
+                            {/* Security Score */}
+                            <div className="flex justify-between items-center mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                                        <span className="text-white text-lg font-bold">85</span>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold">360 安全评分</h2>
+                                        <p className="text-gray-300">全面守护您的电脑安全</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 text-gray-400">
+                                    <i className="fas fa-shield-alt"></i>
+                                    <span className="text-sm">建议分 ≥90 分为优秀状态</span>
+                                </div>
+                            </div>
+
+                            {/* Top Buttons and Scan Section */}
+                            <div className="bg-gray-800 rounded-lg p-6 mb-6">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex-1">
+                                        <div className="mb-3">
+                                            <label className="block text-sm text-gray-300 mb-2">扫描路径</label>
+                                            <input 
+                                                type="text" 
+                                                value={scanPath}
+                                                onChange={handleInputChange}
+                                                className="w-full bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                            />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={isScanning ? handleStopDiagnose : handleStartDiagnose}
+                                                className={`px-4 py-2 rounded text-white font-medium ${
+                                                    isScanning 
+                                                        ? 'bg-yellow-600 hover:bg-yellow-700' 
+                                                        : 'bg-green-500 hover:bg-green-600'
+                                                }`}
+                                            >
+                                                <i className={`fas ${isScanning ? 'fa-pause' : 'fa-play'} mr-2`}></i>
+                                                {isScanning ? '暂停体检' : '开始体检'}
+                                            </button>
+                                            <button className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white font-medium">
+                                                <i className="fas fa-cog mr-2"></i>自定义扫描
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="mb-3">
+                                            <label className="block text-sm text-gray-300 mb-2">扫描深度</label>
+                                            <select 
+                                                value={scanDepth}
+                                                onChange={(e) => setScanDepth(e.target.value)}
+                                                className="bg-gray-700 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+                                            >
+                                                <option value="标准">标准</option>
+                                                <option value="深度">深度</option>
+                                            </select>
+                                        </div>
+                                        <div className="text-sm text-gray-400">
+                                            <i className="fas fa-info-circle mr-1"></i>
+                                            选择深度将影响扫描速度
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                {/* Vulnerability Repair */}
+                                <div className="bg-gray-800 rounded-lg p-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <i className="fas fa-shield-alt text-blue-400"></i>
+                                            <h3 className="text-lg font-semibold">漏洞修复建议</h3>
+                                        </div>
+                                        <button 
+                                            onClick={handleGarbageCleanup}
+                                            className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white font-medium"
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>添加自定义修复规则
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <i className="fas fa-bug text-red-400"></i>
+                                                    <h4 className="font-medium">微软补丁 KB123456 漏洞</h4>
+                                                </div>
+                                                <span className="bg-red-600 text-xs px-2 py-1 rounded">高优先</span>
+                                            </div>
+                                            <p className="text-gray-300 text-sm mb-2">
+                                                <i className="fas fa-info-circle mr-1"></i>
+                                                此漏洞可能导致远程代码执行
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-exclamation-triangle mr-1"></i>查看详情
+                                                </button>
+                                                <button className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-download mr-1"></i>立即修复
+                                                </button>
+                                                <button className="border border-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm text-gray-400">
+                                                    <i className="fas fa-ellipsis-h mr-1"></i>...
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <i className="fas fa-bug text-yellow-500"></i>
+                                                <h4 className="font-medium">浏览器插件过期</h4>
+                                            </div>
+                                            <p className="text-gray-300 text-sm mb-2">
+                                                <i className="fas fa-info-circle mr-1"></i>
+                                                某些过期插件可能包含安全隐患
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-exclamation-triangle mr-1"></i>查看详情
+                                                </button>
+                                                <button className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-download mr-1"></i>立即修复
+                                                </button>
+                                                <button className="border border-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm text-gray-400">
+                                                    <i className="fas fa-ellipsis-h mr-1"></i>...
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <i className="fas fa-bug text-red-600"></i>
+                                                <h4 className="font-medium">Java 运行时环境需要更新</h4>
+                                            </div>
+                                            <p className="text-gray-300 text-sm mb-2">
+                                                <i className="fas fa-info-circle mr-1"></i>
+                                                当前版本存在已知安全问题
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-exclamation-triangle mr-1"></i>查看详情
+                                                </button>
+                                                <button className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-download mr-1"></i>立即修复
+                                                </button>
+                                                <button className="border border-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm text-gray-400">
+                                                    <i className="fas fa-ellipsis-h mr-1"></i>...
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <i className="fas fa-bug text-blue-500"></i>
+                                                <h4 className="font-medium">Adobe Flash Player 漏洞</h4>
+                                            </div>
+                                            <p className="text-gray-300 text-sm mb-2">
+                                                <i className="fas fa-info-circle mr-1"></i>
+                                                该漏洞已有修复补丁
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-exclamation-triangle mr-1"></i>查看详情
+                                                </button>
+                                                <button className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm text-white">
+                                                    <i className="fas fa-download mr-1"></i>立即修复
+                                                </button>
+                                                <button className="border border-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm text-gray-400">
+                                                    <i className="fas fa-ellipsis-h mr-1"></i>...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Garbage Cleanup */}
+                                <div className="bg-gray-800 rounded-lg p-6">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <i className="fas fa-broom text-green-400"></i>
+                                            <h3 className="text-lg font-semibold">垃圾清理结果</h3>
+                                        </div>
+                                        <button className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white font-medium">
+                                            <i className="fas fa-plus mr-2"></i>添加清理项
+                                        </button>
+                                    </div>
+                                    
+                                    {garbageCleanupComplete ? (
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-4 text-green-400 font-medium">
+                                                <i className="fas fa-broom"></i>
+                                                <span>清理结果报告</span>
+                                            </div>
+                                            <div className="bg-gray-700 rounded-lg p-4 mb-6">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <div className="text-sm text-gray-400">剩余垃圾容量</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <i className="fas fa-weight h-6"></i>
+                                                            <span className="text-lg font-semibold">0MB</span>
+                                                            <span className="text-gray-300">清理完成</span>
+                                                        </div>
+                                                    </div>
+                                                    <button className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white font-medium">
+                                                        开始清理
+                                                    </button>
+                                                </div>
+                                                <div className="text-center text-sm text-gray-400 mt-4">
+                                                    <i className="fas fa-info-circle mr-1"></i>
+                                                    清理已完全执行，系统垃圾已清空
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h4 className="text-lg font-medium">垃圾清理过程</h4>
+                                                    <span className="text-sm text-gray-400">系统垃圾模</span>
+                                                </div>
+                                                
+                                                <div className="space-y-3">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2 text-sm">
+                                                            <i className="fas fa-square text-green-400"></i>
+                                                            <span>系统垃圾</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-gray-300">包含临时文件</span>
+                                                            <span className="text-blue-400">已清理</span>
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">删除临时日志和缓存数据文件云</div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2 text-sm">
+                                                            <i className="fas fa-square text-green-400"></i>
+                                                            <span>浏览器缓存</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-gray-300">各浏览器的图片、视频的缓存文件</span>
+                                                            <span className="text-blue-400">已清理</span>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2 text-sm">
+                                                            <i className="fas fa-square text-green-400"></i>
+                                                            <span>软件残留</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-gray-300">卸载软件后的残留文件</span>
+                                                            <span className="text-blue-400">已清理</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <div className="grid grid-cols-3 gap-4 mb-6">
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                                                        <i className="fas fa-folder-open"></i>
+                                                        <span>系统垃圾</span>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-2xl font-bold">245MB</div>
+                                                        <div className="text-sm text-gray-400">垃圾总量</div>
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                            清理
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                                                        <i className="fas fa-file-image"></i>
+                                                        <span>浏览器缓存</span>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-2xl font-bold">80MB</div>
+                                                        <div className="text-sm text-gray-400">各大系统文件</div>
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                            清理
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="bg-gray-700 rounded-lg p-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+                                                        <i className="fas fa-code"></i>
+                                                        <span>软件残留</span>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-2xl font-bold">45MB</div>
+                                                        <div className="text-sm text-gray-400">卸载安装</div>
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-sm text-white">
+                                                            清理
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex justify-between">
+                                                <button 
+                                                    onClick={handleGarbageCleanup}
+                                                    className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg text-white font-medium"
+                                                >
+                                                    <i className="fas fa-broom mr-2"></i>一键清理全部
+                                                </button>
+                                                <button className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-white font-medium">
+                                                    <i className="fas fa-plus mr-2"></i>添加清理项
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="w-80 bg-gray-800 p-6 border-l border-gray-700">
+                        {/* Security Score */}
+                        <div className="bg-gray-900 rounded-lg p-6 mb-6">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-semibold text-white">实时防护状态</h3>
+                                <div className="flex items-center gap-2">
+                                    <i className="fas fa-shield-alt text-green-400"></i>
+                                    <span className="text-sm text-gray-400">防护正常运行中</span>
+                                </div>
+                            </div>
+                            <div className="bg-green-600 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-3">
+                                <img src="https://picsum.photos/id/100/80/80" alt="防护正常运行" className="w-20 h-20 rounded-full opacity-60" />
+                            </div>
+                            <div className="text-xs text-gray-400 mb-2">防护工作正常运行</div>
+                            <div className="text-xs text-gray-400">访问风险情况良好</div>
+                        </div>
+
+                        {/* Usage Tools */}
+                        <div className="bg-gray-900 rounded-lg p-6 mb-6">
+                            <h3 className="font-semibold text-white mb-4">常用工具</h3>
+                            <div className="grid grid-cols-3 gap-3">
+                                <button className="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-magic mr-2"></i>优化加速
+                                </button>
+                                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-shield-alt mr-2"></i>木马查杀
+                                </button>
+                                <button className="w-full bg-green-500 hover:bg-green-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-cogs mr-2"></i>系统修复
+                                </button>
+                                <button className="w-full bg-pink-500 hover:bg-pink-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-globe mr-2"></i>网速保护
+                                </button>
+                                <button className="w-full bg-purple-500 hover:bg-purple-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-broom mr-2"></i>垃圾清理
+                                </button>
+                                <button className="w-full bg-teal-500 hover:bg-teal-600 text-white text-xs py-2 rounded">
+                                    <i className="fas fa-desktop mr-2"></i>软件管家
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Daily Stats */}
+                        <div className="bg-gray-900 rounded-lg p-6 mb-6">
+                            <h3 className="font-semibold text-white mb-4">今日数据</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2 text-blue-400">
+                                        <i className="fas fa-shield-alt"></i>
+                                        <span className="text-sm">查威胁</span>
+                                    </div>
+                                    <span className="text-green-400 font-bold">12</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-2 text-green-400">
+                                        <i className="fas fa-clock"></i>
+                                        <span className="text-sm">在线保护时长</span>
+                                    </div>
+                                    <span className="text-green-400 font-bold">
+                                        <i className="fas fa-hourglass-half mr-1"></i>168小时
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Version Info */}
+                        <div className="bg-gray-900 rounded-lg p-6">
+                            <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
+                                <i className="fas fa-info-circle"></i>
+                                <span>版本</span>
+                            </div>
+                            <div className="text-white text-sm">13.1.0.1110</div>
+                            <button className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-xs text-white">
+                                <i className="fas fa-sync mr-1"></i>检查更新
+                            </button>
+                            <div className="flex gap-2 mt-4">
+                                <span className="text-xs text-gray-400">遇到问题？</span>
+                                <i className="fas fa-question-circle text-green-400 ml-1"></i>
+                                <span className="text-xs text-gray-400">查看帮助文档</span>
+                                <i className="fas fa-child text-blue-400 ml-1"></i>
+                                <span className="text-xs text-gray-400">或联系客服</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="text-center text-gray-500 text-xs py-4 border-t border-gray-700">
+                        <div className="flex justify-between items-center">
+                            <div>© 2023 360安全卫士 All Rights Reserved</div>
+                            <div className="flex gap-2">
+                                <img src="https://picsum.photos/id/200/20/20" alt="社交媒体" className="w-5 h-5 rounded" />
+                                <span className="text-gray-400">lianjiaotong</span>
+                                <i className="fab fa-weixin text-green-500"></i>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

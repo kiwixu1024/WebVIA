@@ -1,0 +1,275 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>游泳成绩记录</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100">
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+function Sidebar() {
+  return (
+    <div className="w-64 bg-white h-screen flex flex-col p-5 border-r">
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold">个人信息</h2>
+      </div>
+      <nav className="flex-1 space-y-2">
+        <button className="w-full text-left px-3 py-2 bg-blue-100 text-blue-600 rounded">泳姿设置</button>
+        <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">历史记录</button>
+        <button className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded">系统设置</button>
+      </nav>
+      <div className="mt-auto bg-blue-50 border border-blue-200 text-blue-800 p-3 text-sm rounded">
+        快速小贴士<br/>
+        要提高自由泳速度，请增加划臂频率并保持良好的身体姿态。
+      </div>
+    </div>
+  );
+}
+
+function Header() {
+  return (
+    <header className="w-full bg-white shadow px-6 py-4 flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <i className="fas fa-swimmer text-xl text-blue-600"></i>
+        <span className="text-2xl font-semibold text-blue-600">游泳成绩记录</span>
+        <div className="text-gray-500 space-x-2">
+          <span>首页</span><span>/</span><span>主頁</span>
+        </div>
+      </div>
+      <nav className="space-x-3">
+        <button className="px-4 py-1 bg-blue-600 text-white rounded">主頁</button>
+        <button className="px-4 py-1 text-gray-600 hover:text-blue-600">成绩管理</button>
+        <button className="px-4 py-1 text-gray-600 hover:text-blue-600">统计报表</button>
+        <button className="px-4 py-1 text-gray-600 hover:text-blue-600">帮助说明</button>
+      </nav>
+    </header>
+  );
+}
+
+function TableView({ data, onEdit, onDelete }) {
+  return (
+    <table className="min-w-full bg-white rounded overflow-hidden shadow">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">项目</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">泳姿</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">日期</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">成绩（秒）</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">备注</th>
+          <th className="px-6 py-3 text-right text-sm font-medium text-gray-600">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(item => (
+          <tr key={item.id} className="border-t">
+            <td className="px-6 py-4 text-gray-700">{item.name}</td>
+            <td className="px-6 py-4 text-gray-700">{item.stroke}</td>
+            <td className="px-6 py-4 text-gray-700">{item.date}</td>
+            <td className="px-6 py-4 text-gray-700">{item.time}</td>
+            <td className="px-6 py-4 text-gray-700">{item.notes}</td>
+            <td className="px-6 py-4 text-right space-x-2">
+              <button onClick={()=>onEdit(item)} className="text-blue-600 hover:underline"><i className="fas fa-edit"></i> 编辑</button>
+              <button onClick={()=>onDelete(item)} className="text-red-600 hover:underline"><i className="fas fa-trash-alt"></i> 删除</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function CardView({ data, onEdit, onDelete }) {
+  return (
+    <div className="grid grid-cols-3 gap-6">
+      {data.map(item => (
+        <div key={item.id} className="bg-white p-4 rounded shadow">
+          <h3 className="text-lg font-medium mb-2">{item.name}</h3>
+          <p><span className="font-semibold">泳姿：</span>{item.stroke}</p>
+          <p><span className="font-semibold">日期：</span>{item.date}</p>
+          <p><span className="font-semibold">成绩：</span><span className="text-blue-600">{item.time}秒</span></p>
+          <p><span className="font-semibold">备注：</span>{item.notes}</p>
+          <div className="mt-3 flex space-x-2">
+            <button onClick={()=>onEdit(item)} className="px-3 py-1 bg-blue-500 text-white rounded"><i className="fas fa-edit"></i> 编辑</button>
+            <button onClick={()=>onDelete(item)} className="px-3 py-1 bg-red-500 text-white rounded"><i className="fas fa-trash-alt"></i> 删除</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Modal({ children, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white rounded shadow-lg w-96 p-6 relative">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"><i className="fas fa-times"></i></button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AddEditModal({ mode, item, onSave, onCancel }) {
+  const [name, setName] = useState(item?.name||'');
+  const [stroke, setStroke] = useState(item?.stroke||'自由泳');
+  const [date, setDate] = useState(item?.date||'');
+  const [time, setTime] = useState(item?.time||'');
+  const [notes, setNotes] = useState(item?.notes||'');
+  const title = mode==='edit'?'编辑游泳成绩':'添加游泳成绩';
+  const btnLabel = mode==='edit'?'保存更改':'确认添加';
+  const btnClass = mode==='edit'?'bg-yellow-500':'bg-blue-500';
+  return (
+    <Modal onClose={onCancel}>
+      <h3 className="text-lg font-medium mb-4">{title}</h3>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm mb-1">项目名称</label>
+          <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="例如：50米自由泳"
+            className="w-full border px-3 py-2 rounded"/>
+        </div>
+        <div>
+          <label className="block text-sm mb-1">泳姿选择</label>
+          <select value={stroke} onChange={e=>setStroke(e.target.value)} className="w-full border px-3 py-2 rounded">
+            <option>自由泳</option><option>蛙泳</option><option>仰泳</option><option>蝶泳</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm mb-1">日期</label>
+          <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="w-full border px-3 py-2 rounded"/>
+        </div>
+        <div>
+          <label className="block text-sm mb-1">成绩（秒）</label>
+          <input type="text" value={time} onChange={e=>setTime(e.target.value)} placeholder="例如：23.45"
+            className="w-full border px-3 py-2 rounded"/>
+        </div>
+        <div>
+          <label className="block text-sm mb-1">备注</label>
+          <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="添加备注..."
+            className="w-full border px-3 py-2 rounded"/>
+        </div>
+        <div className="flex justify-end space-x-2 mt-4">
+          <button onClick={onCancel} className="px-4 py-1 border rounded">取消</button>
+          <button onClick={()=>onSave({ id: item?.id, name, stroke, date, time, notes })} className={`px-4 py-1 text-white rounded ${btnClass}`}>{btnLabel}</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function DeleteModal({ item, onConfirm, onCancel }) {
+  return (
+    <Modal onClose={onCancel}>
+      <h3 className="text-lg font-medium mb-4">确认删除</h3>
+      <p>您确定要删除 {item.name} ({item.date}) 的记录吗？此操作无法撤销。</p>
+      <div className="flex justify-end space-x-2 mt-6">
+        <button onClick={onCancel} className="px-4 py-1 border rounded">取消</button>
+        <button onClick={()=>onConfirm(item)} className="px-4 py-1 bg-red-500 text-white rounded">确认删除</button>
+      </div>
+    </Modal>
+  );
+}
+
+function AssistantPanel() {
+  return (
+    <div className="w-64 bg-white p-5 rounded shadow space-y-6">
+      <button className="w-full flex items-center justify-center bg-blue-600 text-white py-2 rounded"><i className="fas fa-plus mr-2"></i>添加成绩</button>
+      <div>
+        <h4 className="font-semibold mb-2">游泳成绩管理助手</h4>
+        <ul className="space-y-2 text-gray-700">
+          <li><i className="fas fa-fire mr-2 text-red-500"></i>实时追踪</li>
+          <li><i className="fas fa-chart-line mr-2 text-yellow-500"></i>数据分析</li>
+          <li><i className="fas fa-bullseye mr-2 text-green-500"></i>目标管理</li>
+        </ul>
+      </div>
+      <div className="bg-blue-50 border border-blue-200 p-3 text-blue-800 text-sm rounded">
+        今日小贴士<br/>
+        提高游泳效率的三个关键点：<br/>
+        1. 保持流线型姿态，减少水的阻力<br/>
+        2. 规律呼吸，避免体力过早消耗<br/>
+        3. 控制节奏，找到最适合自己的配速
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2">训练日程</h4>
+        <ul className="text-gray-700 space-y-1 text-sm">
+          <li>周一：自由泳 + 蛙泳</li>
+          <li>周三：仰泳技术训练</li>
+          <li>周五：混合泳练习</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const initial = [
+    {id:1,name:'50米自由泳',stroke:'自由泳',date:'2024-06-01',time:'23.45',notes:'状态良好'},
+    {id:2,name:'100米蛙泳',stroke:'蛙泳',date:'2024-05-28',time:'65.23',notes:'技术有待提高'},
+    {id:3,name:'200米仰泳',stroke:'仰泳',date:'2024-05-20',time:'145.78',notes:'个人最佳'}
+  ];
+  const [data, setData] = useState(initial);
+  const [view, setView] = useState('table');
+  const [modal, setModal] = useState(null); // {type:'add'|'edit'|'delete', item}
+  const handleSave = rec => {
+    if(modal.type==='edit') {
+      setData(data.map(d=>d.id===rec.id?rec:d));
+    } else {
+      rec.id = Math.max(0,...data.map(d=>d.id))+1;
+      setData([...data,rec]);
+    }
+    setModal(null);
+  };
+  const handleDelete = item => {
+    setData(data.filter(d=>d.id!==item.id));
+    setModal(null);
+  };
+  return (
+    <div className="flex">
+      <Sidebar/>
+      <div className="flex-1 flex flex-col">
+        <Header/>
+        <div className="flex-1 p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <div className="flex space-x-2">
+              <button onClick={()=>setView('table')} className={`px-3 py-1 border rounded ${view==='table'?'bg-blue-600 text-white':'text-gray-600'}`}><i className="fas fa-table mr-1"></i>表格视图</button>
+              <button onClick={()=>setView('card')} className={`px-3 py-1 border rounded ${view==='card'?'bg-blue-600 text-white':'text-gray-600'}`}><i className="fas fa-th-large mr-1"></i>卡片视图</button>
+              <button onClick={()=>setModal({type:'add'})} className="px-3 py-1 bg-blue-500 text-white rounded"><i className="fas fa-plus mr-1"></i>添加成绩</button>
+            </div>
+            <button onClick={()=>setModal({type:'add'})} className="px-4 py-2 bg-blue-600 text-white rounded"><i className="fas fa-plus mr-2"></i>添加成绩</button>
+          </div>
+          <div>
+            {view==='table'?
+              <TableView data={data} onEdit={item=>setModal({type:'edit',item})} onDelete={item=>setModal({type:'delete',item})}/>
+            :
+              <CardView data={data} onEdit={item=>setModal({type:'edit',item})} onDelete={item=>setModal({type:'delete',item})}/>
+            }
+          </div>
+          <div className="bg-white p-4 rounded shadow">
+            <h4 className="font-semibold mb-2">本周进步提醒</h4>
+            <img src="https://picsum.photos/id/30/800/300" alt="折线图示例" className="w-full rounded"/>
+            <p className="mt-2 text-gray-600 text-right">保持节奏，勇往直前！</p>
+          </div>
+          <div className="bg-white p-4 rounded shadow">
+            <h4 className="font-semibold mb-2">各泳姿最佳成绩对比提示</h4>
+            <img src="https://picsum.photos/id/31/800/300" alt="饼图示例" className="w-full rounded"/>
+          </div>
+        </div>
+      </div>
+      <div className="pr-6 pt-6"><AssistantPanel/></div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

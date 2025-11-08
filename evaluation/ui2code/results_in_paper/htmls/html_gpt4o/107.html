@@ -1,0 +1,166 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <title>项目演示信息</title>
+</head>
+<body class="bg-gray-100">
+  <div id="app"></div>
+  <script type="text/babel">
+    const App = () => {
+      const [modal, setModal] = React.useState(null); // Can be 'edit', 'delete', 'details', 'add'
+      const [search, setSearch] = React.useState('');
+
+      const projects = [
+        {
+          id: 1,
+          name: "AI智能助手平台",
+          team: "创新科技团队",
+          description: "基于大语言模型驱动的企业级智能助手平台，支持多场景定制化应用与部署。",
+          date: "2023-12-15",
+          type: "人工智能",
+          imageUrl: "https://picsum.photos/id/1/200/200"
+        },
+        {
+          id: 2,
+          name: "绿色能源管理系统",
+          team: "节能团队SV小组",
+          description: "面向企业的绿色能源管理平台，通过IoT设备实现能源消耗实时监控与优化。",
+          date: "2023-12-20",
+          type: "能源",
+          imageUrl: "https://picsum.photos/id/2/200/200"
+        },
+        {
+          id: 3,
+          name: "区块链供应链溯源",
+          team: "区块链小组",
+          description: "基于区块链技术的全链路供应链溯源系统，保障产品从原材料到终端的全流程透明可信。",
+          date: "2023-12-25",
+          type: "区块链",
+          imageUrl: "https://picsum.photos/id/3/200/200"
+        },
+      ];
+
+      return (
+        <div>
+          {/* Header */}
+          <header className="bg-blue-800 text-white px-6 py-4 flex justify-between items-center">
+            <h1 className="text-xl font-bold flex items-center">
+              <i className="fas fa-crown mr-2"></i> 项目演示信息
+            </h1>
+            <input
+              type="text"
+              className="rounded-md py-1 px-4 text-gray-800 placeholder-gray-700 focus:outline-none"
+              placeholder="搜索项目"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div>
+              <i className="fas fa-user-circle text-2xl"></i>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <div className="flex">
+            {/* Sidebar */}
+            <aside className="bg-white w-64 p-6 border-r shadow-sm">
+              <ul className="space-y-4">
+                <li className="font-medium">概览</li>
+                <li className="text-gray-500 cursor-pointer">项目列表</li>
+                <li className="text-gray-500 cursor-pointer">数据统计</li>
+                <li className="text-gray-500 cursor-pointer">帮助中心</li>
+              </ul>
+              <div className="mt-6 text-gray-500 text-sm">
+                <p>提示</p>
+                <p>可自定义项目筛选规则，根据需求标记项目信息。</p>
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 bg-white p-6">
+              <div className="mb-6 font-bold text-xl">项目路演列表</div>
+              {projects.filter(project => project.name.includes(search)).map(project => (
+                <div key={project.id} className="border rounded-md p-4 mb-4 shadow-sm">
+                  <div className="flex">
+                    <img src={project.imageUrl} alt="Project Image" className="rounded-md w-16 h-16" />
+                    <div className="ml-4">
+                      <h2 className="font-bold">{project.name}</h2>
+                      <p className="text-gray-500 text-sm">团队: {project.team}</p>
+                      <p className="text-sm mt-2">{project.description}</p>
+                      <p className="text-gray-600 text-sm mt-1">路演日期: {project.date}</p>
+                      <p className="text-blue-600 text-xs mt-1">{project.type}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-end mt-4 space-x-2">
+                    <button
+                      className="bg-blue-500 text-white py-1 px-4 rounded-md hover:bg-blue-700"
+                      onClick={() => setModal('edit')}
+                    >
+                      <i className="fas fa-edit"></i> 编辑
+                    </button>
+                    <button
+                      className="bg-red-500 text-white py-1 px-4 rounded-md hover:bg-red-700"
+                      onClick={() => setModal('delete')}
+                    >
+                      <i className="fas fa-trash"></i> 删除
+                    </button>
+                    <button
+                      className="bg-gray-500 text-white py-1 px-4 rounded-md hover:bg-gray-700"
+                      onClick={() => setModal('details')}
+                    >
+                      <i className="fas fa-eye"></i> 查看详情
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <div className="text-center">
+                <button
+                  className="bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600"
+                  onClick={() => setModal('add')}
+                >
+                  <i className="fas fa-plus"></i> 添加项目
+                </button>
+              </div>
+            </main>
+          </div>
+
+          {/* Footer */}
+          <footer className="bg-gray-200 p-4 text-center text-sm text-gray-500">
+            © 2023 项目演示平台 版权所有 | 联系我们 | 隐私政策
+          </footer>
+
+          {/* Modals */}
+          {modal === 'edit' && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white rounded-md p-6 w-96">
+                <h2 className="font-bold mb-4">编辑项目</h2>
+                {/* Form */}
+                <form>
+                  <label className="block mb-2">项目名称</label>
+                  <input type="text" className="border rounded-md w-full p-2 mb-4" />
+                  <label className="block mb-2">团队名称</label>
+                  <input type="text" className="border rounded-md w-full p-2 mb-4" />
+                  <label className="block mb-2">项目简介</label>
+                  <textarea className="border rounded-md w-full p-2 mb-4" rows="4"></textarea>
+                  <div className="flex justify-between mt-4">
+                    <button className="bg-gray-200 text-gray-700 py-1 px-4 rounded-md hover:bg-gray-300" onClick={() => setModal(null)}>取消</button>
+                    <button className="bg-blue-500 text-white py-1 px-4 rounded-md hover:bg-blue-700">保存</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+          {/* Add more modals according to other operations */}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('app'));
+  </script>
+</body>
+</html>

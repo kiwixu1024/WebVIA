@@ -1,0 +1,552 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>潮流服饰收藏夹</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const FashionCollection = () => {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [selectedCard, setSelectedCard] = useState(null);
+            const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+            const [newCard, setNewCard] = useState({
+                name: '',
+                brand: '',
+                style: [],
+                date: '',
+                price: '',
+                image: 'https://picsum.photos/id/1018/400/300'
+            });
+
+            const [fashionCards, setFashionCards] = useState([
+                {
+                    id: 1,
+                    name: '复古宽松牛仔夹克',
+                    brand: 'Levis',
+                    styles: ['复古', '休闲'],
+                    image: 'https://picsum.photos/id/1025/400/300',
+                    price: '¥899',
+                    date: '2023-09-15'
+                },
+                {
+                    id: 2,
+                    name: '机能风高领卫衣',
+                    brand: 'Nike ACG',
+                    styles: ['机能', '运动'],
+                    image: 'https://picsum.photos/id/237/400/300',
+                    price: '¥699',
+                    date: '2023-10-22'
+                },
+                {
+                    id: 3,
+                    name: '宽松格纹西装外套',
+                    brand: 'ZARA',
+                    styles: ['商务', '休闲'],
+                    image: 'https://picsum.photos/id/1036/400/300',
+                    price: '¥1299',
+                    date: '2023-11-30'
+                },
+                {
+                    id: 4,
+                    name: '潮流印花T恤',
+                    brand: 'Supreme',
+                    styles: ['街头', '潮流'],
+                    image: 'https://picsum.photos/id/1081/400/300',
+                    price: '¥499',
+                    date: '2024-01-05'
+                }
+            ]);
+
+            const [styles, setStyles] = useState(['街头', '潮流', '复古', '机能', '运动', '商务', '学院', '极简']);
+
+            const handleDelete = (card) => {
+                setSelectedCard(card);
+                setShowDeleteConfirm(true);
+            };
+
+            const confirmDelete = () => {
+                setFashionCards(fashionCards.filter(c => c.id !== selectedCard.id));
+                setShowDeleteConfirm(false);
+                setSelectedCard(null);
+            };
+
+            const handleSave = () => {
+                setShowEditModal(false);
+                setShowDeleteConfirm(false);
+                setSelectedCard(null);
+            };
+
+            const handleCancel = () => {
+                setShowEditModal(false);
+                setShowDeleteConfirm(false);
+                setSelectedCard(null);
+            };
+
+            const handleDeletionFromCard = (card) => {
+                setFashionCards(fashionCards.map(c => 
+                    c.id === card.id ? { ...c, price: '¥899' } : c
+                ));
+            };
+
+            const handleStyleSelection = (style, cardId) => {
+                setFashionCards(fashionCards.map(c => 
+                    c.id === cardId ? { ...c, styles: [...new Set(c.styles.concat(style))], price: '¥899' } : c
+                ));
+                
+                // Update the card in editing modal too if it's open
+                if (showEditModal && selectedCard && selectedCard.id === cardId) {
+                    setSelectedCard({ ...selectedCard, styles: [...new Set(selectedCard.styles.concat(style))], price: '¥899' });
+                }
+            };
+
+            const getCategoryStats = () => {
+                const stats = {};
+                
+                fashionCards.forEach(card => {
+                    card.styles.forEach(style => {
+                        stats[style] = (stats[style] || 0) + 1;
+                    });
+                });
+                
+                return stats;
+            };
+
+            const searchCards = (searchTerm) => {
+                if (!searchTerm) return fashionCards;
+                return fashionCards.filter(card => 
+                    card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    card.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    card.styles.some(style => style.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+            };
+
+            const stylesSet = new Set(styles);
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-slate-800 text-white px-6 py-3">
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                                <i className="fas fa-tshirt mr-2"></i>
+                                <span className="font-medium">潮流服饰收藏夹</span>
+                            </div>
+                            <div className="flex space-x-4">
+                                <button className="px-3 py-1 bg-pink-500 hover:bg-pink-600 rounded">全部收藏</button>
+                                <button className="px-3 py-1 hover:bg-gray-600 rounded">品牌分类</button>
+                                <button className="px-3 py-1 hover:bg-gray-600 rounded">风格推荐</button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-80 bg-white p-6 shadow-sm min-h-screen">
+                            <div className="space-y-4">
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="w-full bg-pink-500 text-white py-2 px-4 rounded flex items-center hover:bg-pink-600"
+                                >
+                                    <i className="fas fa-plus mr-2"></i>
+                                    添加新潮流服饰
+                                </button>
+
+                                <button className="w-full bg-pink-100 text-pink-600 py-2 px-4 rounded flex items-center hover:bg-pink-200">
+                                    <i className="fas fa-heart mr-2"></i>
+                                    我的收藏
+                                </button>
+
+                                <button className="w-full bg-gray-100 text-gray-600 py-2 px-4 rounded flex items-center hover:bg-gray-200">
+                                    <i className="fas fa-chart-bar mr-2"></i>
+                                    统计报表
+                                </button>
+
+                                <button className="w-full bg-gray-100 text-gray-600 py-2 px-4 rounded flex items-center hover:bg-gray-200">
+                                    <i className="fas fa-question-circle mr-2"></i>
+                                    帮助说明
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {/* Search Bar */}
+                            <div className="flex mb-6">
+                                <input 
+                                    type="text" 
+                                    placeholder="搜索衣服名称或品牌..."
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                                <button className="pl-4 pr-2">
+                                    <i className="fas fa-search text-gray-500 hover:text-gray-700"></i>
+                                </button>
+                                <select className="px-4 py-2 border-t border-b text-gray-500">
+                                    <option>所有风格</option>
+                                </select>
+                            </div>
+
+                            {/* Cards Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                {fashionCards.map(card => (
+                                    <div key={card.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                        <div className="relative">
+                                            <img src={card.image} alt={card.name} className="w-full h-48 object-cover" />
+                                            <button 
+                                                onClick={() => handleDelete(card)}
+                                                className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                                            >
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleEdit(card)}
+                                                className="absolute top-2 left-2 w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleCardDetail(card)}
+                                                className="absolute bottom-2 right-2 w-8 h-8 bg-gray-600 text-white rounded-full flex items-center justify-center hover:bg-gray-700 ease-in-out"
+                                            >
+                                                <i className="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-medium mb-2">{card.name}</h3>
+                                            <p className="text-sm text-gray-600 mb-1">品牌: {card.brand}</p>
+                                            {card.styles.map((style, index) => (
+                                                <span key={index} className="inline-block bg-pink-100 text-pink-600 px-2 py-1 rounded text-xs mr-2 mb-1">
+                                                    {style}
+                                                </span>
+                                            ))}
+                                            <div className="flex justify-between items-center mt-2">
+                                                <span className="text-red-500 font-medium">{card.price}</span>
+                                                <span className="text-gray-400 text-sm">{card.date}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Help Section */}
+                            <div className="bg-white p-4 rounded-lg shadow-sm">
+                                <div className="flex items-center text-yellow-500 mb-2">
+                                    <i className="fas fa-lightbulb mr-2"></i>
+                                    <span className="font-medium">使用提示</span>
+                                </div>
+                                <p className="text-gray-600 text-sm">按住 Shift 可一次选中多张卡片进行批量操作</p>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 bg-white p-6 shadow-sm min-h-screen">
+                            {/* Search Results */}
+                            <div className="mb-6">
+                                <h3 className="font-medium mb-3">搜索结果 (0)</h3>
+                                <div className="bg-gray-50 p-8 rounded-lg h-40 flex flex-col items-center justify-center">
+                                    <i className="fas fa-search text-gray-400 text-2xl mb-2"></i>
+                                    <p className="text-gray-500">暂无搜索结果</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-8">
+                                <div>
+                                    <h3 className="font-medium mb-3">收藏统计</h3>
+                                    <div className="bg-pink-50 p-4 rounded-lg">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm">总收藏数</span>
+                                            <span className="text-2xl font-bold text-pink-500">4</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {styles.length > 0 && (
+                                    <div>
+                                        <h3 className="font-medium mb-3">风格分布</h3>
+                                        <div className="bg-pink-50 p-4 rounded-lg flex items-center">
+                                            <i className="fas fa-chart-pie text-pink-500 mr-2"></i>
+                                            <span className="text-sm">风格分布图</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <h3 className="font-medium mb-3">品牌分布</h3>
+                                    <div className="bg-pink-50 p-4 rounded-lg flex items-center">
+                                        <i className="fas fa-chart-pie text-pink-500 mr-2"></i>
+                                        <span className="text-sm">品牌分布图</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 bg-pink-100 border-l-4 border-pink-500 p-4 rounded-lg">
+                                <p className="text-pink-700 text-sm">
+                                    <i className="fas fa-heart mr-2"></i>
+                                    保持最新潮流，关注趋势变化，及时整理你的时尚收藏。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <h2 className="text-xl font-bold mb-4">添加新潮流服饰</h2>
+                                
+                                <div className="mb-4">
+                                    <h3 className="font-medium mb-2">服饰图片</h3>
+                                    <div className="bg-gray-50 p-4 rounded border mb-4 h-32 flex items-center justify-center">
+                                        <img src="https://picsum.photos/id/1018/300/200" alt="服饰图片" className="rounded w-20 h-20 object-cover flex-shrink-0" />
+                                    </div>
+                                    <button className="text-pink-500 text-sm flex items-center">
+                                        <i className="fas fa-image mr-1"></i>
+                                        更换图片
+                                    </button>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">服饰名称</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入服饰名称"
+                                        value={newCard.name}
+                                        onChange={(e) => setNewCard({...newCard, name: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">品牌</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="选择品牌"
+                                        value={newCard.brand}
+                                        onChange={(e) => setNewCard({...newCard, brand: e.target.value})}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">风格标签</label>
+                                    <div className="bg-pink-50 p-3 rounded">
+                                        <div className="flex flex-wrap gap-2">
+                                            {stylesSet.map(style => (
+                                                <button 
+                                                    key={style}
+                                                    onClick={() => handleStyleSelection(style, 'new')}
+                                                    className={`px-2 py-1 rounded text-sm ${
+                                                        newCard.styles.includes(style) 
+                                                            ? 'bg-pink-500 text-white' 
+                                                            : 'bg-white text-pink-500 border border-pink-200'
+                                                    }`}
+                                                >
+                                                    {style}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <label className="block font-medium mb-2">上架时间</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type="date" 
+                                                value={newCard.date}
+                                                onChange={(e) => setNewCard({...newCard, date: e.target.value})}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                            <i className="fas fa-calendar-alt text-pink-500"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium mb-2">价格 (¥)</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入价格"
+                                                value={newCard.price}
+                                                onChange={(e) => setNewCard({...newCard, price: e.target.value})}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                            <i className="fas fa-yen-sign text-pink-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-3">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && selectedCard && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-90vw">
+                                <h2 className="text-xl font-bold mb-4">编辑潮流服饰</h2>
+                                
+                                <div className="mb-4">
+                                    <h3 className="font-medium mb-2">服饰图片</h3>
+                                    <div className="bg-gray-50 p-4 rounded border mb-4 h-32 flex items-center justify-center">
+                                        <img src={selectedCard.image} alt="服饰图片" className="rounded w-20 h-20 object-cover flex-shrink-0" />
+                                    </div>
+                                    <button className="text-pink-500 text-sm flex items-center">
+                                        <i className="fas fa-image mr-1"></i>
+                                        更换图片
+                                    </button>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">服饰名称</label>
+                                    <input 
+                                        type="text" 
+                                        value={selectedCard.name}
+                                        onChange={(e) => {
+                                            handleStyleSelection(e.target.value, selectedCard.id);
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">品牌</label>
+                                    <input 
+                                        type="text" 
+                                        value={selectedCard.brand}
+                                        onChange={(e) => {
+                                            handleStyleSelection(e.target.value, selectedCard.id);
+                                            // Update price too when editing
+                                            const isPoeticFilm = e.target.value === '复古宽松牛仔夹克';
+                                            if (isPoeticFilm) {
+                                                handleDeletionFromCard(selectedCard);
+                                            }
+                                        }}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    />
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block font-medium mb-2">风格标签</label>
+                                    <div className="bg-pink-50 p-3 rounded">
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedCard.styles.map(style => (
+                                                <button 
+                                                    key={style}
+                                                    onClick={() => handleStyleSelection(style, selectedCard.id)}
+                                                    className={`px-2 py-1 rounded text-sm ${
+                                                        selectedCard.styles.includes(style) 
+                                                            ? 'bg-pink-500 text-white' 
+                                                            : 'bg-white text-pink-500 border border-pink-200'
+                                                    }`}
+                                                >
+                                                    {style}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <label className="block font-medium mb-2">上架时间</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type="date" 
+                                                value={selectedCard.date}
+                                                onChange={(e) => {
+                                                    handleStyleSelection(e.target.value, selectedCard.id);
+                                                    const newDate = e.target.value;
+                                                    // Update price slightly when editing old fashion
+                                                    if (newDate === '2023-09-13') {
+                                                        handleDeletionFromCard(selectedCard);
+                                                    } else {
+                                                        handleDeletionFromCard(selectedCard);
+                                                    }
+                                                }}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                            <i className="fas fa-calendar-alt text-pink-500"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block font-medium mb-2">价格 (¥)</label>
+                                        <div className="flex items-center space-x-2">
+                                            <input 
+                                                type="text" 
+                                                value={selectedCard.price}
+                                                onChange={(e) => {
+                                                    handleStyleSelection(e.target.value, selectedCard.id);
+                                                }}
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                            />
+                                            <i className="fas fa-yen-sign text-pink-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={handleSave}
+                                    className="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600"
+                                >
+                                    保存修改
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirm Modal */}
+                    {showDeleteConfirm && selectedCard && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <h3 className="text-lg font-bold mb-4">删除服饰</h3>
+                                <p className="mb-6">确认删除该潮流服饰收藏？此操作不可撤销。</p>
+                                <div className="flex justify-end space-x-3">
+                                    <button 
+                                        onClick={handleCancel}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<FashionCollection />, document.getElementById('root'));
+    </script>
+</body>
+</html>

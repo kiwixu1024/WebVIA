@@ -1,0 +1,661 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互动幸福时光树</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('展示区');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingEntry, setEditingEntry] = useState(null);
+            const [entries, setEntries] = useState([
+                {
+                    id: 1,
+                    date: '2023-01-15',
+                    title: '家庭野餐',
+                    description: '和家人一起去公园野餐，享受阳光和美食。',
+                    likes: 12,
+                    image: 'https://picsum.photos/id/1/400/250'
+                },
+                {
+                    id: 2,
+                    date: '2023-02-20',
+                    title: '孩子的第一次画展',
+                    description: '小明的绘画作品在学校展出，他很兴奋和自豪。',
+                    likes: 8,
+                    image: 'https://picsum.photos/id/2/400/250'
+                },
+                {
+                    id: 3,
+                    date: '2023-03-10',
+                    title: '家庭游戏之夜',
+                    description: '全家人一起玩桌游，欢笑声充满了整个客厅。',
+                    likes: 15,
+                    image: 'https://picsum.photos/id/3/400/250'
+                }
+            ]);
+
+            const [newEntry, setNewEntry] = useState({
+                date: '09/23/2025',
+                title: '',
+                description: '',
+                image: null
+            });
+
+            const [editEntry, setEditEntry] = useState({
+                date: '',
+                title: '',
+                description: '',
+                image: null
+            });
+
+            const handleAddEntry = () => {
+                if (newEntry.title && newEntry.description) {
+                    const entry = {
+                        id: Date.now(),
+                        date: newEntry.date,
+                        title: newEntry.title,
+                        description: newEntry.description,
+                        likes: 0,
+                        image: 'https://picsum.photos/id/91/400/250'
+                    };
+                    setEntries([...entries, entry]);
+                    setShowAddModal(false);
+                    setNewEntry({
+                        date: '09/23/2025',
+                        title: '',
+                        description: '',
+                        image: null
+                    });
+                }
+            };
+
+            const handleDeleteEntry = (id) => {
+                setEntries(entries.filter(entry => entry.id !== id));
+            };
+
+            const handleEditEntry = (entry) => {
+                setEditingEntry(entry);
+                setEditEntry({
+                    date: entry.date,
+                    title: entry.title,
+                    description: entry.description,
+                    image: null
+                });
+                setShowEditModal(true);
+            };
+
+            const handleSaveEdit = () => {
+                setEntries(entries.map(entry => 
+                    entry.id === editingEntry.id 
+                        ? { ...entry, ...editEntry }
+                        : entry
+                ));
+                setShowEditModal(false);
+                setEditingEntry(null);
+                setEditEntry({
+                    date: '',
+                    title: '',
+                    description: '',
+                    image: null
+                });
+            };
+
+            const toggleTab = (tabName) => {
+                setActiveTab(tabName);
+            };
+
+            const getStatistics = () => {
+                const likes = entries.reduce((sum, entry) => sum + entry.likes, 0);
+                return { total: entries.length, today: 2, likes };
+            };
+
+            const statistics = getStatistics();
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 py-4">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg mr-3"></div>
+                                <h1 className="text-2xl font-bold text-pink-600">互动幸福时光树</h1>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-2">在互动幸福时光树上，分享家的温暖，记录爱的痕迹</p>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="flex gap-6">
+                            {/* Left Sidebar */}
+                            <div className="w-64">
+                                <div className="bg-white rounded-lg shadow p-4 mb-6">
+                                    <div className="flex items-center mb-4">
+                                        <i className="fas fa-list-ol text-gray-600 mr-2"></i>
+                                        <span className="font-semibold">数据板块</span>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <button 
+                                            onClick={() => toggleTab('展示区')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '展示区' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-image mr-2"></i>
+                                                展示区
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => toggleTab('编辑区')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '编辑区' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-edit mr-2"></i>
+                                                编辑区
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => toggleTab('统计区')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '统计区' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-chart-bar mr-2"></i>
+                                                统计区
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => toggleTab('操作栏')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '操作栏' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-cog mr-2"></i>
+                                                操作栏
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => toggleTab('帮助说明')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '帮助说明' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-question-circle mr-2"></i>
+                                                帮助说明
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => toggleTab('主题特色')}
+                                            className={`w-full px-4 py-3 rounded-lg flex items-center justify-between ${
+                                                activeTab === '主题特色' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'
+                                            }`}
+                                        >
+                                            <div className="flex items-center">
+                                                <i className="fas fa-palette mr-2"></i>
+                                                主题特色
+                                            </div>
+                                            <i className="fas fa-chevron-down"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Theme Selection */}
+                                <div className="bg-white rounded-lg shadow p-4">
+                                    <div className="flex items-center mb-3">
+                                        <i className="fas fa-palette text-purple-600 mr-2"></i>
+                                        <span className="font-semibold">主题色彩</span>
+                                    </div>
+                                    <select className="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option>粉色系</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="flex-1">
+                                {/* Tab Navigation */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex space-x-2">
+                                        <button className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center">
+                                            <i className="fas fa-clock mr-2"></i>
+                                            时间轴视图
+                                        </button>
+                                        <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg flex items-center">
+                                            <i className="fas fa-project-diagram mr-2"></i>
+                                            树状视图
+                                        </button>
+                                        <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg flex items-center">
+                                            <i className="fas fa-map mr-2"></i>
+                                            地图视图
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-600">
+                                        <i className="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                        小贴士：点击顶部Tab可切换不同视图，发现更多惊喜
+                                    </div>
+                                </div>
+
+                                {/* Content Area */}
+                                {activeTab === '展示区' && (
+                                    <div className="bg-white rounded-lg shadow">
+                                        <div className="p-6">
+                                            <h2 className="text-xl font-semibold text-green-600 mb-6">幸福时光展示</h2>
+                                            <div className="grid grid-cols-3 gap-6">
+                                                {entries.map((entry) => (
+                                                    <div key={entry.id} className="bg-white rounded-lg shadow overflow-hidden">
+                                                        <img 
+                                                            src={entry.image} 
+                                                            alt={entry.title} 
+                                                            className="w-full h-48 object-cover"
+                                                        />
+                                                        <div className="p-4">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <span className="text-gray-600 text-sm">{entry.date}</span>
+                                                                <div className="flex space-x-2">
+                                                                    <button 
+                                                                        onClick={() => handleEditEntry(entry)}
+                                                                        className="text-blue-500 hover:text-blue-700"
+                                                                    >
+                                                                        <i className="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleDeleteEntry(entry.id)}
+                                                                        className="text-red-500 hover:text-red-700"
+                                                                    >
+                                                                        <i className="fas fa-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <h3 className="font-semibold text-lg mb-2">{entry.title}</h3>
+                                                            <p className="text-gray-600 text-sm mb-4">{entry.description}</p>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-red-500 flex items-center">
+                                                                    <i className="fas fa-heart mr-1"></i>
+                                                                    {entry.likes} 互动
+                                                                </span>
+                                                                <button className="px-3 py-1 bg-green-500 text-white rounded-md text-sm hover:bg-green-600">
+                                                                    <i className="fas fa-share mr-1"></i>
+                                                                    分享
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === '编辑区' && (
+                                    <div className="bg-white rounded-lg shadow">
+                                        <div className="p-6">
+                                            <h2 className="text-xl font-semibold text-green-600 mb-6">时光条目编辑</h2>
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={editingEntry?.date || ""}
+                                                            readOnly
+                                                            className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                                        <input 
+                                                            type="text" 
+                                                            value={editingEntry?.title || ""}
+                                                            readOnly
+                                                            className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1">操作</label>
+                                                        <div className="space-y-2">
+                                                            <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center justify-center">
+                                                                <i className="fas fa-edit mr-2"></i>
+                                                                编辑
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteEntry(editingEntry?.id)}
+                                                                className="w-full px-4 py-2 bg-red-500 text-white rounded-lg flex items-center justify-center"
+                                                            >
+                                                                <i className="fas fa-trash mr-2"></i>
+                                                                删除
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                                    <input 
+                                                        type="text" 
+                                                        value={editingEntry?.title || ""}
+                                                        readOnly
+                                                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                                    <textarea 
+                                                        value={editingEntry?.description || ""}
+                                                        readOnly
+                                                        className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 h-24"
+                                                    ></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === '统计区' && (
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="bg-blue-50 rounded-lg p-6">
+                                            <h3 className="text-lg font-semibold text-blue-600 mb-4">时光统计</h3>
+                                            <div className="space-y-4">
+                                                <div className="bg-white rounded-lg p-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-blue-600 font-semibold">总互动次数</span>
+                                                        <div className="text-right">
+                                                            <div className="text-2xl font-bold text-blue-600">{statistics.total}</div>
+                                                            <div className="text-sm text-gray-500">交互计数</div>
+                                                            <div className="text-red-500 text-sm">زمالة</div>
+                                                            <div className="text-xs text-gray-400">总条目的相乘</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-2">
+                                                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                                            <i className="fas fa-sync-alt text-white"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-white rounded-lg p-4">
+                                                    <div className="flex justify-between items-center">
+                                                        <span className="text-red-500 font-semibold">今日新增条目</span>
+                                                        <div className="text-right">
+                                                            <div className="text-2xl font-bold text-red-500">{statistics.today}</div>
+                                                            <div className="text-sm text-gray-500">今日事件</div>
+                                                            <div className="text-yellow-500 text-sm">新增益</div>
+                                                            <div className="text-xs text-gray-400">最近的着街</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-2">
+                                                        <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                                                            <i className="fas fa-sync-alt text-white"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white rounded-lg shadow p-6">
+                                            <h3 className="text-lg font-semibold text-green-600 mb-4">热门时光条目</h3>
+                                            <div className="space-y-3">
+                                                {(entries.sort((a, b) => b.likes - a.likes)).slice(0, 3).map((entry, index) => (
+                                                    <div key={entry.id} className="flex items-center space-x-3">
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${
+                                                            index === 0 ? 'bg-yellow-500' : 
+                                                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                                                        }`}>
+                                                            {index + 1}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="font-medium">{entry.title}</div>
+                                                            <div className="text-xs text-gray-500">{entry.date}</div>
+                                                            <div className="text-sm">
+                                                                <i className="fas fa-heart text-red-500 mr-1"></i>
+                                                                {entry.likes} 点赞
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Add New Modal */}
+                        {showAddModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                    <h3 className="text-lg font-semibold mb-4">添加新时光</h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                            <input 
+                                                type="text" 
+                                                value={newEntry.date}
+                                                onChange={(e) => setNewEntry({...newEntry, date: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="输入幸福瞬间的标题"
+                                                value={newEntry.title}
+                                                onChange={(e) => setNewEntry({...newEntry, title: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                            <textarea 
+                                                placeholder="描述这个幸福的瞬间..."
+                                                value={newEntry.description}
+                                                onChange={(e) => setNewEntry({...newEntry, description: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                                            ></textarea>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">图片</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    onChange={(e) => setNewEntry({...newEntry, image: e.target.files[0]})}
+                                                    className="hidden"
+                                                    id="image-upload"
+                                                />
+                                                <label 
+                                                    htmlFor="image-upload"
+                                                    className="w-full h-24 bg-gray-300 border border-gray-300 rounded-lg p-3 cursor-pointer text-center"
+                                                >
+                                                    {newEntry.image ? (
+                                                        <div className="text-center">
+                                                            <div className="w-full h-8 bg-blue-500 rounded mb-2 flex items-center justify-center">
+                                                                <i className="fas fa-image text-white text-sm"></i>
+                                                            </div>
+                                                            <p className="text-xs">图片已选择</p>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <i className="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                                            <p className="text-xs text-gray-500">Choose File | No file chosen</p>
+                                                        </>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex space-x-3 mt-6">
+                                        <button 
+                                            onClick={() => setShowAddModal(false)}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={handleAddEntry}
+                                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg"
+                                        >
+                                            添加
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Edit Modal */}
+                        {showEditModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                    <h3 className="text-lg font-semibold mb-4">编辑时光</h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                            <input 
+                                                type="text" 
+                                                value={editEntry.date}
+                                                onChange={(e) => setEditEntry({...editEntry, date: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                            <input 
+                                                type="text" 
+                                                value={editEntry.title}
+                                                onChange={(e) => setEditEntry({...editEntry, title: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                            <textarea 
+                                                value={editEntry.description}
+                                                onChange={(e) => setEditEntry({...editEntry, description: e.target.value})}
+                                                className="w-full p-3 border border-gray-300 rounded-lg h-20"
+                                            ></textarea>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">图片</label>
+                                            <div className="relative">
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/*"
+                                                    onChange={(e) => setEditEntry({...editEntry, image: e.target.files[0]})}
+                                                    className="hidden"
+                                                    id="image-upload-edit"
+                                                />
+                                                <label 
+                                                    htmlFor="image-upload-edit"
+                                                    className="w-full h-24 bg-gray-300 border border-gray-300 rounded-lg p-3 cursor-pointer text-center"
+                                                >
+                                                    {editEntry.image ? (
+                                                        <div className="text-center">
+                                                            <div className="w-full h-8 bg-blue-500 rounded mb-2 flex items-center justify-center">
+                                                                <i className="fas fa-image text-white text-sm"></i>
+                                                            </div>
+                                                            <p className="text-xs">图片已选择</p>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <i className="fas fa-camera text-gray-400 text-2xl mb-2"></i>
+                                                            <p className="text-xs text-gray-500">Choose File | No file chosen</p>
+                                                        </>
+                                                    )}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex space-x-3 mt-6">
+                                        <button 
+                                            onClick={() => setShowEditModal(false)}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+                                        >
+                                            保存
+                                        </button>
+                                        <button 
+                                            onClick={() => setShowEditModal(false)}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gradient-to-r from-green-400 to-orange-400 text-white py-8 mt-12">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="grid grid-cols-3 gap-8">
+                                <div>
+                                    <h4 className="font-semibold mb-4">互动幸福时光树</h4>
+                                    <p className="text-sm">记录美好时光，传递家庭温暖</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-4">版本信息</h4>
+                                    <p className="text-sm">v1.0 © 2023 幸福学堂</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-4">联系我们</h4>
+                                    <p className="text-sm">contact@happytree.com</p>
+                                </div>
+                            </div>
+                            <div className="text-center mt-8 pt-4 border-t border-white/20">
+                                <p className="text-sm">美好的时光记录，分享家的温暖，记录爱的痕迹</p>
+                                <p className="text-xs mt-2">用数字表达温暖，让记忆变得永恒</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

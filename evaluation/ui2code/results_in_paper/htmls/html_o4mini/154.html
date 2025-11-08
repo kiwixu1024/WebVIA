@@ -1,0 +1,440 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>健身餐管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body class="h-screen overflow-hidden">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    const SIDEBAR_ITEMS = [
+      { key: 'today', label: '今日计划', icon: 'fas fa-calendar-day', color: '#21BF96' },
+      { key: 'ingredient', label: '食材库', icon: 'fas fa-box-open' },
+      { key: 'recipe', label: '食谱库', icon: 'fas fa-book', active: true },
+      { key: 'stats', label: '统计分析', icon: 'fas fa-chart-pie' },
+      { key: 'help', label: '帮助说明', icon: 'fas fa-question-circle' },
+    ];
+
+    const TOP_TABS = [
+      { key: 'mine', label: '我的食谱', active: true },
+      { key: 'recommend', label: '系统推荐' },
+      { key: 'fav', label: '收藏夹' },
+    ];
+
+    const TAG_OPTIONS = ['高蛋白','低脂','高纤维','生酮','素食','健康膳食'];
+    const TYPE_OPTIONS = ['沙拉','主食','甜品','小吃','饮料'];
+
+    const initialRecipes = [
+      {
+        id: 1,
+        name: '高蛋白鸡胸肉沙拉',
+        image: 'https://picsum.photos/id/1080/600/400',
+        macros: { kcal: 350, protein: 40, carb: 25, fat: 15 },
+        tags: ['高蛋白','低脂'],
+        type: '沙拉',
+        remark: '适合健身后食用，补充蛋白质'
+      },
+      {
+        id: 2,
+        name: '牛油果三文鱼饭',
+        image: 'https://picsum.photos/id/1025/600/400',
+        macros: { kcal: 420, protein: 30, carb: 45, fat: 20 },
+        tags: ['高蛋白','健康膳食'],
+        type: '主食',
+        remark: ''
+      },
+      {
+        id: 3,
+        name: '希腊酸奶水果碗',
+        image: 'https://picsum.photos/id/1035/600/400',
+        macros: { kcal: 280, protein: 20, carb: 35, fat: 8 },
+        tags: ['高纤维','低脂'],
+        type: '甜品',
+        remark: ''
+      }
+    ];
+
+    function Sidebar() {
+      return (
+        <div className="w-60 bg-gray-800 text-white flex flex-col">
+          <div className="h-16 flex items-center justify-center text-xl font-bold border-b border-gray-700">
+            健身餐管理
+          </div>
+          <div className="flex-1">
+            {SIDEBAR_ITEMS.map(item => (
+              <div key={item.key} className={
+                `flex items-center h-12 px-4 cursor-pointer hover:bg-gray-700
+                 ${item.active ? 'bg-gray-700' : ''}`
+              }>
+                <div className="w-1 h-6 mr-3" style={{backgroundColor: item.active ? (item.color||'#fff') : 'transparent'}}></div>
+                <i className={`${item.icon} w-6 text-center`} style={{color: item.active && item.color ? item.color : 'white'}}></i>
+                <span className="ml-2">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function TopBar() {
+      return (
+        <div className="flex items-center justify-between bg-gray-100 h-16 px-6">
+          <div className="flex items-center space-x-4">
+            {TOP_TABS.map(tab => (
+              <div key={tab.key} className="relative">
+                <span className={`cursor-pointer text-gray-800 ${tab.active ? 'font-semibold' : ''}`}>{tab.label}</span>
+                {tab.active && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-red-500"></div>}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 mx-6 bg-gradient-to-r from-pink-400 to-purple-500 rounded-lg h-12 flex items-center justify-between px-4">
+            <span className="text-white">定制你的专属健身餐，从营养均衡到口感美味一步到位</span>
+            <img src="https://picsum.photos/id/1003/80/50" className="rounded" />
+          </div>
+        </div>
+      );
+    }
+
+    function NutritionStats() {
+      return (
+        <div className="w-64 bg-white shadow rounded p-4 space-y-4">
+          <div className="text-lg font-semibold">营养摄入统计</div>
+          <div>
+            <div className="text-gray-600 mb-2">本周营养摄入对比</div>
+            <div className="flex justify-between text-sm text-gray-500">
+              {['周一','周二','周三','周四','周五','周六','周日'].map(d => <div key={d}>{d}</div>)}
+            </div>
+          </div>
+          <div>
+            <div className="text-gray-600 mb-1">营养目标完成度</div>
+            <div className="flex justify-around">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full border-4 border-red-400 flex items-center justify-center">85%</div>
+                <div className="text-sm mt-1">高蛋白</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full border-4 border-green-400 flex items-center justify-center">65%</div>
+                <div className="text-sm mt-1">低脂</div>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-full border-4 border-blue-400 flex items-center justify-center">75%</div>
+                <div className="text-sm mt-1">膳食纤维</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <button className="flex-1 bg-gray-100 py-1 rounded text-sm">导出PDF</button>
+            <button className="flex-1 bg-gray-100 py-1 rounded text-sm">导出CSV</button>
+          </div>
+          <div className="text-gray-600 text-sm border border-gray-200 p-2 rounded">
+            <i className="fas fa-info-circle mr-2 text-blue-400"></i>使用小贴士 <br/>
+            高蛋白餐优先摄入，有助于肌肉修复。可在侧边栏实时查看营养摄入分布。
+          </div>
+        </div>
+      );
+    }
+
+    function RecipeCard({ recipe, onEdit, onDelete }) {
+      const { name, image, macros, tags } = recipe;
+      const totalGram = macros.protein + macros.carb + macros.fat;
+      const pct = {
+        protein: Math.round(macros.protein / totalGram * 100),
+        carb: Math.round(macros.carb / totalGram * 100),
+        fat: Math.round(macros.fat / totalGram * 100)
+      };
+      return (
+        <div className="bg-white rounded shadow p-4 relative w-80">
+          <div className="h-40 rounded overflow-hidden mb-3 relative">
+            <img src={image} className="w-full h-full object-cover" />
+            <i className="fas fa-search absolute top-2 right-2 text-white bg-black bg-opacity-50 p-1 rounded-full"></i>
+          </div>
+          <div className="font-semibold text-lg mb-1">{name}</div>
+          <div className="text-gray-600 text-sm mb-2">{macros.kcal} 卡路里</div>
+          <div className="space-y-2 mb-3">
+            <div className="flex justify-between text-sm"><span>蛋白质 {macros.protein}g</span><span>{pct.protein}%</span></div>
+            <div className="w-full h-2 bg-gray-200 rounded"><div className="h-2 bg-blue-500 rounded" style={{width: pct.protein + '%'}}></div></div>
+            <div className="flex justify-between text-sm"><span>碳水 {macros.carb}g</span><span>{pct.carb}%</span></div>
+            <div className="w-full h-2 bg-gray-200 rounded"><div className="h-2 bg-green-500 rounded" style={{width: pct.carb + '%'}}></div></div>
+            <div className="flex justify-between text-sm"><span>脂肪 {macros.fat}g</span><span>{pct.fat}%</span></div>
+            <div className="w-full h-2 bg-gray-200 rounded"><div className="h-2 bg-yellow-400 rounded" style={{width: pct.fat + '%'}}></div></div>
+          </div>
+          <div className="flex flex-wrap mb-3 space-x-2">
+            {tags.map(t => <div key={t} className="text-xs px-2 py-0.5 bg-blue-100 text-blue-600 rounded">{t}</div>)}
+          </div>
+          <div className="flex space-x-2">
+            <button onClick={() => onEdit(recipe)} className="flex-1 flex items-center justify-center text-sm bg-blue-100 text-blue-600 py-1 rounded">
+              <i className="fas fa-edit mr-1"></i>编辑
+            </button>
+            <button onClick={() => onDelete(recipe)} className="flex-1 flex items-center justify-center text-sm bg-red-100 text-red-600 py-1 rounded">
+              <i className="fas fa-trash-alt mr-1"></i>删除
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function EditModal({ recipe, onClose, onSave }) {
+      const [name, setName] = useState(recipe.name);
+      const [image, setImage] = useState(recipe.image);
+      const [macros, setMacros] = useState({...recipe.macros});
+      const [tags, setTags] = useState([...recipe.tags]);
+      const [type, setType] = useState(recipe.type);
+      const [remark, setRemark] = useState(recipe.remark);
+      const fileInput = useRef();
+
+      const toggleTag = t => {
+        setTags(prev => prev.includes(t) ? prev.filter(x=>x!==t) : [...prev, t]);
+      };
+      const pickImage = e => {
+        const f = e.target.files[0];
+        if(f) {
+          const url = URL.createObjectURL(f);
+          setImage(url);
+        }
+      };
+      const handleSave = () => {
+        onSave({
+          ...recipe,
+          name, image, macros, tags, type, remark
+        });
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-2/5 p-6 relative">
+            <div className="text-xl font-semibold mb-4">编辑健身餐食谱</div>
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">食谱名称</label>
+                <input value={name} onChange={e=>setName(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1" />
+              </div>
+              <div>
+                <div className="text-sm mb-1">当前图片</div>
+                <div className="border-dashed border-2 border-gray-300 rounded p-2 inline-block">
+                  <img src={image} className="w-40 h-24 object-cover rounded" />
+                </div>
+                <div className="mt-2">
+                  <button onClick={()=>fileInput.current.click()} className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm">
+                    <i className="fas fa-upload mr-1"></i>更改图片
+                  </button>
+                  <input type="file" className="hidden" ref={fileInput} onChange={pickImage} accept="image/*" />
+                </div>
+              </div>
+              <div>
+                <div className="text-sm mb-1">营养成分</div>
+                <div className="flex space-x-2">
+                  <div><input type="number" value={macros.kcal} onChange={e=>setMacros({...macros,kcal:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="卡路里" /><div className="text-xs text-gray-500 text-center">kcal</div></div>
+                  <div><input type="number" value={macros.protein} onChange={e=>setMacros({...macros,protein:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="蛋白质(g)" /><div className="text-xs text-gray-500 text-center">蛋白质(g)</div></div>
+                  <div><input type="number" value={macros.carb} onChange={e=>setMacros({...macros,carb:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="碳水(g)" /><div className="text-xs text-gray-500 text-center">碳水(g)</div></div>
+                  <div><input type="number" value={macros.fat} onChange={e=>setMacros({...macros,fat:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="脂肪(g)" /><div className="text-xs text-gray-500 text-center">脂肪(g)</div></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex flex-wrap space-x-2 mb-1">
+                  {TAG_OPTIONS.map(t=>(
+                    <span key={t} onClick={()=>toggleTag(t)} className={
+                      `cursor-pointer px-2 py-0.5 text-sm border rounded
+                       ${tags.includes(t) ? 'bg-blue-100 text-blue-600 border-blue-300' : 'bg-gray-100 text-gray-600 border-gray-300'}`
+                    }>{t}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">菜系类型</label>
+                <select value={type} onChange={e=>setType(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1">
+                  {TYPE_OPTIONS.map(o=> <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">备注</label>
+                <textarea value={remark} onChange={e=>setRemark(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1 h-20"></textarea>
+              </div>
+            </div>
+            <div className="mt-6 text-right space-x-3">
+              <button onClick={onClose} className="px-4 py-1 border border-gray-300 rounded">取消</button>
+              <button onClick={handleSave} className="px-4 py-1 bg-blue-500 text-white rounded">保存更改</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AddModal({ onClose, onSave }) {
+      const [name, setName] = useState('');
+      const [image, setImage] = useState('https://picsum.photos/id/1074/600/400');
+      const [macros, setMacros] = useState({kcal:0,protein:0,carb:0,fat:0});
+      const [tags, setTags] = useState([]);
+      const [type, setType] = useState('沙拉');
+      const [remark, setRemark] = useState('');
+      const fileInput = useRef();
+
+      const toggleTag = t => {
+        setTags(prev => prev.includes(t) ? prev.filter(x=>x!==t) : [...prev, t]);
+      };
+      const pickImage = e => {
+        const f = e.target.files[0];
+        if(f) {
+          const url = URL.createObjectURL(f);
+          setImage(url);
+        }
+      };
+      const handleSave = () => {
+        onSave({
+          id: Date.now(),
+          name, image, macros, tags, type, remark
+        });
+      };
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-2/5 p-6 relative">
+            <div className="text-xl font-semibold mb-4">新增健身餐食谱</div>
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"><i className="fas fa-times"></i></button>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">食谱名称</label>
+                <input value={name} onChange={e=>setName(e.target.value)} placeholder="例如：高蛋白鸡胸肉沙拉" className="w-full border border-gray-300 rounded px-2 py-1" />
+              </div>
+              <div>
+                <div className="text-sm mb-1">上传图片</div>
+                <div className="border-dashed border-2 border-gray-300 rounded p-2 inline-block">
+                  <img src={image} className="w-40 h-24 object-cover rounded" />
+                </div>
+                <div className="mt-2">
+                  <button onClick={()=>fileInput.current.click()} className="px-3 py-1 bg-gray-100 border border-gray-300 rounded text-sm">
+                    <i className="fas fa-upload mr-1"></i>上传图片
+                  </button>
+                  <input type="file" className="hidden" ref={fileInput} onChange={pickImage} accept="image/*" />
+                </div>
+              </div>
+              <div>
+                <div className="text-sm mb-1">营养成分</div>
+                <div className="flex space-x-2">
+                  <div><input type="number" value={macros.kcal} onChange={e=>setMacros({...macros,kcal:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="0" /><div className="text-xs text-gray-500 text-center">kcal</div></div>
+                  <div><input type="number" value={macros.protein} onChange={e=>setMacros({...macros,protein:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="0" /><div className="text-xs text-gray-500 text-center">蛋白质(g)</div></div>
+                  <div><input type="number" value={macros.carb} onChange={e=>setMacros({...macros,carb:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="0" /><div className="text-xs text-gray-500 text-center">碳水(g)</div></div>
+                  <div><input type="number" value={macros.fat} onChange={e=>setMacros({...macros,fat:+e.target.value})} className="w-20 border border-gray-300 rounded px-2 py-1" placeholder="0" /><div className="text-xs text-gray-500 text-center">脂肪(g)</div></div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">备注</label>
+                <textarea value={remark} onChange={e=>setRemark(e.target.value)} placeholder="添加关于这个食谱的备注..." className="w-full border border-gray-300 rounded px-2 py-1 h-20"></textarea>
+              </div>
+              <div>
+                <div className="flex flex-wrap space-x-2 mb-1">
+                  {TAG_OPTIONS.map(t=>(
+                    <span key={t} onClick={()=>toggleTag(t)} className={
+                      `cursor-pointer px-2 py-0.5 text-sm border rounded
+                       ${tags.includes(t) ? 'bg-blue-100 text-blue-600 border-blue-300' : 'bg-gray-100 text-gray-600 border-gray-300'}`
+                    }>{t}</span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">菜系类型</label>
+                <select value={type} onChange={e=>setType(e.target.value)} className="w-full border border-gray-300 rounded px-2 py-1">
+                  {TYPE_OPTIONS.map(o=> <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 text-right space-x-3">
+              <button onClick={onClose} className="px-4 py-1 border border-gray-300 rounded">取消</button>
+              <button onClick={handleSave} className="px-4 py-1 bg-red-500 text-white rounded">保存</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function DeleteConfirm({ recipe, onCancel, onConfirm }) {
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-96 p-6">
+            <div className="flex items-center mb-4">
+              <i className="fas fa-exclamation-triangle text-red-500 text-xl mr-2"></i>
+              <span className="text-lg font-semibold">删除确认</span>
+            </div>
+            <div className="text-gray-700 mb-6">确认删除《{recipe.name}》？此操作不可撤销。</div>
+            <div className="flex justify-end space-x-3">
+              <button onClick={onCancel} className="px-4 py-1 border border-gray-300 rounded">取消</button>
+              <button onClick={onConfirm} className="px-4 py-1 bg-red-500 text-white rounded">确认删除</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [recipes, setRecipes] = useState(initialRecipes);
+      const [editing, setEditing] = useState(null);
+      const [adding, setAdding] = useState(false);
+      const [deleting, setDeleting] = useState(null);
+
+      const handleEdit = recipe => setEditing(recipe);
+      const handleDelete = recipe => setDeleting(recipe);
+      const handleAdd = () => setAdding(true);
+
+      const closeEdit = () => setEditing(null);
+      const closeAdd = () => setAdding(false);
+      const cancelDelete = () => setDeleting(null);
+
+      const saveEdit = updated => {
+        setRecipes(rs => rs.map(r => r.id === updated.id ? updated : r));
+        closeEdit();
+      };
+      const saveAdd = rec => {
+        setRecipes(rs => [...rs, rec]);
+        closeAdd();
+      };
+      const confirmDelete = () => {
+        setRecipes(rs => rs.filter(r => r.id !== deleting.id));
+        cancelDelete();
+      };
+
+      return (
+        <div className="h-full flex">
+          <Sidebar />
+          <div className="flex-1 flex flex-col">
+            <TopBar />
+            <div className="flex-1 p-6 bg-gray-50 flex">
+              <div className="flex-1 grid grid-cols-3 gap-6">
+                {recipes.map(r=>
+                  <RecipeCard key={r.id} recipe={r} onEdit={handleEdit} onDelete={handleDelete} />
+                )}
+                <div className="flex items-center justify-center">
+                  <button onClick={handleAdd} className="flex items-center justify-center w-80 h-40 border-2 border-dashed border-gray-300 rounded bg-white text-red-500 text-lg">
+                    <i className="fas fa-plus mr-2"></i>添加食谱
+                  </button>
+                </div>
+              </div>
+              <div className="ml-6">
+                <NutritionStats />
+              </div>
+            </div>
+            <div className="h-12 bg-white border-t border-gray-200 flex items-center justify-between px-6">
+              <div className="text-sm text-gray-500">版本 1.0.0</div>
+              <div className="text-sm text-gray-500">隐私政策 | 用户协议</div>
+              <div className="space-x-3">
+                <button className="px-3 py-1 border border-gray-300 rounded text-sm">恢复默认</button>
+                <button className="px-3 py-1 bg-blue-500 text-white rounded text-sm">联系客服</button>
+              </div>
+            </div>
+          </div>
+          {editing && <EditModal recipe={editing} onClose={closeEdit} onSave={saveEdit} />}
+          {adding && <AddModal onClose={closeAdd} onSave={saveAdd} />}
+          {deleting && <DeleteConfirm recipe={deleting} onCancel={cancelDelete} onConfirm={confirmDelete} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

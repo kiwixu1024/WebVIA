@@ -1,0 +1,399 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经典微视频回放墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function App() {
+            const [videos, setVideos] = useState([
+                {
+                    id: 1,
+                    title: "复古瞬间",
+                    description: "回顾上世纪80年代的街头即拍即播，记录了一个时代的风貌与情感。通过镜头，我们得以窥见那个年代人们的生活百态。",
+                    tags: ["#怀旧", "#经典"],
+                    views: 1523,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/1/400/300",
+                    deleted: false
+                },
+                {
+                    id: 2,
+                    title: "城市记忆",
+                    description: "从20世纪90年代至今，记录城市面貌的巨大变迁。高楼大厦拔地而起，马路拓宽，却仍保有着那些值得怀念的角落。",
+                    tags: ["#城市", "#变迁"],
+                    views: 892,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/2/400/300",
+                    deleted: false
+                },
+                {
+                    id: 3,
+                    title: "经典广告集锦",
+                    description: "那些年我们难以忘怀的电视广告，承载了太多共同的记忆。从脑白金到两只老虎，每一则都曾风靡一时。",
+                    tags: ["#广告", "#创意"],
+                    views: 2156,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/3/400/300",
+                    deleted: false
+                },
+                {
+                    id: 4,
+                    title: "音乐故事",
+                    description: "探索经典音乐背后的故事，那些熟悉的旋律如何诞生，又如何影响了一代人的成长与情感。",
+                    tags: ["#音乐", "#历史"],
+                    views: 1082,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/4/400/300",
+                    deleted: false
+                },
+                {
+                    id: 5,
+                    title: "历史瞬间",
+                    description: "重大历史事件的珍贵影像资料，让我们重温那些改变世界的瞬间，感受历史的厚重与震撼。",
+                    tags: ["#历史", "#纪实"],
+                    views: 3678,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/5/400/300",
+                    deleted: false
+                }
+            ]);
+
+            const [showDeleteModal, setShowDeleteModal] = useState({ id: null, title: "" });
+            const [showEmptyState, setShowEmptyState] = useState(false);
+            const [deletePending, setDeletePending] = useState(false);
+
+            const createVideo = () => {
+                const newVideo = {
+                    id: Date.now(),
+                    title: "用户上传视频",
+                    description: "这是用户上传的视频，来自最新拍摄的内容...",
+                    tags: ["#资讯", "#原创"],
+                    views: 351,
+                    duration: "3:45",
+                    cover: "https://picsum.photos/id/6/400/300",
+                    deleted: false
+                };
+                setVideos(prev => [...prev, newVideo]);
+            };
+
+            const handleDelete = (videoId, videoTitle) => {
+                setShowDeleteModal({ id: videoId, title: videoTitle });
+                setDeletePending(false);
+            };
+
+            const confirmDelete = (videoId) => {
+                setVideos(prev => prev.filter(video => video.id !== videoId));
+                setShowDeleteModal({ id: null, title: "" });
+                setDeletePending(false);
+                setShowEmptyState(true);
+            };
+
+            const cancelDelete = () => {
+                setShowDeleteModal({ id: null, title: "" });
+            };
+
+            const deletedVideos = videos.filter(video => video.deleted);
+            const nonDeletedVideos = videos.filter(video => !video.deleted);
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <div className="bg-blue-500 text-white px-6 py-4">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center">
+                                    <i className="fas fa-video text-white"></i>
+                                </div>
+                                <h1 className="text-xl font-semibold">经典微视频回放墙</h1>
+                            </div>
+                            <div className="flex space-x-4">
+                                <button className="bg-white text-blue-500 px-4 py-2 rounded flex items-center space-x-2">
+                                    <i className="fas fa-home"></i>
+                                    <span>首页</span>
+                                </button>
+                                <button className="hover:bg-blue-400 px-4 py-2 rounded flex items-center space-x-2">
+                                    <i className="fas fa-heart"></i>
+                                    <span>我的收藏</span>
+                                </button>
+                                <button className="hover:bg-blue-400 px-4 py-2 rounded flex items-center space-x-2">
+                                    <i className="fas fa-chart-bar"></i>
+                                    <span>数据统计</span>
+                                </button>
+                                <button className="hover:bg-blue-400 px-4 py-2 rounded flex items-center space-x-2">
+                                    <i className="fas fa-question-circle"></i>
+                                    <span>帮助</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto p-6 flex gap-6">
+                        {/* Left Sidebar */}
+                        <div className="w-80 space-y-6">
+                            {/* Navigation */}
+                            <div className="bg-white rounded-lg p-4 shadow">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                    <span className="font-semibold">视频展示</span>
+                                </div>
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                                        <span>新增/编辑</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                                        <span>回放主题</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded"></div>
+                                        <span>设置</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Tips */}
+                            <div className="bg-gray-700 text-white rounded-lg p-4">
+                                <div className="flex items-center space-x-2 mb-3">
+                                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                                    <span className="font-medium">使用小贴士</span>
+                                </div>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span>点击视频卡片即可全屏播放视频</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span>使用标签筛选功能快速找到目标视频</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span>定期备份您的视频数据库很重要</span>
+                                    </div>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-gray-600">
+                                    <div className="text-xs text-gray-300">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <span>快捷键：</span>
+                                        </div>
+                                        <div className="text-xs space-y-1">
+                                            <div>Ctrl+H - 编辑视频</div>
+                                            <div>Del - 删除视频</div>
+                                            <div>Ctrl+N - 新建视频</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            <div className="bg-white rounded-lg shadow">
+                                <div className="p-4 border-b flex justify-between items-center">
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-video text-blue-500"></i>
+                                        <span className="font-semibold">视频展示区</span>
+                                    </div>
+                                    <button 
+                                        onClick={createVideo}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded flex items-center space-x-2 hover:bg-blue-600"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>新增视频</span>
+                                    </button>
+                                </div>
+
+                                {!showEmptyState && (
+                                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {nonDeletedVideos.slice(0, 4).map((video) => (
+                                            <div key={video.id} className="bg-white rounded-lg shadow overflow-hidden relative">
+                                                {!video.removed && (
+                                                    <video playsInline autoPlay muted className="w-full h-48 object-cover">
+                                                        <source src="#" type="video/mp4" />
+                                                    </video>
+                                                )}
+                                                <img 
+                                                    src={video.cover} 
+                                                    alt={video.title}
+                                                    className="w-full h-48 object-cover"
+                                                />
+                                                {video.deleted && (
+                                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                                        <div className="text-center text-white">
+                                                            <i className="fas fa-lock text-4xl"></i>
+                                                            <p>视频被暂时移出视频库</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {!showEmptyState && (
+                                                    <div className="p-4">
+                                                        <h3 className="font-semibold mb-2">{video.title}</h3>
+                                                        <div className="text-sm text-gray-600 mb-3 line-clamp-2">
+                                                            {video.description}
+                                                        </div>
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <div className="flex space-x-2">
+                                                                {video.tags.map((tag, index) => (
+                                                                    <span 
+                                                                        key={index} 
+                                                                        className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"
+                                                                    >
+                                                                        {tag}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                                                <span className="flex items-center space-x-1">
+                                                                    <i className="fas fa-eye"></i>
+                                                                    <span>{video.views}</span>
+                                                                </span>
+                                                                <span className="flex items-center space-x-1">
+                                                                    <i className="fas fa-clock"></i>
+                                                                    <span>{video.duration}</span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-end">
+                                                            <div className="flex space-x-2">
+                                                                <button className="text-blue-500 hover:text-blue-700">
+                                                                    <i className="fas fa-edit"></i>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleDelete(video.id, video.title)}
+                                                                    className="text-red-500 hover:text-red-700"
+                                                                >
+                                                                    <i className="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {showEmptyState && (
+                                    <div className="text-center py-12">
+                                        <div className="text-gray-400 mb-4">
+                                            <i className="fas fa-folder-open text-6xl"></i>
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                                            回收站为空，已删除的视频
+                                        </h3>
+                                        <p className="text-gray-500">恢复视频到影库可随时恢复观看</p>
+                                        {deletedVideos.length > 0 && (
+                                            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {deletedVideos.slice(0, 3).map((video) => (
+                                                    <div key={`deleted-${video.id}`} className="bg-white rounded-lg shadow overflow-hidden">
+                                                        <img 
+                                                            src={video.cover} 
+                                                            alt={video.title}
+                                                            className="w-full h-32 object-cover"
+                                                        />
+                                                        <div className="p-3">
+                                                            <h4 className="text-sm font-semibold mb-1">{video.title}</h4>
+                                                            <div className="flex items-center justify-between text-xs text-gray-500">
+                                                                <span>{video.views} 播放</span>
+                                                                <span>{video.duration}</span>
+                                                            </div>
+                                                            <button className="w-full bg-blue-500 text-white py-1 rounded text-xs mt-2 hover:bg-blue-600">
+                                                                恢复
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="text-white text-sm px-6 pb-6">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-1">
+                                        <i className="fas fa-video"></i>
+                                        <span>经典微视频回放墙 - 帮助您保存和展示珍贵的历史影像资料</span>
+                                    </div>
+                                    <div className="flex items-center space-x-1">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                        <span>© 2023 经典微视频回放墙. 保留所有权利.</span>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-4">
+                                    <i className="fab fa-weibo text-gray-300 hover:text-white cursor-pointer"></i>
+                                    <i className="fab fa-weixin text-gray-300 hover:text-white cursor-pointer"></i>
+                                    <i className="fas fa-bell text-gray-300 hover:text-white cursor-pointer"></i>
+                                    <i className="fab fa-github text-gray-300 hover:text-white cursor-pointer"></i>
+                                </div>
+                            </div>
+                            <div className="border-t pt-2 text-gray-400 text-xs">
+                                本工具旨在帮助用户保存和展示珍贵的历史影像资料
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Confirmation Modal */}
+                    {showDeleteModal.id && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 mx-4 w-96">
+                                <div className="text-center">
+                                    <div className="text-red-500 text-4xl mb-4">
+                                        <i className="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-4">确认删除</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        您确定要删除"{showDeleteModal.title}"这个视频吗？此操作无法撤销。
+                                    </p>
+                                    <div className="flex space-x-4">
+                                        <button 
+                                            onClick={cancelDelete}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                setDeletePending(true);
+                                                setTimeout(() => {
+                                                    confirmDelete(showDeleteModal.id);
+                                                }, 1000);
+                                            }}
+                                            className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

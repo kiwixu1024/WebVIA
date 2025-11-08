@@ -1,0 +1,420 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影视混剪</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('展示区');
+            const [editingEditMode, setEditingEditMode] = useState('library'); // 'library' or 'editing'
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showUsageGuide, setShowUsageGuide] = useState(false);
+            const [newMaterialTitle, setNewMaterialTitle] = useState('');
+            const [newMaterialDuration, setNewMaterialDuration] = useState('');
+            const [newMaterialCategory, setNewMaterialCategory] = useState('风景');
+            const [newMaterialDescription, setNewMaterialDescription] = useState('');
+
+            const handleTabClick = (tab) => {
+                setActiveTab(tab);
+                setEditingEditMode('library');
+            };
+
+            const handleLibraryEditClick = () => {
+                setEditingEditMode('editing');
+            };
+
+            const handleCloseLibraryEdit = () => {
+                setEditingEditMode('library');
+            };
+
+            const handleAddMaterial = () => {
+                setShowAddModal(true);
+            };
+
+            const handleCloseAddModal = () => {
+                setShowAddModal(false);
+                setNewMaterialTitle('');
+                setNewMaterialDuration('');
+                setNewMaterialCategory('风景');
+                setNewMaterialDescription('');
+            };
+
+            const handleSaveProject = () => {
+                alert('项目已保存');
+            };
+
+            const handleShowGuide = () => {
+                setShowUsageGuide(!showUsageGuide);
+            };
+
+            const videoClips = [
+                {
+                    id: 1,
+                    title: '城市夜景',
+                    description: '繁华城市的霓虹灯书写景',
+                    duration: '00:15',
+                    image: 'https://picsum.photos/id/1021/400/250'
+                },
+                {
+                    id: 2,
+                    title: '海滩日落',
+                    description: '金色阳光下美丽的海滩日落美景',
+                    duration: '00:22',
+                    image: 'https://picsum.photos/id/1015/400/250'
+                },
+                {
+                    id: 3,
+                    title: '山间溪流',
+                    description: '清新自然的山间溪流水景',
+                    duration: '00:18',
+                    image: 'https://picsum.photos/id/1036/400/250'
+                },
+                {
+                    id: 4,
+                    title: '城市街道',
+                    description: '繁忙都市的街道场景',
+                    duration: '00:26',
+                    image: 'https://picsum.photos/id/1018/400/250'
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="border-b border-gray-200 bg-white px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                                <i className="fas fa-film text-blue-600 mr-2"></i>
+                                <span className="text-blue-600 text-lg font-semibold">影视混剪</span>
+                            </div>
+                            <button 
+                                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+                                onClick={handleAddMaterial}
+                            >
+                                <i className="fas fa-plus mr-1"></i>
+                                添加新素材
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="p-6">
+                        {/* Welcome Section */}
+                        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded">
+                            <h2 className="text-lg font-semibold text-blue-800 mb-2">
+                                <i className="fas fa-rocket mr-2"></i>影视混剪：释放你的创意
+                            </h2>
+                            <p className="text-blue-700 text-sm leading-relaxed">
+                                影视混剪是将多个影视作品片段重新组合，赋予新的含义和情感表达的创作形式。无论是制作MV、情感短片还是创意广告，它都能帮你讲述独特的故事。从下方素材库中选择片段，拖入时间线，创作属于你的视觉盛宴！
+                            </p>
+                        </div>
+
+                        {/* Usage Guide */}
+                        {showUsageGuide && (
+                            <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                            <i className="fas fa-info-circle mr-2"></i>操作指引
+                                        </h3>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            {[
+                                                { id: 1, title: '步骤 1：导入素材', description: '在"素材库"中浏览现有片段，点击"添加新素材"上传自己的视频', color: 'bg-blue-50' },
+                                                { id: 2, title: '步骤 2：剪辑拼接', description: '将喜欢的片段添加到时间线，调整片段顺序和时长', color: 'bg-blue-50' },
+                                                { id: 3, title: '步骤 3：导出成片', description: '检查统计数据，确认项目完整性和导出适合的输出格式和分辨率', color: 'bg-blue-50' }
+                                            ].map((step) => (
+                                                <div key={step.id} className={`p-4 rounded-lg ${step.color}`}>
+                                                    <h4 className="font-medium text-gray-800 mb-2 flex items-center">
+                                                        <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">
+                                                            {step.id}
+                                                        </span>
+                                                        {step.title}
+                                                    </h4>
+                                                    <p className="text-gray-600 text-sm">{step.description}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <button 
+                                        className="text-blue-500 hover:text-blue-600 ml-4"
+                                        onClick={handleShowGuide}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                    <p className="text-gray-600 text-sm mt-2">
+                                        更多详细教程和技巧，请访问我们的帮助中心或观看教学视频。
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Content Area */}
+                        <div className="bg-white rounded-lg shadow-sm">
+                            <div className="bg-blue-600 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                                <span className="text-sm font-medium">{activeTab}</span>
+                                <button className="text-sm">视频库</button>
+                            </div>
+
+                            {activeTab === '展示区' && (
+                                <div className="p-4">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {videoClips.map((clip) => (
+                                            <div key={clip.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                <img 
+                                                    src={clip.image}
+                                                    alt={clip.title}
+                                                    className="w-full h-48 object-cover"
+                                                />
+                                                <div className="p-4">
+                                                    <h3 className="font-semibold text-gray-800 mb-2">{clip.title}</h3>
+                                                    <p className="text-gray-600 text-sm mb-3">{clip.description}</p>
+                                                    <div className="flex items-center mb-3">
+                                                        <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-medium">
+                                                            <i className="far fa-clock mr-1"></i>{clip.duration}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded text-sm font-medium hover:bg-blue-700 flex items-center justify-center">
+                                                            <i className="fas fa-play mr-1"></i>播放预览
+                                                        </button>
+                                                        <button 
+                                                            className="bg-blue-500 text-white py-2 px-3 rounded text-sm hover:bg-blue-600"
+                                                            onClick={handleLibraryEditClick}
+                                                        >
+                                                            <i className="fas fa-plus mr-1"></i>加入剪辑
+                                                        </button>
+                                                        <button className="bg-white text-blue-600 border border-blue-600 py-2 px-4 rounded text-sm font-medium hover:bg-blue-50 flex items-center justify-center">
+                                                            <i className="fas fa-info-circle mr-1"></i>详情
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === '编辑区' && editingEditMode === 'editing' && (
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center">
+                                            <button className="bg-blue-100 text-blue-600 px-3 py-1 rounded text-sm font-medium mr-4 flex items-center">
+                                                <i className="fas fa-plus mr-2"></i>添加片段
+                                            </button>
+                                            <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium ml-4 flex items-center">
+                                                <i className="fas fa-upload mr-2"></i>导入素材
+                                            </button>
+                                        </div>
+                                        <button 
+                                            className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center text-sm"
+                                            onClick={handleSaveProject}
+                                        >
+                                            <i className="fas fa-save mr-2"></i>保存项目
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center justify-center py-16">
+                                        <div className="text-center">
+                                            <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4">
+                                                <i className="fas fa-film text-gray-400 text-xl"></i>
+                                            </div>
+                                            <h3 className="text-gray-700 font-medium mb-2">时间线暂无片段</h3>
+                                            <p className="text-gray-500 text-sm">从素材库中添加视频片段到时间线开始编辑制作</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === '编辑区' && editingEditMode === 'library' && (
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center">
+                                            <button className="bg-blue-100 text-blue-600 px-3 py-1 rounded text-sm font-medium mr-4 flex items-center">
+                                                <i className="fas fa-plus mr-2"></i>添加片段
+                                            </button>
+                                            <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium ml-4 flex items-center">
+                                                <i className="fas fa-upload mr-2"></i>导入素材
+                                            </button>
+                                        </div>
+                                        <button className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium ml-4 flex items-center">
+                                            <i className="fas fa-upload mr-2"></i>导入素材
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-white rounded-lg p-8 border border-gray-200 min-h-96">
+                                        <div className="flex items-center justify-center">
+                                            <div className="text-center w-24">
+                                                <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4">
+                                                    <i className="fas fa-film text-gray-400 text-xl"></i>
+                                                </div>
+                                                <h3 className="text-gray-700 font-medium mb-2">时间线暂无片段</h3>
+                                                <p className="text-gray-500 text-sm">从素材库中添加视频片段到时间线开始创作</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    {/* Add Material Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50">
+                            <div className="flex items-center justify-center min-h-screen pt-20">
+                                <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                                    <div className="bg-blue-600 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold">添加新素材</h3>
+                                        <button 
+                                            className="text-white hover:text-gray-200"
+                                            onClick={handleCloseAddModal}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                    <div className="p-6">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    标题 *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={newMaterialTitle}
+                                                    onChange={(e) => setNewMaterialTitle(e.target.value)}
+                                                    placeholder="输入素材标题"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    时长 *
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={newMaterialDuration}
+                                                    onChange={(e) => setNewMaterialDuration(e.target.value)}
+                                                    placeholder="mm:ss"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    分类
+                                                </label>
+                                                <select
+                                                    value={newMaterialCategory}
+                                                    onChange={(e) => setNewMaterialCategory(e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                >
+                                                    <option value="风景">风景</option>
+                                                    <option value="城市">城市</option>
+                                                    <option value="人物">人物</option>
+                                                    <option value="动物">动物</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    描述
+                                                </label>
+                                                <textarea
+                                                    rows="4"
+                                                    value={newMaterialDescription}
+                                                    onChange={(e) => setNewMaterialDescription(e.target.value)}
+                                                    placeholder="输入素材描述..."
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex space-x-3 mt-6">
+                                            <button 
+                                                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md font-medium hover:bg-gray-400"
+                                                onClick={handleCloseAddModal}
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700"
+                                                onClick={handleCloseAddModal}
+                                            >
+                                                添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sidebar */}
+                    <aside className="w-64 mt-6 ml-6">
+                        <div className="bg-white rounded-lg shadow-sm p-4">
+                            <h3 className="font-semibold text-gray-800 mb-4">操作中心</h3>
+                            <nav className="space-y-1">
+                                <div className="flex items-center p-2 border-b border-gray-100">
+                                    <i className="fas fa-play mr-3 text-blue-600"></i>
+                                    <span className="text-blue-600">视频库</span>
+                                </div>
+                                <div className="flex items-center p-2">
+                                    <i className="fas fa-edit mr-3 text-gray-400"></i>
+                                    <span>我的剪辑</span>
+                                </div>
+                                <div className="flex items-center p-2">
+                                    <i className="fas fa-layer-group mr-3 text-gray-400"></i>
+                                    <span>模板中心</span>
+                                </div>
+                                <div className="flex items-center p-2">
+                                    <i className="fas fa-question-circle mr-3 text-gray-400"></i>
+                                    <span>帮助</span>
+                                </div>
+                            </nav>
+                        </div>
+                    </aside>
+
+                    {/* Floating Toolbar */}
+                    <div className="fixed bottom-4 right-4">
+                        <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm shadow-lg hover:bg-blue-700 z-40">
+                            <i className="fas fa-info-circle mr-2"></i>帮助中心
+                        </button>
+                        <button className="bg-gray-800 text-white px-3 py-2 rounded-md shadow-lg hover:bg-gray-900 z-30">
+                            <i className="fas fa-lightbulb mr-1"></i>
+                        </button>
+                        <button className="bg-white text-gray-800 px-3 py-2 rounded-md shadow-lg border border-gray-300 hover:bg-gray-50 z-30">
+                            <i className="fas fa-plus mr-1"></i>添加材料
+                        </button>
+                    </div>
+
+                    {/* Copyright */}
+                    <footer className="border-t border-gray-200 bg-gray-800 text-center text-gray-300 py-6">
+                        <p className="flex items-center justify-center">
+                            <i className="far fa-copyright mr-1"></i>
+                            2023 影视片段混剪工具 | 版权所有 | 联系我们：support@videomix.com
+                        </p>
+                        <p className="text-xs mt-1">
+                            版本：2.1.0
+                        </p>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

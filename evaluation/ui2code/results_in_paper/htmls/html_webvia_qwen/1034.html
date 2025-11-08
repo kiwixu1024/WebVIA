@@ -1,0 +1,727 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>婚礼仪式流程编辑器</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function WeddingApp() {
+            const [currentView, setCurrentView] = useState('process');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingStep, setEditingStep] = useState(null);
+
+            const [processes, setProcesses] = useState([
+                {
+                    id: 1,
+                    name: '新人入场',
+                    time: '10:00',
+                    duration: '20 分钟',
+                    description: '新人携手进入婚礼现场，伴随着婚礼进行曲',
+                    icon: '¥',
+                    color: 'purple'
+                },
+                {
+                    id: 2,
+                    name: '证婚环节',
+                    time: '10:20',
+                    duration: '20 分钟',
+                    description: '请证婚人宣读证婚词，新人交换誓言',
+                    icon: '高标准对应证章-2',
+                    color: 'purple'
+                },
+                {
+                    id: 3,
+                    name: '交换戒指',
+                    time: '10:40',
+                    duration: '15 分钟',
+                    description: '新娘为新郎戴上戒指，新郎为新娘戴上戒指',
+                    icon: '标准化图标-4',
+                    color: 'purple'
+                }
+            ]);
+
+            const handleAddProcess = () => {
+                setShowAddModal(true);
+            };
+
+            const handleEditProcess = (step) => {
+                setEditingStep({
+                    ...step,
+                    icon: '',
+                    color: step.color
+                });
+                setShowEditModal(true);
+            };
+
+            const handleDeleteProcess = (id) => {
+                const updatedSteps = processes.filter(step => step.id !== id);
+                setProcesses(updatedSteps);
+                setEditingStep(null);
+            };
+
+            const handleSaveProgress = () => {
+                setShowAddModal(false);
+                setCurrentView('process');
+            };
+
+            const handleSaveEdit = () => {
+                setProcesses(prev => prev.map(step => 
+                    step.id === editingStep.id ? { ...editingStep, color: step.color } : step
+                ));
+                setShowEditModal(false);
+                setEditingStep(null);
+            };
+
+            const getProcessColor = (color) => {
+                const colors = {
+                    purple: 'bg-purple-100',
+                    orange: 'bg-orange-100',
+                    blue: 'bg-blue-100'
+                };
+                return colors[color] || 'bg-purple-100';
+            };
+
+            const renderSidebar = () => (
+                <div className="w-64 bg-pink-100 py-4">
+                    <div className="flex flex-col">
+                        <div className="bg-pink-200 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                            <i className="fas fa-heart text-2xl text-white"></i>
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">浪漫婚礼策划</h3>
+                        
+                        <nav className="space-y-2">
+                            <button 
+                                onClick={() => setCurrentView('process')}
+                                className={`w-full flex items-center px-2 py-2 rounded-lg text-left transition-colors ${
+                                    currentView === 'process' ? 'bg-pink-300 text-white' : 'text-gray-600 hover:bg-pink-200'
+                                }`}
+                            >
+                                <i className="fas fa-list mr-3"></i>
+                                仪式流程管理
+                            </button>
+                            
+                            <button 
+                                onClick={() => setCurrentView('stats')}
+                                className={`w-full flex items-center px-2 py-2 rounded-lg text-left transition-colors ${
+                                    currentView === 'stats' ? 'bg-pink-300 text-white' : 'text-gray-600 hover:bg-pink-200'
+                                }`}
+                            >
+                                <i className="fas fa-chart-bar mr-3"></i>
+                                流程统计
+                            </button>
+                            
+                            <button 
+                                onClick={() => setCurrentView('theme')}
+                                className={`w-full flex items-center px-2 py-2 rounded-lg text-left transition-colors ${
+                                    currentView === 'theme' ? 'bg-pink-300 text-white' : 'text-gray-600 hover:bg-pink-200'
+                                }`}
+                            >
+                                <i className="fas fa-palette mr-3"></i>
+                                主题定制
+                            </button>
+                            
+                            <button 
+                                onClick={() => {}}
+                                className="w-full flex items-center px-2 py-2 rounded-lg text-left transition-colors text-gray-600 hover:bg-pink-200"
+                            >
+                                <i className="fas fa-question-circle mr-3"></i>
+                                帮助中心
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            );
+
+            const renderStatsPage = () => (
+                <div className="p-6">
+                    <h1 className="text-2xl font-semibold text-gray-800 mb-2">流程统计</h1>
+                    <p className="text-gray-600 mb-6">通过统计数据分析您的婚礼流程安排情况，控制场总进度避免现场混乱。</p>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                        <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center mb-2">
+                                <i className="fas fa-list text-pink-500 mr-2"></i>
+                                <span className="text-sm text-gray-600">总流程数</span>
+                            </div>
+                            <div className="text-2xl font-bold text-pink-500">3</div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center mb-2">
+                                <i className="fas fa-check text-green-500 mr-2"></i>
+                                <span className="text-sm text-gray-600">已完成数</span>
+                            </div>
+                            <div className="text-2xl font-bold text-green-500">0</div>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-4">
+                            <div className="flex items-center mb-2">
+                                <i className="fas fa-clock text-blue-500 mr-2"></i>
+                                <span className="text-sm text-gray-600">总时长</span>
+                            </div>
+                            <div className="text-2xl font-bold text-blue-500">55 分钟</div>
+                        </div>
+                    </div>
+
+                    <button 
+                        onClick={() => setCurrentView('process')}
+                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                        刷新统计
+                    </button>
+                </div>
+            );
+
+            const renderThemePage = () => (
+                <div className="p-6">
+                    <h1 className="text-2xl font-semibold text-gray-800 mb-2 text-center">主题定制</h1>
+                    <p className="text-gray-600 mb-6 text-center">换个色彩选择、字体和图标展示风格，让您婚礼更加与众不同。</p>
+                    
+                    <div className="bg-white rounded-lg p-6 mb-6">
+                        <div className="flex items-center mb-4">
+                            <i className="fas fa-palette text-pink-500 mr-2"></i>
+                            <span className="text-lg font-semibold text-gray-800">配色方案</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-4 mb-6">
+                            <button 
+                                className="bg-pink-300 text-white px-4 py-2 rounded-lg hover:bg-pink-400 transition-colors"
+                                onClick={() => setCurrentView('process')}
+                            >
+                                浪漫粉
+                            </button>
+                            <button 
+                                className="bg-yellow-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-yellow-300 transition-colors"
+                                onClick={() => setCurrentView('process')}
+                            >
+                                金色优雅
+                            </button>
+                            <button 
+                                className="bg-yellow-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-yellow-200 transition-colors"
+                                onClick={() => setCurrentView('process')}
+                            >
+                                奶油白
+                            </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <div className="flex items-center mb-3">
+                                    <i className="fas fa-font text-blue-500 mr-2"></i>
+                                    <span className="text-sm font-semibold text-gray-700">字体选择</span>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition-colors">
+                                        宋体
+                                    </button>
+                                    <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition-colors">
+                                        思源宋体
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="flex items-center mb-3">
+                                    <i className="fas fa-home text-teal-500 mr-2"></i>
+                                    <span className="text-sm font-semibold text-gray-700">图标风格</span>
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <button className="bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 transition-colors">
+                                        扁平风格
+                                    </button>
+                                    <button className="bg-teal-100 text-teal-700 px-3 py-1 rounded hover:bg-teal-200 transition-colors">
+                                        线性风格
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-6 text-center">
+                            <button 
+                                onClick={() => setCurrentView('process')}
+                                className="bg-pink-300 text-white px-6 py-2 rounded-lg hover:bg-pink-400 transition-colors"
+                            >
+                                应用主题
+                            </button>
+                        </div>
+                        
+                        <div className="mt-4">
+                            <button 
+                                onClick={() => setCurrentView('process')}
+                                className="text-gray-600 hover:text-gray-800 transition-colors"
+                            >
+                                重置默认
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderProcessPage = () => {
+                const processDescriptions = processes.map((process, index) => {
+                    switch(index) {
+                        case 0: return process.description;
+                        case 1: return process.description;
+                        case 2: return process.description;
+                        default: return process.description;
+                    }
+                });
+
+                return (
+                    <div className="p-6">
+                        <h1 className="text-2xl font-semibold text-gray-800 mb-2">婚礼仪式流程</h1>
+                        <p className="text-gray-600 mb-6">在这里可添加婚礼仪式流程，支持自定义图标及已送时长。点击"添加流程"按钮开始创建您的完美婚礼流程。</p>
+                        
+                        <div className="space-y-4">
+                            {processes.map((process, index) => (
+                                <div 
+                                    key={process.id} 
+                                    className={`${getProcessColor(process.color)} rounded-lg p-4 border-4 border-yellow-400 relative`}
+                                >
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center">
+                                            <input 
+                                                type="checkbox" 
+                                                className="w-5 h-5 mr-3 text-pink-600 rounded"
+                                                defaultChecked
+                                            />
+                                            <div>
+                                                <h3 className="font-semibold text-gray-800">{process.name}</h3>
+                                                <p className="text-sm text-gray-500">{process.time}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm text-gray-400">{process.duration}</p>
+                                            <button 
+                                                onClick={() => handleEditProcess(process)}
+                                                className="text-gray-600 hover:text-gray-800 ml-2"
+                                            >
+                                                <i className="fas fa-cog"></i>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteProcess(process.id)}
+                                                className="text-red-500 hover:text-red-700 ml-2"
+                                            >
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between text-pink-500 mb-3">
+                                        <div className="flex items-center">
+                                            <span className="text-lg mr-2">{process.icon}</span>
+                                        </div>
+                                        <span className="text-base font-semibold">开始时间: {process.time}</span>
+                                    </div>
+                                    
+                                    <div className="text-sm text-gray-500 mb-3">{process.description}</div>
+                                    
+                                    <div className="text-xs text-gray-400 flex items-center justify-center">
+                                        <i className="fas fa-clock mr-1"></i>
+                                        {index === 0 && <span>日新时间: 10:20</span>}
+                                        {index === 1 && <span>日新时间: 10:40</span>}
+                                        {index === 2 && <span>日新时间: 10:55</span>}
+                                    </div>
+                                    
+                                    <div className="absolute top-4 right-4">
+                                        <div className="flex space-x-2">
+                                            <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                                            <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                            <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div className="text-center mt-6">
+                            <button 
+                                onClick={handleAddProcess}
+                                className="bg-yellow-400 text-gray-800 px-6 py-2 rounded-lg hover:bg-yellow-500 transition-colors"
+                            >
+                                + 添加流程
+                            </button>
+                        </div>
+                        
+                        <div className="mt-8 flex items-center space-x-8 bg-gray-50 p-6 rounded-lg">
+                            <div className="text-center">
+                                <i className="fas fa-list text-pink-500 text-2xl mb-2"></i>
+                                <p className="text-sm text-gray-600">总流程数</p>
+                                <p className="text-xl font-bold text-pink-500">3</p>
+                            </div>
+                            <div className="text-center">
+                                <i className="fas fa-check text-green-500 text-2xl mb-2"></i>
+                                <p className="text-sm text-gray-600">已完成</p>
+                                <p className="text-xl font-bold text-green-500">0</p>
+                            </div>
+                            <div className="text-center">
+                                <i className="fas fa-clock text-blue-500 text-2xl mb-2"></i>
+                                <p className="text-sm text-gray-600">总时长</p>
+                                <p className="text-xl font-bold text-blue-500">55 分钟</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderAddModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg w-full max-w-md mx-4 p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800">添加流程步骤</h3>
+                            <button 
+                                onClick={() => setShowAddModal(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    过程名称 *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入步骤名称..."
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    图标
+                                </label>
+                                <div className="grid grid-cols-4 gap-3">
+                                    <button className="bg-pink-300 text-white p-3 rounded-lg hover:bg-pink-400 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-pink-100 text-pink-600 p-3 rounded-lg hover:bg-pink-200 transition-colors">
+                                        <i className="fas fa-heart"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-camera"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-utensils"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-hands-helping"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-music"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-camera"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-hands-helping"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    持续时长 (分钟)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入持续时长..."
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    描述
+                                </label>
+                                <textarea 
+                                    placeholder="请输入描述..."
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20 focus:outline-none focus:border-pink-500"
+                                ></textarea>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    图片颜色
+                                </label>
+                                <div className="flex space-x-2">
+                                    <button className="w-8 h-8 bg-pink-300 rounded-full border-2 border-gray-200"></button>
+                                    <button className="w-8 h-8 bg-yellow-200 rounded-full border-2 border-gray-200"></button>
+                                    <button className="w-8 h-8 bg-yellow-100 rounded-full border-2 border-gray-200"></button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="flex space-x-3 mt-6">
+                            <button 
+                                onClick={() => setShowAddModal(false)}
+                                className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={handleSaveProgress}
+                                className="flex-1 bg-pink-300 text-white py-2 rounded-lg hover:bg-pink-400 transition-colors"
+                            >
+                                ❤ 保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderEditModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg w-full max-w-md mx-4 p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-purple-600">编辑内程步骤</h3>
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    过程名称 *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    value={editingStep?.name || ''}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    图标
+                                </label>
+                                <div className="grid grid-cols-4 gap-3">
+                                    <button className="bg-pink-300 text-white p-3 rounded-lg hover:bg-pink-400 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-pink-100 text-pink-600 p-3 rounded-lg hover:bg-pink-200 transition-colors">
+                                        <i className="fas fa-heart"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-camera"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-utensils"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-hands-helping"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-music"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-camera"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-hands-helping"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-gift"></i>
+                                    </button>
+                                    <button className="bg-white p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i className="fas fa-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    持续时长 (分钟)
+                                </label>
+                                <input 
+                                    type="text" 
+                                    value={editingStep?.duration || ''}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-semibold text-purple-600 mb-2">
+                                    描述
+                                </label>
+                                <textarea 
+                                    value={editingStep?.description || ''}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20 focus:outline-none focus:border-pink-500"
+                                ></textarea>
+                            </div>
+                        </div>
+                        
+                        <div className="flex space-x-3 mt-6">
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                取消
+                            </button>
+                            <button 
+                                onClick={handleSaveEdit}
+                                className="flex-1 bg-pink-300 text-white py-2 rounded-lg hover:bg-pink-400 transition-colors"
+                            >
+                                ❤ 保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="flex h-screen bg-pink-50">
+                    {renderSidebar()}
+                    
+                    <div className="flex-1 flex flex-col">
+                        <div className="bg-white border-b px-6 py-4 flex justify-between items-center">
+                            <div className="flex items-center">
+                                <i className="fas fa-heart text-pink-500 mr-2"></i>
+                                <h1 className="text-xl font-semibold text-gray-800">婚礼仪式流程编辑器</h1>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button 
+                                    onClick={() => setCurrentView('stats')}
+                                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                                        currentView === 'stats' ? 'bg-pink-200 text-pink-800' : 'text-gray-600 hover:bg-pink-100'
+                                    }`}
+                                >
+                                    <i className="fas fa-chart-pie mr-2"></i>
+                                    简洁版预览
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setCurrentView('theme')}
+                                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                                        currentView === 'theme' ? 'bg-pink-200 text-pink-800' : 'text-gray-600 hover:bg-pink-100'
+                                    }`}
+                                >
+                                    <i className="fas fa-question-circle mr-2"></i>
+                                    详情版说明
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="flex-1 flex">
+                            <div className="flex-1 flex">
+                                <div className="w-1/2 p-6 bg-white border-r">
+                                    {currentView === 'process' && renderProcessPage()}
+                                    {currentView === 'stats' && renderStatsPage()}
+                                    {currentView === 'theme' && renderThemePage()}
+                                </div>
+                                <div className="w-1/2 p-6 bg-white">
+                                    {currentView === 'process' && currentView === 'stats' && showAddModal && renderAddModal()}
+                                    {currentView === 'process' && currentView === 'theme' && showAddModal && renderAddModal()}
+                                    {currentView === 'process' && currentView === 'stats' && showEditModal && renderEditModal()}
+                                    {currentView === 'process' && currentView === 'theme' && showEditModal && renderEditModal()}
+                                    <div className="border-t pt-6">
+                                        <h3 className="text-lg font-semibold text-pink-600 mb-4">婚礼流程统计</h3>
+                                        <div className="flex space-x-6">
+                                            <div className="bg-yellow-100 p-4 rounded-lg">
+                                                <div className="text-xs text-gray-500 mb-1">总流程数</div>
+                                                <div className="text-2xl font-bold text-pink-600 mb-1">3</div>
+                                                <div className="text-xs text-gray-600">已完成流程</div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-gray-400 h-2 rounded-full" style={{width: '0%'}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="bg-blue-100 p-4 rounded-lg">
+                                                <div className="text-xs text-gray-500 mb-1">预计总时长</div>
+                                                <div className="text-2xl font-bold text-blue-600 mb-1">55 分钟</div>
+                                                <div className="text-xs text-gray-600">总时长（分钟）</div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-6">
+                                            <div className="flex items-center mb-2">
+                                                <i className="fas fa-clock text-purple-500 mr-2"></i>
+                                                <span className="font-semibold text-gray-800">实时监控流程进度，避免现场混乱</span>
+                                            </div>
+                                            <div className="space-y-1 text-sm text-gray-600">
+                                                <div className="flex items-center">
+                                                    <i className="far fa-circle text-gray-300 mr-2"></i>
+                                                    <span>每个流程步骤建议控制在15-30分钟</span>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <i className="far fa-circle text-gray-300 mr-2"></i>
+                                                    <span>整个婚礼仪式建议控制在2小时内</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="bg-white border-t px-6 py-4 mt-4">
+                            <p className="text-sm text-gray-600">
+                                使用撤销/重做快速修正编辑，保存后可随时导出分享
+                            </p>
+                            <div className="flex space-x-4 mt-4">
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-undo mr-1"></i>
+                                    撤销
+                                </button>
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-redo mr-1"></i>
+                                    重做
+                                </button>
+                                <button className="bg-gray-100 text-gray-700 px-4 py-1 rounded hover:bg-gray-200">
+                                    <i className="fas fa-save mr-1"></i>
+                                    保存草稿
+                                </button>
+                                <button className="bg-gray-100 text-gray-700 px-4 py-1 rounded hover:bg-gray-200">
+                                    <i className="fas fa-file-pdf mr-1"></i>
+                                    导出PDF
+                                </button>
+                                <button className="bg-gray-100 text-gray-700 px-4 py-1 rounded hover:bg-gray-200">
+                                    <i className="fas fa-print mr-1"></i>
+                                    打印
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<WeddingApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏排行榜</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(to right, #FFDD00, #FF8C00);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const App = () => {
+            const [currentView, setCurrentView] = React.useState('ranking'); // ranking, help, addGame
+            const [activeCategory, setActiveCategory] = React.useState('全部游戏');
+            const [showHelpModal, setShowHelpModal] = React.useState(false);
+            const [showAddGameModal, setShowAddGameModal] = React.useState(false);
+            const [sortBy, setSortBy] = React.useState('按评分排序');
+            const [sortOrder, setSortOrder] = React.useState('asc');
+            
+            const initialGames = [
+                {
+                    id: 1,
+                    name: "魔法王国",
+                    downloads: "350.0万",
+                    date: "3/27/2023",
+                    rating: 9.1,
+                    tags: ["策略", "动作", "RPG"],
+                    image: "https://picsum.photos/id/1/300/200"
+                },
+                {
+                    id: 2,
+                    name: "太空射击王",
+                    downloads: "98.0万",
+                    date: "6/21/2023",
+                    rating: 8.7,
+                    tags: ["射击", "动作", "科幻"],
+                    image: "https://picsum.photos/id/2/300/200"
+                },
+                {
+                    id: 3,
+                    name: "零年极速",
+                    downloads: "120.0万",
+                    date: "7/4/2023",
+                    rating: 8.5,
+                    tags: ["竞速", "体育", "多人"],
+                    image: "https://picsum.photos/id/3/300/200"
+                },
+                {
+                    id: 4,
+                    name: "美食大亨",
+                    downloads: "230.0万",
+                    date: "4/9/2023",
+                    rating: 7.9,
+                    tags: ["模拟", "经营", "休闲"],
+                    image: "https://picsum.photos/id/4/300/200"
+                },
+                {
+                    id: 5,
+                    name: "幻境冒险",
+                    downloads: "150.0万",
+                    date: "5/14/2023",
+                    rating: 9.3,
+                    tags: ["冒险", "RPG", "开放世界"],
+                    image: "https://picsum.photos/id/5/300/200"
+                }
+            ];
+            
+            const [games, setGames] = React.useState(initialGames);
+            
+            const handleCategoryClick = (category) => {
+                setActiveCategory(category);
+                
+                if (category === '冒险') {
+                    const filteredGames = initialGames.filter(game => 
+                        game.tags.includes('冒险') || game.name.includes('冒险')
+                    );
+                    setGames(filteredGames);
+                } else if (category === '全部游戏') {
+                    setGames(initialGames);
+                }
+            };
+            
+            const handleSortChange = (option) => {
+                setSortBy(option);
+                sortGames(option, sortOrder);
+            };
+            
+            const handleSortOrderChange = (order) => {
+                setSortOrder(order);
+                sortGames(sortBy, order);
+            };
+            
+            const sortGames = (sortOption, order) => {
+                let sortedGames = [...games];
+                
+                if (sortOption === '按下载量排序') {
+                    sortedGames.sort((a, b) => {
+                        const aDownloads = parseFloat(a.downloads);
+                        const bDownloads = parseFloat(b.downloads);
+                        return order === 'desc' ? bDownloads - aDownloads : aDownloads - bDownloads;
+                    });
+                }
+                
+                setGames(sortedGames);
+            };
+            
+            const categories = [
+                '全部游戏', '冒险', 'RPG', '开放世界', '射击', '动作', '科幻', 
+                '休闲', '竞速', '体育', '多人', '策略', '模拟'
+            ];
+            
+            return (
+                <div className="flex flex-col min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-purple-900 text-white py-4 px-6 flex justify-between items-center">
+                        <div className="flex items-center">
+                            <div className="text-xl font-bold flex items-center">
+                                <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                                </svg>
+                                游戏排行榜
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button className={`px-4 py-1 rounded ${currentView === 'ranking' ? 'bg-blue-500' : 'bg-blue-400'}`} onClick={() => setCurrentView('ranking')}>排行榜</button>
+                            <button className={`px-4 py-1 rounded ${currentView === 'stats' ? 'bg-blue-500' : 'bg-blue-400'}`} onClick={() => setCurrentView('stats')}>统计</button>
+                            <button className="px-4 py-1 rounded bg-blue-400" onClick={() => setShowHelpModal(true)}>帮助</button>
+                        </div>
+                        <button className="bg-orange-500 text-white px-4 py-2 rounded-md flex items-center" onClick={() => setShowAddGameModal(true)}>
+                            <span className="text-lg mr-1">+</span> 添加新游戏
+                        </button>
+                    </header>
+
+                    <div className="flex flex-1">
+                        {/* Sidebar */}
+                        <aside className="w-40 bg-white shadow-md">
+                            <div className="p-4 text-gray-500 font-semibold">导航</div>
+                            <div className="px-2 py-1">
+                                <div className="sidebar-item active bg-purple-100 text-purple-800 rounded px-3 py-2 mb-1 flex items-center">
+                                    <i className="fas fa-home mr-2"></i> 首页概览
+                                </div>
+                                <div className="sidebar-item text-gray-700 rounded px-3 py-2 mb-1 flex items-center">
+                                    <i className="fas fa-list-alt mr-2"></i> 排行榜管理
+                                </div>
+                                <div className="sidebar-item text-gray-700 rounded px-3 py-2 mb-1 flex items-center">
+                                    <i className="fas fa-chart-bar mr-2"></i> 数据统计
+                                </div>
+                                <div className="sidebar-item text-gray-700 rounded px-3 py-2 mb-1 flex items-center">
+                                    <i className="fas fa-cog mr-2"></i> 系统设置
+                                </div>
+                            </div>
+
+                            <div className="p-4 text-gray-500 font-semibold">游戏分类</div>
+                            <div className="px-2 pb-4">
+                                {categories.map(category => (
+                                    <div 
+                                        key={category}
+                                        className={`cursor-pointer rounded px-3 py-1 mb-1 text-sm ${activeCategory === category ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                        onClick={() => handleCategoryClick(category)}
+                                    >
+                                        {category}
+                                    </div>
+                                ))}
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-6 overflow-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <h1 className="text-2xl font-bold text-gray-800">游戏排行榜</h1>
+                                <div className="flex items-center space-x-2">
+                                    <select 
+                                        className="border border-gray-300 rounded px-3 py-1"
+                                        value={sortBy}
+                                        onChange={(e) => handleSortChange(e.target.value)}
+                                    >
+                                        <option value="按评分排序">按评分排序</option>
+                                        <option value="按下载量排序">按下载量排序</option>
+                                    </select>
+                                    <button 
+                                        className={`px-3 py-1 rounded ${sortOrder === 'desc' ? 'bg-purple-700 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                        onClick={() => handleSortOrderChange('desc')}
+                                    >
+                                        降序
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Game List */}
+                            <div className="space-y-4">
+                                {games.map((game, index) => (
+                                    <div key={game.id} className="bg-white rounded-lg shadow-md p-4 flex">
+                                        <div className="w-8 h-8 bg-purple-700 text-white rounded-full flex items-center justify-center mr-4">
+                                            {index + 1}
+                                        </div>
+                                        <div className="w-64 h-36 overflow-hidden rounded mr-4">
+                                            <img src={game.image} alt={game.name} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold text-gray-800">{game.name}</h3>
+                                            <div className="flex items-center mt-2 text-gray-600 text-sm">
+                                                <span className="mr-6"><i className="fas fa-download mr-1"></i> {game.downloads}下载</span>
+                                                <span><i className="far fa-calendar-alt mr-1"></i> 更新于: {game.date}</span>
+                                            </div>
+                                            <div className="mt-2 flex flex-wrap gap-1">
+                                                {game.tags.map(tag => (
+                                                    <span key={tag} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-xs text-gray-700">#{tag}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col items-end">
+                                            <div className="bg-yellow-100 px-2 py-1 rounded-md flex items-center text-yellow-600">
+                                                <span className="text-sm mr-1">★</span>
+                                                <span className="font-bold">{game.rating}</span>
+                                            </div>
+                                            <div className="mt-auto flex space-x-2">
+                                                <button className="border border-purple-500 text-purple-500 px-3 py-1 rounded-md text-sm">
+                                                    <i className="fas fa-edit mr-1"></i> 编辑
+                                                </button>
+                                                <button className="border border-red-500 text-red-500 px-3 py-1 rounded-md text-sm">
+                                                    <i className="fas fa-trash-alt mr-1"></i> 删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-64 bg-white p-4 shadow-md">
+                            <h3 className="font-bold text-lg mb-4">统计概览</h3>
+                            
+                            <div className="mb-6">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-700">游戏总数</span>
+                                    <span className="font-bold text-purple-800">5</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1">
+                                    <div className="progress-bar w-full"></div>
+                                </div>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-700">今日新增</span>
+                                    <span className="font-bold text-blue-500">2</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1">
+                                    <div className="progress-bar w-1/2"></div>
+                                </div>
+                            </div>
+                            
+                            <div className="mb-8">
+                                <div className="flex justify-between mb-1">
+                                    <span className="text-gray-700">访问量</span>
+                                    <span className="font-bold text-orange-500">15,783</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1">
+                                    <div className="progress-bar w-4/5"></div>
+                                </div>
+                            </div>
+                            
+                            <h3 className="font-bold text-lg mb-3">排行榜特色</h3>
+                            
+                            <div className="space-y-3 mb-8">
+                                <div className="flex items-start">
+                                    <div className="text-purple-500 mr-2">
+                                        <i className="fas fa-sync-alt"></i>
+                                    </div>
+                                    <div className="text-sm text-gray-700">关时更新，及时反映游戏排名变化</div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="text-purple-500 mr-2">
+                                        <i className="fas fa-globe"></i>
+                                    </div>
+                                    <div className="text-sm text-gray-700">全球数据同步，掌握国际游戏动态</div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="text-purple-500 mr-2">
+                                        <i className="fas fa-chart-line"></i>
+                                    </div>
+                                    <div className="text-sm text-gray-700">运营数据分析，真实反映游戏口碑</div>
+                                </div>
+                                <div className="flex items-start">
+                                    <div className="text-purple-500 mr-2">
+                                        <i className="fas fa-users"></i>
+                                    </div>
+                                    <div className="text-sm text-gray-700">社区投票支持，由玩家共同决定</div>
+                                </div>
+                            </div>
+                            
+                            <h3 className="font-bold text-lg mb-3">快捷操作</h3>
+                            
+                            <div className="grid grid-cols-2 gap-2">
+                                <button className="bg-purple-700 text-white p-2 rounded flex items-center justify-center text-sm">
+                                    <i className="fas fa-plus mr-1"></i> 导出数据
+                                </button>
+                                <button className="bg-blue-500 text-white p-2 rounded flex items-center justify-center text-sm">
+                                    <i className="fas fa-sync mr-1"></i> 刷新排行
+                                </button>
+                                <button className="bg-gray-700 text-white p-2 rounded flex items-center justify-center text-sm">
+                                    <i className="fas fa-cog mr-1"></i> 设置
+                                </button>
+                                <button className="bg-orange-500 text-white p-2 rounded flex items-center justify-center text-sm">
+                                    <i className="fas fa-question-circle mr-1"></i> 帮助
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-800 text-white p-4 text-center text-sm">
+                        © 2023 游戏排行榜 | 版本 1.0.0
+                        <span className="mx-4">|</span>
+                        <a href="#" className="text-gray-300 hover:text-white">联系我们</a>
+                        <span className="mx-4">|</span>
+                        <a href="#" className="text-gray-300 hover:text-white">隐私政策</a>
+                        <span className="mx-4">|</span>
+                        <a href="#" className="text-gray-300 hover:text-white">使用条款</a>
+                    </footer>
+
+                    {/* Help Modal */}
+                    {showHelpModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-xl font-bold">帮助中心</h3>
+                                    <button onClick={() => setShowHelpModal(false)} className="text-gray-500 hover:text-gray-700">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="mb-6">
+                                    <h4 className="font-bold mb-2">如何使用游戏排行榜?</h4>
+                                    <p className="text-gray-700 mb-4">游戏排行榜提供了最新的游戏评分和下载量数据，帮助您找到最受欢迎的游戏。</p>
+                                    
+                                    <h4 className="font-bold mb-2">功能介绍:</h4>
+                                    <ul className="list-disc pl-5 text-gray-700">
+                                        <li className="mb-1">分类浏览 - 通过左侧分类列表快速筛选游戏</li>
+                                        <li className="mb-1">排序功能 - 可按评分、下载量等多种方式排序</li>
+                                        <li className="mb-1">游戏详情 - 查看游戏的详细信息和评价</li>
+                                        <li className="mb-1">数据统计 - 查看全面的游戏数据分析</li>
+                                    </ul>
+                                </div>
+                                <div className="flex justify-end">
+                                    <button 
+                                        onClick={() => setShowHelpModal(false)}
+                                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                    >
+                                        了解了
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Game Modal */}
+                    {showAddGameModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                                <div className="flex justify-between items-center mb-4 bg-purple-700 text-white p-3 rounded-t-lg -mt-6 -mx-6">
+                                    <h3 className="text-xl font-bold">添加新游戏</h3>
+                                    <button onClick={() => setShowAddGameModal(false)} className="text-white hover:text-gray-200">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">游戏名称</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入游戏名称" 
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">评分 (0-10)</label>
+                                    <input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        min="0"
+                                        max="10"
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">下载量</label>
+                                    <input 
+                                        type="number" 
+                                        placeholder="0" 
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">封面图片URL</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="https://picsum.photos/id/123/300/200"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 mb-2">游戏标签</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['RPG', '冒险', '动作', '射击', '休闲', '模拟', '竞速', '体育', '科幻', '多人', '开放世界'].map(tag => (
+                                            <div key={tag} className="border border-gray-300 rounded px-3 py-1 text-sm cursor-pointer hover:bg-gray-100">
+                                                {tag}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-red-500 text-xs mt-2">至少选择一个标签</p>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
+                                        onClick={() => setShowAddGameModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800"
+                                    >
+                                        提交
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

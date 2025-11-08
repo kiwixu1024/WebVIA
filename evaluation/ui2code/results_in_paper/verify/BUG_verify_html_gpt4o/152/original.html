@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Game Ranking</title>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+    <script type="text/babel">
+        const gamesInitial = [
+            {
+                id: 2,
+                title: "魔法王国",
+                downloads: "350.07万",
+                lastUpdate: "3/27/2023",
+                tags: ["冒险", "魔幻", "RPG"],
+                imageUrl: "https://picsum.photos/id/1/300/200",
+                rating: 9.1
+            },
+            {
+                id: 3,
+                title: "太空射击王",
+                downloads: "98.07万",
+                lastUpdate: "6/21/2023",
+                tags: ["射击", "动作", "科幻"],
+                imageUrl: "https://picsum.photos/id/2/300/200",
+                rating: 8.7
+            },
+            {
+                id: 4,
+                title: "赛车极速",
+                downloads: "120.07万",
+                lastUpdate: "7/4/2023",
+                tags: ["竞速", "多人"],
+                imageUrl: "https://picsum.photos/id/3/300/200",
+                rating: 8.5
+            },
+            {
+                id: 5,
+                title: "美食大亨",
+                downloads: "230.07万",
+                lastUpdate: "4/9/2023",
+                tags: ["模拟", "经营"],
+                imageUrl: "https://picsum.photos/id/4/300/200",
+                rating: 7.9
+            }
+        ];
+
+        function GameCard({ game, onEdit, onDelete }) {
+            return (
+                <div className="flex items-start bg-white shadow-lg rounded-lg p-4 mb-4">
+                    <img src={game.imageUrl} alt={game.title} className="w-24 h-16 rounded-md mr-4 object-cover" />
+                    <div className="flex-1">
+                        <h3 className="text-purple-700 font-semibold">{game.title}</h3>
+                        <p className="text-gray-500 text-sm">
+                            <i className="fas fa-download mr-1"></i>{game.downloads}
+                            <span className="mx-2">|</span>
+                            <i className="fas fa-calendar-alt mr-1"></i>更新于 {game.lastUpdate}
+                        </p>
+                        <div className="flex mt-2 space-x-2">
+                            {game.tags.map(tag => (
+                                <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            className="text-sm bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                            onClick={() => onEdit(game)}
+                        >
+                            编辑
+                        </button>
+                        <button
+                            className="text-sm bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                            onClick={() => onDelete(game.id)}
+                        >
+                            删除
+                        </button>
+                        <span className="text-yellow-600 font-bold">{game.rating}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        function App() {
+            const [games, setGames] = React.useState(gamesInitial);
+            const [isModalOpen, setModalOpen] = React.useState(false);
+            const [newGame, setNewGame] = React.useState({
+                title: "",
+                rating: "",
+                downloads: "",
+                imageUrl: "",
+                tags: []
+            });
+
+            const openModal = () => setModalOpen(true);
+            const closeModal = () => {
+                setModalOpen(false);
+                setNewGame({
+                    title: "",
+                    rating: "",
+                    downloads: "",
+                    imageUrl: "",
+                    tags: []
+                });
+            };
+
+            const handleAddNewGame = () => {
+                setGames([
+                    ...games,
+                    {
+                        ...newGame,
+                        id: games.length + 2,
+                        tags: newGame.tags.split(","),
+                        rating: parseFloat(newGame.rating),
+                        downloads: `${newGame.downloads}.07万`
+                    }
+                ]);
+                closeModal();
+            };
+
+            const handleDelete = id => {
+                setGames(games.filter(game => game.id !== id));
+            };
+
+            const handleInputChange = e => {
+                const { name, value } = e.target;
+                setNewGame(prev => ({ ...prev, [name]: value }));
+            };
+
+            return (
+                <div className="flex h-screen">
+                    <aside className="w-64 bg-gray-800 text-white">
+                        <div className="p-6"> <h1 className="text-lg font-bold ">菜单</h1> </div>
+                    </aside>
+                  <main>
+                  </main>
+                </div>);</script>
+                </html

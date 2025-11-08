@@ -1,0 +1,450 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>邻里互助平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const initialTasksData = [
+      { id: 1, title: '帮忙代收快递', author: '张三', dueDate: '2023-12-25', contact: '138****2234', contactType: '电话', emergency: 3, tag: '购物代买' },
+      { id: 2, title: '带小朋友散步', author: '李四', dueDate: '2023-12-26', contact: 'li_si', contactType: '微信', emergency: 2, tag: '陪伴聊天' },
+      { id: 3, title: '共寻电竞工具', author: '王五', dueDate: '2023-12-30', contact: '139****5678', contactType: '电话', emergency: 1, tag: '家电维修' },
+    ];
+    
+    const tags = ["购物代买", "家电维修", "陪伴聊天", "接送小孩", "萌宠打扫", "宠物照料", "社区活动", "厨艺分享", "其他"];
+
+    const Header = ({ onNavClick }) => (
+      <header className="bg-[#FFFBEB] px-8 py-4 border-b border-gray-200">
+        <div className="flex justify-between items-center max-w-screen-2xl mx-auto">
+          <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-2">
+              <i className="fas fa-home text-2xl text-gray-800"></i>
+              <span className="text-xl font-bold text-gray-800">邻里互助平台</span>
+            </div>
+            <nav className="flex items-center space-x-6 text-gray-600">
+              <a href="#" onClick={(e) => { e.preventDefault(); onNavClick('addTask'); }} className="flex items-center space-x-1 hover:text-blue-600">
+                <i className="fas fa-plus-circle"></i>
+                <span>添加任务</span>
+              </a>
+              <a href="#" onClick={(e) => { e.preventDefault(); onNavClick('statistics'); }} className="hover:text-blue-600">统计分析</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); onNavClick('help'); }} className="hover:text-blue-600">帮助说明</a>
+            </nav>
+          </div>
+          <div className="relative">
+            <input type="text" placeholder="搜索" className="bg-white border border-gray-300 rounded-full py-1.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <i className="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+      </header>
+    );
+
+    const LeftSidebar = () => (
+      <aside className="w-60 flex-shrink-0 p-6">
+        <nav>
+          <ul>
+            <li>
+              <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg bg-gray-100 font-bold text-gray-900">
+                <i className="fas fa-tasks w-5 text-center"></i>
+                <span>我的任务</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
+                <i className="fas fa-bullhorn w-5 text-center"></i>
+                <span>社区公告</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
+                <i className="fas fa-cog w-5 text-center"></i>
+                <span>设置</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div className="mt-8 bg-white p-4 rounded-lg border border-gray-200">
+          <h3 className="font-bold text-sm text-gray-800 mb-2">互助心情</h3>
+          <p className="text-sm text-gray-600">“助人为主，乐在其中，每一次互助都是社区和谐的小小贡献。”</p>
+        </div>
+      </aside>
+    );
+
+    const RightSidebar = () => (
+      <aside className="w-80 flex-shrink-0 p-6 space-y-6">
+        <div className="bg-white p-4 rounded-xl border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-gray-800">数据概览</h3>
+            <a href="#" className="text-sm text-blue-600 hover:underline"><i className="fas fa-sync-alt mr-1"></i>刷新</a>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600 mb-2">任务完成率</p>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '70%' }}></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>0%</span>
+              <span>70%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-gray-200">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-gray-800">任务类型分布</h3>
+            <a href="#" className="text-sm text-blue-600 hover:underline"><i className="fas fa-sync-alt mr-1"></i>刷新</a>
+          </div>
+          <img src="https://picsum.photos/id/1074/400/300" alt="Task type distribution" className="rounded-lg w-full h-auto" />
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-gray-800">今日统计</h3>
+            <a href="#" className="text-sm text-blue-600 hover:underline">查看详情 ></a>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="bg-green-100 text-green-800 px-3 py-1.5 rounded-md">新增任务: 5</div>
+            <div className="bg-red-100 text-red-800 px-3 py-1.5 rounded-md">已解决: 2</div>
+            <div className="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-md">待响应: 3</div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-gray-200">
+          <h3 className="font-bold text-gray-800 mb-2">互助小贴士</h3>
+          <p className="text-sm text-gray-600">互助是好，研究先行。申V为互助功能，能获得更精准更高效的生活及信息和福利。今天，就从一个小小的互助开始吧！</p>
+        </div>
+      </aside>
+    );
+
+    const TaskCard = ({ task, onEditClick }) => (
+      <div className="bg-white p-6 rounded-xl border border-gray-200">
+        <div className="flex justify-between items-start">
+          <h4 className="text-lg font-bold text-gray-800">{task.title}</h4>
+          <a href="#" onClick={(e) => {e.preventDefault(); onEditClick(task);}} className="text-sm text-blue-600 hover:underline flex items-center">
+            <i className="fas fa-edit mr-1"></i>编辑
+          </a>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-gray-600">
+          <p>发起人：{task.author}</p>
+          <p>截止日期：{task.dueDate}</p>
+          <p>联系方式：{task.contactType}: {task.contact}</p>
+          <div className="flex items-center">
+            <span className="mr-2">紧急程度：</span>
+            {[...Array(task.emergency)].map((_, i) => <i key={i} className="fas fa-fire text-orange-500"></i>)}
+            {[...Array(3-task.emergency)].map((_, i) => <i key={i} className="fas fa-fire text-gray-300"></i>)}
+          </div>
+        </div>
+        <div className="mt-4 flex justify-between items-end">
+          <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">{task.tag}</span>
+          <button className="text-sm text-red-500 hover:text-red-700 flex items-center">
+            <i className="fas fa-trash-alt mr-1"></i>删除
+          </button>
+        </div>
+      </div>
+    );
+    
+    const TaskList = ({ tasks, onEditClick, activeTag, onTagClick }) => {
+        const filteredTasks = activeTag ? tasks.filter(t => t.tag === activeTag) : tasks;
+        
+        return (
+            <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">社区互助任务列表</h2>
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm">
+                    <span className="text-gray-800 font-medium">按标签筛选:</span>
+                    {tags.map(tag => (
+                        <button 
+                            key={tag} 
+                            onClick={() => onTagClick(tag)}
+                            className={`px-3 py-1 rounded-full transition-colors ${activeTag === tag ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >
+                            {tag}
+                        </button>
+                    ))}
+                    {activeTag && (
+                        <button onClick={() => onTagClick(null)} className="text-blue-600 hover:underline">
+                            清除筛选
+                        </button>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {filteredTasks.slice(0, 2).map(task => <TaskCard key={task.id} task={task} onEditClick={onEditClick}/>)}
+                </div>
+                {filteredTasks.length > 2 && <TaskCard task={filteredTasks[2]} onEditClick={onEditClick}/>}
+
+
+                <div className="bg-white p-6 rounded-xl border border-gray-200 mt-6">
+                    <div className="flex items-center space-x-3">
+                        <i className="fas fa-hands-helping text-2xl text-blue-500"></i>
+                        <h3 className="text-lg font-bold text-gray-800">社区互助，让爱传递</h3>
+                    </div>
+                    <p className="mt-2 text-gray-600">邻里互助，共同成长。在我们的社区中，每一次互助都是一份温暖，每一次帮助都是一次成长。让我们携手共建和谐友爱的社区家园！</p>
+                </div>
+            </div>
+        );
+    };
+
+    const TaskForm = ({ onCancel, initialData }) => {
+        const isEdit = !!initialData;
+        const [emergency, setEmergency] = useState(initialData?.emergency || 3);
+        
+        const emergencyLabels = {1: '不急', 2: '一般', 3: '紧急', 4: '非常紧急', 5: '立刻'};
+
+        return (
+            <div className="bg-white p-8 rounded-xl border border-gray-200 max-w-3xl mx-auto">
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">{isEdit ? '编辑任务' : '添加新任务'}</h2>
+                <form className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">任务名称 *</label>
+                        <input type="text" defaultValue={initialData?.title || ''} placeholder="例如: 帮忙代收快递" className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">发起人 *</label>
+                        {isEdit ? (
+                            <p className="w-full bg-gray-100 border-gray-300 rounded-md shadow-sm px-3 py-2 text-gray-600">{initialData?.author}</p>
+                        ) : (
+                            <input type="text" placeholder="您的姓名" className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">截止日期</label>
+                        <input type="text" defaultValue={isEdit ? new Date(initialData.dueDate).toLocaleDateString('en-CA') : '2023-09-23'} className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">紧急程度: {emergency}</label>
+                        <div className="relative">
+                           <input type="range" min="1" max="5" value={emergency} onChange={(e) => setEmergency(e.target.value)} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"/>
+                           <div className="flex justify-between text-xs text-gray-500 mt-1">
+                               <span>不急</span>
+                               <span>紧急</span>
+                           </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">联系方式 *</label>
+                        <input type="text" defaultValue={isEdit ? `${initialData.contactType}: ${initialData.contact}`: ''} placeholder="电话或微信" className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">标签 *</label>
+                        <div className="flex flex-wrap gap-2">
+                            {tags.slice(0,7).map(tag => (
+                                <button key={tag} type="button" className={`px-3 py-1.5 text-sm rounded-md transition-colors ${initialData?.tag === tag ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                    {tag}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex justify-center pt-4">
+                        <button type="button" onClick={onCancel} className="px-10 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">取消</button>
+                    </div>
+                </form>
+            </div>
+        );
+    };
+
+    const Statistics = () => (
+        <div className="bg-white p-8 rounded-xl border border-gray-200 space-y-8">
+            <h2 className="text-2xl font-bold text-gray-800">统计分析</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-bold text-gray-800">任务完成情况</h3>
+                        <a href="#" className="text-sm text-blue-600 hover:underline"><i className="fas fa-sync-alt mr-1"></i>刷新数据</a>
+                    </div>
+                    <img src="https://picsum.photos/id/24/600/400" alt="Task completion status" className="rounded-lg w-full"/>
+                    <p className="text-right text-xs text-gray-500 mt-2">数据更新于: 10分钟前</p>
+                </div>
+                <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-bold text-gray-800">任务类型分布</h3>
+                        <a href="#" className="text-sm text-blue-600 hover:underline"><i className="fas fa-sync-alt mr-1"></i>刷新数据</a>
+                    </div>
+                    <img src="https://picsum.photos/id/1078/600/400" alt="Task type distribution" className="rounded-lg w-full"/>
+                    <p className="text-right text-xs text-gray-500 mt-2">数据更新于: 10分钟前</p>
+                </div>
+            </div>
+            <div>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-gray-800">任务详细统计</h3>
+                    <button className="text-sm text-blue-600 hover:underline"><i className="fas fa-download mr-1"></i>导出报表</button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left text-gray-600">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">任务类型</th>
+                                <th scope="col" className="px-6 py-3">总数量</th>
+                                <th scope="col" className="px-6 py-3">已完成</th>
+                                <th scope="col" className="px-6 py-3">进行中</th>
+                                <th scope="col" className="px-6 py-3">完成率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr className="bg-white border-b">
+                                <td className="px-6 py-4 font-medium text-gray-900">购物代买</td>
+                                <td className="px-6 py-4">24</td>
+                                <td className="px-6 py-4">18</td>
+                                <td className="px-6 py-4">6</td>
+                                <td className="px-6 py-4">75%</td>
+                            </tr>
+                            <tr className="bg-gray-50 border-b">
+                                <td className="px-6 py-4 font-medium text-gray-900">家电维修</td>
+                                <td className="px-6 py-4">15</td>
+                                <td className="px-6 py-4">12</td>
+                                <td className="px-6 py-4">3</td>
+                                <td className="px-6 py-4">80%</td>
+                            </tr>
+                            <tr className="bg-white border-b">
+                                <td className="px-6 py-4 font-medium text-gray-900">陪伴聊天</td>
+                                <td className="px-6 py-4">30</td>
+                                <td className="px-6 py-4">22</td>
+                                <td className="px-6 py-4">8</td>
+                                <td className="px-6 py-4">73%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+    
+    const Help = () => (
+        <div className="bg-white p-8 rounded-xl border border-gray-200 space-y-8">
+            <h2 className="text-2xl font-bold text-gray-800">帮助说明</h2>
+            <div className="space-y-6 text-gray-700">
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">如何快速发布互助</h3>
+                    <ol className="list-decimal list-inside space-y-1">
+                        <li>点击顶部导航栏的“添加任务”按钮</li>
+                        <li>填写任务名称、截止日期等必要信息</li>
+                        <li>设置紧急程度和选择相关标签</li>
+                        <li>提供您的联系方式，方便邻居联系您</li>
+                        <li>点击“保存”按钮完成发布</li>
+                    </ol>
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">如何筛选任务</h3>
+                    <ul className="list-disc list-inside space-y-1">
+                        <li>在任务列表上方，您可以通过点击不同的标签来筛选任务，例如：</li>
+                        <li>需要帮忙购物时，点击“购物代买”标签</li>
+                        <li>寻求家电维修帮助时，点击“家电维修”标签</li>
+                        <li>想要找人聊天时，点击“陪伴聊天”标签</li>
+                        <li>您可以同时选择多个标签进行组合筛选，也可以点击“清除筛选”恢复完整列表。</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">社区公约</h3>
+                    <ol className="list-decimal list-inside space-y-1">
+                        <li>尊重隐私：请勿在公开任务中分享个人敏感信息。</li>
+                        <li>诚信互助：发布真实需求，按约定完成互助任务。</li>
+                        <li>友善交流：保持良好沟通态度，互相理解与尊重。</li>
+                        <li>及时反馈：任务完成后，请及时更新状态或删除任务。</li>
+                        <li>互帮互助：在获得帮助的同时，也请积极帮助有需要的邻居。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    );
+
+    const Footer = () => (
+        <footer className="bg-[#FFFBEB] text-gray-600 text-sm">
+            <div className="max-w-screen-2xl mx-auto px-8 pt-8 pb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-200">
+                    <div>
+                        <h4 className="font-bold text-gray-800 mb-2">温馨提示</h4>
+                        <p>请文明互助，保护个人隐私。有问题可联系社区管家。</p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-gray-800 mb-2">联系我们</h4>
+                        <p>社区服务热线: 400-123-4567</p>
+                        <p>邮箱: support@community.com</p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-gray-800 mb-2">关注我们</h4>
+                        <div className="flex space-x-4 text-xl">
+                            <a href="#" className="text-red-500"><i className="fab fa-weibo"></i></a>
+                            <a href="#" className="text-blue-500"><i className="fab fa-qq"></i></a>
+                            <a href="#" className="text-green-500"><i className="fab fa-weixin"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div className="text-center pt-4 text-xs text-gray-500">
+                    <p>© 2023 邻里互助平台 | 让爱与温暖传递</p>
+                </div>
+            </div>
+        </footer>
+    );
+
+    const App = () => {
+        const [page, setPage] = useState('taskList');
+        const [activeTag, setActiveTag] = useState(null);
+        const [taskToEdit, setTaskToEdit] = useState(null);
+
+        const handleNavClick = (targetPage) => {
+            setPage(targetPage);
+        };
+
+        const handleEditClick = (task) => {
+            setTaskToEdit(task);
+            setPage('editTask');
+        };
+
+        const handleTagClick = (tag) => {
+            setActiveTag(tag);
+        };
+
+        const handleCancelForm = () => {
+            setTaskToEdit(null);
+            setPage('taskList');
+        }
+
+        const renderMainContent = () => {
+            switch (page) {
+                case 'taskList':
+                    return <TaskList tasks={initialTasksData} onEditClick={handleEditClick} activeTag={activeTag} onTagClick={handleTagClick} />;
+                case 'addTask':
+                    return <TaskForm onCancel={handleCancelForm} />;
+                case 'editTask':
+                    return <TaskForm onCancel={handleCancelForm} initialData={taskToEdit} />;
+                case 'statistics':
+                    return <Statistics />;
+                case 'help':
+                    return <Help />;
+                default:
+                    return <TaskList tasks={initialTasksData} onEditClick={handleEditClick} activeTag={activeTag} onTagClick={handleTagClick} />;
+            }
+        };
+
+        return (
+            <div className="bg-[#FFFBEB] min-h-screen text-gray-800">
+                <Header onNavClick={handleNavClick} />
+                <main className="max-w-screen-2xl mx-auto flex">
+                    <LeftSidebar />
+                    <div className="flex-grow p-6">
+                        {renderMainContent()}
+                    </div>
+                    <RightSidebar />
+                </main>
+                <Footer />
+            </div>
+        );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

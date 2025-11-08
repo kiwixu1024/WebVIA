@@ -1,0 +1,466 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>求职跟踪</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const initialApplications = [
+      {
+        id: 1,
+        logo: "https://picsum.photos/id/1060/40/40", // A generic square logo, like the "T"
+        company: "腾讯",
+        title: "前端开发工程师",
+        date: "2024-05-10",
+        status: "面试中",
+      },
+      {
+        id: 2,
+        logo: "https://picsum.photos/id/22/40/40", // Looks like the "A" logo
+        company: "阿里巴巴",
+        title: "UI 设计师",
+        date: "2024-05-08",
+        status: "初筛中",
+      },
+      {
+        id: 3,
+        logo: "https://picsum.photos/id/1074/40/40", // A generic square logo, like the "字"
+        company: "字节跳动",
+        title: "后端工程师",
+        date: "2024-05-05",
+        status: "已投递",
+      },
+      {
+        id: 4,
+        logo: "https://picsum.photos/id/1075/40/40", // A generic square logo, like the "百"
+        company: "百度",
+        title: "产品经理",
+        date: "2024-05-01",
+        status: "已录用",
+      },
+    ];
+
+    const statusStyles = {
+      "面试中": "bg-purple-100 text-purple-700",
+      "初筛中": "bg-yellow-100 text-yellow-700",
+      "已投递": "bg-blue-100 text-blue-700",
+      "已录用": "bg-green-100 text-green-700",
+    };
+
+    const StatusBadge = ({ status }) => (
+      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-700'}`}>
+        {status}
+      </span>
+    );
+    
+    const Sidebar = () => (
+      <aside className="w-56 bg-white h-screen flex flex-col justify-between border-r border-gray-200">
+        <div>
+          <div className="px-6 py-5 flex items-center">
+            <div className="bg-blue-500 w-8 h-8 rounded-lg flex items-center justify-center">
+              <i className="fas fa-briefcase text-white"></i>
+            </div>
+            <span className="ml-3 text-lg font-bold text-gray-800">求职跟踪</span>
+          </div>
+          <nav className="mt-4 px-3">
+            <ul>
+              <li>
+                <a href="#" className="flex items-center px-3 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+                  <i className="fas fa-home w-5 text-center"></i>
+                  <span className="ml-3 text-sm font-medium">概览</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" className="flex items-center px-3 py-2.5 text-blue-600 bg-blue-50 rounded-lg">
+                  <i className="fas fa-list-ul w-5 text-center"></i>
+                  <span className="ml-3 text-sm font-medium">职位列表</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" className="flex items-center px-3 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+                  <i className="fas fa-chart-pie w-5 text-center"></i>
+                  <span className="ml-3 text-sm font-medium">统计报表</span>
+                </a>
+              </li>
+              <li>
+                <a href="#" className="flex items-center px-3 py-2.5 text-gray-600 hover:bg-gray-100 rounded-lg">
+                  <i className="fas fa-question-circle w-5 text-center"></i>
+                  <span className="ml-3 text-sm font-medium">帮助说明</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+        <div className="px-6 py-4 text-xs text-gray-400">
+          <p>Version 1.0.0</p>
+          <p>© 2024 求职助手</p>
+        </div>
+      </aside>
+    );
+
+    const Header = ({ searchTerm, onSearchChange }) => (
+      <header className="flex justify-between items-center py-4 px-8 bg-slate-50 border-b border-gray-200">
+        <div>
+          <p className="text-sm text-gray-500">概览 / <span className="text-gray-800 font-medium">职位列表</span></p>
+        </div>
+        <div className="flex items-center space-x-6">
+          <div className="relative">
+            <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input
+              type="text"
+              placeholder="搜索职位或公司..."
+              value={searchTerm}
+              onChange={onSearchChange}
+              className="pl-9 pr-4 py-2 w-56 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <img src="https://picsum.photos/id/433/32/32" alt="User Avatar" className="w-8 h-8 rounded-full" />
+            <span className="text-sm font-medium text-gray-700">李明</span>
+            <i className="fas fa-chevron-down text-xs text-gray-500"></i>
+          </div>
+        </div>
+      </header>
+    );
+    
+    const ApplicationItem = ({ app, onEdit, onDelete }) => (
+      <div className="bg-white p-4 rounded-lg border border-gray-200 flex items-center justify-between hover:shadow-md transition-shadow">
+        <div className="flex items-center space-x-4">
+          <img src={app.logo} alt={app.company} className="w-10 h-10 rounded-md object-cover" />
+          <div>
+            <p className="font-semibold text-gray-800">{app.title}</p>
+            <p className="text-sm text-gray-500">{app.company}</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-8">
+          <div className="text-sm text-gray-500 flex items-center">
+             <i className="far fa-calendar-alt mr-2"></i>
+             {app.date}
+          </div>
+          <StatusBadge status={app.status} />
+        </div>
+        <div className="flex items-center space-x-4">
+          <button onClick={() => onEdit(app)} className="text-sm text-gray-600 hover:text-blue-600 flex items-center">
+            <i className="fas fa-pen mr-1 text-xs"></i> 编辑
+          </button>
+          <button onClick={() => onDelete(app)} className="text-sm text-red-500 hover:text-red-700 flex items-center">
+            <i className="fas fa-trash-alt mr-1 text-xs"></i> 删除
+          </button>
+        </div>
+      </div>
+    );
+    
+    const StatsPanel = () => (
+      <aside className="w-96 space-y-6">
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-gray-800">本月申请总数</h3>
+            <button className="text-gray-400 hover:text-gray-600">
+              <i className="fas fa-sync-alt"></i>
+            </button>
+          </div>
+          <div className="flex items-baseline">
+            <p className="text-5xl font-bold text-gray-800">4</p>
+            <p className="ml-2 text-gray-600">个职位</p>
+          </div>
+          <div className="mt-1 text-sm text-green-600 flex items-center">
+            <i className="fas fa-arrow-up text-xs mr-1"></i>
+            <span>较上月 +1</span>
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+          <h3 className="font-semibold text-gray-800 mb-6">申请阶段分布</h3>
+          <div className="flex items-center justify-center space-x-8">
+            <div className="relative w-40 h-40">
+              <div className="absolute inset-0 rounded-full bg-[conic-gradient(#60A5FA_0_25%,#FBBF24_25%_50%,#C084FC_50%_75%,#E5E7EB_75%_100%)]"></div>
+              <div className="absolute inset-2 bg-white rounded-full"></div>
+            </div>
+            <div className="text-sm space-y-2 text-gray-600">
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-slate-300 mr-2"></span>已投递 (0)</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-yellow-400 mr-2"></span>初筛中 (1)</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-purple-400 mr-2"></span>面试中 (1)</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-blue-400 mr-2"></span>已录用 (1)</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+           <h3 className="font-semibold text-gray-800 mb-6">近7天投递趋势</h3>
+           <div className="flex justify-between items-end h-32 px-2">
+             <div className="flex flex-col items-center w-10">
+               <div className="w-4 bg-blue-200 rounded-t-sm" style={{height: '25%'}}></div>
+               <span className="text-xs text-gray-500 mt-2">05-10</span>
+             </div>
+             <div className="flex flex-col items-center w-10">
+               <div className="w-4 bg-blue-200 rounded-t-sm" style={{height: '10%'}}></div>
+               <span className="text-xs text-gray-500 mt-2">05-11</span>
+             </div>
+             <div className="flex flex-col items-center w-10">
+               <div className="w-4 bg-blue-200 rounded-t-sm" style={{height: '20%'}}></div>
+               <span className="text-xs text-gray-500 mt-2">05-12</span>
+             </div>
+             <div className="flex flex-col items-center w-10">
+                <div className="w-4 bg-blue-200 rounded-t-sm" style={{height: '5%'}}></div>
+               <span className="text-xs text-gray-500 mt-2">05-13</span>
+             </div>
+             <div className="flex flex-col items-center w-10">
+                <div className="w-4 bg-blue-200 rounded-t-sm" style={{height: '35%'}}></div>
+               <span className="text-xs text-gray-500 mt-2">05-14</span>
+             </div>
+              <div className="flex flex-col items-center w-10">
+                <div className="w-4 bg-blue-500 rounded-t-sm" style={{height: '80%'}}></div>
+                <span className="text-xs text-gray-500 mt-2">05-15</span>
+             </div>
+              <div className="flex flex-col items-center w-10">
+                <div className="w-4 bg-transparent rounded-t-sm" style={{height: '0%'}}></div>
+                <span className="text-xs text-gray-500 mt-2">05-16</span>
+             </div>
+           </div>
+        </div>
+      </aside>
+    );
+
+    const GuidePanel = () => (
+      <div className="col-span-2 mt-6 grid grid-cols-2 gap-6">
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+            <h3 className="font-semibold text-gray-800 mb-3 flex items-center"><span className="w-5 h-5 flex items-center justify-center text-sm bg-blue-100 text-blue-600 rounded-full mr-2">📘</span>操作指引</h3>
+            <ul className="text-sm text-gray-600 space-y-2 list-inside">
+                <li className="flex items-start"><span className="mr-2 text-blue-500">1</span><span>点击“添加申请”按钮，填写公司、职位等信息进行记录</span></li>
+                <li className="flex items-start"><span className="mr-2 text-blue-500">2</span><span>随时更新职位申请状态，跟踪每个申请的最新进展</span></li>
+                <li className="flex items-start"><span className="mr-2 text-blue-500">3</span><span>通过右侧统计图表，了解当前的求职全局情况</span></li>
+            </ul>
+        </div>
+        <div className="bg-white p-5 rounded-lg border border-gray-200">
+            <h3 className="font-semibold text-gray-800 mb-3 flex items-center"><span className="w-5 h-5 flex items-center justify-center text-sm bg-yellow-100 text-yellow-600 rounded-full mr-2">⭐</span>主要特色</h3>
+             <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-600">
+                <p className="flex items-center"><i className="fas fa-check-circle text-green-500 mr-2"></i>实时同步您的求职进度</p>
+                <p className="flex items-center"><i className="fas fa-chart-line text-purple-500 mr-2"></i>多维度数据统计分析</p>
+                <p className="flex items-center"><i className="fas fa-tags text-blue-500 mr-2"></i>自定义筛选与分类</p>
+                <p className="flex items-center"><i className="fas fa-file-export text-orange-500 mr-2"></i>导出报表进行备份</p>
+            </div>
+        </div>
+      </div>
+    );
+
+    const AddModal = ({ show, onClose }) => {
+      if (!show) return null;
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">添加职位申请</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <form>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">公司名称</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">职位名称</label>
+                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">投递日期</label>
+                  <div className="relative">
+                    <input type="text" defaultValue="09/23/2025" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                    <i className="far fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">申请阶段</label>
+                  <select defaultValue="已投递" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option>已投递</option>
+                    <option>初筛中</option>
+                    <option>面试中</option>
+                    <option>已录用</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-8 flex justify-end space-x-3">
+                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">取消</button>
+                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    const EditModal = ({ show, onClose, app }) => {
+      if (!show || !app) return null;
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">编辑职位申请</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <form>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">公司名称</label>
+                  <input type="text" defaultValue={app.company} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"/>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">职位名称</label>
+                  <input type="text" defaultValue={app.title} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"/>
+                </div>
+                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">投递日期</label>
+                  <div className="relative">
+                    <input type="text" defaultValue="05/10/2024" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"/>
+                    <i className="far fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">申请阶段</label>
+                  <select defaultValue={app.status} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option>已投递</option>
+                    <option>初筛中</option>
+                    <option>面试中</option>
+                    <option>已录用</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-8 flex justify-end space-x-3">
+                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">取消</button>
+                <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">保存</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    const DeleteModal = ({ show, onClose, app }) => {
+      if (!show || !app) return null;
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900">确认删除</h3>
+            <div className="mt-2 px-7 py-3">
+              <p className="text-sm text-gray-500">
+                您确定要删除 {app.company} - {app.title} 的申请记录吗？此操作无法撤销。
+              </p>
+            </div>
+            <div className="mt-4 flex justify-center space-x-3">
+              <button type="button" onClick={onClose} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                取消
+              </button>
+              <button type="button" onClick={onClose} className="px-6 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">
+                确认删除
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    function App() {
+      const [applications, setApplications] = useState(initialApplications);
+      const [searchTerm, setSearchTerm] = useState("");
+      const [showAddModal, setShowAddModal] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [showDeleteModal, setShowDeleteModal] = useState(false);
+      const [editingApplication, setEditingApplication] = useState(null);
+      const [deletingApplication, setDeletingApplication] = useState(null);
+
+      const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+      };
+
+      const handleOpenEditModal = (app) => {
+        setEditingApplication(app);
+        setShowEditModal(true);
+      };
+
+      const handleOpenDeleteModal = (app) => {
+        setDeletingApplication(app);
+        setShowDeleteModal(true);
+      };
+      
+      const handleCloseModals = () => {
+        setShowAddModal(false);
+        setShowEditModal(false);
+        setShowDeleteModal(false);
+      };
+
+      const filteredApplications = useMemo(() => {
+        if (!searchTerm) return applications;
+        return applications.filter(app => 
+          app.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+          app.company.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }, [searchTerm, applications]);
+      
+      return (
+        <div className="bg-slate-50 min-h-screen flex">
+          <Sidebar />
+          <main className="flex-1 flex flex-col">
+            <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
+            <div className="flex-1 p-8 overflow-y-auto">
+              <div className="flex gap-6">
+                <div className="flex-1">
+                  <div className="flex justify-between items-center mb-5">
+                    <h2 className="text-xl font-semibold text-gray-800">职位申请列表</h2>
+                    <button onClick={() => setShowAddModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center space-x-2">
+                      <i className="fas fa-plus"></i>
+                      <span>添加申请</span>
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {filteredApplications.map(app => (
+                      <ApplicationItem 
+                        key={app.id} 
+                        app={app} 
+                        onEdit={handleOpenEditModal}
+                        onDelete={handleOpenDeleteModal}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <StatsPanel />
+              </div>
+              <GuidePanel />
+            </div>
+          </main>
+          
+          <AddModal show={showAddModal} onClose={handleCloseModals} />
+          <EditModal show={showEditModal} onClose={handleCloseModals} app={editingApplication} />
+          <DeleteModal show={showDeleteModal} onClose={handleCloseModals} app={deletingApplication} />
+
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+  </script>
+</body>
+</html>

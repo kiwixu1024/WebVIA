@@ -1,0 +1,609 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活微耐心挑战榜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('ranking');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingChallenge, setEditingChallenge] = useState(null);
+            const [newChallenge, setNewChallenge] = useState({
+                title: '',
+                type: '排队',
+                difficulty: 3,
+                days: 7
+            });
+
+            const [challenges, setChallenges] = useState([
+                {
+                    id: 1,
+                    rank: 1,
+                    avatar: 'https://picsum.photos/id/64/40/40',
+                    name: '耐心大师',
+                    description: '耐心等电梯不插队',
+                    completedDays: 15,
+                    type: '礼让',
+                    difficulty: 3,
+                    targetDays: 30
+                },
+                {
+                    id: 2,
+                    rank: 2,
+                    avatar: 'https://picsum.photos/id/91/40/40',
+                    name: '冷静小王',
+                    description: '公交车上给老人让座',
+                    completedDays: 12,
+                    type: '礼让',
+                    difficulty: 2,
+                    targetDays: 15
+                },
+                {
+                    id: 3,
+                    rank: 3,
+                    avatar: 'https://picsum.photos/id/177/40/40',
+                    name: '淡定哥',
+                    description: '排队买奶茶不催促',
+                    completedDays: 10,
+                    type: '排队',
+                    difficulty: 4,
+                    targetDays: 20
+                },
+                {
+                    id: 4,
+                    rank: 4,
+                    avatar: 'https://picsum.photos/id/342/40/40',
+                    name: '从容妹',
+                    description: '专注写作45分钟不看手机',
+                    completedDays: 9,
+                    type: '专注',
+                    difficulty: 5,
+                    targetDays: 25
+                },
+                {
+                    id: 5,
+                    rank: 5,
+                    avatar: 'https://picsum.photos/id/883/40/40',
+                    name: '静候派',
+                    description: '等人时默默不发脾气',
+                    completedDays: 8,
+                    type: '等待',
+                    difficulty: 3,
+                    targetDays: 10
+                }
+            ]);
+
+            const handleAddChallenge = () => {
+                if (newChallenge.title.trim()) {
+                    const newId = Math.max(...challenges.map(c => c.id)) + 1;
+                    const newEntry = {
+                        id: newId,
+                        rank: challenges.length + 1,
+                        avatar: 'https://picsum.photos/id/1027/40/40',
+                        name: '当前用户',
+                        description: newChallenge.title,
+                        completedDays: parseInt(newChallenge.days),
+                        type: newChallenge.type,
+                        difficulty: newChallenge.difficulty,
+                        targetDays: parseInt(newChallenge.days)
+                    };
+                    setChallenges([...challenges, newEntry]);
+                    setNewChallenge({
+                        title: '',
+                        type: '排队',
+                        difficulty: 3,
+                        days: 7
+                    });
+                }
+            };
+
+            const handleEditClick = (challenge) => {
+                setEditingChallenge({...challenge});
+                setShowEditModal(true);
+            };
+
+            const handleSaveEdit = () => {
+                setChallenges(challenges.map(c => 
+                    c.id === editingChallenge.id ? editingChallenge : c
+                ));
+                setShowEditModal(false);
+                setEditingChallenge(null);
+            };
+
+            const renderRankingPage = () => (
+                <div className="flex-1 p-6">
+                    <h2 className="text-xl font-semibold text-orange-600 mb-6">生活微耐心挑战榜 Top10</h2>
+                    
+                    <div className="space-y-4 mb-8">
+                        {challenges.map((challenge) => (
+                            <div key={challenge.id} className="bg-white rounded-lg p-4 shadow-sm border flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                        {challenge.rank}
+                                    </div>
+                                    <img src={challenge.avatar} alt="" className="w-10 h-10 rounded-full" />
+                                    <div>
+                                        <div className="font-medium">{challenge.name}</div>
+                                        <div className="text-gray-600 text-sm">{challenge.description}</div>
+                                        <div className="text-gray-500 text-xs">已完成{challenge.completedDays}天</div>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button className="px-3 py-1 text-blue-600 text-sm border border-blue-200 rounded hover:bg-blue-50">
+                                        查看详情
+                                    </button>
+                                    <button 
+                                        onClick={() => handleEditClick(challenge)}
+                                        className="px-3 py-1 text-orange-600 text-sm border border-orange-200 rounded hover:bg-orange-50"
+                                    >
+                                        编辑挑战
+                                    </button>
+                                    <button className="px-3 py-1 text-red-600 text-sm border border-red-200 rounded hover:bg-red-50">
+                                        删除挑战
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-semibold text-orange-600 mb-4">新增微耐心挑战</h3>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">挑战标题</label>
+                                <input
+                                    type="text"
+                                    placeholder="例如：耐心排队买奶茶"
+                                    value={newChallenge.title}
+                                    onChange={(e) => setNewChallenge({...newChallenge, title: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">挑战类型</label>
+                                <select
+                                    value={newChallenge.type}
+                                    onChange={(e) => setNewChallenge({...newChallenge, type: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                >
+                                    <option value="排队">排队</option>
+                                    <option value="礼让">礼让</option>
+                                    <option value="等待">等待</option>
+                                    <option value="专注">专注</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">难度评分</label>
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-blue-600 font-medium">★</span>
+                                    <div className="flex-1 relative">
+                                        <input
+                                            type="range"
+                                            min="1"
+                                            max="5"
+                                            step="1"
+                                            value={newChallenge.difficulty}
+                                            onChange={(e) => setNewChallenge({...newChallenge, difficulty: parseInt(e.target.value)})}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <span className="text-blue-600 font-medium">{newChallenge.difficulty}星</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">持续天数目标</label>
+                                <div className="flex space-x-4">
+                                    <input
+                                        type="number"
+                                        value={newChallenge.days}
+                                        onChange={(e) => setNewChallenge({...newChallenge, days: e.target.value})}
+                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        min="1"
+                                        max="30"
+                                    />
+                                    <span className="flex items-center text-gray-600">天</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleAddChallenge}
+                                className="px-6 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors"
+                            >
+                                添加挑战
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-orange-600 mb-4">为什么选择生活微耐心？</h3>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">🎯</div>
+                                <h4 className="font-semibold mb-2">提升专注力</h4>
+                                <p className="text-sm text-gray-600">通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散的情况，提高工作和学习效率。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">💖</div>
+                                <h4 className="font-semibold mb-2">缓解焦虑</h4>
+                                <p className="text-sm text-gray-600">培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更加平和。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">⚡</div>
+                                <h4 className="font-semibold mb-2">增强恒心</h4>
+                                <p className="text-sm text-gray-600">小小的耐心挑战累积成大的习惯改变，通过每日的坚持，逐渐培养出持之以恒的品质和意志力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderEditPage = () => (
+                <div className="flex-1 p-6">
+                    <h2 className="text-xl font-semibold text-orange-600 mb-6">编辑您的挑战</h2>
+                    
+                    <p className="text-gray-600 mb-6">在这里您可以管理所有已创建的挑战，包括修改目标、更新进度、删除不需要的挑战等。</p>
+                    
+                    <div className="space-y-6">
+                        {challenges.map((challenge) => (
+                            <div key={challenge.id} className="bg-white rounded-lg p-4 shadow-sm border flex items-center justify-between">
+                                <div>
+                                    <h3 className="font-semibold">{challenge.description}</h3>
+                                    <p className="text-gray-600 text-sm">
+                                        类型：{challenge.type} | 难度：{challenge.difficulty}星 | 目标：{challenge.targetDays}天
+                                    </p>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => handleEditClick(challenge)}
+                                        className="px-3 py-1 text-orange-600 text-sm border border-orange-200 rounded hover:bg-orange-50"
+                                    >
+                                        编辑
+                                    </button>
+                                    <button className="px-3 py-1 text-red-600 text-sm border border-red-200 rounded hover:bg-red-50">
+                                        删除
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-orange-600 mb-4">为什么选择生活微耐心？</h3>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">🎯</div>
+                                <h4 className="font-semibold mb-2">提升专注力</h4>
+                                <p className="text-sm text-gray-600">通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散的情况，提高工作和学习效率。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">💖</div>
+                                <h4 className="font-semibold mb-2">缓解焦虑</h4>
+                                <p className="text-sm text-gray-600">培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更加平和。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">⚡</div>
+                                <h4 className="font-semibold mb-2">增强恒心</h4>
+                                <p className="text-sm text-gray-600">小小的耐心挑战累积成大的习惯改变，通过每日的坚持，逐渐培养出持之以恒的品质和意志力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderHelpPage = () => (
+                <div className="flex-1 p-6">
+                    <h2 className="text-xl font-semibold text-orange-600 mb-6">如何参与微耐心挑战？</h2>
+                    
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    1
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-2">点击"新增微耐心挑战"填写表单</h3>
+                                    <p className="text-gray-600">在页面底部找到"新增微耐心挑战"按钮，填写您想要挑战的内容，设定难度和目标天数，点击添加即可创建您的个人挑战。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    2
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-2">坚持每日打卡并更新完成情况</h3>
+                                    <p className="text-gray-600">每天完成一次挑战，点击对应挑战卡片的"更新进度"按钮，记录您的完成情况。系统会自动统计您的完成次数并更新排行榜。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    3
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-2">在"展示榜单"中查看最新排行</h3>
+                                    <p className="text-gray-600">通过首页的"展示榜单"，您可以查看到所有参与者的排名情况。排名根据挑战完成次数、难度等因素综合计算，每周更新一次。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-orange-100 rounded-lg p-4 border-l-4 border-orange-400">
+                            <p className="text-orange-800"><strong>小贴士：</strong> 坚持是成功的关键！即使是最简单的微耐心挑战，每天坚持也能带来巨大的改变。加油！</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <h3 className="text-lg font-semibold text-orange-600 mb-4">为什么选择生活微耐心？</h3>
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">🎯</div>
+                                <h4 className="font-semibold mb-2">提升专注力</h4>
+                                <p className="text-sm text-gray-600">通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散的情况，提高工作和学习效率。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">💖</div>
+                                <h4 className="font-semibold mb-2">缓解焦虑</h4>
+                                <p className="text-sm text-gray-600">培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更加平和。</p>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="text-orange-500 text-2xl mb-2">⚡</div>
+                                <h4 className="font-semibold mb-2">增强恒心</h4>
+                                <p className="text-sm text-gray-600">小小的耐心挑战累积成大的习惯改变，通过每日的坚持，逐渐培养出持之以恒的品质和意志力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-8">
+                                    <h1 className="text-xl font-bold text-orange-600">微耐心</h1>
+                                    <nav className="flex space-x-6">
+                                        <button
+                                            onClick={() => setCurrentPage('ranking')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                currentPage === 'ranking'
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'text-gray-600 hover:text-orange-600'
+                                            }`}
+                                        >
+                                            展示榜单
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage('edit')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                currentPage === 'edit'
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'text-gray-600 hover:text-orange-600'
+                                            }`}
+                                        >
+                                            编辑挑战
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage('help')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                currentPage === 'help'
+                                                    ? 'bg-orange-100 text-orange-700'
+                                                    : 'text-gray-600 hover:text-orange-600'
+                                            }`}
+                                        >
+                                            帮助指南
+                                        </button>
+                                    </nav>
+                                </div>
+                                <button className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors">
+                                    登录/注册
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div className="flex gap-6">
+                            {/* Sidebar */}
+                            <aside className="w-48 bg-white rounded-lg shadow-sm p-4">
+                                <nav className="space-y-2">
+                                    <button className="w-full text-left px-3 py-2 text-orange-600 font-medium flex items-center space-x-2 bg-orange-50 rounded">
+                                        <i className="fas fa-trophy"></i>
+                                        <span>今日挑战</span>
+                                    </button>
+                                    <button className="w-full text-left text-gray-600 hover:text-orange-600 px-3 py-2 flex items-center space-x-2">
+                                        <i className="fas fa-history"></i>
+                                        <span>历史成绩</span>
+                                    </button>
+                                    <button className="w-full text-left text-gray-600 hover:text-orange-600 px-3 py-2 flex items-center space-x-2">
+                                        <i className="fas fa-user"></i>
+                                        <span>个人设置</span>
+                                    </button>
+                                </nav>
+                            </aside>
+
+                            {/* Main Content */}
+                            <main className="flex-1 ml-6">
+                                {currentPage === 'ranking' && renderRankingPage()}
+                                {currentPage === 'edit' && renderEditPage()}
+                                {currentPage === 'help' && renderHelpPage()}
+                            </main>
+
+                            {/* Right Sidebar */}
+                            <aside className="w-80 bg-white rounded-lg shadow-sm p-4">
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-800 mb-4">今日完成率</h3>
+                                    <div className="relative w-24 h-24 mx-auto">
+                                        <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
+                                            <path
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                stroke="#e5e7eb"
+                                                strokeWidth="2"
+                                            />
+                                            <path
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                stroke="#f97316"
+                                                strokeWidth="2"
+                                                strokeDasharray="75, 100"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-xl font-bold text-orange-600">75%</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-center text-sm text-gray-600 mt-2">已完成 3/4 项挑战</p>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h3 className="font-semibold text-gray-800 mb-3">本周排行榜</h3>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-white text-xs font-bold">1</span>
+                                                <span className="text-sm">耐心大师</span>
+                                            </div>
+                                            <span className="text-sm text-gray-600">15天</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold">2</span>
+                                                <span className="text-sm">冷静小王</span>
+                                            </div>
+                                            <span className="text-sm text-gray-600">12天</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center text-white text-xs font-bold">3</span>
+                                                <span className="text-sm">淡定哥</span>
+                                            </div>
+                                            <span className="text-sm text-gray-600">10天</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-semibold text-gray-800 mb-3">温馨提示</h3>
+                                    <p className="text-sm text-gray-600 mb-2">坚持每日微耐心，收获大能量！</p>
+                                    <p className="text-sm text-gray-600">今天的一小步，明天的一大步。持续做的小改变，最终带来巨大的成长。</p>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4">编辑挑战</h3>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">挑战标题</label>
+                                        <input
+                                            type="text"
+                                            value={editingChallenge?.description || ''}
+                                            onChange={(e) => setEditingChallenge({...editingChallenge, description: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">挑战类型</label>
+                                        <select
+                                            value={editingChallenge?.type || ''}
+                                            onChange={(e) => setEditingChallenge({...editingChallenge, type: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        >
+                                            <option value="排队">排队</option>
+                                            <option value="礼让">礼让</option>
+                                            <option value="等待">等待</option>
+                                            <option value="专注">专注</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">难度评分</label>
+                                        <div className="flex items-center space-x-4">
+                                            <span className="text-blue-600 font-medium">★</span>
+                                            <div className="flex-1 relative">
+                                                <input
+                                                    type="range"
+                                                    min="1"
+                                                    max="5"
+                                                    step="1"
+                                                    value={editingChallenge?.difficulty || 3}
+                                                    onChange={(e) => setEditingChallenge({...editingChallenge, difficulty: parseInt(e.target.value)})}
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                            <span className="text-blue-600 font-medium">{editingChallenge?.difficulty || 3}星</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex space-x-4">
+                                        <button
+                                            onClick={handleSaveEdit}
+                                            className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition-colors"
+                                        >
+                                            保存
+                                        </button>
+                                        <button
+                                            onClick={() => setShowEditModal(false)}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t mt-12">
+                        <div className="max-w-7xl mx-auto px-4 py-6">
+                            <div className="flex justify-between items-center">
+                                <p className="text-sm text-gray-500">©2024 微耐心</p>
+                                <div className="flex space-x-6 text-sm text-gray-500">
+                                    <a href="#" className="hover:text-orange-600">关于我们</a>
+                                    <a href="#" className="hover:text-orange-600">使用条款</a>
+                                    <a href="#" className="hover:text-orange-600">隐私政策</a>
+                                    <a href="#" className="hover:text-orange-600">联系我们</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

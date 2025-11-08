@@ -1,0 +1,219 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健身餐管理</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app"></div>
+
+  <script type="text/babel">
+    const App = () => {
+      const [recipes, setRecipes] = React.useState([
+        {
+          id: 1,
+          name: "高蛋白鸡胸肉沙拉",
+          calorie: "350 卡路里",
+          protein: "蛋白质 40g",
+          fat: "脂肪 25g",
+          carbs: "碳水 15g",
+          distribution: { protein: 50, fat: 31, carbs: 19 },
+          imageUrl: "https://picsum.photos/id/1025/300/200",
+        },
+        {
+          id: 2,
+          name: "牛油黑三文鱼饭",
+          calorie: "420 卡路里",
+          protein: "蛋白质 30g",
+          fat: "脂肪 45g",
+          carbs: "碳水 20g",
+          distribution: { protein: 32, fat: 47, carbs: 21 },
+          imageUrl: "https://picsum.photos/id/1020/300/200",
+        },
+        {
+          id: 3,
+          name: "希腊酸奶水果碗",
+          calorie: "280 卡路里",
+          protein: "蛋白质 20g",
+          fat: "脂肪 35g",
+          carbs: "碳水 5g",
+          distribution: { protein: 32, fat: 56, carbs: 13 },
+          imageUrl: "https://picsum.photos/id/1030/300/200",
+        },
+      ]);
+
+      const [editingRecipe, setEditingRecipe] = React.useState(null);
+      const [confirmDelete, setConfirmDelete] = React.useState(null);
+
+      const handleEdit = (recipe) => {
+        setEditingRecipe(recipe);
+      };
+
+      const handleDelete = (recipe) => {
+        setConfirmDelete(recipe);
+      };
+
+      const saveChanges = () => {
+        setRecipes(
+          recipes.map((r) =>
+            r.id === editingRecipe.id ? { ...editingRecipe } : r
+          )
+        );
+        setEditingRecipe(null);
+      };
+
+      const confirmDeleteRecipe = () => {
+        setRecipes(recipes.filter((r) => r.id !== confirmDelete.id));
+        setConfirmDelete(null);
+      };
+
+      return (
+        <div className="flex h-screen overflow-hidden">
+          {/* Sidebar */}
+          <div className="w-64 bg-gray-800 text-white">
+            <h1 className="text-xl font-bold p-4">健身餐管理</h1>
+            <ul>
+              <li className="px-4 py-2 hover:bg-gray-700">今日计划</li>
+              <li className="px-4 py-2 hover:bg-gray-700">饮食推荐</li>
+              <li className="px-4 py-2 hover:bg-gray-700">饮食集</li>
+              <li className="px-4 py-2 hover:bg-gray-700">统计分析</li>
+              <li className="px-4 py-2 hover:bg-gray-700">帮助说明</li>
+            </ul>
+          </div>
+
+          {/* Main Content */}
+          <main className="flex-1 p-4">
+            <h2 className="text-lg font-semibold mb-4">
+              我的食谱集
+            </h2>
+            <div className="grid grid-cols-3 gap-6">
+              {recipes.map((recipe) => (
+                <div
+                  className="bg-white shadow-lg rounded-lg overflow-hidden"
+                  key={recipe.id}
+                >
+                  <img
+                    className="w-full h-32 object-cover"
+                    src={recipe.imageUrl}
+                    alt={recipe.name}
+                  />
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold">{recipe.name}</h3>
+                    <p>{recipe.calorie}</p>
+                    <div className="h-2 bg-gray-200 rounded my-2">
+                      <div
+                        className="h-2 bg-blue-500 rounded"
+                        style={{
+                          width: `${recipe.distribution.protein}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-blue-500">{recipe.protein}</span>
+                      <span className="text-green-500">{recipe.fat}</span>
+                      <span className="text-gray-500">{recipe.carbs}</span>
+                    </div>
+                    <div className="flex justify-between mt-4">
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={() => handleEdit(recipe)}
+                      >
+                        编辑
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded"
+                        onClick={() => handleDelete(recipe)}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </main>
+
+          {/* Edit Recipe Modal */}
+          {editingRecipe && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white rounded-lg overflow-hidden p-4 shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">编辑健身餐食谱</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium">
+                      食谱名称
+                    </label>
+                    <input
+                      type="text"
+                      value={editingRecipe.name}
+                      onChange={(e) =>
+                        setEditingRecipe({ ...editingRecipe, name: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded p-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">
+                      当前图片
+                    </label>
+                    <img
+                      src={editingRecipe.imageUrl}
+                      alt={editingRecipe.name}
+                      className="w-full rounded"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-end space-x-2">
+                  <button
+                    className="bg-gray-500 text-white px-4 py-2 rounded"
+                    onClick={() => setEditingRecipe(null)}
+                  >
+                    取消
+                  </button>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={saveChanges}
+                  >
+                    保存更改
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Confirm Delete Modal */}
+          {confirmDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white rounded-lg overflow-hidden p-4 shadow-lg">
+                <h2 className="text-xl font-semibold text-red-500 mb-4">删除确认</h2>
+                <p>确认删除 <strong>{confirmDelete.name}</strong> ？此操作不可撤销。</p>
+                <div className="mt-4 flex justify-end space-x-2">
+                  <button
+                    className="bg-gray-500 text-white px-4 py-2 rounded"
+                    onClick={() => setConfirmDelete(null)}
+                  >
+                    取消
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    onClick={confirmDeleteRecipe}
+                  >
+                    确认删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById("app"));
+  </script>
+</body>
+</html>

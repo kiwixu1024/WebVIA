@@ -1,0 +1,714 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>梦想清单管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingDream, setEditingDream] = useState(null);
+            const [selectedDreamForDelete, setSelectedDreamForDelete] = useState(null);
+            
+            // Initial dreams data
+            const [dreams, setDreams] = useState([
+                {
+                    id: 1,
+                    title: "环游世界",
+                    description: "探索世界各地的文化和美景，计划访问至少10个国家。",
+                    progress: 45,
+                    deadline: "2024-12-31",
+                    priority: "高优先级",
+                    members: ["小明"],
+                    person: "小明"
+                },
+                {
+                    id: 2,
+                    title: "学习一门新语言",
+                    description: "",
+                    progress: 30,
+                    deadline: "2023-08-15",
+                    priority: "中优先级",
+                    members: [],
+                    person: "小红"
+                },
+                {
+                    id: 3,
+                    title: "完成马拉松",
+                    description: "",
+                    progress: 70,
+                    deadline: "2023-11-05",
+                    priority: "高优先级",
+                    members: ["小李"],
+                    person: "小李"
+                },
+                {
+                    id: 4,
+                    title: "写一本小说",
+                    description: "",
+                    progress: 15,
+                    deadline: "2024-06-30",
+                    priority: "低优先级",
+                    members: [],
+                    person: "小王"
+                }
+            ]);
+
+            const addDream = (newDream) => {
+                const dream = {
+                    ...newDream,
+                    id: Date.now(),
+                    progress: 0,
+                    deadline: "2024-12-31",
+                    priority: "中优先级",
+                    members: ["小张"]
+                };
+                setDreams([dream, ...dreams]);
+                setShowAddModal(false);
+            };
+
+            const editDream = (dream) => {
+                setEditingDream({ ...dream });
+                setShowEditModal(true);
+            };
+
+            const deleteDream = (dreamId) => {
+                setSelectedDreamForDelete(dreamId);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                if (selectedDreamForDelete) {
+                    const updatedDreams = dreams.filter(dream => dream.id !== selectedDreamForDelete);
+                    setDreams(updatedDreams);
+                    setSelectedDreamForDelete(null);
+                    setShowDeleteModal(false);
+                }
+            };
+
+            const closeModals = () => {
+                setShowAddModal(false);
+                setShowEditModal(false);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm font-bold">⭐</span>
+                                </div>
+                                <div>
+                                    <h1 className="text-lg font-semibold text-gray-900">梦想清单管理</h1>
+                                    <p className="text-sm text-gray-500">追踪并实现您的每一个梦想</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-2 text-orange-500">
+                                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                <span className="text-sm font-medium">第122天</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Navigation */}
+                    <nav className="bg-white border-b shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex items-center space-x-4">
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium"
+                                >
+                                    + 添加新梦想
+                                </button>
+                                <button className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm font-medium">
+                                    📁 批量导入
+                                </button>
+                                <button className="text-gray-600 hover:text-gray-900 px-4 py-2 rounded-lg font-medium">
+                                    📁 导出清单
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Main Content */}
+                    <div className="max-w-7xl mx-auto px-4 py-6">
+                        <div className="flex gap-6">
+                            {/* Left Column */}
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-semibold text-gray-900">梦想列表</h2>
+                                    <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium">
+                                        📊 降选排序
+                                    </button>
+                                </div>
+
+                                {/* Dreams List */}
+                                <div className="space-y-4">
+                                    {dreams.map((dream) => (
+                                        <div key={dream.id} className="bg-white rounded-xl shadow-sm border">
+                                            <div className="p-6">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <h3 className="text-lg font-semibold text-gray-900 mb-2 flex-1">{dream.title}</h3>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => editDream(dream)}
+                                                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                                        >
+                                                            ✓ 编辑
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => deleteDream(dream.id)}
+                                                            className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                        >
+                                                            🗑️ 删除
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div>
+                                                        <p className="text-sm text-gray-500 mb-1">🎯 目标日期:</p>
+                                                        <p className="font-medium">{dream.deadline}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm text-gray-500 mb-1">👤 负责人:</p>
+                                                        <p className="font-medium">{dream.person}</p>
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <p className="text-sm text-gray-500 mb-2">ℹ️ 进度 {dream.progress}%</p>
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-32 bg-gray-200 rounded-full h-2">
+                                                                <div 
+                                                                    className={`h-2 rounded-full ${dream.progress === 100 || dream.progress === 70 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' : 'bg-green-500'}`}
+                                                                    style={{ width: `${Math.min(dream.progress, 100)}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <span className="text-sm text-gray-500">{dream.progress}%</span>
+                                                        </div>
+                                                        <p className={`mt-1 text-sm ${dream.progress >= 70 ? 'text-red-500' : 'text-green-500'}`}>
+                                                            {dream.progress >= 70 ? '⚠️ 已过期' : '✓ 已完成'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div>
+                                                        <p className="text-sm text-gray-500 mb-1">quiry</p>
+                                                        <p className="text-sm text-gray-700">{dream.description}</p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium ${dream.priority.includes('高') ? 'bg-red-100 text-red-600' : dream.priority.includes('中') ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'}`}>
+                                                            {dream.priority}
+                                                        </span>
+                                                        <span className="text-sm text-gray-500 flex items-center">
+                                                            ✓ 协作协作
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 flex flex-wrap gap-2">
+                                                    {dream.members.map((member, index) => (
+                                                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                                            ✅ {member}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Footer Help Section */}
+                                <div className="mt-8 bg-yellow-50 rounded-lg border">
+                                    <div className="p-6 space-y-4">
+                                        <div className="flex items-start space-x-3 p-4 bg-white rounded border">
+                                            <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center mt-0.5">
+                                                <i className="fas fa-lightbulb text-white text-xs"></i>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-base font-medium text-gray-900 mb-2 flex items-center">
+                                                    ❓ 帮助说明
+                                                </h4>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-start space-x-2">
+                                                        <i className="fas fa-check text-green-500 mt-1"></i>
+                                                        <span className="text-sm text-gray-700">如何添加梦想</span>
+                                                    </div>
+                                                    <div className="flex items-start space-x-2">
+                                                        <i className="fas fa-pencil-alt text-gray-400 mt-1"></i>
+                                                        <span className="text-sm text-gray-700">如何编辑/删除梦想</span>
+                                                    </div>
+                                                    <div className="flex items-start space-x-2">
+                                                        <i className="fas fa-cogs text-purple-500 mt-1"></i>
+                                                        <span className="text-sm text-gray-700">使用技巧小贴士</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div className="flex items-start space-x-3 p-4 bg-white rounded border">
+                                                <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center mt-0.5">
+                                                    <i className="fas fa-lightbulb text-white text-xs"></i>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-base font-medium text-gray-900 mb-2">小贴士</h4>
+                                                    <p className="text-sm text-orange-500">每天为梦想打勾，才能不断前行。点击"今日目标"开始您的每日进步！</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-80 space-y-6">
+                                {/* Overall Completion */}
+                                <div className="bg-white rounded-lg border shadow-sm">
+                                    <div className="p-4 border-b">
+                                        <h3 className="font-semibold text-gray-900">总体完成率</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="relative w-32 h-32 mx-auto">
+                                            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 144 144">
+                                                <path
+                                                    d="M 72 24 A 48 48 0 0 1 120 72 a 48 48 0 01-48 48 A 48 48 0 01 72 120 z"
+                                                    fill="none"
+                                                />
+                                                <path
+                                                    d="M 72 24 A 48 48 0 0 1 120 72 a 48 48 0 01-48 48 A 48 48 0 01 72 120 z"
+                                                    fill="#F97316"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-2xl font-bold text-yellow-600">40%</span>
+                                            </div>
+                                        </div>
+                                        <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium text-sm mt-4">
+                                            查看详细
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Category Distribution */}
+                                <div className="bg-white rounded-lg border shadow-sm">
+                                    <div className="p-4 border-b">
+                                        <h3 className="font-semibold text-gray-900">分类分布</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <p className="text-sm text-gray-600 mb-4">概率/百分比/P</p>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-red-400 rounded"></div>
+                                                    <span className="text-sm text-gray-700">高优先级</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-8 bg-gray-800 h-2 rounded">
+                                                        <div className="w-1/4 h-2 bg-red-400 rounded"></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium">25%</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-yellow-400 rounded"></div>
+                                                    <span className="text-sm text-gray-700">中优先级</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-8 bg-gray-800 h-2 rounded">
+                                                        <div className="w-3/10 h-2 bg-yellow-400 rounded"></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium">25%</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-3 h-3 bg-green-400 rounded"></div>
+                                                    <span className="text-sm text-gray-700">低优先级</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-8 bg-gray-800 h-2 rounded">
+                                                        <div className="w-1/2 h-2 bg-green-400 rounded"></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium">50%</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2">
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <div className="w-3 h-3 bg-blue-400 rounded"></div>
+                                                    <span className="text-sm text-gray-700">已完成</span>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-8 bg-gray-800 h-2 rounded"></div>
+                                                    <span className="text-sm font-medium">0%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white py-2 rounded-lg font-medium text-sm mt-4">
+                                            查看详情
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Weekly Warning */}
+                                <div className="bg-white rounded-lg border shadow-sm">
+                                    <div className="p-4 border-b">
+                                        <h3 className="font-semibold text-gray-900">本周预警</h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="space-y-3">
+                                            <div className="border rounded-lg p-3">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <h4 className="font-medium text-gray-900 flex items-center">
+                                                            😮 写一本小说
+                                                        </h4>
+                                                        <p className="text-xs text-gray-500 mt-1">进度仅 15%</p>
+                                                    </div>
+                                                    <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">🔴</span>
+                                                </div>
+                                                <button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-1 rounded font-medium text-sm mt-2">
+                                                    查看详情
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Dream Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900">添加新梦想</h3>
+                                    <button 
+                                        onClick={closeModals}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            梦想标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="梦想标题" 
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            目标日期 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="mm/dd/yyyy" 
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            负责人 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="梦想负责人" 
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">进度 (0%)</label>
+                                            <div className="relative w-full">
+                                                <input 
+                                                    type="range" 
+                                                    min="0" 
+                                                    max="100" 
+                                                    value="0" 
+                                                    step="0.01" 
+                                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer 
+                                                    focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <span className="text-sm text-gray-500">0%</span>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                        <select className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                                            <option>中优先级</option>
+                                            <option>高优先级</option>
+                                            <option>低优先级</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">多人协作</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['小明', '小红', '小李', '小王', '小张'].map((member, index) => (
+                                                <button 
+                                                    key={index}
+                                                    className={`px-2 py-1 rounded text-xs ${
+                                                        editingDream?.members.includes(member) 
+                                                            ? 'bg-green-100 text-green-600 border border-green-300' 
+                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    }`}
+                                                    onClick={() => {
+                                                        if (editingDream) {
+                                                            setEditingDream({ ...editingDream, members: [...editingDream.members, member] });
+                                                        }
+                                                    }}
+                                                >
+                                                    ✅ {member}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">梦想描述</label>
+                                        <textarea 
+                                            placeholder="梦想描述" 
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-20"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={closeModals}
+                                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={addDream}
+                                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium"
+                                    >
+                                        ✨ 保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Dream Modal */}
+                    {showEditModal && editingDream && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900">编辑梦想</h3>
+                                    <button 
+                                        onClick={closeModals}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            梦想标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            defaultValue={editingDream.title}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            目标日期 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            defaultValue={editingDream.deadline}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            负责人 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            defaultValue={editingDream.person}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">进度 ({editingDream.progress}%)</label>
+                                            <div className="relative w-full">
+                                                <input 
+                                                    type="range" 
+                                                    min="0" 
+                                                    max="100" 
+                                                    value={editingDream.progress} 
+                                                    step="0.01" 
+                                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer 
+                                                    focus:outline-none focus:ring-2 focus:ring-red-500"
+                                                />
+                                            </div>
+                                        </div>
+                                        <span className="text-sm text-gray-500">{editingDream.progress}%</span>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">优先级</label>
+                                        <select 
+                                            defaultValue={editingDream.priority}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                                        >
+                                            <option>高优先级</option>
+                                            <option>中优先级</option>
+                                            <option>低优先级</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">多人协作</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['小明', '小红', '小李', '小王', '小张'].map((member) => (
+                                                <button 
+                                                    key={member}
+                                                    className={`px-2 py-1 rounded text-xs ${
+                                                        editingDream.members.includes(member) 
+                                                            ? 'bg-yellow-400 text-white' 
+                                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    }`}
+                                                    onClick={() => {
+                                                        const currentMembers = [...editingDream.members];
+                                                        const currentIndex = currentMembers.indexOf(member);
+                                                        if (currentIndex >= 0) {
+                                                            const newMembers = currentMembers.filter((_, index) => index !== currentIndex);
+                                                            setEditingDream({ ...editingDream, members: newMembers });
+                                                        } else {
+                                                            setEditingDream({ ...editingDream, members: [...editingDream.members, member] });
+                                                        }
+                                                    }}
+                                                >
+                                                    ✓ {member}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">梦想描述</label>
+                                        <textarea 
+                                            defaultValue={editingDream.description}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent h-20"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={closeModals}
+                                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={closeModals}
+                                        className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium"
+                                    >
+                                        保存修改
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && selectedDreamForDelete && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="text-center">
+                                    <div className="flex items-center justify-center space-x-2 mb-4">
+                                        <i className="fas fa-exclamation-triangle text-yellow-500 text-2xl"></i>
+                                        <h3 className="text-lg font-semibold text-gray-900">确认删除</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-6">
+                                        您确定要删除梦想 "<span className="font-medium">{editingDream?.title || '未定义'}</span>" 吗？此操作无法撤销。
+                                    </p>
+                                    <div className="flex space-x-3">
+                                        <button 
+                                            onClick={confirmDelete}
+                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium"
+                                        >
+                                            确定删除
+                                        </button>
+                                        <button 
+                                            onClick={closeModals}
+                                            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium"
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-gray-100 border-t py-8">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-gray-600 rounded"></div>
+                                    <div>
+                                        <h4 className="font-medium text-gray-900">小明的梦想</h4>
+                                        <p className="text-sm text-gray-500">梦想清单管理系统 版权所有</p>
+                                    </div>
+                                </div>
+                                <div className="flex space-x-6 text-sm text-gray-500">
+                                    <span>版本号：v1.0.3</span>
+                                    <span>反馈建议</span>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

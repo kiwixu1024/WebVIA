@@ -1,0 +1,384 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>经典微视频放映墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif';
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const initialVideoData = [
+            {
+                id: 1,
+                title: "复古瞬间",
+                imageUrl: "https://picsum.photos/id/1/400/225",
+                tags: ["#怀旧", "#经典"],
+                description: "回顾上世纪80年代的街头风貌与穿搭，通过镜头，我们得以窥见那个年代人们的生活百态。",
+                views: 1523,
+                duration: "3:45",
+            },
+            {
+                id: 2,
+                title: "城市记忆",
+                imageUrl: "https://picsum.photos/id/1015/400/225",
+                tags: ["#城市", "#纪实"],
+                description: "从20世纪90年代至今，记录城市面貌的巨大变迁。高楼大厦拔地而起，马路拓宽，但仍保留着那些值得怀念的角落。",
+                views: 892,
+                duration: "3:45",
+            },
+            {
+                id: 3,
+                title: "经典广告集锦",
+                imageUrl: "https://picsum.photos/id/1079/400/225",
+                tags: ["#广告", "#经典"],
+                description: "那些年我们耳熟能详的电视广告，承载了太多共同的回忆。从黑白金曲到流行乐，每一首都曾风靡一时。",
+                views: 2156,
+                duration: "3:45",
+            },
+             {
+                id: 4,
+                title: "音乐故事",
+                imageUrl: "https://picsum.photos/id/119/400/225",
+                tags: ["#音乐", "#经典"],
+                description: "探索经典音乐背后的故事，那些熟悉的旋律如何诞生。又如何影响了一代人乃至如今的潮流。",
+                views: 1082,
+                duration: "3:45",
+            },
+            {
+                id: 5,
+                title: "历史瞬间",
+                imageUrl: "https://picsum.photos/id/212/400/225",
+                tags: ["#历史", "#纪实"],
+                description: "重大历史事件的珍贵影像资料，让我们重温那些改变世界的瞬间，感受历史的厚重与震撼。",
+                views: 3678,
+                duration: "3:45",
+            }
+        ];
+
+        const initialCategoryData = [
+            { name: '怀旧', count: 1, max: 5 },
+            { name: '经典', count: 5, max: 5 },
+            { name: '广告', count: 1, max: 5 },
+            { name: '广播', count: 1, max: 5 },
+            { name: '音乐', count: 1, max: 5 },
+            { name: '历史', count: 2, max: 5 },
+            { name: '纪实', count: 1, max: 5 },
+        ];
+
+
+        const Header = () => (
+            <header className="bg-white shadow-md flex items-center justify-between px-6 py-2 h-16">
+                <div className="flex items-center">
+                    <div className="bg-blue-500 text-white text-xl font-bold p-2 rounded-md mr-3">
+                        <i className="fas fa-film"></i>
+                    </div>
+                    <h1 className="text-xl font-semibold text-gray-800">经典微视频放映墙</h1>
+                </div>
+                <nav className="flex items-center space-x-6 text-gray-600">
+                    <a href="#" className="flex items-center text-blue-500 font-semibold">
+                        <i className="fas fa-home mr-2"></i>首页
+                    </a>
+                    <a href="#" className="flex items-center hover:text-blue-500">
+                        <i className="fas fa-heart mr-2"></i>我的收藏
+                    </a>
+                    <a href="#" className="flex items-center hover:text-blue-500">
+                        <i className="fas fa-chart-bar mr-2"></i>数据统计
+                    </a>
+                    <a href="#" className="flex items-center hover:text-blue-500">
+                        <i className="fas fa-question-circle mr-2"></i>帮助
+                    </a>
+                </nav>
+                <div className="flex items-center space-x-3">
+                    <button className="bg-yellow-500 text-white px-4 py-2 rounded-md text-sm font-semibold flex items-center">
+                        <i className="fas fa-upload mr-2"></i>导入数据
+                    </button>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded-md text-sm font-semibold flex items-center">
+                        <i className="fas fa-download mr-2"></i>导出报表
+                    </button>
+                    <button className="bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-semibold flex items-center">
+                        <i className="fas fa-trash-alt mr-2"></i>清空回收站
+                    </button>
+                </div>
+            </header>
+        );
+
+        const Sidebar = () => (
+            <aside className="w-56 bg-white p-4 flex flex-col justify-between">
+                <div>
+                    <nav className="space-y-2">
+                        <a href="#" className="flex items-center px-4 py-2 text-white bg-blue-500 rounded-lg">
+                            <i className="fas fa-video w-6"></i>
+                            <span>视频展示</span>
+                        </a>
+                        <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            <i className="fas fa-edit w-6"></i>
+                            <span>新增/编辑</span>
+                        </a>
+                        <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            <i className="fas fa-undo w-6"></i>
+                            <span>回收主播</span>
+                        </a>
+                        <a href="#" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                            <i className="fas fa-cog w-6"></i>
+                            <span>设置</span>
+                        </a>
+                    </nav>
+                </div>
+                <div className="text-xs text-gray-500">
+                    <h3 className="font-semibold mb-2">快捷键:</h3>
+                    <p>Ctrl+E: 新增/编辑视频</p>
+                    <p>Del: 删除视频</p>
+                    <p>Ctrl+N: 新增视频</p>
+                </div>
+            </aside>
+        );
+        
+        const VideoCard = ({ video, onDeleteClick }) => (
+            <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                <div className="relative">
+                    <img src={video.imageUrl} alt={video.title} className="w-full h-40 object-cover" />
+                    <div className="absolute top-0 right-0 p-2 space-x-1 bg-black bg-opacity-30 rounded-bl-lg">
+                        <button className="text-white hover:text-gray-200"><i className="fas fa-pencil-alt text-xs"></i></button>
+                        <button className="text-white hover:text-gray-200"><i className="far fa-check-square text-xs"></i></button>
+                        <button className="text-white hover:text-gray-200" onClick={() => onDeleteClick(video)}><i className="fas fa-trash-alt text-xs"></i></button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 p-2">
+                        <h3 className="text-white font-semibold text-lg">{video.title}</h3>
+                    </div>
+                </div>
+                <div className="p-4 flex-grow flex flex-col">
+                    <div className="flex space-x-2 mb-2">
+                        {video.tags.map(tag => (
+                            <span key={tag} className="text-xs text-blue-500">{tag}</span>
+                        ))}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4 flex-grow">{video.description}</p>
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                        <span><i className="far fa-eye mr-1"></i>{video.views} 次播放</span>
+                        <span><i className="far fa-clock mr-1"></i>{video.duration}</span>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Statistics = ({ videoCount, totalViews, categories }) => {
+            const maxCategoryCount = useMemo(() => Math.max(...categories.map(c => c.count)), [categories]);
+            
+            return (
+                <div className="bg-white p-4 rounded-lg shadow-md mb-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-base font-semibold text-gray-800">统计数据</h3>
+                        <div className="text-gray-400 space-x-2">
+                            <i className="fas fa-chart-line"></i>
+                            <i className="fas fa-download"></i>
+                        </div>
+                    </div>
+                    <div className="flex space-x-4 mb-4">
+                        <div className="flex-1 text-center">
+                            <p className="text-gray-500 text-sm">视频总数</p>
+                            <p className="text-2xl font-bold text-gray-800">{videoCount}<span className="text-sm font-normal ml-1">处</span></p>
+                        </div>
+                        <div className="flex-1 text-center">
+                            <p className="text-gray-500 text-sm">累计播放量</p>
+                            <p className="text-2xl font-bold text-gray-800">{totalViews}<span className="text-sm font-normal ml-1">次</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">分类分布</h4>
+                        <div className="space-y-2 text-xs text-gray-600">
+                            {categories.filter(c => c.count > 0).map(cat => (
+                                <div key={cat.name} className="flex items-center">
+                                    <span className="w-12">{cat.name}</span>
+                                    <div className="flex-1 bg-gray-200 rounded-full h-2 mx-2">
+                                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${(cat.count / maxCategoryCount) * 100}%` }}></div>
+                                    </div>
+                                    <span>({cat.count})</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )
+        };
+        
+        const RecommendedTopics = () => (
+            <div className="bg-white p-4 rounded-lg shadow-md mb-4">
+                <h3 className="text-base font-semibold text-gray-800 mb-3">推荐主题</h3>
+                <div className="space-y-3">
+                    <div>
+                        <p className="font-semibold text-sm text-blue-500">老电影记忆</p>
+                        <p className="text-xs text-gray-500">盘点20世纪80-90年代的经典影片</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-sm text-gray-700"><span className="bg-green-100 text-green-700 px-1 rounded">广告党狂史</span></p>
+                        <p className="text-xs text-gray-500">盘点儿时耳熟能详的时代广告金曲</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold text-sm text-blue-500">城市变迁计划</p>
+                        <p className="text-xs text-gray-500">记录中国城市近20年的微观缩影</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const UsageTips = () => (
+            <div className="bg-white p-4 rounded-lg shadow-md">
+                 <h3 className="text-base font-semibold text-gray-800 mb-3">使用小贴士</h3>
+                 <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-start">
+                        <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>点击视频卡片即可全屏播放视频</span>
+                    </div>
+                     <div className="flex items-start">
+                        <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>使用筛选功能可快速过滤目标视频</span>
+                    </div>
+                     <div className="flex items-start">
+                        <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                        <span>定期备份您的视频数据非常重要</span>
+                    </div>
+                 </div>
+            </div>
+        );
+
+        const Footer = () => (
+             <footer className="text-center text-xs text-gray-500 py-4 mt-4 flex justify-between items-center px-6">
+                <span>© 2023 经典微视频放映墙. 保留所有权利. 本工具由经典视界与数码光影联合开发.</span>
+                <div className="flex items-center space-x-3 text-lg">
+                    <i className="fab fa-github"></i>
+                    <i className="far fa-question-circle"></i>
+                    <i className="fas fa-cog"></i>
+                </div>
+            </footer>
+        );
+
+        const DeleteModal = ({ video, onConfirm, onCancel }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl p-8 w-96 text-center">
+                    <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                        <i className="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">确认删除</h3>
+                    <p className="text-sm text-gray-500 mb-6">
+                        您确定要删除“{video.title}”这个视频吗？此操作无法撤销。
+                    </p>
+                    <div className="flex justify-center space-x-4">
+                        <button onClick={onCancel} className="px-6 py-2 rounded-md border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                            取消
+                        </button>
+                        <button onClick={onConfirm} className="px-6 py-2 rounded-md bg-red-600 text-sm font-semibold text-white hover:bg-red-700">
+                            确认删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+
+        function App() {
+            const [videos, setVideos] = useState(initialVideoData);
+            const [categories, setCategories] = useState(initialCategoryData);
+            const [totalViews, setTotalViews] = useState(9331);
+            
+            const [showModal, setShowModal] = useState(false);
+            const [videoToDelete, setVideoToDelete] = useState(null);
+
+            const handleDeleteClick = (video) => {
+                setVideoToDelete(video);
+                setShowModal(true);
+            };
+
+            const handleCancelDelete = () => {
+                setShowModal(false);
+                setVideoToDelete(null);
+            };
+
+            const handleConfirmDelete = () => {
+                if (!videoToDelete) return;
+
+                // Update video list
+                setVideos(prevVideos => prevVideos.filter(v => v.id !== videoToDelete.id));
+
+                // Update stats
+                setTotalViews(prevViews => prevViews - videoToDelete.views);
+                setCategories(prevCategories => {
+                    const updatedCategories = [...prevCategories];
+                    const classicCategory = updatedCategories.find(c => c.name === '经典');
+                    if (classicCategory) {
+                        classicCategory.count -= 1;
+                    }
+                    return updatedCategories;
+                });
+
+                // Close modal
+                setShowModal(false);
+                setVideoToDelete(null);
+            };
+
+            return (
+                <div className="bg-gray-100 min-h-screen text-gray-800">
+                    <Header />
+                    <div className="flex max-w-screen-2xl mx-auto pt-4 px-4 space-x-4">
+                        <Sidebar />
+                        <main className="flex-1 space-y-6">
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                     <div className="flex items-center">
+                                        <span className="w-1 h-5 bg-blue-500 rounded-full mr-2"></span>
+                                        <h2 className="text-lg font-semibold">视频展示区</h2>
+                                    </div>
+                                    <button className="bg-blue-500 text-white px-4 py-2 text-sm rounded-md font-semibold flex items-center">
+                                        <i className="fas fa-plus mr-2"></i>新增视频
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {videos.map(video => (
+                                        <VideoCard key={video.id} video={video} onDeleteClick={handleDeleteClick} />
+                                    ))}
+                                </div>
+                            </section>
+
+                            <section>
+                                <div className="flex items-center mb-4">
+                                    <span className="w-1 h-5 bg-blue-500 rounded-full mr-2"></span>
+                                    <h2 className="text-lg font-semibold">经典微视频放映墙简介</h2>
+                                </div>
+                                <div className="grid grid-cols-3 gap-6">
+                                    <img src="https://picsum.photos/id/1025/200/100" className="rounded-lg shadow-md w-full h-auto object-cover"/>
+                                    <img src="https://picsum.photos/id/1043/200/100" className="rounded-lg shadow-md w-full h-auto object-cover"/>
+                                    <img src="https://picsum.photos/id/1060/200/100" className="rounded-lg shadow-md w-full h-auto object-cover"/>
+                                </div>
+                            </section>
+                            
+                            <Footer />
+                        </main>
+                        <aside className="w-80 flex-shrink-0">
+                           <Statistics videoCount={videos.length} totalViews={totalViews} categories={categories} />
+                           <RecommendedTopics />
+                           <UsageTips />
+                        </aside>
+                    </div>
+                    {showModal && <DeleteModal video={videoToDelete} onConfirm={handleConfirmDelete} onCancel={handleCancelDelete} />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+</html>

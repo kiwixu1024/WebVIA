@@ -1,0 +1,596 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立动子编时光树</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('展示区');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingItem, setEditingItem] = useState(null);
+
+            const timelineItems = [
+                {
+                    id: 1,
+                    date: '2023-01-15',
+                    title: '数程序袋',
+                    description: '知道人一起去公司管理，学受保证和数据。',
+                    image: 'https://picsum.photos/id/1/400/300',
+                    likes: 12
+                },
+                {
+                    id: 2,
+                    date: '2023-02-20',
+                    title: '我子的第一次画面',
+                    description: '小明的绘画作品在学校获奖，他很高兴看到自己的艺术才能被认可。',
+                    image: 'https://picsum.photos/id/2/400/300',
+                    likes: 8
+                },
+                {
+                    id: 3,
+                    date: '2023-03-10',
+                    title: '家庭游戏之夜',
+                    description: '全家人一起玩棋牌游戏，享受美好的家庭时光。',
+                    image: 'https://picsum.photos/id/3/400/300',
+                    likes: 15
+                }
+            ];
+
+            const handleEditClick = (item) => {
+                setEditingItem(item);
+                setShowEditModal(true);
+            };
+
+            const renderMainContent = () => {
+                if (currentView === '展示区') {
+                    return (
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-medium text-gray-700">★ 编时光展示</h2>
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                                >
+                                    <span>+</span> 添加新时光
+                                </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-3 gap-6">
+                                {timelineItems.map((item) => (
+                                    <div key={item.id} className="bg-white rounded-lg shadow-sm border">
+                                        <img 
+                                            src={item.image} 
+                                            alt={item.title}
+                                            className="w-full h-48 object-cover rounded-t-lg"
+                                        />
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-medium text-gray-900">{item.title}</h3>
+                                                <div className="flex gap-1">
+                                                    <button 
+                                                        onClick={() => handleEditClick(item)}
+                                                        className="text-blue-500 hover:text-blue-600"
+                                                    >
+                                                        <i className="fas fa-edit"></i>
+                                                    </button>
+                                                    <button className="text-red-500 hover:text-red-600">
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-500 mb-2">{item.date}</p>
+                                            <p className="text-sm text-gray-700 mb-3">{item.description}</p>
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-1 text-red-500">
+                                                    <i className="fas fa-heart"></i>
+                                                    <span className="text-sm">{item.likes} 没有</span>
+                                                </div>
+                                                <div className="flex items-center gap-1 text-green-500">
+                                                    <i className="fas fa-share"></i>
+                                                    <span className="text-sm">分享</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mt-6 text-center">
+                                <p className="text-sm text-gray-500">
+                                    💡 Tip: 长按卡片可快速分享至朋友圈
+                                </p>
+                            </div>
+                        </div>
+                    );
+                } else if (currentView === '编辑区') {
+                    return (
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-medium text-gray-700">时光条目编辑</h2>
+                                <button 
+                                    onClick={() => setShowAddModal(true)}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg"
+                                >
+                                    批量添加时光条目
+                                </button>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg border">
+                                <div className="grid grid-cols-3 gap-4 p-4 border-b font-medium text-gray-700">
+                                    <div>日期</div>
+                                    <div>标题</div>
+                                    <div>操作</div>
+                                </div>
+                                {timelineItems.map((item) => (
+                                    <div key={item.id} className="grid grid-cols-3 gap-4 p-4 border-b hover:bg-gray-50">
+                                        <div className="text-gray-700">{item.date}</div>
+                                        <div className="text-gray-700">{item.title}</div>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => handleEditClick(item)}
+                                                className="text-blue-500 hover:text-blue-600 text-sm"
+                                            >
+                                                编辑
+                                            </button>
+                                            <button className="text-red-500 hover:text-red-600 text-sm">
+                                                删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                } else if (currentView === '统计区') {
+                    return (
+                        <div className="p-6">
+                            <h2 className="text-xl font-medium text-gray-700 mb-6">时光统计</h2>
+                            
+                            <div className="grid grid-cols-2 gap-8 mb-8">
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-blue-500 mb-2">35</div>
+                                    <div className="text-gray-600">总互动次数</div>
+                                    <div className="text-blue-500 mt-1">
+                                        <i className="fas fa-sync-alt"></i>
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-3xl font-bold text-red-500 mb-2">2</div>
+                                    <div className="text-gray-600">今日新增条目</div>
+                                    <div className="text-red-500 mt-1">
+                                        <i className="fas fa-sync-alt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-8">
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-700 mb-4">热门时光条目 Top3</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-6 h-6 bg-yellow-400 text-white text-sm rounded-full flex items-center justify-center">1</span>
+                                                <span>家庭游戏之夜</span>
+                                            </div>
+                                            <span className="text-red-500 flex items-center gap-1">
+                                                <i className="fas fa-heart"></i>
+                                                15
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-6 h-6 bg-gray-400 text-white text-sm rounded-full flex items-center justify-center">2</span>
+                                                <span>数程序袋</span>
+                                            </div>
+                                            <span className="text-red-500 flex items-center gap-1">
+                                                <i className="fas fa-heart"></i>
+                                                12
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-6 h-6 bg-orange-400 text-white text-sm rounded-full flex items-center justify-center">3</span>
+                                                <span>我子的第一次画面</span>
+                                            </div>
+                                            <span className="text-red-500 flex items-center gap-1">
+                                                <i className="fas fa-heart"></i>
+                                                8
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-700 mb-4">活跃用户排行榜</h3>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                                <span>时明</span>
+                                            </div>
+                                            <span className="text-orange-500">18 活跃度</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                                <span>老爸</span>
+                                            </div>
+                                            <span className="text-orange-500">12 活跃度</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                                <span>小明</span>
+                                            </div>
+                                            <span className="text-orange-500">9 活跃度</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                                <span>时明</span>
+                                            </div>
+                                            <span className="text-orange-500">7 活跃度</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                                                <span>苛苛</span>
+                                            </div>
+                                            <span className="text-orange-500">5 活跃度</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-8 text-center">
+                                <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg">
+                                    导出报表
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+                
+                return null;
+            };
+
+            const AddModal = ({ show, onClose }) => {
+                if (!show) return null;
+                
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                            <h3 className="text-lg font-medium mb-4">添加新时光</h3>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                    <input 
+                                        type="date" 
+                                        defaultValue="2025-09-23"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入您现阶段的标题"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                    <textarea 
+                                        placeholder="描述这个令人难忘的瞬间..."
+                                        rows="3"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">图片</label>
+                                    <div className="flex items-center gap-2">
+                                        <img 
+                                            src="https://picsum.photos/id/4/80/60" 
+                                            alt="Preview"
+                                            className="w-20 h-15 object-cover rounded"
+                                        />
+                                        <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                            选择图片
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button 
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                                >
+                                    添加
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const EditModal = ({ show, onClose, item }) => {
+                if (!show || !item) return null;
+                
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                            <h3 className="text-lg font-medium mb-4">编辑时光</h3>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                    <input 
+                                        type="date" 
+                                        defaultValue="2023-01-15"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                    <input 
+                                        type="text" 
+                                        defaultValue="数程序袋"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                    <textarea 
+                                        defaultValue="知道人一起去公司管理，学受保证和数据。"
+                                        rows="3"
+                                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                    ></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">图片</label>
+                                    <div className="flex items-center gap-2">
+                                        <img 
+                                            src="https://picsum.photos/id/1/80/60" 
+                                            alt="Preview"
+                                            className="w-20 h-15 object-cover rounded"
+                                        />
+                                        <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm">
+                                            选择图片
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end gap-3 mt-6">
+                                <button 
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={onClose}
+                                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                                >
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b">
+                        <div className="flex items-center justify-between px-6 py-3">
+                            <div className="text-lg font-medium text-red-400">立动子编时光树</div>
+                            <div className="flex items-center gap-4">
+                                <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">
+                                    内容编辑映射
+                                </button>
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-user"></i> 时代积测
+                                </button>
+                                <button className="text-gray-600 hover:text-gray-800">
+                                    <i className="fas fa-cog"></i> 地理领域
+                                </button>
+                                <div className="text-sm text-gray-500">
+                                    <i className="fas fa-lightbulb text-yellow-500"></i> 小编上：点主管的内容可获得不同程度，更新更多多样
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Left Sidebar */}
+                        <div className="w-48 bg-red-100 min-h-screen">
+                            <div className="p-4">
+                                <div className="space-y-2">
+                                    <button 
+                                        onClick={() => setCurrentView('展示区')}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                                            currentView === '展示区' 
+                                                ? 'bg-green-500 text-white' 
+                                                : 'text-gray-700 hover:bg-red-200'
+                                        }`}
+                                    >
+                                        <i className="fas fa-th mr-2"></i> 展示区
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('编辑区')}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                                            currentView === '编辑区' 
+                                                ? 'bg-green-500 text-white' 
+                                                : 'text-gray-700 hover:bg-red-200'
+                                        }`}
+                                    >
+                                        <i className="fas fa-edit mr-2"></i> 编辑区
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentView('统计区')}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                                            currentView === '统计区' 
+                                                ? 'bg-green-500 text-white' 
+                                                : 'text-gray-700 hover:bg-red-200'
+                                        }`}
+                                    >
+                                        <i className="fas fa-chart-bar mr-2"></i> 统计区
+                                    </button>
+                                    <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-red-200">
+                                        <i className="fas fa-times mr-2"></i> 操作栏
+                                    </button>
+                                    <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-red-200">
+                                        <i className="fas fa-question-circle mr-2"></i> 帮助说明
+                                    </button>
+                                    <button className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-red-200">
+                                        <i className="fas fa-palette mr-2"></i> 主题颜色
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="absolute bottom-4 left-4 right-4">
+                                <div className="bg-yellow-100 p-3 rounded-lg text-xs text-gray-700">
+                                    "在互动编辑器的归档上，分享更美的迷恋，记录美好时光体验"
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            {renderMainContent()}
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-64 bg-blue-50 min-h-screen p-4">
+                            <h3 className="text-lg font-medium text-gray-700 mb-4">数时统计</h3>
+                            
+                            <div className="bg-white rounded-lg p-4 mb-4">
+                                <div className="text-center mb-2">
+                                    <div className="text-sm text-gray-600">总互动次数</div>
+                                    <div className="text-2xl font-bold text-blue-500">35</div>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg p-4 mb-4">
+                                <div className="text-center mb-2">
+                                    <div className="text-sm text-gray-600">今日新增</div>
+                                    <div className="text-2xl font-bold text-red-500">2</div>
+                                </div>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">热门时光条目 <i className="fas fa-sync-alt text-gray-400"></i></h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span>家庭游戏之夜</span>
+                                        <span className="text-red-500 flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 15
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>数程序袋</span>
+                                        <span className="text-red-500 flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 12
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span>我子的第一次画面</span>
+                                        <span className="text-red-500 flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 8
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">活跃用户 <i className="fas fa-sync-alt text-gray-400"></i></h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                            <span>时明</span>
+                                        </div>
+                                        <span className="text-orange-500">18</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                            <span>老爸</span>
+                                        </div>
+                                        <span className="text-orange-500">12</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                            <span>小明</span>
+                                        </div>
+                                        <span className="text-orange-500">9</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm">
+                                导出报表
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-green-200 p-4 text-center text-sm text-gray-600">
+                        <div>江苏省时  |  电话支持中</div>
+                        <div className="mt-1">苏ICP备1898484号 | 联系人：刘开东 | 登录 | 站长统计设置 | 兵临城下 - www.timeofcloud.com</div>
+                    </div>
+                    
+                    <div className="bg-white border-t p-4 text-center">
+                        <div className="flex justify-center items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                                <input type="text" placeholder="搜索时光记录..." className="border rounded px-2 py-1" />
+                                <button><i className="fas fa-search"></i></button>
+                            </div>
+                            <button><i className="fas fa-user"></i> 登入/注册</button>
+                            <button><i className="fas fa-question-circle"></i> 帮助中心</button>
+                        </div>
+                    </div>
+
+                    <AddModal show={showAddModal} onClose={() => setShowAddModal(false)} />
+                    <EditModal show={showEditModal} onClose={() => setShowEditModal(false)} item={editingItem} />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

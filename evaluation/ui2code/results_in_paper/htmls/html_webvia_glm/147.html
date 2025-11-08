@@ -1,0 +1,500 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>背单词好帮手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('wordList');
+            const [showModal, setShowModal] = useState(false);
+            const [filterStatus, setFilterStatus] = useState('All');
+            const [filterDifficulty, setFilterDifficulty] = useState('All');
+            const [englishInput, setEnglishInput] = useState('');
+            const [chineseInput, setChineseInput] = useState('');
+            const [difficultySelect, setDifficultySelect] = useState('Easy');
+            const [isMarked, setIsMarked] = useState(false);
+
+            const words = [
+                {
+                    id: 1,
+                    english: 'apple',
+                    chinese: '苹果',
+                    difficulty: 'Easy',
+                    isMarked: true,
+                    image: 'https://picsum.photos/id/102/300/200'
+                },
+                {
+                    id: 2,
+                    english: 'journey',
+                    chinese: '旅程',
+                    difficulty: 'Medium',
+                    isMarked: false,
+                    image: 'https://picsum.photos/id/103/300/200'
+                },
+                {
+                    id: 3,
+                    english: 'meticulous',
+                    chinese: '一丝不苟的',
+                    difficulty: 'Hard',
+                    isMarked: false,
+                    image: 'https://picsum.photos/id/104/300/200'
+                }
+            ];
+
+            const filteredWords = words.filter(word => {
+                const statusMatch = filterStatus === 'All' || 
+                    (filterStatus === '已学' && word.isMarked) ||
+                    (filterStatus === '未学' && !word.isMarked);
+                const difficultyMatch = filterDifficulty === 'All' || word.difficulty === filterDifficulty;
+                return statusMatch && difficultyMatch;
+            });
+
+            const getDifficultyColor = (difficulty) => {
+                switch(difficulty) {
+                    case 'Easy': return 'bg-green-100 text-green-800';
+                    case 'Medium': return 'bg-yellow-100 text-yellow-800';
+                    case 'Hard': return 'bg-red-100 text-red-800';
+                    default: return 'bg-gray-100 text-gray-800';
+                }
+            };
+
+            const handleAddWord = () => {
+                if (englishInput && chineseInput) {
+                    // 这里可以添加新单词的逻辑
+                    setShowModal(false);
+                    setEnglishInput('');
+                    setChineseInput('');
+                    setDifficultySelect('Easy');
+                    setIsMarked(false);
+                }
+            };
+
+            const renderSidebar = () => (
+                <div className="w-48 bg-white border-r border-gray-200 h-screen">
+                    <div className="p-4">
+                        <h2 className="text-lg font-semibold text-blue-600 mb-4">菜单</h2>
+                        <nav className="space-y-2">
+                            <button 
+                                onClick={() => setActiveTab('wordList')}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                    activeTab === 'wordList' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fas fa-list"></i>
+                                <span>单词列表</span>
+                            </button>
+                            <button 
+                                onClick={() => setShowModal(true)}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                    activeTab === 'addWord' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fas fa-plus"></i>
+                                <span>添加新单词</span>
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('statistics')}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                    activeTab === 'statistics' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fas fa-chart-bar"></i>
+                                <span>学习统计</span>
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('help')}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                    activeTab === 'help' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                <i className="fas fa-question-circle"></i>
+                                <span>帮助中心</span>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            );
+
+            const renderHeader = () => (
+                <div className="bg-white border-b border-gray-200 px-6 py-4">
+                    <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                            <input 
+                                type="text" 
+                                placeholder="背单词好帮手"
+                                className="px-4 py-2 border border-gray-300 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div className="flex -space-x-2">
+                            <button 
+                                onClick={() => setActiveTab('target')}
+                                className={`px-4 py-2 rounded-lg ${
+                                    activeTab === 'target' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}
+                            >
+                                今日目标
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('record')}
+                                className={`px-4 py-2 rounded-lg ${
+                                    activeTab === 'record' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}
+                            >
+                                学习记录
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('report')}
+                                className={`px-4 py-2 rounded-lg ${
+                                    activeTab === 'report' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}
+                            >
+                                统计报告
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderMainContent = () => (
+                <div className="flex-1 bg-gray-50 p-6">
+                    <div className="mb-6 flex justify-between items-center">
+                        <div className="flex items-center space-x-4">
+                            <button 
+                                onClick={() => setShowModal(true)}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                            >
+                                <i className="fas fa-plus"></i>
+                                <span>添加单词</span>
+                            </button>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-600">筛选:</span>
+                                <select 
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    className="border border-gray-300 rounded px-3 py-1 text-sm"
+                                >
+                                    <option value="All">All</option>
+                                    <option value="已学">已学</option>
+                                    <option value="未学">未学</option>
+                                </select>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-600">难度:</span>
+                                <div className="flex items-center space-x-2">
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max="100" 
+                                        value={filterDifficulty === 'Hard' ? 100 : 0}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '50') {
+                                                setFilterDifficulty('Hard');
+                                            } else {
+                                                setFilterDifficulty('All');
+                                            }
+                                        }}
+                                        className="w-20"
+                                    />
+                                    <span className={filterDifficulty === 'Hard' ? 'text-red-600' : 'text-gray-600'}>
+                                        {filterDifficulty === 'Hard' ? 'Hard' : '全部'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                            <h3 className="font-semibold text-gray-800 mb-2">学习统计</h3>
+                            <p className="text-sm text-gray-600">今日目标单词</p>
+                        </div>
+                    </div>
+
+                    <div className="mb-4 text-sm text-blue-600">
+                        当前筛选: {filterStatus === 'All' ? '全部' : (filterStatus === '已学' ? '已学' : '未学')} / {filterDifficulty === 'All' ? '全部难度' : filterDifficulty + '难度'}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredWords.map(word => (
+                            <div key={word.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="relative">
+                                    <img src={word.image} alt={word.english} className="w-full h-40 object-cover" />
+                                    <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-1">{word.english}</h3>
+                                    <p className="text-gray-600 mb-3">{word.chinese}</p>
+                                    <div className="flex justify-between items-center">
+                                        <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(word.difficulty)}`}>
+                                            {word.difficulty}
+                                        </span>
+                                        <div className="flex items-center space-x-2">
+                                            <span className="text-sm text-gray-500">
+                                                {word.isMarked ? '已学习' : '未学习'}
+                                            </span>
+                                            <button className="text-gray-400 hover:text-gray-600">
+                                                <i className="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const renderStatsPanel = () => (
+                <div className="w-80 bg-white p-6 border border-gray-200 rounded-lg shadow-sm">
+                    <h3 className="font-semibold text-gray-800 mb-4">学习统计</h3>
+                    <div className="text-center mb-6">
+                        <div className="relative inline-block">
+                            <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 36 36">
+                                <path
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#E5E7EB"
+                                    strokeWidth="3"
+                                />
+                                <path
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="#3B82F6"
+                                    strokeWidth="3"
+                                    strokeDasharray="33, 66"
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-2xl font-bold text-blue-600">33%</span>
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-2">1/3</p>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="font-medium text-gray-700 mb-3">累计学习</h4>
+                        <div className="flex justify-between text-xs text-gray-500 mb-2">
+                            <span>星期一</span>
+                            <span>星期二</span>
+                            <span>星期三</span>
+                            <span>星期四</span>
+                            <span>星期五</span>
+                        </div>
+                        <div className="flex space-x-1">
+                            {[12, 18, 25, 30, 28].map((height, index) => (
+                                <div key={index} className="flex-1 bg-blue-500 rounded-t" style={{ height: `${height}px` }}></div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="font-medium text-gray-700 mb-3">难度分布</h4>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                                    <span className="text-sm text-gray-600">Easy</span>
+                                </div>
+                                <span className="text-sm font-medium">1词</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                                    <span className="text-sm text-gray-600">Medium</span>
+                                </div>
+                                <span className="text-sm font-medium">1词</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 bg-red-500 rounded"></div>
+                                    <span className="text-sm text-gray-600">Hard</span>
+                                </div>
+                                <span className="text-sm font-medium">1词</span>
+                            </div>
+                        </div>
+                        <div className="mt-4 flex space-x-1">
+                            <div className="flex-1 bg-green-500 rounded-full" style={{ height: '8px' }}></div>
+                            <div className="flex-1 bg-yellow-500 rounded-full" style={{ height: '8px' }}></div>
+                            <div className="flex-1 bg-red-500 rounded-full" style={{ height: '8px' }}></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-medium text-gray-700">测验正确率</h4>
+                            <span className="text-green-600 text-sm">↑较上周提升5%</span>
+                        </div>
+                        <p className="text-2xl font-bold text-orange-500">87%</p>
+                    </div>
+                </div>
+            );
+
+            const renderModal = () => (
+                showModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold">添加新单词</h3>
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">英文单词</label>
+                                    <input 
+                                        type="text"
+                                        value={englishInput}
+                                        onChange={(e) => setEnglishInput(e.target.value)}
+                                        placeholder="输入英文单词"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">中文释义</label>
+                                    <input 
+                                        type="text"
+                                        value={chineseInput}
+                                        onChange={(e) => setChineseInput(e.target.value)}
+                                        placeholder="输入中文释义"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">难度</label>
+                                    <select 
+                                        value={difficultySelect}
+                                        onChange={(e) => setDifficultySelect(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="Easy">Easy</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Hard">Hard</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="flex items-center">
+                                    <input 
+                                        type="checkbox"
+                                        checked={isMarked}
+                                        onChange={(e) => setIsMarked(e.target.checked)}
+                                        id="marked"
+                                        className="mr-2"
+                                    />
+                                    <label htmlFor="marked" className="text-sm text-gray-700">标记为已学习</label>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-end space-x-3 mt-6">
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleAddWord}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                >
+                                    保存
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            );
+
+            const renderFooter = () => (
+                <div className="bg-white border-t border-gray-200 p-6">
+                    <div className="grid grid-cols-2 gap-8">
+                        <div>
+                            <h3 className="font-semibold text-gray-800 mb-3">操作指引</h3>
+                            <ul className="space-y-2 text-sm text-gray-600">
+                                <li className="flex items-center">
+                                    <i className="fas fa-info-circle text-blue-500 mr-2"></i>
+                                    点击单词卡片可查看详细释义及例句或更改学习状态
+                                </li>
+                                <li className="flex items-center">
+                                    <i className="fas fa-plus-circle text-green-500 mr-2"></i>
+                                    点击新增按钮即可新增单词
+                                </li>
+                                <li className="flex items-center">
+                                    <i className="fas fa-star text-yellow-500 mr-2"></i>
+                                    在单词卡片右上角设置星标可快速归类重要单词
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-800 mb-3">特色功能</h3>
+                            <ul className="space-y-2 text-sm text-gray-600">
+                                <li className="flex items-center">
+                                    <i className="fas fa-star text-yellow-500 mr-2"></i>
+                                    支持艾宾浩斯遗忘曲线智能复习策略
+                                </li>
+                                <li className="flex items-center">
+                                    <i className="fas fa-brain text-purple-500 mr-2"></i>
+                                    智能推荐复习单词
+                                </li>
+                                <li className="flex items-center">
+                                    <i className="fas fa-cog text-gray-500 mr-2"></i>
+                                    支持自定义单词分类
+                                </li>
+                                <li className="flex items-center">
+                                    <i className="fas fa-file-export text-blue-500 mr-2"></i>
+                                    批量导出CSV
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                        <p className="text-sm text-gray-500 text-center">
+                            <i className="fas fa-heart text-red-400 mr-1"></i>
+                            Tip: 每天坚持打卡，让记忆更牢固！
+                            <span className="ml-2 text-blue-500 cursor-pointer">去打卡</span>
+                            <span className="ml-1">今日单词量30%</span>
+                        </p>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {renderHeader()}
+                    <div className="flex">
+                        {renderSidebar()}
+                        <div className="flex-1">
+                            {renderMainContent()}
+                        </div>
+                        {renderStatsPanel()}
+                    </div>
+                    {renderFooter()}
+                    {renderModal()}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

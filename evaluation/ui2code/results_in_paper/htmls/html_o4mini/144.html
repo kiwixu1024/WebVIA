@@ -1,0 +1,342 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>内容聚合平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      function App() {
+        const graphImages = [
+          "https://picsum.photos/id/1039/400/200",
+          "https://picsum.photos/id/1042/400/200",
+          "https://picsum.photos/id/1040/400/200",
+          "https://picsum.photos/id/1056/400/200",
+          "https://picsum.photos/id/1062/400/200",
+          "https://picsum.photos/id/1084/400/200"
+        ];
+        const [graphIdx, setGraphIdx] = useState(0);
+        const [showAdd, setShowAdd] = useState(false);
+        const [showEdit, setShowEdit] = useState(false);
+        const [showDelete, setShowDelete] = useState(false);
+
+        const updateGraph = () => {
+          setGraphIdx((idx) => (idx + 1) % graphImages.length);
+        };
+
+        const openAdd = () => {
+          updateGraph();
+          setShowAdd(true);
+        };
+        const openEdit = () => {
+          updateGraph();
+          setShowEdit(true);
+        };
+        const openDelete = () => {
+          updateGraph();
+          setShowDelete(true);
+        };
+        const closeAdd = () => setShowAdd(false);
+        const closeEdit = () => setShowEdit(false);
+        const closeDelete = () => setShowDelete(false);
+
+        const saveAdd = () => {
+          updateGraph();
+          setShowAdd(false);
+        };
+        const saveEdit = () => {
+          updateGraph();
+          setShowEdit(false);
+        };
+        const confirmDelete = () => {
+          setShowDelete(false);
+        };
+        const cancelDelete = () => {
+          setShowDelete(false);
+        };
+        const refreshData = () => {
+          updateGraph();
+        };
+
+        return (
+          <div className="flex h-screen">
+            {/* 左侧菜单 */}
+            <aside className="w-64 bg-white border-r border-gray-200 p-6 flex flex-col">
+              <h1 className="text-xl font-semibold mb-8">内容聚合平台</h1>
+              <nav className="flex-1">
+                <ul className="space-y-4">
+                  <li className="text-blue-600 font-medium flex items-center">
+                    <i className="fas fa-rss mr-2"></i> 订阅管理
+                  </li>
+                  <li className="text-gray-600 flex items-center"><i className="fas fa-cog mr-2"></i> 推送设置</li>
+                  <li className="text-gray-600 flex items-center"><i className="fas fa-history mr-2"></i> 历史记录</li>
+                  <li className="text-gray-600 flex items-center"><i className="fas fa-question-circle mr-2"></i> 帮助中心</li>
+                </ul>
+              </nav>
+              <div className="mt-4 bg-blue-50 p-4 rounded">
+                <p className="text-sm text-gray-700">💡 使用订阅聚合功能，可集中管理多平台信息，提升内容获取效率。</p>
+              </div>
+            </aside>
+            {/* 主体 */}
+            <div className="flex-1 flex flex-col">
+              {/* 头部 */}
+              <header className="py-4 px-6 bg-white border-b border-gray-200 flex justify-between items-center">
+                <h2 className="text-lg font-medium">一站式订阅内容聚合与推送平台，实时同步，多端分发，智能统计。</h2>
+              </header>
+              {/* 主体内容 */}
+              <div className="flex-1 flex overflow-hidden">
+                {/* 订阅列表区 */}
+                <main className="flex-1 p-6 overflow-auto">
+                  {/* 导航 tab */}
+                  <div className="mb-6 border-b border-gray-200">
+                    <ul className="flex space-x-8 text-gray-600">
+                      <li className="py-2 px-1 border-b-2 border-blue-600 text-blue-600">订阅聚合</li>
+                      <li className="py-2 px-1 hover:text-blue-600 cursor-pointer">推送调度</li>
+                      <li className="py-2 px-1 hover:text-blue-600 cursor-pointer">统计报表</li>
+                    </ul>
+                  </div>
+                  {/* 按钮 */}
+                  <div className="mb-4">
+                    <button onClick={openAdd} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                      + 新增订阅
+                    </button>
+                  </div>
+                  {/* 我的订阅 */}
+                  <h3 className="text-lg font-medium mb-4">我的订阅</h3>
+                  <div className="space-y-4">
+                    {/* 订阅卡片1 */}
+                    <div className="bg-white p-4 rounded shadow-sm flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center mb-2">
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                          <span className="font-medium">科技新闻日报</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">来源：新浪科技</p>
+                        <p className="text-gray-600 text-sm">频率：每日</p>
+                        <p className="text-gray-600 text-sm">推送时间：上午 9:00</p>
+                      </div>
+                      <div className="flex flex-col space-y-2">
+                        <button onClick={openEdit} className="text-gray-500 hover:text-gray-700"><i className="fas fa-edit"></i></button>
+                        <button onClick={openDelete} className="text-red-500 hover:text-red-700 flex items-center text-sm">
+                          <i className="fas fa-trash mr-1"></i> 删除订阅
+                        </button>
+                      </div>
+                    </div>
+                    {/* 订阅卡片2 */}
+                    <div className="bg-white p-4 rounded shadow-sm flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center mb-2">
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                          <span className="font-medium">财经周刊精选</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">来源：财经网</p>
+                        <p className="text-gray-600 text-sm">频率：每周</p>
+                        <p className="text-gray-600 text-sm">推送时间：周一 8:00</p>
+                      </div>
+                      <div className="flex flex-col space-y-2">
+                        <button onClick={openEdit} className="text-gray-500 hover:text-gray-700"><i className="fas fa-edit"></i></button>
+                        <button onClick={openDelete} className="text-red-500 hover:text-red-700 flex items-center text-sm">
+                          <i className="fas fa-trash mr-1"></i> 删除订阅
+                        </button>
+                      </div>
+                    </div>
+                    {/* 订阅卡片3 */}
+                    <div className="bg-white p-4 rounded shadow-sm flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center mb-2">
+                          <span className="inline-block w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                          <span className="font-medium">生活小窍门</span>
+                        </div>
+                        <p className="text-gray-600 text-sm">来源：小红书</p>
+                        <p className="text-gray-600 text-sm">频率：每3天</p>
+                        <p className="text-gray-600 text-sm">推送时间：下午 3:00</p>
+                      </div>
+                      <div className="flex flex-col space-y-2">
+                        <button onClick={openEdit} className="text-gray-500 hover:text-gray-700"><i className="fas fa-edit"></i></button>
+                        <button onClick={openDelete} className="text-red-500 hover:text-red-700 flex items-center text-sm">
+                          <i className="fas fa-trash mr-1"></i> 删除订阅
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* 底部版权 */}
+                  <footer className="mt-16 text-center text-gray-500 text-xs">
+                    © 2023 订阅内容聚合与推送平台 版权所有<br />
+                    版本 1.2.5 | 联系邮箱：support@example.com<br />
+                    <span className="cursor-pointer hover:underline">关于我们</span> · <span className="cursor-pointer hover:underline">使用条款</span> · <span className="cursor-pointer hover:underline">隐私政策</span>
+                  </footer>
+                </main>
+                {/* 侧边数据区 */}
+                <aside className="w-80 bg-white border-l border-gray-200 p-6 flex flex-col overflow-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-medium">数据概览</h4>
+                    <button onClick={refreshData} className="text-blue-600 hover:text-blue-800">
+                      <i className="fas fa-sync-alt"></i> 刷新数据
+                    </button>
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <div className="border border-gray-200 rounded p-4 flex justify-between items-center">
+                      <span>订阅总数</span><span className="font-semibold">3</span>
+                    </div>
+                    <div className="border border-gray-200 rounded p-4 flex justify-between items-center">
+                      <span>推送成功率</span><span className="font-semibold">92%</span>
+                    </div>
+                    <div className="border border-gray-200 rounded p-4 flex justify-between items-center">
+                      <span>当日新增订阅</span><span className="font-semibold">5</span>
+                    </div>
+                    <div className="border border-gray-200 rounded p-4 flex justify-between items-center">
+                      <span>故障报警数</span><span className="font-semibold text-yellow-600">1</span>
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <h5 className="font-medium mb-2">实时推送统计</h5>
+                    <img src={graphImages[graphIdx]} alt="统计图" className="w-full h-40 object-cover rounded mb-2" />
+                    <p className="text-xs text-gray-600">点击此处“刷新数据”按钮，随时掌握推送效果。</p>
+                  </div>
+                  <div>
+                    <h5 className="font-medium mb-2">常见问题</h5>
+                    <ul className="space-y-1 text-blue-600 text-sm">
+                      <li className="hover:underline cursor-pointer">如何添加新订阅？</li>
+                      <li className="hover:underline cursor-pointer">如何调整推送频率？</li>
+                      <li className="hover:underline cursor-pointer">为什么我的推送失败了？</li>
+                      <li className="hover:underline cursor-pointer">如何查看历史推送记录？</li>
+                    </ul>
+                  </div>
+                </aside>
+              </div>
+            </div>
+
+            {/* 新增订阅 Modal */}
+            {showAdd && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg w-96 overflow-hidden">
+                  <div className="bg-blue-600 text-white px-4 py-2 flex justify-between items-center">
+                    <span>新增订阅</span>
+                    <button onClick={closeAdd}><i className="fas fa-times"></i></button>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-sm mb-1">订阅名称</label>
+                      <input type="text" placeholder="输入订阅名称" className="w-full border border-gray-300 rounded px-2 py-1" />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">来源渠道</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1">
+                        <option>新浪科技</option>
+                        <option>财经网</option>
+                        <option>小红书</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">推送频率</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1">
+                        <option>每日</option>
+                        <option>每周</option>
+                        <option>每3天</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">推送时间</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1">
+                        <option>上午 9:00</option>
+                        <option>下午 3:00</option>
+                        <option>周一 8:00</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span className="block text-sm mb-1">订阅状态</span>
+                      <label className="mr-4"><input type="radio" name="status" checked className="mr-1" /> 开启</label>
+                      <label><input type="radio" name="status" className="mr-1" /> 暂停</label>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-50 flex justify-end space-x-2">
+                    <button onClick={closeAdd} className="px-3 py-1 border border-gray-300 rounded">取消</button>
+                    <button onClick={saveAdd} className="px-3 py-1 bg-blue-600 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 编辑订阅 Modal */}
+            {showEdit && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg w-96 overflow-hidden">
+                  <div className="bg-blue-600 text-white px-4 py-2 flex justify-between items-center">
+                    <span>编辑订阅</span>
+                    <button onClick={closeEdit}><i className="fas fa-times"></i></button>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <label className="block text-sm mb-1">订阅名称</label>
+                      <input type="text" value="科技新闻日报" className="w-full border border-gray-300 rounded px-2 py-1" />
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">来源渠道</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1" defaultValue="新浪科技">
+                        <option>新浪科技</option>
+                        <option>财经网</option>
+                        <option>小红书</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">推送频率</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1" defaultValue="每日">
+                        <option>每日</option>
+                        <option>每周</option>
+                        <option>每3天</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm mb-1">推送时间</label>
+                      <select className="w-full border border-gray-300 rounded px-2 py-1" defaultValue="上午 9:00">
+                        <option>上午 9:00</option>
+                        <option>下午 3:00</option>
+                        <option>周一 8:00</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span className="block text-sm mb-1">订阅状态</span>
+                      <label className="mr-4"><input type="radio" name="editStatus" checked className="mr-1" /> 开启</label>
+                      <label><input type="radio" name="editStatus" className="mr-1" /> 暂停</label>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-50 flex justify-end space-x-2">
+                    <button onClick={closeEdit} className="px-3 py-1 border border-gray-300 rounded">取消</button>
+                    <button onClick={saveEdit} className="px-3 py-1 bg-blue-600 text-white rounded">保存</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 删除确认 Modal */}
+            {showDelete && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white rounded-lg w-80 overflow-hidden">
+                  <div className="p-6 text-center space-y-4">
+                    <h3 className="text-lg font-medium">确认删除</h3>
+                    <p className="text-sm text-gray-600">您确定要删除这个订阅吗？此操作无法撤销。</p>
+                  </div>
+                  <div className="px-4 py-3 bg-gray-50 flex justify-end space-x-2">
+                    <button onClick={cancelDelete} className="px-3 py-1 border border-gray-300 rounded">取消</button>
+                    <button onClick={confirmDelete} className="px-3 py-1 bg-red-600 text-white rounded">确认删除</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>

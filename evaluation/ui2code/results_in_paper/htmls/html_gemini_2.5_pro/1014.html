@@ -1,0 +1,434 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>React Social Feed</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, Fragment } = React;
+
+        const Modal = ({ children, onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg relative p-8">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <i className="fas fa-times fa-lg"></i>
+                    </button>
+                    {children}
+                </div>
+            </div>
+        );
+
+        const PostModal = ({ onClose }) => {
+            const tags = ["旅行", "美食", "电影", "摄影", "音乐", "宠物", "运动", "读书", "游戏", "生活"];
+            return (
+                <Modal onClose={onClose}>
+                    <h2 className="text-xl font-bold mb-6">发布新动态</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                            <input type="text" placeholder="给你的动态起个标题" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                        </div>
+                        <div>
+                             <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-gray-700">内容</label>
+                                <span className="text-sm text-gray-400">0/500</span>
+                            </div>
+                            <textarea placeholder="分享你的精彩瞬间..." rows="4" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                            <div className="flex flex-wrap gap-2">
+                                {tags.map(tag => <button key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm hover:bg-gray-200">{tag}</button>)}
+                            </div>
+                        </div>
+                        <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-2">图片</label>
+                             <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
+                                <i className="fas fa-plus text-gray-400 text-2xl"></i>
+                             </div>
+                             <p className="text-xs text-gray-400 mt-1">最多可添加6张图片</p>
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">可见度</label>
+                            <div className="relative pt-1">
+                                <input type="range" min="0" max="2" defaultValue="1" className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>仅自己</span>
+                                    <span>好友可见</span>
+                                    <span>公开</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end mt-8 space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200">取消</button>
+                        <button className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">发布</button>
+                    </div>
+                </Modal>
+            );
+        };
+
+        const FriendModal = ({ onClose }) => {
+            const tags = ["旅行", "美食", "电影", "摄影", "音乐", "宠物", "运动", "读书", "游戏", "生活"];
+            return (
+                 <Modal onClose={onClose}>
+                    <h2 className="text-xl font-bold mb-6">添加新朋友</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">名称</label>
+                            <input type="text" placeholder="输入好友名称" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">简介</label>
+                            <textarea placeholder="简单描述一下这位朋友" rows="3" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">兴趣标签</label>
+                            <div className="flex flex-wrap gap-2">
+                                {tags.slice(0, 7).map(tag => <button key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm hover:bg-gray-200">{tag}</button>)}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end mt-8 space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200">取消</button>
+                        <button className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">添加好友</button>
+                    </div>
+                </Modal>
+            );
+        };
+
+        const EditModal = ({ onClose }) => {
+            const tags = ["旅行", "美食", "电影", "摄影", "音乐", "宠物", "运动", "读书", "游戏", "生活"];
+            const postImageUrl1 = "https://picsum.photos/id/1015/400/250";
+            const postImageUrl2 = "https://picsum.photos/id/1043/400/250";
+            return (
+                 <Modal onClose={onClose}>
+                    <h2 className="text-xl font-bold mb-6">编辑动态</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                            <input type="text" defaultValue="午后阳光漫步分享" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                        </div>
+                        <div>
+                             <div className="flex justify-between items-center mb-1">
+                                <label className="block text-sm font-medium text-gray-700">内容</label>
+                                <span className="text-sm text-gray-400">98/500</span>
+                            </div>
+                            <textarea rows="4" className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-400" defaultValue="今天去了公园见到了可爱的松鼠，它们在树上跳来跳去，非常可爱！阳光透过树叶的缝隙洒在地上，形成了斑驳的光影，整个下午都沉浸在这美好的氛围中。"></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                            <div className="flex flex-wrap gap-2">
+                                {tags.map(tag => <button key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm hover:bg-gray-200">{tag}</button>)}
+                            </div>
+                        </div>
+                        <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-2">图片</label>
+                             <div className="flex space-x-2">
+                                <div className="relative">
+                                    <img src={postImageUrl1} className="w-24 h-24 object-cover rounded-md" />
+                                    <button className="absolute top-0 right-0 -mt-1 -mr-1 bg-gray-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>
+                                </div>
+                                <div className="relative">
+                                    <img src={postImageUrl2} className="w-24 h-24 object-cover rounded-md" />
+                                    <button className="absolute top-0 right-0 -mt-1 -mr-1 bg-gray-700 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>
+                                </div>
+                                <div className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50">
+                                    <i className="fas fa-plus text-gray-400 text-xl"></i>
+                                </div>
+                             </div>
+                             <p className="text-xs text-gray-400 mt-1">最多可添加6张图片</p>
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">可见度</label>
+                            <div className="relative pt-1">
+                                <input type="range" min="0" max="2" defaultValue="1" className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>仅自己</span>
+                                    <span>好友可见</span>
+                                    <span>公开</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex justify-end mt-8 space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200">取消</button>
+                        <button className="px-6 py-2 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600">保存修改</button>
+                    </div>
+                </Modal>
+            );
+        };
+        
+        const DeleteConfirmModal = ({ onClose }) => (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+                    <h2 className="text-lg font-bold mb-4">确认删除</h2>
+                    <p className="text-gray-600 mb-6">确定要删除这条动态吗? 删除后将无法恢复。</p>
+                    <div className="flex justify-center space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200">取消</button>
+                        <button className="px-6 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600">确认删除</button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const LeftSidebar = () => {
+            const navItems = [
+                { icon: 'user-circle', name: 'Profile' },
+                { icon: 'comment-dots', name: '消息' },
+                { icon: 'users', name: '好友广场' },
+                { icon: 'calendar-alt', name: '首选活动' },
+                { icon: 'cog', name: '设置' },
+            ];
+            const activeItem = "交友社区";
+
+            return (
+                <aside className="w-64 bg-white flex-shrink-0 p-6 flex flex-col h-screen sticky top-0">
+                    <div className="flex items-center space-x-3 mb-10">
+                        <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">F</div>
+                        <span className="font-bold text-lg text-gray-800">交友社区</span>
+                    </div>
+
+                    <nav className="flex-grow">
+                        <ul>
+                            <li className="mb-2">
+                                <a href="#" className="flex items-center space-x-3 p-3 rounded-lg bg-orange-50 border-l-4 border-orange-500 text-orange-600 font-bold">
+                                    <i className="fas fa-home w-5 text-center"></i>
+                                    <span>交友社区</span>
+                                </a>
+                            </li>
+                            {navItems.map(item => (
+                                <li key={item.name} className="mb-2">
+                                    <a href="#" className="flex items-center space-x-3 p-3 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
+                                        <i className={`fas fa-${item.icon} w-5 text-center`}></i>
+                                        <span>{item.name}</span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+
+                    <div className="bg-cyan-100 text-cyan-800 rounded-lg p-4 text-center">
+                        <h3 className="font-bold">升级到 VIP 会员</h3>
+                        <p className="text-sm mt-1">解锁更多交友功能!</p>
+                        <button className="mt-3 bg-cyan-500 text-white text-sm font-semibold py-2 px-4 rounded-full w-full hover:bg-cyan-600">了解会员</button>
+                    </div>
+                </aside>
+            );
+        };
+        
+        const PostCard = ({ onEdit, onDelete }) => {
+            const avatarUrl = "https://picsum.photos/id/40/40/40";
+            const postImageUrl1 = "https://picsum.photos/id/1015/400/250";
+            const postImageUrl2 = "https://picsum.photos/id/1043/400/250";
+            return (
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <div className="flex items-start mb-4">
+                        <img src={avatarUrl} alt="Alice" className="w-12 h-12 rounded-full mr-4" />
+                        <div className="flex-grow">
+                            <p className="font-bold">Alice</p>
+                            <p className="text-sm text-gray-400">2023-11-12 14:30</p>
+                        </div>
+                        <div className="flex items-center space-x-4 text-gray-400">
+                             <button onClick={onEdit} className="hover:text-orange-500"><i className="fas fa-edit"></i></button>
+                            <button onClick={onDelete} className="hover:text-red-500"><i className="fas fa-trash-alt"></i></button>
+                            <i className="fas fa-fire text-orange-500"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg mb-2">午后阳光漫步分享</h3>
+                        <p className="text-gray-600 mb-4 leading-relaxed">
+                            今天去了公园见到了可爱的松鼠，它们在树上跳来跳去，非常可爱！阳光透过树叶的缝隙洒在地上，形成了斑驳的光影，整个下午都沉浸在这美好的氛围中。
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 mb-4">
+                            <img src={postImageUrl1} className="rounded-lg object-cover w-full h-auto" />
+                            <img src={postImageUrl2} className="rounded-lg object-cover w-full h-auto" />
+                        </div>
+                        <div className="flex items-center justify-between text-gray-500">
+                            <div className="flex space-x-2">
+                                <span className="text-orange-500 bg-orange-100 text-xs font-semibold px-2.5 py-1 rounded-full">#日常</span>
+                                <span className="text-orange-500 bg-orange-100 text-xs font-semibold px-2.5 py-1 rounded-full">#公园</span>
+                                <span className="text-orange-500 bg-orange-100 text-xs font-semibold px-2.5 py-1 rounded-full">#小动物</span>
+                            </div>
+                            <div className="flex items-center space-x-6">
+                                <div className="flex items-center space-x-2 cursor-pointer hover:text-red-500">
+                                    <i className="far fa-heart"></i>
+                                    <span>24</span>
+                                </div>
+                                <div className="flex items-center space-x-2 cursor-pointer hover:text-blue-500">
+                                    <i className="far fa-comment"></i>
+                                    <span>5</span>
+                                </div>
+                                <i className="fas fa-share-alt cursor-pointer hover:text-green-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const RightSidebar = ({ showTip, onTipClose }) => {
+            const davidAvatarUrl = "https://picsum.photos/id/1005/40/40";
+            const emmaAvatarUrl = "https://picsum.photos/id/1027/40/40";
+            const tipAvatarUrl = "https://picsum.photos/id/342/32/32";
+
+            const trendingTopics = [
+                { title: '初秋旅行穿搭推荐', participants: 2345 },
+                { title: '周末的美好食光', participants: 1892 },
+                { title: '发现友好咖啡厅', participants: 1024 },
+            ];
+
+            return (
+                <aside className="w-80 bg-gray-50 flex-shrink-0 p-6 space-y-6 h-screen sticky top-0">
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <h3 className="font-bold mb-3">社区数据</h3>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">在线人数</span>
+                            <span className="font-semibold">1287</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm mt-2">
+                            <span className="text-gray-500">今日注册</span>
+                            <span className="font-semibold text-orange-500">456</span>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <h3 className="font-bold mb-4">热门话题排行</h3>
+                        <ul className="space-y-4">
+                            {trendingTopics.map((topic, index) => (
+                                <li key={topic.title} className="flex items-start">
+                                    <span className="text-orange-400 font-bold w-5">{index + 1}</span>
+                                    <div>
+                                        <p className="font-semibold text-sm leading-tight">{topic.title}</p>
+                                        <p className="text-xs text-gray-400">{topic.participants}人参与</p>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                         <button className="text-orange-500 text-sm font-semibold mt-4 w-full text-center hover:text-orange-600">查看更多 &gt;</button>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <h3 className="font-bold mb-4">推荐好友</h3>
+                        <ul className="space-y-4">
+                            <li className="flex items-center">
+                                <img src={davidAvatarUrl} alt="David" className="w-10 h-10 rounded-full mr-3" />
+                                <div>
+                                    <p className="font-semibold text-sm">David</p>
+                                    <p className="text-xs text-gray-400">20个爱好作者</p>
+                                </div>
+                            </li>
+                            <li className="flex items-center">
+                                <img src={emmaAvatarUrl} alt="Emma" className="w-10 h-10 rounded-full mr-3" />
+                                <div>
+                                    <p className="font-semibold text-sm">Emma</p>
+                                    <p className="text-xs text-gray-400">喜欢旅行和摄影</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    {showTip && (
+                        <div className="bg-yellow-50 p-4 rounded-lg relative">
+                            <button onClick={onTipClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+                                <i className="fas fa-times"></i>
+                            </button>
+                            <div className="flex items-start">
+                                <div className="w-8 h-8 rounded-full flex-shrink-0 mr-3 mt-1 relative">
+                                    <img src={tipAvatarUrl} className="w-full h-full rounded-full object-cover"/>
+                                    <span className="absolute -bottom-1 -right-1 bg-orange-400 rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">?</span>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-sm">小贴士</h4>
+                                    <p className="text-xs text-gray-600 mt-1">在“热门话题”中发帖更容易获得高曝光率，更容易被其他用户发现！</p>
+                                    <p className="text-xs text-gray-600 mt-1">每天登录还可以获得额外积分哦！</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </aside>
+            );
+        };
+
+
+        const MainContent = ({ onPostClick, onFriendClick, onEdit, onDelete }) => {
+            return (
+                <div className="max-w-3xl mx-auto">
+                    <header className="bg-white border-b border-gray-200 mb-6">
+                        <nav className="flex space-x-8">
+                            <a href="#" className="py-4 px-1 border-b-2 border-orange-500 text-orange-500 font-semibold">推荐</a>
+                            <a href="#" className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-800 font-medium">新朋友</a>
+                            <a href="#" className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-800 font-medium">热门话题</a>
+                            <a href="#" className="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-800 font-medium">我的订阅</a>
+                        </nav>
+                    </header>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+                        <p className="font-bold text-gray-800 mb-4">分享你的精彩</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <button onClick={onPostClick} className="w-full bg-gradient-to-r from-orange-400 to-red-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center space-x-2 hover:opacity-90">
+                                <i className="fas fa-edit"></i>
+                                <span>发布动态</span>
+                            </button>
+                             <button onClick={onFriendClick} className="w-full bg-gradient-to-r from-cyan-400 to-blue-400 text-white font-semibold py-3 rounded-lg flex items-center justify-center space-x-2 hover:opacity-90">
+                                <i className="fas fa-plus"></i>
+                                <span>新增话题</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                       <PostCard onEdit={onEdit} onDelete={onDelete} />
+                    </div>
+                </div>
+            );
+        };
+        
+
+        const App = () => {
+            const [showPostModal, setShowPostModal] = useState(false);
+            const [showFriendModal, setShowFriendModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showTipBox, setShowTipBox] = useState(true);
+
+            return (
+                <div className="bg-gray-50 min-h-screen text-gray-800">
+                    <div className="flex max-w-screen-2xl mx-auto">
+                        <LeftSidebar />
+                        <main className="flex-grow px-8 py-6">
+                            <MainContent 
+                                onPostClick={() => setShowPostModal(true)}
+                                onFriendClick={() => setShowFriendModal(true)}
+                                onEdit={() => setShowEditModal(true)}
+                                onDelete={() => setShowDeleteModal(true)}
+                            />
+                        </main>
+                        <RightSidebar showTip={showTipBox} onTipClose={() => setShowTipBox(false)} />
+                    </div>
+                    {showPostModal && <PostModal onClose={() => setShowPostModal(false)} />}
+                    {showFriendModal && <FriendModal onClose={() => setShowFriendModal(false)} />}
+                    {showEditModal && <EditModal onClose={() => setShowEditModal(false)} />}
+                    {showDeleteModal && <DeleteConfirmModal onClose={() => setShowDeleteModal(false)} />}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

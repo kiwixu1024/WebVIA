@@ -1,0 +1,511 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('订阅聚合');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [currentImage, setCurrentImage] = useState(1);
+            const [editingSubscription, setEditingSubscription] = useState(null);
+            const [deletingSubscription, setDeletingSubscription] = useState(null);
+
+            const images = [
+                "https://picsum.photos/id/26/500/300", // 初始海洋图片
+                "https://picsum.photos/id/29/500/300", // 相机图片
+                "https://picsum.photos/id/53/500/300", // 海滩棕榈树
+                "https://picsum.photos/id/30/500/300"  // 蒲公英特写
+            ];
+
+            const refreshData = () => {
+                setCurrentImage((prevImage) => (prevImage + 2) % images.length);
+            };
+
+            const handleAddClick = () => {
+                setShowAddModal(true);
+            };
+
+            const handleEditClick = (subscription) => {
+                setEditingSubscription(subscription);
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = (subscription) => {
+                setDeletingSubscription(subscription);
+                setShowDeleteModal(true);
+            };
+
+            const handleConfirmDelete = () => {
+                // 这里应该有删除订阅的逻辑
+                setShowDeleteModal(false);
+            };
+
+            const closeAddModal = () => {
+                setShowAddModal(false);
+                setCurrentImage((prevImage) => (prevImage + 3) % images.length);
+            };
+
+            return (
+                <div className="flex min-h-screen bg-gray-100">
+                    {/* 侧边栏 */}
+                    <div className="w-40 bg-white shadow-md">
+                        <div className="p-4 font-bold text-blue-700">内容聚合平台</div>
+                        <div className="mt-8">
+                            <div className="p-3 flex items-center text-blue-600 bg-blue-50">
+                                <i className="fas fa-rss mr-2"></i>
+                                <span>订阅管理</span>
+                            </div>
+                            <div className="p-3 flex items-center text-gray-600">
+                                <i className="fas fa-cog mr-2"></i>
+                                <span>网站设置</span>
+                            </div>
+                            <div className="p-3 flex items-center text-gray-600">
+                                <i className="fas fa-history mr-2"></i>
+                                <span>历史记录</span>
+                            </div>
+                            <div className="p-3 flex items-center text-gray-600">
+                                <i className="fas fa-info-circle mr-2"></i>
+                                <span>帮助中心</span>
+                            </div>
+                        </div>
+                        <div className="mt-12 p-3 bg-blue-50 text-sm text-gray-600 mx-2 rounded">
+                            <i className="fas fa-star text-yellow-500 mr-1"></i>
+                            使用订阅聚合功能，可集中管理多平台资讯，提升内容获取效率。
+                        </div>
+                    </div>
+
+                    {/* 主内容区 */}
+                    <div className="flex-1">
+                        {/* 顶部标题 */}
+                        <div className="p-5 text-center text-gray-700">
+                            一站式订阅内容聚合与推送平台，实时同步，多端分发，智能统计。
+                        </div>
+
+                        {/* 主要内容 */}
+                        <div className="mx-4">
+                            {/* 选项卡 */}
+                            <div className="flex border-b">
+                                <div 
+                                    className={`py-2 px-4 cursor-pointer ${activeTab === '订阅聚合' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                                    onClick={() => setActiveTab('订阅聚合')}
+                                >
+                                    订阅聚合
+                                </div>
+                                <div 
+                                    className={`py-2 px-4 cursor-pointer ${activeTab === '推送调度' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                                    onClick={() => setActiveTab('推送调度')}
+                                >
+                                    推送调度
+                                </div>
+                                <div 
+                                    className={`py-2 px-4 cursor-pointer ${activeTab === '统计报表' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                                    onClick={() => setActiveTab('统计报表')}
+                                >
+                                    统计报表
+                                </div>
+                            </div>
+
+                            {/* 内容区域 */}
+                            <div className="mt-4 flex">
+                                {/* 左侧订阅列表 */}
+                                <div className="w-3/4 pr-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h2 className="text-gray-700">我的订阅</h2>
+                                        <button 
+                                            className="bg-blue-600 text-white px-3 py-1 rounded flex items-center"
+                                            onClick={handleAddClick}
+                                        >
+                                            <i className="fas fa-plus mr-1"></i> 新增订阅
+                                        </button>
+                                    </div>
+
+                                    {/* 订阅卡片列表 */}
+                                    <div className="space-y-4">
+                                        {/* 科技新闻日报 */}
+                                        <div className="bg-white p-4 rounded shadow-sm relative">
+                                            <i className="fas fa-circle text-green-500 text-xs absolute left-4 top-5"></i>
+                                            <div className="ml-4 flex justify-between">
+                                                <div>
+                                                    <div className="font-medium">科技新闻日报</div>
+                                                    <div className="text-sm text-gray-600 mt-1">来源: 新浪科技</div>
+                                                    <div className="text-sm text-gray-600">频率: 每日</div>
+                                                    <div className="text-sm text-gray-600">推送时间: 上午 9:00</div>
+                                                </div>
+                                                <div className="flex">
+                                                    <button 
+                                                        className="text-gray-500 hover:text-blue-600"
+                                                        onClick={() => handleEditClick({
+                                                            name: '科技新闻日报',
+                                                            source: '新浪科技',
+                                                            frequency: '每日',
+                                                            time: '上午 9:00'
+                                                        })}
+                                                    >
+                                                        <i className="fas fa-external-link-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                className="mt-2 px-2 py-1 text-sm bg-red-500 text-white rounded flex items-center"
+                                                onClick={() => handleDeleteClick({
+                                                    name: '科技新闻日报'
+                                                })}
+                                            >
+                                                <i className="fas fa-trash-alt mr-1"></i> 删除订阅
+                                            </button>
+                                        </div>
+
+                                        {/* 财经周刊精选 */}
+                                        <div className="bg-white p-4 rounded shadow-sm relative">
+                                            <i className="fas fa-circle text-green-500 text-xs absolute left-4 top-5"></i>
+                                            <div className="ml-4 flex justify-between">
+                                                <div>
+                                                    <div className="font-medium">财经周刊精选</div>
+                                                    <div className="text-sm text-gray-600 mt-1">来源: 财经网</div>
+                                                    <div className="text-sm text-gray-600">频率: 每周</div>
+                                                    <div className="text-sm text-gray-600">推送时间: 周一 8:00</div>
+                                                </div>
+                                                <div className="flex">
+                                                    <button 
+                                                        className="text-gray-500 hover:text-blue-600"
+                                                        onClick={() => handleEditClick({
+                                                            name: '财经周刊精选',
+                                                            source: '财经网',
+                                                            frequency: '每周',
+                                                            time: '周一 8:00'
+                                                        })}
+                                                    >
+                                                        <i className="fas fa-external-link-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button className="mt-2 px-2 py-1 text-sm bg-red-500 text-white rounded flex items-center">
+                                                <i className="fas fa-trash-alt mr-1"></i> 删除订阅
+                                            </button>
+                                        </div>
+
+                                        {/* 生活小窍门 */}
+                                        <div className="bg-white p-4 rounded shadow-sm relative">
+                                            <i className="fas fa-circle text-gray-400 text-xs absolute left-4 top-5"></i>
+                                            <div className="ml-4 flex justify-between">
+                                                <div>
+                                                    <div className="font-medium">生活小窍门</div>
+                                                    <div className="text-sm text-gray-600 mt-1">来源: 小红书</div>
+                                                    <div className="text-sm text-gray-600">频率: 每3天</div>
+                                                    <div className="text-sm text-gray-600">推送时间: 下午 3:00</div>
+                                                </div>
+                                                <div className="flex">
+                                                    <button 
+                                                        className="text-gray-500 hover:text-blue-600"
+                                                        onClick={() => handleEditClick({
+                                                            name: '生活小窍门',
+                                                            source: '小红书',
+                                                            frequency: '每3天',
+                                                            time: '下午 3:00'
+                                                        })}
+                                                    >
+                                                        <i className="fas fa-external-link-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button className="mt-2 px-2 py-1 text-sm bg-red-500 text-white rounded flex items-center">
+                                                <i className="fas fa-trash-alt mr-1"></i> 删除订阅
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 右侧数据概览 */}
+                                <div className="w-1/4 bg-white p-4 rounded shadow-sm">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-gray-700">数据概览</h3>
+                                        <button 
+                                            className="text-blue-600"
+                                            onClick={refreshData}
+                                        >
+                                            <i className="fas fa-sync-alt mr-1"></i> 刷新数据
+                                        </button>
+                                    </div>
+
+                                    {/* 订阅总数 */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <i className="fas fa-rss text-blue-600 mr-2"></i>
+                                            订阅总数
+                                        </div>
+                                        <div className="text-2xl font-bold">3</div>
+                                    </div>
+
+                                    {/* 推送成功率 */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <i className="fas fa-check-circle text-green-600 mr-2"></i>
+                                            推送成功率
+                                        </div>
+                                        <div className="text-2xl font-bold">92%</div>
+                                    </div>
+
+                                    {/* 当日新增订阅 */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <i className="fas fa-calendar-day text-orange-500 mr-2"></i>
+                                            当日新增订阅
+                                        </div>
+                                        <div className="text-2xl font-bold">5</div>
+                                    </div>
+
+                                    {/* 故障提醒数 */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center text-gray-600">
+                                            <i className="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+                                            故障提醒数
+                                        </div>
+                                        <div className="text-2xl font-bold">1</div>
+                                    </div>
+
+                                    {/* 实时推送统计 */}
+                                    <div>
+                                        <h4 className="text-gray-600 mb-2">实时推送统计</h4>
+                                        <div className="mb-1">
+                                            <img 
+                                                src={images[currentImage]} 
+                                                alt="推送统计图表" 
+                                                className="w-full h-24 object-cover rounded"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500">点击图表查看"推送数据"明细，预计下周推出功能。</p>
+                                    </div>
+
+                                    {/* 常见问题 */}
+                                    <div className="mt-4">
+                                        <h4 className="text-gray-600 mb-2">常见问题</h4>
+                                        <ul className="text-sm text-blue-600 space-y-1">
+                                            <li><a href="#">如何添加新订阅?</a></li>
+                                            <li><a href="#">如何管理推送频率?</a></li>
+                                            <li><a href="#">为什么我的推送没有收到?</a></li>
+                                            <li><a href="#">如何查看历史推送记录?</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 页脚 */}
+                        <div className="mt-12 p-4 text-center text-sm text-gray-500">
+                            <div>© 2023 订阅内容聚合与推送平台 版权所有</div>
+                            <div className="mt-1">版本 1.2.5 | 联系我们：support@example.com</div>
+                            <div className="mt-2 space-x-4">
+                                <a href="#" className="text-gray-500">关于我们</a>
+                                <a href="#" className="text-gray-500">使用条款</a>
+                                <a href="#" className="text-gray-500">隐私政策</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 新增订阅模态框 */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="bg-white rounded-md shadow-lg w-96">
+                                <div className="bg-blue-600 text-white py-2 px-4 flex justify-between items-center rounded-t-md">
+                                    <h3>新增订阅</h3>
+                                    <button onClick={() => setShowAddModal(false)} className="text-white">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="p-4">
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">订阅名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请入订阅名称" 
+                                            className="w-full border rounded p-2"
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">来源渠道</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>新浪科技</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">推送频率</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>每日</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">推送时间</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>上午 9:00</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">订阅状态</label>
+                                        <div className="flex items-center">
+                                            <input type="radio" id="active" name="status" checked className="mr-1" />
+                                            <label htmlFor="active" className="mr-4">开启</label>
+                                            <input type="radio" id="inactive" name="status" className="mr-1" />
+                                            <label htmlFor="inactive">暂停</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-100 px-4 py-3 flex justify-end rounded-b-md">
+                                    <button 
+                                        className="text-gray-600 px-4 py-2 rounded mr-2"
+                                        onClick={() => setShowAddModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                                        onClick={closeAddModal}
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 编辑订阅模态框 */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="bg-white rounded-md shadow-lg w-96">
+                                <div className="bg-blue-600 text-white py-2 px-4 flex justify-between items-center rounded-t-md">
+                                    <h3>编辑订阅</h3>
+                                    <button onClick={() => setShowEditModal(false)} className="text-white">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="p-4">
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">订阅名称</label>
+                                        <input 
+                                            type="text" 
+                                            value={editingSubscription?.name || ''}
+                                            className="w-full border rounded p-2"
+                                            readOnly
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">来源渠道</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>{editingSubscription?.source || ''}</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">推送频率</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>{editingSubscription?.frequency || ''}</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm text-gray-600 mb-1">推送时间</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded p-2 appearance-none">
+                                                <option>{editingSubscription?.time || ''}</option>
+                                            </select>
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-600 mb-1">订阅状态</label>
+                                        <div className="flex items-center">
+                                            <input type="radio" id="active-edit" name="status-edit" checked className="mr-1" />
+                                            <label htmlFor="active-edit" className="mr-4">开启</label>
+                                            <input type="radio" id="inactive-edit" name="status-edit" className="mr-1" />
+                                            <label htmlFor="inactive-edit">暂停</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-100 px-4 py-3 flex justify-end rounded-b-md">
+                                    <button 
+                                        className="text-gray-600 px-4 py-2 rounded mr-2"
+                                        onClick={() => setShowEditModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                                        onClick={() => setShowEditModal(false)}
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 删除确认模态框 */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div className="bg-white rounded-md shadow-lg w-80">
+                                <div className="p-4">
+                                    <h3 className="text-lg font-medium mb-2">确认删除</h3>
+                                    <p className="text-gray-600">您确定要删除这个订阅吗？此操作无法撤销。</p>
+                                </div>
+                                <div className="bg-gray-100 px-4 py-3 flex justify-end rounded-b-md">
+                                    <button 
+                                        className="text-gray-600 px-4 py-2 rounded mr-2"
+                                        onClick={() => setShowDeleteModal(false)}
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        className="bg-red-600 text-white px-4 py-2 rounded"
+                                        onClick={handleConfirmDelete}
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

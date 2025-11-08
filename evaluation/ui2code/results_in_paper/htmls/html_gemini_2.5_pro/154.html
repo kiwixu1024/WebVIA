@@ -1,0 +1,494 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>健身餐管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+        const initialRecipesData = [
+            {
+                id: 1,
+                name: '高蛋白鸡胸肉沙拉',
+                calories: 350,
+                protein: 40,
+                carbs: 25,
+                fat: 15,
+                tags: ['高蛋白', '低脂'],
+                type: '沙拉',
+                notes: '适合健身后食用，补充蛋白质',
+                imageUrl: 'https://picsum.photos/id/102/400/300'
+            },
+            {
+                id: 2,
+                name: '牛油果三文鱼盖饭',
+                calories: 420,
+                protein: 30,
+                carbs: 45,
+                fat: 20,
+                tags: ['健康脂肪'],
+                type: '主食',
+                notes: '',
+                imageUrl: 'https://picsum.photos/id/219/400/300'
+            },
+            {
+                id: 3,
+                name: '奇趣酸奶水果捞',
+                calories: 280,
+                protein: 20,
+                carbs: 35,
+                fat: 8,
+                tags: ['高纤维', '低脂'],
+                type: '甜品',
+                notes: '',
+                imageUrl: 'https://picsum.photos/id/30/400/300'
+            }
+        ];
+
+        const App = () => {
+            const [recipes, setRecipes] = React.useState(initialRecipesData);
+            const [modal, setModal] = React.useState({ type: null, data: null });
+
+            const handleShowEditModal = (recipe) => setModal({ type: 'edit', data: recipe });
+            const handleShowDeleteModal = (recipe) => setModal({ type: 'delete', data: recipe });
+            const handleShowAddModal = () => setModal({ type: 'add', data: null });
+            const handleCloseModal = () => setModal({ type: null, data: null });
+
+            const handleSaveRecipe = (updatedRecipe) => {
+                if (updatedRecipe.id) {
+                    setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r));
+                } else {
+                    const newRecipe = { ...updatedRecipe, id: Date.now() };
+                    setRecipes([...recipes, newRecipe]);
+                }
+                handleCloseModal();
+            };
+
+            const handleDeleteRecipe = (recipeId) => {
+                setRecipes(recipes.filter(r => r.id !== recipeId));
+                handleCloseModal();
+            };
+
+            return (
+                <div className="flex min-h-screen">
+                    <Sidebar />
+                    <div className="flex-1 flex flex-col">
+                        <main className="flex-1 p-8">
+                            <HeaderTabs />
+                            <Banner />
+                            <RecipeList
+                                recipes={recipes}
+                                onEdit={handleShowEditModal}
+                                onDelete={handleShowDeleteModal}
+                                onAdd={handleShowAddModal}
+                            />
+                        </main>
+                        <Footer />
+                    </div>
+                    <RightSidebar />
+                    
+                    {modal.type && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={handleCloseModal}></div>}
+
+                    {modal.type === 'edit' && (
+                        <RecipeFormModal
+                            isOpen={true}
+                            onClose={handleCloseModal}
+                            onSave={handleSaveRecipe}
+                            initialData={modal.data}
+                            title="编辑健身食谱"
+                        />
+                    )}
+
+                    {modal.type === 'add' && (
+                        <RecipeFormModal
+                            isOpen={true}
+                            onClose={handleCloseModal}
+                            onSave={handleSaveRecipe}
+                            title="新增健身食谱"
+                        />
+                    )}
+
+                    {modal.type === 'delete' && (
+                        <DeleteConfirmationModal
+                            isOpen={true}
+                            onClose={handleCloseModal}
+                            onConfirm={() => handleDeleteRecipe(modal.data.id)}
+                            recipeName={modal.data.name}
+                        />
+                    )}
+
+                </div>
+            );
+        };
+
+        const Sidebar = () => (
+            <div className="w-64 bg-[#2d3748] text-gray-300 flex flex-col">
+                <div className="p-6 text-white text-xl font-bold flex items-center">
+                    <i className="fas fa-dumbbell mr-3"></i>
+                    健身餐管理
+                </div>
+                <nav className="flex-1 px-4 py-2 space-y-2">
+                    <a href="#" className="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white">
+                        <i className="fas fa-calendar-alt w-6"></i>
+                        今日计划
+                    </a>
+                    <a href="#" className="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white">
+                        <i className="fas fa-cube w-6"></i>
+                        食材库
+                    </a>
+                    <a href="#" className="flex items-center px-4 py-2 rounded-md bg-gray-700 text-white font-semibold">
+                        <i className="fas fa-book-open w-6"></i>
+                        食谱库
+                    </a>
+                    <a href="#" className="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white">
+                        <i className="fas fa-chart-pie w-6"></i>
+                        统计分析
+                    </a>
+                    <a href="#" className="flex items-center px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white">
+                        <i className="fas fa-question-circle w-6"></i>
+                        帮助说明
+                    </a>
+                </nav>
+                <div className="p-4 text-sm text-gray-500">
+                    版本 1.0.0
+                </div>
+            </div>
+        );
+
+        const HeaderTabs = () => (
+            <div className="flex items-center border-b mb-6">
+                <button className="px-4 py-2 text-lg font-semibold text-gray-800 border-b-2 border-blue-500">我的食谱</button>
+                <button className="px-4 py-2 text-lg text-gray-500">系统推荐</button>
+                <button className="px-4 py-2 text-lg text-gray-500">收藏夹</button>
+            </div>
+        );
+
+        const Banner = () => (
+            <div className="bg-gradient-to-r from-[#ef8e8d] via-[#7b75d5] to-[#4c96e6] rounded-lg p-6 flex justify-between items-center text-white mb-8">
+                <div>
+                    <h2 className="text-2xl font-bold">定制你的专属健身餐，从营养均衡到口感美味一步到位</h2>
+                </div>
+                <img src="https://picsum.photos/id/119/200/100" alt="Water Lily" className="w-40 h-24 object-cover rounded-md" />
+            </div>
+        );
+
+        const RecipeList = ({ recipes, onEdit, onDelete, onAdd }) => (
+            <div>
+                <h3 className="text-xl font-bold mb-4">我的食谱集</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {recipes.map(recipe => (
+                        <RecipeCard key={recipe.id} recipe={recipe} onEdit={onEdit} onDelete={onDelete} />
+                    ))}
+                </div>
+                <div className="mt-8">
+                    <button onClick={onAdd} className="bg-red-500 text-white px-4 py-2 rounded-md font-semibold flex items-center hover:bg-red-600">
+                        <i className="fas fa-plus mr-2"></i>
+                        添加食谱
+                    </button>
+                </div>
+            </div>
+        );
+
+        const NutrientBar = ({ label, value, percentage, color }) => (
+            <div className="text-sm">
+                <div className="flex justify-between mb-1">
+                    <span>{label}</span>
+                    <span>{percentage}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className={color + " h-2 rounded-full"} style={{ width: `${percentage}%` }}></div>
+                </div>
+            </div>
+        );
+
+        const RecipeCard = ({ recipe, onEdit, onDelete }) => {
+            const { name, calories, protein, carbs, fat, tags, imageUrl } = recipe;
+            const totalNutrients = protein + carbs + fat;
+            const proteinPercent = Math.round((protein / totalNutrients) * 100);
+            const carbsPercent = Math.round((carbs / totalNutrients) * 100);
+            const fatPercent = Math.round((fat / totalNutrients) * 100);
+
+            return (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                    <div className="relative">
+                        <img src={imageUrl} alt={name} className="w-full h-48 object-cover" />
+                        <div className="absolute top-2 right-2 bg-white bg-opacity-75 rounded-full p-2 cursor-pointer">
+                            <i className="fas fa-search text-gray-600"></i>
+                        </div>
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col">
+                        <h4 className="text-lg font-bold">{name}</h4>
+                        <p className="text-sm text-gray-500">{calories} 卡路里</p>
+                        <p className="text-sm text-gray-500 mb-4">蛋白质 {protein}g</p>
+
+                        <div className="space-y-3 mb-4">
+                            <NutrientBar label="蛋白质" percentage={proteinPercent} color="bg-blue-500" />
+                            <NutrientBar label="碳水" percentage={carbsPercent} color="bg-green-500" />
+                            <NutrientBar label="脂肪" percentage={fatPercent} color="bg-teal-500" />
+                        </div>
+                        
+                        <div className="flex-1"></div>
+
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {tags.map(tag => (
+                                <span key={tag} className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{tag}</span>
+                            ))}
+                        </div>
+
+                        <div className="flex justify-between items-center border-t pt-4">
+                            <button onClick={() => onEdit(recipe)} className="text-blue-500 font-semibold hover:text-blue-700 flex items-center">
+                                <i className="fas fa-edit mr-2"></i>编辑
+                            </button>
+                            <button onClick={() => onDelete(recipe)} className="bg-red-500 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-red-600 flex items-center">
+                                <i className="fas fa-trash-alt mr-2"></i>删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const Footer = () => (
+            <footer className="text-center py-4">
+                <a href="#" className="text-xs text-gray-500 mx-2">隐私政策</a>
+                <span className="text-xs text-gray-500">|</span>
+                <a href="#" className="text-xs text-gray-500 mx-2">用户协议</a>
+            </footer>
+        );
+        
+        const RightSidebar = () => (
+            <div className="w-96 bg-white p-6 border-l border-gray-200 flex flex-col">
+                <h3 className="text-lg font-bold mb-4">营养摄入统计</h3>
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h4 className="font-semibold text-sm mb-2">本周营养摄入对比</h4>
+                    <div className="flex justify-around text-xs text-gray-500">
+                        <span>周一</span>
+                        <span>周二</span>
+                        <span>周三</span>
+                        <span>周四</span>
+                        <span>周五</span>
+                        <span>周六</span>
+                        <span>周日</span>
+                    </div>
+                     <div className="h-32 flex items-end justify-around mt-2">
+                        <div className="w-4 bg-gray-200" style={{height: '60%'}}></div>
+                        <div className="w-4 bg-gray-300" style={{height: '80%'}}></div>
+                        <div className="w-4 bg-gray-200" style={{height: '50%'}}></div>
+                        <div className="w-4 bg-gray-300" style={{height: '70%'}}></div>
+                        <div className="w-4 bg-gray-200" style={{height: '90%'}}></div>
+                        <div className="w-4 bg-gray-300" style={{height: '60%'}}></div>
+                        <div className="w-4 bg-gray-200" style={{height: '40%'}}></div>
+                    </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                    <h4 className="font-semibold text-sm mb-4">营养目标完成度</h4>
+                    <div className="flex justify-around">
+                        <div className="text-center">
+                            <div className="relative w-20 h-20">
+                                <svg className="w-full h-full" viewBox="0 0 36 36">
+                                    <path className="text-gray-200" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path className="text-red-500" strokeWidth="3" strokeDasharray="85, 100" strokeLinecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">85%</div>
+                            </div>
+                            <p className="text-sm mt-2">高蛋白</p>
+                        </div>
+                        <div className="text-center">
+                            <div className="relative w-20 h-20">
+                                <svg className="w-full h-full" viewBox="0 0 36 36">
+                                    <path className="text-gray-200" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path className="text-blue-500" strokeWidth="3" strokeDasharray="65, 100" strokeLinecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">65%</div>
+                            </div>
+                            <p className="text-sm mt-2">低脂</p>
+                        </div>
+                        <div className="text-center">
+                             <div className="relative w-20 h-20">
+                                <svg className="w-full h-full" viewBox="0 0 36 36">
+                                    <path className="text-gray-200" strokeWidth="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path className="text-green-500" strokeWidth="3" strokeDasharray="75, 100" strokeLinecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">75%</div>
+                            </div>
+                            <p className="text-sm mt-2">膳食纤维</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 mb-6">
+                    <button className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 font-semibold flex items-center justify-center"><i className="fas fa-file-pdf mr-2 text-red-500"></i>导出PDF</button>
+                    <button className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-md hover:bg-gray-300 font-semibold flex items-center justify-center"><i className="fas fa-file-csv mr-2 text-green-500"></i>导出CSV</button>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
+                    <h4 className="font-bold flex items-center mb-2"><i className="fas fa-info-circle mr-2 text-blue-500"></i>使用小贴士</h4>
+                    <p>高蛋白饮食有助于肌肉摄入，有助于肌肉的修复可在编辑区实时浏览更改并进行发布</p>
+                </div>
+
+                <div className="mt-auto flex justify-end gap-4">
+                    <button className="bg-gray-100 text-gray-600 px-4 py-2 rounded-md hover:bg-gray-200">恢复默认</button>
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">联系客服</button>
+                </div>
+            </div>
+        );
+
+        const RecipeFormModal = ({ isOpen, onClose, onSave, initialData, title }) => {
+            const defaultState = {
+                name: '',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                type: '沙拉',
+                notes: '',
+                imageUrl: 'https://picsum.photos/id/1062/400/300',
+                activeTags: []
+            };
+
+            const [formData, setFormData] = React.useState(initialData ? { ...initialData, activeTags: initialData.tags || [] } : defaultState);
+
+            React.useEffect(() => {
+                setFormData(initialData ? { ...initialData, activeTags: initialData.tags || [] } : defaultState);
+            }, [initialData, isOpen]);
+
+            if (!isOpen) return null;
+
+            const handleChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleTagClick = (tag) => {
+                setFormData(prev => {
+                    const activeTags = prev.activeTags.includes(tag)
+                        ? prev.activeTags.filter(t => t !== tag)
+                        : [...prev.activeTags, tag];
+                    return { ...prev, activeTags };
+                });
+            };
+
+            const handleSaveClick = () => {
+                onSave({ ...formData, tags: formData.activeTags });
+            };
+            
+            const isAddMode = !initialData;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                            <i className="fas fa-times fa-lg"></i>
+                        </button>
+                        <h2 className="text-xl font-bold mb-6">{title}</h2>
+
+                        <div className="grid grid-cols-2 gap-6">
+                            {/* Left side */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">食谱名称</label>
+                                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder={isAddMode ? '例如：高蛋白鸡胸肉沙拉' : ''} className="w-full border-gray-300 rounded-md shadow-sm" />
+                                
+                                <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">当前图片</label>
+                                <div className="relative w-full h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                                    <img src={formData.imageUrl} className="w-full h-full object-cover rounded-lg" />
+                                    <button className="absolute bottom-2 bg-white text-gray-700 px-3 py-1 rounded-md text-sm font-semibold shadow-md hover:bg-gray-50">
+                                        <i className="fas fa-camera mr-2"></i>更改图片
+                                    </button>
+                                </div>
+                                
+                                <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">菜系类型</label>
+                                <select name="type" value={formData.type} onChange={handleChange} className="w-full border-gray-300 rounded-md shadow-sm">
+                                    <option>沙拉</option>
+                                    <option>主食</option>
+                                    <option>甜品</option>
+                                </select>
+                            </div>
+                            
+                            {/* Right side */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">食谱标签</label>
+                                <div className="flex space-x-2 mb-4">
+                                    {['高蛋白', '低脂', '高纤维', '生酮'].map(tag => (
+                                        <button key={tag} onClick={() => handleTagClick(tag)} className={`px-4 py-1.5 text-sm rounded-md border ${formData.activeTags.includes(tag) ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300'}`}>{tag}</button>
+                                    ))}
+                                </div>
+                                
+                                <label className="block text-sm font-medium text-gray-700 mb-1">营养成分</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label className="text-xs text-gray-500">热量(kcal)</label>
+                                        <input type="number" name="calories" value={formData.calories} onChange={handleChange} className="w-full border-gray-300 rounded-md shadow-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500">蛋白(g)</label>
+                                        <input type="number" name="protein" value={formData.protein} onChange={handleChange} className="w-full border-gray-300 rounded-md shadow-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500">碳水(g)</label>
+                                        <input type="number" name="carbs" value={formData.carbs} onChange={handleChange} className="w-full border-gray-300 rounded-md shadow-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-500">脂肪(g)</label>
+                                        <input type="number" name="fat" value={formData.fat} onChange={handleChange} className="w-full border-gray-300 rounded-md shadow-sm" />
+                                    </div>
+                                </div>
+                                
+                                <label className="block text-sm font-medium text-gray-700 mt-4 mb-1">备注</label>
+                                <textarea name="notes" value={formData.notes} onChange={handleChange} rows="3" placeholder={isAddMode ? '添加关于这个食谱的备注...' : ''} className="w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex justify-end space-x-4">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md font-semibold hover:bg-gray-200">取消</button>
+                            <button onClick={handleSaveClick} className="px-6 py-2 bg-blue-500 text-white rounded-md font-semibold hover:bg-blue-600">{isAddMode ? '保存' : '保存更改'}</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, recipeName }) => {
+            if (!isOpen) return null;
+            return (
+                 <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                        <div className="flex">
+                            <div className="text-red-500 text-2xl mr-4 mt-1">
+                                <i className="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold">删除确认</h3>
+                                <p className="mt-2 text-sm text-gray-600">确认删除《{recipeName}》？此操作不可撤销。</p>
+                            </div>
+                        </div>
+                        <div className="mt-6 flex justify-end space-x-3">
+                            <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-gray-300">取消</button>
+                            <button onClick={onConfirm} className="px-4 py-2 bg-red-500 text-white rounded-md font-semibold hover:bg-red-600">确认删除</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+    </script>
+</body>
+
+</html>

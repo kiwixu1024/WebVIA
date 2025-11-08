@@ -1,0 +1,209 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+    const { useState } = React;
+
+    function App() {
+      const [songs, setSongs] = useState([
+        { id: 1, name: 'Shape of You', artist: 'Ed Sheeran', level: '初级', duration: '30秒', image: 'https://picsum.photos/id/1/100/100' },
+        { id: 2, name: 'Blinding Lights', artist: 'The Weeknd', level: '中级', duration: '20秒', image: 'https://picsum.photos/id/2/100/100' },
+        { id: 3, name: 'Bad Guy', artist: 'Billie Eilish', level: '高级', duration: '45秒', image: 'https://picsum.photos/id/3/100/100' },
+      ]);
+      const [modalType, setModalType] = useState('');
+      const [selectedSong, setSelectedSong] = useState(null);
+      const [newSongData, setNewSongData] = useState({
+        name: '',
+        artist: '',
+        level: '初级',
+        duration: '30秒',
+        image: 'https://picsum.photos/id/10/100/100',
+      });
+
+      const handleAddSong = () => {
+        setModalType('add');
+        setNewSongData({
+          name: '',
+          artist: '',
+          level: '初级',
+          duration: '30秒',
+          image: 'https://picsum.photos/id/10/100/100',
+        });
+      };
+
+      const handleEditSong = song => {
+        setModalType('edit');
+        setSelectedSong(song);
+        setNewSongData({ ...song });
+      };
+
+      const handleDeleteSong = song => {
+        setModalType('delete');
+        setSelectedSong(song);
+      };
+
+      const handleSaveEdit = () => {
+        setSongs(songs.map(song => song.id === selectedSong.id ? { ...newSongData } : song));
+        setModalType('');
+      };
+
+      const handleSaveAdd = () => {
+        setSongs([...songs, { ...newSongData, id: songs.length + 1 }]);
+        setModalType('');
+      };
+
+      const handleConfirmDelete = () => {
+        setSongs(songs.filter(song => song.id !== selectedSong.id));
+        setModalType('');
+      };
+
+      return (
+        <div className="flex h-screen">
+          {/* Sidebar */}
+          <div className="w-1/5 bg-blue-600 text-white p-4">
+            <h1 className="text-lg font-bold">听歌识曲练习</h1>
+            <ul className="mt-8 space-y-4">
+              <li>练习训练</li>
+              <li>我的成绩</li>
+              <li>排行榜</li>
+              <li>设置</li>
+            </ul>
+          </div>
+
+          {/* Main Content */}
+          <div className="w-4/5 p-8">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <nav>
+                <ul className="flex space-x-4 text-gray-700">
+                  <li>练习首页</li>
+                  <li>曲库管理</li>
+                  <li>使用教程</li>
+                </ul>
+              </nav>
+              <button className="bg-yellow-400 text-white py-2 px-4 rounded" onClick={handleAddSong}>添加曲目练习</button>
+            </div>
+
+            {/* Song List */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">我的曲目练习</h2>
+              <ul className="space-y-4">
+                {songs.map(song => (
+                  <li key={song.id} className="flex items-center bg-white shadow rounded p-4">
+                    <img src={song.image} alt={song.name} className="w-16 h-16 rounded mr-4" />
+                    <div className="flex-grow">
+                      <h3 className="text-lg">{song.name}</h3>
+                      <p className="text-gray-500">{song.artist}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-gray-300 text-sm py-1 px-2 rounded">{song.level}</span>
+                      <span className="text-gray-500">{song.duration}</span>
+                      <button className="bg-blue-500 text-white py-1 px-3 rounded" onClick={() => handleEditSong(song)}>编辑</button>
+                      <button className="bg-red-500 text-white py-1 px-3 rounded" onClick={() => handleDeleteSong(song)}>删除</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Statistics */}
+            <div className="mt-8 border p-4 rounded bg-white">
+              <h3 className="font-bold">练习统计</h3>
+              <p>已完成练习: 128</p>
+              <p>正确率: 85%</p>
+              {/* Additional Stats */}
+              <p className="mt-4 text-sm">已连续练习 3次，解锁高级曲库！</p>
+            </div>
+          </div>
+
+          {/* Modals */}
+          {modalType === 'add' && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+              <div className="bg-white p-6 rounded">
+                <h2 className="text-lg font-bold mb-4">新增听歌识曲练习</h2>
+                <input
+                  value={newSongData.name}
+                  onChange={e => setNewSongData({ ...newSongData, name: e.target.value })}
+                  placeholder="输入歌曲名称"
+                  className="border p-2 rounded w-full mb-4"
+                />
+                <input
+                  value={newSongData.artist}
+                  onChange={e => setNewSongData({ ...newSongData, artist: e.target.value })}
+                  placeholder="输入艺术家名称"
+                  className="border p-2 rounded w-full mb-4"
+                />
+                <select
+                  value={newSongData.level}
+                  onChange={e => setNewSongData({ ...newSongData, level: e.target.value })}
+                  className="border p-2 rounded w-full mb-4"
+                >
+                  <option value="初级">初级</option>
+                  <option value="中级">中级</option>
+                  <option value="高级">高级</option>
+                </select>
+                <button className="bg-yellow-400 py-2 px-4 rounded text-white" onClick={handleSaveAdd}>确认保存</button>
+              </div>
+            </div>
+          )}
+
+          {modalType === 'edit' && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+              <div className="bg-white p-6 rounded">
+                <h2 className="text-lg font-bold mb-4">编辑曲目练习</h2>
+                <input
+                  value={newSongData.name}
+                  onChange={e => setNewSongData({ ...newSongData, name: e.target.value })}
+                  placeholder="输入歌曲名称"
+                  className="border p-2 rounded w-full mb-4"
+                />
+                <input
+                  value={newSongData.artist}
+                  onChange={e => setNewSongData({ ...newSongData, artist: e.target.value })}
+                  placeholder="输入艺术家名称"
+                  className="border p-2 rounded w-full mb-4"
+                />
+                <select
+                  value={newSongData.level}
+                  onChange={e => setNewSongData({ ...newSongData, level: e.target.value })}
+                  className="border p-2 rounded w-full mb-4"
+                >
+                  <option value="初级">初级</option>
+                  <option value="中级">中级</option>
+                  <option value="高级">高级</option>
+                </select>
+                <button className="bg-yellow-400 py-2 px-4 rounded text-white" onClick={handleSaveEdit}>保存修改</button>
+              </div>
+            </div>
+          )}
+
+          {modalType === 'delete' && (
+            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+              <div className="bg-white p-6 rounded">
+                <h2 className="text-lg font-bold mb-4">删除确认</h2>
+                <p>确定要删除“{selectedSong.name}”这个练习吗?</p>
+                <div className="flex justify-end space-x-4 mt-4">
+                  <button className="py-2 px-4 border rounded" onClick={() => setModalType('')}>取消</button>
+                  <button className="bg-red-500 text-white py-2 px-4 rounded" onClick={handleConfirmDelete}>确定删除</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

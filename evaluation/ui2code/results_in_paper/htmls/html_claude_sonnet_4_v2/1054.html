@@ -1,0 +1,370 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字手账日历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [showAddSchedule, setShowAddSchedule] = useState(false);
+            const [showEditSchedule, setShowEditSchedule] = useState(false);
+            const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+            const [showEditPeriod, setShowEditPeriod] = useState(false);
+            const [schedules, setSchedules] = useState([
+                { month: '2024年五月', total: 12, completed: 47, color: 'bg-blue-500' },
+                { month: '2024年六月', total: 15, completed: 53, color: 'bg-blue-500' },
+                { month: '2024年七月', total: 10, completed: 30, color: 'bg-blue-500' }
+            ]);
+
+            const handleAddSchedule = () => {
+                setShowAddSchedule(true);
+            };
+
+            const handleEditSchedule = () => {
+                setShowEditSchedule(true);
+            };
+
+            const handleDeleteSchedule = () => {
+                setShowDeleteConfirm(true);
+            };
+
+            const handleEditPeriod = () => {
+                setShowEditPeriod(true);
+            };
+
+            const confirmDelete = () => {
+                setSchedules(schedules.filter(schedule => schedule.month !== '2024年五月'));
+                setShowDeleteConfirm(false);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                            <div className="flex items-center space-x-8">
+                                <h1 className="text-xl font-semibold text-blue-600">数字手账日历</h1>
+                                <nav className="flex space-x-6">
+                                    <a href="#" className="text-blue-600 border-b-2 border-blue-600 pb-1">首页</a>
+                                    <a href="#" className="text-gray-600 hover:text-blue-600">我的手账</a>
+                                    <a href="#" className="text-gray-600 hover:text-blue-600">统计报表</a>
+                                    <a href="#" className="text-gray-600 hover:text-blue-600">帮助说明</a>
+                                </nav>
+                            </div>
+                            <button className="bg-blue-500 text-white px-4 py-2 rounded text-sm">登录/注册</button>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 py-6 flex">
+                        {/* Left Sidebar */}
+                        <div className="w-48 mr-8">
+                            <h2 className="text-sm font-medium text-gray-900 mb-3">操作菜单</h2>
+                            <div className="space-y-2">
+                                <button className="w-full text-left px-3 py-2 bg-blue-500 text-white rounded text-sm flex items-center">
+                                    <i className="fas fa-calendar mr-2"></i>
+                                    本月日程
+                                </button>
+                                <button className="w-full text-left px-3 py-2 border border-gray-300 rounded text-sm flex items-center hover:bg-gray-50">
+                                    <i className="fas fa-upload mr-2"></i>
+                                    导入日程
+                                </button>
+                                <button className="w-full text-left px-3 py-2 border border-gray-300 rounded text-sm flex items-center hover:bg-gray-50">
+                                    <i className="fas fa-palette mr-2"></i>
+                                    修改文字主题颜色
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1">
+                            <div className="mb-6">
+                                <h2 className="text-lg font-semibold mb-1">我的手账日历</h2>
+                                <p className="text-sm text-gray-600">点击任意月份卡片，即可快速查看该月的日程安排。</p>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-6 mb-8">
+                                {schedules.map((schedule, index) => (
+                                    <div key={index} className="bg-white rounded-lg border p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="font-medium">{schedule.month}</h3>
+                                            <div className="flex space-x-1">
+                                                <button onClick={handleEditSchedule} className="text-blue-500 text-xs">
+                                                    <i className="fas fa-edit"></i>
+                                                </button>
+                                                <button onClick={handleDeleteSchedule} className="text-red-500 text-xs">
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">待办事项:</span>
+                                                <span className="font-medium">{schedule.total}个</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">已完成:</span>
+                                                <span className="font-medium">{Math.round(schedule.total * schedule.completed / 100)}个</span>
+                                            </div>
+                                            <div className="mt-3">
+                                                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                    <span>完成率: {schedule.completed}%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div 
+                                                        className={`${schedule.color} h-2 rounded-full`}
+                                                        style={{width: `${schedule.completed}%`}}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4">
+                                            <p className="text-xs text-gray-500">最近3个事项</p>
+                                            <a href="#" className="text-blue-500 text-xs">查看详情 →</a>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {schedules.length < 3 && (
+                                    <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+                                        <button onClick={handleAddSchedule} className="text-blue-500 text-4xl mb-2">
+                                            +
+                                        </button>
+                                        <p className="text-blue-500 font-medium">添加新手账</p>
+                                        <p className="text-xs text-gray-500 mt-1">点击创建新的手账日历</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Small note */}
+                            <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                                <p className="font-medium text-blue-800 mb-1">小贴士:</p>
+                                <p className="text-blue-700">
+                                    添加日程时，可以选择标签来更好地管理和分类不同类型的事项，提高你的事务管理效率。
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-72 ml-8">
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="font-medium">统计概览</h3>
+                                    <button onClick={handleEditPeriod} className="text-blue-500 text-sm">编辑统计计算周期</button>
+                                </div>
+                                <p className="text-xs text-gray-600 mb-4">
+                                    数据反映过去7天内的任务完成情况，助你更好地掌握时间安排。
+                                </p>
+
+                                <div className="mb-4">
+                                    <h4 className="text-sm font-medium mb-2">任务完成度</h4>
+                                    <div className="relative w-24 h-24 mx-auto">
+                                        <img src="https://picsum.photos/id/238/96/96" alt="完成度图表" className="w-24 h-24 rounded-full" />
+                                    </div>
+                                    <div className="flex justify-center space-x-4 mt-2 text-xs">
+                                        <span className="flex items-center">
+                                            <span className="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                                            已完成 (67%)
+                                        </span>
+                                        <span className="flex items-center">
+                                            <span className="w-2 h-2 bg-gray-300 rounded-full mr-1"></span>
+                                            待完成 (33%)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="mb-4">
+                                    <h4 className="text-sm font-medium mb-2">近期日程访问</h4>
+                                    <img src="https://picsum.photos/id/180/288/120" alt="近期访问图表" className="w-full h-24 rounded" />
+                                    <p className="text-xs text-gray-500 mt-1">过去7天内日程查看活跃度</p>
+                                </div>
+
+                                <div>
+                                    <h4 className="text-sm font-medium mb-2">标签使用情况</h4>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between items-center">
+                                            <span>工作</span>
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-green-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                                                </div>
+                                                <span className="text-xs">75%</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span>学习</span>
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                                <span className="text-xs">60%</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span>生活</span>
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-16 bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-orange-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                                                </div>
+                                                <span className="text-xs">45%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t mt-12">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center text-sm text-gray-600">
+                            <span>© 2024 数字手账日历 | 版本 v1.0.3</span>
+                            <div className="space-x-4">
+                                <a href="#" className="hover:text-blue-600">首次使用?</a>
+                                <a href="#" className="hover:text-blue-600">点击查看帮助中心</a>
+                                <a href="#" className="hover:text-blue-600">为上手更简单的数字手账之旅。</a>
+                                <a href="#" className="hover:text-blue-600">帮助中心</a>
+                                <a href="#" className="hover:text-blue-600">意见反馈</a>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Modals */}
+                    {showAddSchedule && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium">添加新日程</h3>
+                                    <button onClick={() => setShowAddSchedule(false)} className="text-gray-400 hover:text-gray-600">
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">日期</label>
+                                        <input type="date" placeholder="mm/dd/yyyy" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">时间</label>
+                                        <input type="time" placeholder="--:-- --" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">标签</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>选择标签</option>
+                                            <option>工作</option>
+                                            <option>学习</option>
+                                            <option>生活</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">内容</label>
+                                        <textarea placeholder="请输入日程内容..." className="w-full border border-gray-300 rounded px-3 py-2 h-24 resize-none"></textarea>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button onClick={() => setShowAddSchedule(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">取消</button>
+                                    <button onClick={() => setShowAddSchedule(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showEditSchedule && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium">编辑日程</h3>
+                                    <button onClick={() => setShowEditSchedule(false)} className="text-gray-400 hover:text-gray-600">
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">日期</label>
+                                        <input type="date" defaultValue="2024-05-01" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">时间</label>
+                                        <input type="time" defaultValue="09:00" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">标签</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option selected>工作</option>
+                                            <option>学习</option>
+                                            <option>生活</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">内容</label>
+                                        <textarea defaultValue="2024年五月的日程安排" className="w-full border border-gray-300 rounded px-3 py-2 h-24 resize-none"></textarea>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button onClick={() => setShowEditSchedule(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">取消</button>
+                                    <button onClick={() => setShowEditSchedule(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">保存修改</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showDeleteConfirm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="text-center">
+                                    <div className="text-orange-500 text-3xl mb-4">⚠</div>
+                                    <h3 className="text-lg font-medium mb-2">确认删除</h3>
+                                    <p className="text-sm text-gray-600 mb-6">确认删除2024年五月的日程？此操作不可撤销。</p>
+                                    <div className="flex justify-center space-x-3">
+                                        <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">取消</button>
+                                        <button onClick={confirmDelete} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">确认删除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showEditPeriod && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-medium">编辑统计周期</h3>
+                                    <button onClick={() => setShowEditPeriod(false)} className="text-gray-400 hover:text-gray-600">
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">开始日期</label>
+                                        <input type="date" defaultValue="2024-05-01" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">结束日期</label>
+                                        <input type="date" defaultValue="2024-05-31" className="w-full border border-gray-300 rounded px-3 py-2" />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button onClick={() => setShowEditPeriod(false)} className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">关闭</button>
+                                    <button onClick={() => setShowEditPeriod(false)} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">应用</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

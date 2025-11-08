@@ -1,0 +1,380 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>经典微视频回放场</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const App = () => {
+      const [videos, setVideos] = React.useState([
+        {
+          id: 1,
+          title: "真白帽间",
+          tags: ["#科技", "#电商"],
+          image: "https://picsum.photos/id/0/400/220",
+          description: "回顾上世纪90年代的电子商务浪潮，记录了一个时代的见证与情怀，激进投机，我们曾以为改变了年代人的生活百态。",
+          views: 1523,
+          duration: "3:45"
+        },
+        {
+          id: 2,
+          title: "城市记忆",
+          tags: ["#城市", "#足迹"],
+          image: "https://picsum.photos/id/17/400/220",
+          description: "从20世纪20年代至今，记录城市最初的年大变迁，感怀大度建城间起，马路两旁，那时候是最贵的城市全新体。",
+          views: 992,
+          duration: "3:45"
+        },
+        {
+          id: 3,
+          title: "经典广告集锦",
+          tags: ["#广告", "#集锦"],
+          image: "https://picsum.photos/id/20/400/220",
+          description: "那些年我们见过的经典广告，承载了太多共同的记忆，从朗白金啤酒代言，每一则都是风靡一时。",
+          views: 2156,
+          duration: "3:45"
+        },
+        {
+          id: 4,
+          title: "青云故事",
+          tags: ["#音乐", "#历史"],
+          image: "https://picsum.photos/id/26/400/220",
+          description: "探索经典音乐背后的故事，那些熟悉的旋律如阳光，又如何影响了一代人的成长与情感。",
+          views: 1082,
+          duration: "3:45"
+        },
+        {
+          id: 5,
+          title: "历史瞬间",
+          tags: ["#历史", "#纪实"],
+          image: "https://picsum.photos/id/28/400/220",
+          description: "那大的历史时刻的影像像资料，让我们重温那些改变世界的瞬间，感受历史的厚重和震撼。",
+          views: 3678,
+          duration: "3:45"
+        }
+      ]);
+
+      const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+      const [videoToDelete, setVideoToDelete] = React.useState(null);
+      const [videoCount, setVideoCount] = React.useState(5);
+      const [totalViews, setTotalViews] = React.useState(9331);
+
+      const handleDelete = (videoId) => {
+        setVideoToDelete(videos.find(v => v.id === videoId));
+        setShowDeleteModal(true);
+      };
+
+      const confirmDelete = () => {
+        const videoToBeDeleted = videos.find(v => v.id === videoToDelete.id);
+        const updatedVideos = videos.filter(v => v.id !== videoToDelete.id);
+        setVideos(updatedVideos);
+        setShowDeleteModal(false);
+        setVideoCount(prev => prev - 1);
+        setTotalViews(prev => prev - videoToBeDeleted.views);
+      };
+
+      const cancelDelete = () => {
+        setShowDeleteModal(false);
+        setVideoToDelete(null);
+      };
+
+      return (
+        <div className="flex flex-col min-h-screen bg-gray-100">
+          {/* Header */}
+          <header className="bg-blue-500 text-white p-3 flex items-center justify-between">
+            <div className="flex items-center">
+              <i className="fas fa-film mr-2"></i>
+              <span className="font-semibold">经典微视频回放场</span>
+            </div>
+            <div className="flex space-x-2">
+              <button className="bg-white text-blue-500 rounded px-3 py-1 flex items-center">
+                <i className="fas fa-home mr-1"></i> 首页
+              </button>
+              <button className="bg-blue-600 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-heart mr-1"></i> 我的收藏
+              </button>
+              <button className="bg-blue-600 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-chart-bar mr-1"></i> 数据统计
+              </button>
+              <button className="bg-blue-600 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-question-circle mr-1"></i> 帮助
+              </button>
+              <button className="bg-yellow-500 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-sign-in-alt mr-1"></i> 登入/注册
+              </button>
+              <button className="bg-yellow-500 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-upload mr-1"></i> 导出视频
+              </button>
+              <button className="bg-gray-700 text-white rounded px-3 py-1 flex items-center">
+                <i className="fas fa-cloud-upload-alt mr-1"></i> 清空回收站
+              </button>
+            </div>
+          </header>
+
+          {/* Main content */}
+          <div className="flex flex-1">
+            {/* Left sidebar */}
+            <aside className="w-28 bg-gray-800 text-white">
+              <div className="p-4 bg-blue-500 text-center">
+                <i className="fas fa-eye mr-1"></i> 视频展示
+              </div>
+              <div className="p-4 border-l-4 border-transparent hover:bg-gray-700 cursor-pointer">
+                <i className="fas fa-plus-square mr-1"></i> 新增/编辑
+              </div>
+              <div className="p-4 border-l-4 border-transparent hover:bg-gray-700 cursor-pointer">
+                <i className="fas fa-video mr-1"></i> 回放主页
+              </div>
+              <div className="p-4 border-l-4 border-transparent hover:bg-gray-700 cursor-pointer">
+                <i className="fas fa-cog mr-1"></i> 设置
+              </div>
+            </aside>
+
+            {/* Main content area */}
+            <main className="flex-1 p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">视频展示区</h2>
+                <button className="bg-blue-500 text-white rounded px-3 py-1 flex items-center">
+                  <i className="fas fa-plus mr-1"></i> 新增视频
+                </button>
+              </div>
+
+              {/* Videos grid */}
+              <div className="grid grid-cols-3 gap-4">
+                {videos.map(video => (
+                  <div key={video.id} className="bg-white rounded shadow">
+                    <div className="relative">
+                      <img src={video.image} alt={video.title} className="w-full h-40 object-cover rounded-t" />
+                      <div className="absolute top-2 right-2 flex space-x-1">
+                        <button className="bg-white p-1 rounded text-blue-500">
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button 
+                          className="bg-white p-1 rounded text-red-500"
+                          onClick={() => handleDelete(video.id)}
+                        >
+                          <i className="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-lg">{video.title}</h3>
+                      <div className="flex space-x-2 my-1 text-sm text-gray-600">
+                        {video.tags.map(tag => (
+                          <span key={tag}>{tag}</span>
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-700">{video.description}</p>
+                      <div className="flex justify-between items-center mt-2 text-sm text-gray-600">
+                        <span><i className="far fa-eye mr-1"></i> {video.views} 次播放</span>
+                        <span><i className="far fa-clock mr-1"></i> {video.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Second section */}
+              <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">经典微视频回放简介</h2>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white rounded shadow">
+                    <img src="https://picsum.photos/id/30/400/220" alt="简介图片1" className="w-full h-40 object-cover rounded-t" />
+                  </div>
+                  <div className="bg-white rounded shadow">
+                    <img src="https://picsum.photos/id/31/400/220" alt="简介图片2" className="w-full h-40 object-cover rounded-t" />
+                  </div>
+                  <div className="bg-white rounded shadow">
+                    <img src="https://picsum.photos/id/32/400/220" alt="简介图片3" className="w-full h-40 object-cover rounded-t" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-8 text-center text-sm text-gray-600 border-t pt-4">
+                <p>© 2023 经典微视频回放场 保留所有权利</p>
+                <p>本工具旨在帮助用户保存和回顾日常记忆和经典瞬间</p>
+                <div className="flex justify-center mt-2 space-x-3">
+                  <i className="fab fa-weixin"></i>
+                  <i className="fas fa-cog"></i>
+                  <i className="far fa-envelope"></i>
+                  <i className="fab fa-github"></i>
+                </div>
+              </div>
+            </main>
+
+            {/* Right sidebar */}
+            <aside className="w-64 bg-white border-l p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">统计数据</h3>
+                <button className="text-blue-500">
+                  <i className="fas fa-sync"></i>
+                </button>
+              </div>
+
+              <div className="bg-white p-3 rounded shadow mb-4">
+                <div className="flex items-center justify-between">
+                  <span>视频总数</span>
+                  <span className="text-lg font-bold text-blue-500">{videoCount}</span>
+                </div>
+                <div className="mt-4 flex items-center">
+                  <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                  <span>累计播放量</span>
+                  <span className="ml-auto font-semibold">{totalViews} <i className="fas fa-arrow-up text-xs"></i></span>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">分类分布</h4>
+                <div className="space-y-2">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>好评 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>好用 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '50%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>喜欢 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '40%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>还行 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '35%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>一般 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '30%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>赞赏 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '25%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>好评 (2)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '20%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>取消 (1)</span>
+                      <div className="w-3/4 bg-blue-200 rounded-full h-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '15%'}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h4 className="font-medium mb-2">推荐主题</h4>
+                
+                <div className="bg-blue-50 p-3 rounded mb-2">
+                  <h5 className="text-blue-600 font-medium">老电影记忆</h5>
+                  <p className="text-xs text-gray-600">怀念20世纪50-80年代的经典影片</p>
+                </div>
+                
+                <div className="bg-blue-50 p-3 rounded mb-2">
+                  <h5 className="text-blue-600 font-medium">广告变迁史</h5>
+                  <p className="text-xs text-gray-600">从早期平面广告到时下"智造"告白</p>
+                </div>
+                
+                <div className="bg-blue-50 p-3 rounded mb-2">
+                  <h5 className="text-blue-600 font-medium">城市记忆计划</h5>
+                  <p className="text-xs text-gray-600">记录城市变迁与过去岁月情境</p>
+                </div>
+                
+                <div className="mt-4">
+                  <h4 className="font-medium mb-2">华南小贴士</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span className="text-xs">点击视频卡片即可全屏播放视频</span>
+                    </li>
+                    <li className="flex items-start">
+                      <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span className="text-xs">使用标签筛选功能更高效查找归档视频</span>
+                    </li>
+                    <li className="flex items-start">
+                      <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                      <span className="text-xs">定期备份可避免视频数据意外丢失</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          {/* Delete confirmation modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-md shadow-lg w-96">
+                <div className="p-6 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                      <i className="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">确认删除</h3>
+                  <p className="mb-6">您确定要删除"{videoToDelete?.title}"这个视频吗？此操作无法撤销。</p>
+                  <div className="flex justify-center space-x-4">
+                    <button 
+                      onClick={cancelDelete} 
+                      className="px-6 py-2 border border-gray-300 rounded hover:bg-gray-100"
+                    >
+                      取消
+                    </button>
+                    <button 
+                      onClick={confirmDelete} 
+                      className="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      确认删除
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

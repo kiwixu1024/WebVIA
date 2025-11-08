@@ -1,0 +1,256 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>温馨读书感悟打卡圈</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body class="bg-[#f2eacf] min-h-screen font-sans text-gray-800">
+  <div id="app" class="h-full"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const initialCards = [
+      {id: 1, title: '百年孤独', date: '2023-03-15', content: '爱与孤独交织，时间如环，故事永不褪色。', tags: ['孤独','魔幻现实'], author:'悠然读者', likes:15, comments:5},
+      {id: 2, title: '围城', date:'2023-04-02', content:'婚姻像城，城外的人想冲进去，城里的人想逃出来。', tags:['婚姻','人生'], author:'思考者', likes:12, comments:3},
+      {id: 3, title: '活着', date:'2023-04-10', content:'苦难与希望同在，活着本身就是胜利。', tags:['生命','坚强'], author:'生活家', likes:24, comments:8}
+    ];
+
+    function App() {
+      const [cards, setCards] = useState(initialCards);
+      const [showForm, setShowForm] = useState(false);
+      const [editing, setEditing] = useState(null);
+      const [form, setForm] = useState({ title:'', date:new Date().toISOString().slice(0,10), content:'', tags:[], tagInput:'', mood:3 });
+      const [showDelete, setShowDelete] = useState(false);
+      const [toDelete, setToDelete] = useState(null);
+
+      // Open Add Modal
+      const openAdd = () => {
+        setEditing(null);
+        setForm({ title:'', date:new Date().toISOString().slice(0,10), content:'', tags:[], tagInput:'', mood:3 });
+        setShowForm(true);
+      };
+      // Open main header add
+      const openAdd2 = () => openAdd();
+
+      // Open Edit Modal
+      const openEdit = (card) => {
+        setEditing(card);
+        setForm({ 
+          title: card.title,
+          date: card.date,
+          content: card.content,
+          tags: [...card.tags],
+          tagInput:'',
+          mood:3
+        });
+        setShowForm(true);
+      };
+      // Open Delete confirm
+      const openDelete = (card) => { setToDelete(card); setShowDelete(true); };
+
+      const closeForm = () => setShowForm(false);
+      const closeDelete = () => setShowDelete(false);
+
+      // Handle Add/Edit Save
+      const handleSave = () => {
+        if (!form.title) return;
+        if (editing) {
+          setCards(cards.map(c => c.id===editing.id ? {...c, title:form.title, date:form.date, content:form.content, tags:form.tags} : c));
+        } else {
+          const newId = cards.length? Math.max(...cards.map(c=>c.id))+1 : 1;
+          setCards([...cards, { id:newId, title:form.title, date:form.date, content:form.content, tags:form.tags, author:'未知', likes:0, comments:0 }]);
+        }
+        setShowForm(false);
+      };
+
+      const handleDelete = () => {
+        setCards(cards.filter(c=>c.id!==toDelete.id));
+        setShowDelete(false);
+      };
+
+      const handleLike = (id) => {
+        setCards(cards.map(c=>c.id===id?{...c,likes:c.likes+1}:c));
+      };
+
+      return (
+        <div className="flex h-full">
+          {/* 左侧导航 */}
+          <div className="w-56 bg-white border-r border-gray-200 flex-shrink-0">
+            <div className="p-4 flex items-center">
+              <img src="https://picsum.photos/id/1005/60/60" alt="头像" className="rounded-full"/>
+              <span className="ml-2 font-bold text-lg">读书感悟圈</span>
+            </div>
+            <nav className="mt-4">
+              <ul>
+                <li className="px-4 py-2 bg-[#fdf6e3] text-[#b77a38] font-semibold flex items-center">
+                  <i className="fas fa-home mr-2"></i> 首页
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center"><i className="fas fa-book-open mr-2"></i> 打卡记录</li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center"><i className="fas fa-chart-bar mr-2"></i> 统计分析</li>
+                <li className="px-4 py-2 hover:bg-gray-100 flex items-center"><i className="fas fa-question-circle mr-2"></i> 帮助说明</li>
+              </ul>
+            </nav>
+            <div className="absolute bottom-4 text-xs text-gray-500 px-4">“阅读是一场心灵旅行，每一次分享都可能点亮他人的世界。”</div>
+          </div>
+          {/* 中间内容 */}
+          <div className="flex-1 p-6 overflow-auto">
+            <div className="flex items-center mb-4">
+              <img src="https://picsum.photos/id/1006/30/30" alt="标志" className="rounded-full mr-2"/>
+              <h1 className="text-2xl font-semibold">温馨读书感悟打卡圈</h1>
+            </div>
+            <div className="bg-white p-4 rounded shadow-sm">
+              <h2 className="text-lg font-medium">读书感悟记录</h2>
+              <p className="mt-1 text-sm text-gray-600">记录每一次阅读的感悟与收获，让思考沉淀为智慧。</p>
+              <div className="flex justify-end mt-4 space-x-2">
+                <button onClick={openAdd2} className="bg-gray-600 text-white px-3 py-1 rounded">+ 添加新打卡</button>
+                <button className="border border-gray-600 text-gray-600 px-3 py-1 rounded">一键清空</button>
+              </div>
+              {/* 卡片列表 */}
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cards.map(card=>(
+                  <div key={card.id} className="bg-[#fffaf0] border border-[#f0e3d2] rounded p-4 relative">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold">{card.title}</h3>
+                      <div className="space-x-2 text-gray-500">
+                        <i onClick={()=>openEdit(card)} className="fas fa-edit cursor-pointer hover:text-gray-800"></i>
+                        <i onClick={()=>openDelete(card)} className="fas fa-times cursor-pointer hover:text-red-600"></i>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-sm text-gray-600"><i className="far fa-calendar-alt mr-1"></i>{card.date}</div>
+                    <p className="mt-2 text-gray-800">{card.content}</p>
+                    <div className="mt-2 space-x-1 text-sm">
+                      {card.tags.map((t,i)=><span key={i} className="inline-block bg-white border border-gray-300 rounded px-2 py-0.5">#{t}</span>)}
+                    </div>
+                    <div className="mt-2 text-sm text-gray-500">{card.author}</div>
+                    <div className="mt-3 flex items-center text-gray-500 space-x-4">
+                      <div className="flex items-center cursor-pointer" onClick={()=>handleLike(card.id)}>
+                        <i className="fas fa-heart mr-1"></i><span>{card.likes}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <i className="fas fa-comment mr-1"></i><span>{card.comments}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* 右侧统计 */}
+          <div className="w-64 p-6 bg-white border-l border-gray-200 flex-shrink-0">
+            <button onClick={openAdd} className="w-full bg-yellow-600 text-white py-2 rounded mb-4">+ 新增打卡</button>
+            <div>
+              <h3 className="font-medium">我的阅读统计</h3>
+              <div className="mt-3 text-gray-600">累计打卡天数 <span className="float-right">45</span></div>
+              <div className="h-1 bg-gray-200 rounded mt-1 mb-3">
+                <div className="h-1 bg-yellow-500 w-3/4 rounded"></div>
+              </div>
+              <div className="text-gray-600">本月打卡次数 <span className="float-right">12</span></div>
+              <div className="h-1 bg-gray-200 rounded mt-1 mb-3">
+                <div className="h-1 bg-yellow-500 w-1/2 rounded"></div>
+              </div>
+              <div className="text-gray-600">最长连更天数 <span className="float-right">7</span></div>
+              <div className="h-1 bg-gray-200 rounded mt-1"></div>
+            </div>
+            <div className="mt-6 text-sm text-gray-600">
+              <h4 className="font-semibold mb-1">阅读小贴士</h4>
+              <ul className="list-disc list-inside">
+                <li>每天阅读15分钟，一年可读12-15本书。</li>
+                <li>做读书笔记能提升理解和记忆。</li>
+                <li>尝试多元化阅读主题，拓宽知识圈。</li>
+              </ul>
+            </div>
+            <div className="mt-6 text-sm text-gray-600">
+              <h4 className="font-semibold mb-1">圈子特色</h4>
+              <p className="mb-2">每周一打卡，分享阅读感悟，互相激励成长。在这里，我们共同探索文字的力量，让阅读成为生活的习惯。</p>
+              <img src="https://picsum.photos/id/1011/200/120" alt="圈子特色" className="rounded"/>
+            </div>
+          </div>
+
+          {/* 添加/编辑模态框 */}
+          {showForm && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white w-96 rounded shadow-lg p-6 relative">
+                <h3 className="text-lg font-semibold mb-4">{editing ? '编辑打卡' : '新增打卡'}</h3>
+                <i onClick={closeForm} className="fas fa-times absolute top-3 right-3 text-gray-500 cursor-pointer"></i>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm mb-1">书名</label>
+                    <input type="text" className="w-full border border-gray-300 rounded px-2 py-1" placeholder="输入书名..." value={form.title}
+                      onChange={e=>setForm({...form,title:e.target.value})}/>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">日期</label>
+                    <input type="date" className="w-full border border-gray-300 rounded px-2 py-1" value={form.date}
+                      onChange={e=>setForm({...form,date:e.target.value})}/>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">读后感悟</label>
+                    <textarea className="w-full border border-gray-300 rounded px-2 py-1 h-20" placeholder="写下你的感悟..." value={form.content}
+                      onChange={e=>setForm({...form,content:e.target.value})}/>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">标签</label>
+                    <div className="flex space-x-2 mb-2">
+                      <input type="text" className="flex-1 border border-gray-300 rounded px-2 py-1" placeholder="添加标签..." value={form.tagInput}
+                        onChange={e=>setForm({...form,tagInput:e.target.value})}/>
+                      <button onClick={()=>{
+                        if(form.tagInput.trim()){
+                          setForm({...form,tags:[...form.tags,form.tagInput.trim()],tagInput:''});
+                        }
+                      }} className="bg-blue-600 text-white px-3 rounded">添加</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {form.tags.map((t,i)=>(
+                        <span key={i} className="bg-white border border-gray-300 rounded px-2 py-0.5 flex items-center space-x-1 text-sm">
+                          <span>#{t}</span>
+                          <i className="fas fa-times cursor-pointer" onClick={()=>{
+                            const newTags = form.tags.filter((_,j)=>j!==i);
+                            setForm({...form,tags:newTags});
+                          }}></i>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-1">阅读心情</label>
+                    <div className="flex items-center space-x-2">
+                      <span>😞</span>
+                      <input type="range" min="1" max="3" value={form.mood}
+                        onChange={e=>setForm({...form,mood:Number(e.target.value)})}/>
+                      <span>😊</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button onClick={closeForm} className="px-4 py-1 border border-gray-400 rounded text-gray-600">取消</button>
+                  <button onClick={handleSave} className="px-4 py-1 bg-yellow-600 text-white rounded">保存</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 删除确认模态框 */}
+          {showDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+              <div className="bg-white w-80 rounded shadow-lg p-6 text-center">
+                <h3 className="text-lg font-semibold mb-4">确认删除</h3>
+                <p className="text-gray-600 mb-6">确定要删除该条打卡吗？此操作不可撤销。</p>
+                <div className="flex justify-center space-x-4">
+                  <button onClick={closeDelete} className="px-4 py-1 border border-gray-400 rounded text-gray-600">取消</button>
+                  <button onClick={handleDelete} className="px-4 py-1 bg-red-600 text-white rounded">确定删除</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('app'));
+  </script>
+</body>
+</html>

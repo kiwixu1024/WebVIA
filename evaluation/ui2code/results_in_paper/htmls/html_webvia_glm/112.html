@@ -1,0 +1,648 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明信片分享</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('display');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingPostcard, setEditingPostcard] = useState(null);
+            
+            const [postcards, setPostcards] = useState([
+                {
+                    id: 1,
+                    sender: "张小明",
+                    receiver: "李华",
+                    date: "2024-01-15",
+                    content: "新年快乐！希望你在新的一年里一切顺利，实现所有的愿望！",
+                    image: "https://picsum.photos/id/1018/300/200"
+                },
+                {
+                    id: 2,
+                    sender: "王芳",
+                    receiver: "赵敏",
+                    date: "2024-02-14",
+                    content: "情人节快乐！虽然相隔千里，但我的心与你同在，期待下次见面！",
+                    image: "https://picsum.photos/id/1025/300/200"
+                },
+                {
+                    id: 3,
+                    sender: "陈强",
+                    receiver: "刘丽",
+                    date: "2024-03-08",
+                    content: "生日快乐！祝你新的一岁充满惊喜和幸福，愿所有美好的约定都成真。",
+                    image: "https://picsum.photos/id/1039/300/200"
+                },
+                {
+                    id: 4,
+                    sender: "林小雨",
+                    receiver: "张伟",
+                    date: "2024-04-01",
+                    content: "谢谢你我的朋友！巴黎的景色真是美，期待有一天我们也能去那里旅行。",
+                    image: "https://picsum.photos/id/1044/300/200"
+                },
+                {
+                    id: 5,
+                    sender: "黄磊",
+                    receiver: "孙艺",
+                    date: "2024-04-15",
+                    content: "毕业快乐！四年时光匆匆，愿你前程似锦，未来可期，我们一起保持联系哦！",
+                    image: "https://picsum.photos/id/1051/300/200"
+                },
+                {
+                    id: 6,
+                    sender: "周小一",
+                    receiver: "吴迪",
+                    date: "2024-05-01",
+                    content: "五一假期快乐！我已经到达海南了，这里的沙滩太美了，阳光明媚，海水湛蓝，真想你也在这里。",
+                    image: "https://picsum.photos/id/1057/300/200"
+                }
+            ]);
+
+            const handleEdit = (postcard) => {
+                setEditingPostcard({...postcard});
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (postcard) => {
+                setEditingPostcard(postcard);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                setPostcards(postcards.filter(p => p.id !== editingPostcard.id));
+                setShowDeleteModal(false);
+                setEditingPostcard(null);
+            };
+
+            const handleAddNew = () => {
+                setShowAddModal(true);
+            };
+
+            const saveNewPostcard = () => {
+                const newPostcard = {
+                    id: postcards.length + 1,
+                    sender: editingPostcard.sender,
+                    receiver: editingPostcard.receiver,
+                    date: editingPostcard.date,
+                    content: editingPostcard.content,
+                    image: "https://picsum.photos/id/1061/300/200"
+                };
+                setPostcards([...postcards, newPostcard]);
+                setShowAddModal(false);
+                setEditingPostcard(null);
+            };
+
+            const renderDisplayView = () => (
+                <div className="flex-1 bg-gray-50 p-6">
+                    <div className="mb-6 flex justify-between items-center">
+                        <h1 className="text-xl font-medium text-gray-800">我的明信片集</h1>
+                        <button 
+                            onClick={handleAddNew}
+                            className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm"
+                        >
+                            <span>+</span> 添加新明信片
+                        </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {postcards.map((postcard) => (
+                            <div key={postcard.id} className="bg-white rounded-lg shadow-sm border p-4 relative">
+                                <div className="absolute top-3 right-3 flex gap-2">
+                                    <button 
+                                        onClick={() => handleEdit(postcard)}
+                                        className="text-blue-500 hover:text-blue-700 w-6 h-6 flex items-center justify-center"
+                                    >
+                                        <i className="fas fa-edit text-xs"></i>
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(postcard)}
+                                        className="text-red-500 hover:text-red-700 w-6 h-6 flex items-center justify-center"
+                                    >
+                                        <i className="fas fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 mb-3">
+                                    <i className="fas fa-envelope text-blue-500 text-sm"></i>
+                                    <span className="text-blue-600 text-sm">{postcard.sender} → {postcard.receiver}</span>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 mb-3">
+                                    <i className="far fa-calendar-alt text-gray-400 text-sm"></i>
+                                    <span className="text-gray-500 text-sm">{postcard.date}</span>
+                                </div>
+                                
+                                <p className="text-gray-700 text-sm mb-4 leading-relaxed">{postcard.content}</p>
+                                
+                                <img 
+                                    src={postcard.image} 
+                                    alt="明信片" 
+                                    className="w-full h-32 object-cover rounded-lg"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            const renderEditView = () => (
+                <div className="flex-1 bg-gray-50 p-6">
+                    <div className="mb-6 flex justify-between items-center">
+                        <h1 className="text-xl font-medium text-gray-800">编辑我的明信片</h1>
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => setCurrentView('display')}
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                            >
+                                新增明信片
+                            </button>
+                            <button className="bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm">
+                                导入导出
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-center gap-2">
+                            <i className="fas fa-lightbulb text-yellow-600"></i>
+                            <span className="text-yellow-800 text-sm">小贴士：双击文字可直接修改，按 Esc 取消编辑</span>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-white rounded-lg border p-6">
+                        <div className="flex items-center gap-3 mb-6">
+                            <input type="checkbox" id="selectAll" className="rounded" />
+                            <label htmlFor="selectAll" className="text-gray-700 cursor-pointer">全选</label>
+                            <button className="ml-auto bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm">
+                                批量删除
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {postcards.map((postcard) => (
+                                <div key={postcard.id} className="flex items-start gap-4 p-4 border rounded-lg">
+                                    <input type="checkbox" className="mt-1 rounded" />
+                                    <div className="flex-1">
+                                        <div className="font-medium text-gray-800 mb-1">
+                                            {postcard.sender} 致 {postcard.receiver} ({postcard.date})
+                                        </div>
+                                        <p className="text-gray-600 text-sm">{postcard.content}</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button className="text-blue-500 hover:text-blue-700 w-8 h-8 flex items-center justify-center">
+                                            <i className="fas fa-edit text-sm"></i>
+                                        </button>
+                                        <button className="text-red-500 hover:text-red-700 w-8 h-8 flex items-center justify-center">
+                                            <i className="fas fa-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderHelpView = () => (
+                <div className="flex-1 bg-gray-50 p-6">
+                    <h1 className="text-xl font-medium text-gray-800 mb-6 text-center">使用指南</h1>
+                    
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        <div className="bg-white rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <i className="fas fa-plus-circle text-blue-500 text-lg"></i>
+                                <h2 className="text-lg font-medium">如何添加明信片</h2>
+                            </div>
+                            
+                            <div className="space-y-2 text-gray-700">
+                                <p>1. 在展示页面点击右上角的"添加新明信片"按钮</p>
+                                <p>2. 在弹出的表单中填写发送者、接收者、日期和消息内容</p>
+                                <p>3. 选择一张美丽的图片（或使用默认图片）</p>
+                                <p>4. 点击"保存"按钮完成添加</p>
+                            </div>
+                            
+                            <img 
+                                src="https://picsum.photos/id/1080/400/250" 
+                                alt="添加明信片示例" 
+                                className="mt-4 rounded-lg w-80"
+                            />
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <i className="fas fa-edit text-blue-500 text-lg"></i>
+                                <h2 className="text-lg font-medium">如何编辑/删除明信片</h2>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <h3 className="font-medium mb-2">编辑明信片：</h3>
+                                    <div className="space-y-1 text-gray-700">
+                                        <p>1. 在展示区找到需要编辑的明信片</p>
+                                        <p>2. 点击明信片右上角的"编辑"图标</p>
+                                        <p>3. 在弹出表单中修改内容</p>
+                                        <p>4. 点击"保存"按钮完成编辑</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="font-medium mb-2">删除明信片：</h3>
+                                    <div className="space-y-1 text-gray-700">
+                                        <p>1. 在展示区找到需要删除的明信片</p>
+                                        <p>2. 点击明信片右上角的"删除"图标</p>
+                                        <p>3. 在确认对话框中点击"确认删除"</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <img 
+                                src="https://picsum.photos/id/1081/400/250" 
+                                alt="编辑删除示例" 
+                                className="mt-4 rounded-lg w-80"
+                            />
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <i className="fas fa-download text-blue-500 text-lg"></i>
+                                <h2 className="text-lg font-medium">导入导出功能示例</h2>
+                            </div>
+                            
+                            <div className="space-y-2 text-gray-700">
+                                <p>通过导入导出功能，您可以轻松备份或分享您的明信片集合：</p>
+                                <p>1. 进入编辑页面</p>
+                                <p>2. 点击顶部的"导入导出"按钮</p>
+                                <p>3. 选择"导出为JSON"可将当前明信片集合保存为文件</p>
+                                <p>4. 选择"JSON导入"可从文件中导入明信片集合</p>
+                            </div>
+                            
+                            <img 
+                                src="https://picsum.photos/id/1082/400/250" 
+                                alt="导入导出示例" 
+                                className="mt-4 rounded-lg w-80"
+                            />
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* 顶部导航 */}
+                    <nav className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-xl font-semibold text-orange-500">明信片分享</h1>
+                            <div className="flex gap-6">
+                                <button 
+                                    onClick={() => setCurrentView('display')}
+                                    className={`px-4 py-2 rounded ${currentView === 'display' ? 'bg-orange-100 text-orange-600' : 'text-gray-600 hover:text-gray-800'}`}
+                                >
+                                    展示区
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('edit')}
+                                    className={`px-4 py-2 rounded ${currentView === 'edit' ? 'bg-orange-100 text-orange-600' : 'text-gray-600 hover:text-gray-800'}`}
+                                >
+                                    编辑区
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('help')}
+                                    className={`px-4 py-2 rounded ${currentView === 'help' ? 'bg-orange-100 text-orange-600' : 'text-gray-600 hover:text-gray-800'}`}
+                                >
+                                    帮助说明
+                                </button>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="flex">
+                        {/* 左侧边栏 */}
+                        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
+                            <div className="p-4">
+                                <div className="bg-blue-100 rounded-lg p-3 mb-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <i className="fas fa-images text-blue-600"></i>
+                                        <span className="font-medium text-blue-800">全部明信片</span>
+                                    </div>
+                                    <div className="text-sm text-blue-600">显示：点击查看所有明信片</div>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                    <div className="bg-yellow-100 rounded-lg p-3">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <i className="fas fa-heart text-yellow-600"></i>
+                                            <span className="font-medium text-yellow-800">我的收藏</span>
+                                        </div>
+                                        <div className="text-sm text-yellow-600">收藏你喜欢的明信片！</div>
+                                    </div>
+                                    
+                                    <div className="bg-orange-100 rounded-lg p-3 mt-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <i className="fas fa-fire text-orange-600"></i>
+                                            <span className="font-medium text-orange-800">热门分享</span>
+                                        </div>
+                                        <div className="text-sm text-orange-600">看看大家都在分享什么</div>
+                                    </div>
+                                    
+                                    <div className="bg-green-100 rounded-lg p-3 mt-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <i className="fas fa-palette text-green-600"></i>
+                                            <span className="font-medium text-green-800">特色模板</span>
+                                        </div>
+                                        <div className="text-sm text-green-600">使用精美模板快速创建</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-8 pt-4 border-t border-gray-200">
+                                    <div className="text-sm text-gray-600">
+                                        在这里分享你的心情，
+                                        每一张明信片都是珍贵的回忆。
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* 主内容区域 */}
+                        {currentView === 'display' && renderDisplayView()}
+                        {currentView === 'edit' && renderEditView()}
+                        {currentView === 'help' && renderHelpView()}
+
+                        {/* 右侧工具栏 */}
+                        <div className="w-72 bg-white border-l border-gray-200 p-4">
+                            <div className="mb-6">
+                                <h3 className="font-medium text-gray-800 mb-3">数据统计</h3>
+                                <div className="text-3xl font-bold text-orange-500 mb-2">{postcards.length}</div>
+                                <div className="text-sm text-gray-600 mb-4">分享总数</div>
+                                
+                                <div className="flex gap-4 mb-4">
+                                    <div className="text-center">
+                                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
+                                            {postcards.filter(p => p.id % 3 === 1).length}
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-1">编辑次数</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center text-white text-sm">
+                                            {postcards.filter(p => p.id % 3 === 2).length}
+                                        </div>
+                                        <div className="text-xs text-gray-600 mt-1">删除次数</div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                                    <i className="fas fa-sync-alt"></i>
+                                    <span>刷新</span>
+                                </div>
+                                
+                                <div className="text-xs text-gray-500 mb-2">本月明信片分享走势</div>
+                                
+                                <div className="flex gap-1 h-20 mb-4">
+                                    {[1,2,3,4,5,6].map(i => (
+                                        <div key={i} className="flex-1 bg-blue-300 rounded-sm" style={{height: `${Math.random() * 40 + 10}px`}}></div>
+                                    ))}
+                                </div>
+                                
+                                <div className="text-xs text-center text-gray-500 border-t border-gray-200 pt-2">
+                                    第1周 第6周 第12周
+                                </div>
+                                
+                                <div className="text-xs text-center text-gray-600 mt-4 italic">
+                                    "每一张明信片都承载着一份珍贵的回忆与情谊。"
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 底部页脚 */}
+                    <footer className="bg-white border-t border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center text-sm text-gray-600">
+                            <div className="flex gap-4">
+                                <a href="#" className="hover:text-gray-800">常见问题</a>
+                                <a href="#" className="hover:text-gray-800">联系我们</a>
+                                <a href="#" className="hover:text-gray-800">隐私政策</a>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <i className="fas fa-map-marker-alt text-gray-400"></i>
+                                <span>Tip：保持心情美好，每一张明信片都是温暖传递~</span>
+                            </div>
+                            <div>© 2024 明信片分享 版权所有</div>
+                        </div>
+                    </footer>
+
+                    {/* 添加明信片弹窗 */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <h2 className="text-lg font-medium mb-4">添加新明信片</h2>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">发送者：</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入发送者姓名"
+                                            value={editingPostcard?.sender || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, sender: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">接收者：</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入接收者姓名"
+                                            value={editingPostcard?.receiver || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, receiver: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期：</label>
+                                        <input 
+                                            type="date" 
+                                            value={editingPostcard?.date || '2025/09/23'}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, date: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">消息内容：</label>
+                                        <textarea 
+                                            rows="4" 
+                                            placeholder="写下你想说的话..."
+                                            value={editingPostcard?.content || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, content: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">选择邮戳：</label>
+                                        <div className="flex gap-2 mb-2">
+                                            <img src="https://picsum.photos/id/1097/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1098/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1099/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1100/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1101/60/40" className="w-15 h-10 object-cover rounded border" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-3 mt-6">
+                                    <button 
+                                        onClick={saveNewPostcard}
+                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded flex items-center justify-center gap-2"
+                                    >
+                                        <i className="fas fa-check"></i>
+                                        保存
+                                    </button>
+                                    <button 
+                                        onClick={() => {setShowAddModal(false); setEditingPostcard(null);}}
+                                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded flex items-center justify-center gap-2"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 删除确认弹窗 */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <div className="text-center">
+                                    <div className="text-red-500 text-4xl mb-4">
+                                        <i className="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <h2 className="text-lg font-medium mb-2">您确定要删除这张明信片吗？</h2>
+                                    <p className="text-gray-600 text-sm mb-6">此操作无法撤销，删除后将无法恢复该明信片。</p>
+                                    
+                                    <div className="flex gap-3">
+                                        <button 
+                                            onClick={confirmDelete}
+                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                                        >
+                                            确认删除
+                                        </button>
+                                        <button 
+                                            onClick={() => {setShowDeleteModal(false); setEditingPostcard(null);}}
+                                            className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+                                        >
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 编辑明信片弹窗 */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <h2 className="text-lg font-medium mb-4">编辑明信片</h2>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">发送者：</label>
+                                        <input 
+                                            type="text" 
+                                            value={editingPostcard?.sender || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, sender: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">接收者：</label>
+                                        <input 
+                                            type="text" 
+                                            value={editingPostcard?.receiver || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, receiver: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期：</label>
+                                        <input 
+                                            type="date" 
+                                            value={editingPostcard?.date || '2025/09/23'}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, date: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">消息内容：</label>
+                                        <textarea 
+                                            rows="4" 
+                                            value={editingPostcard?.content || ''}
+                                            onChange={(e) => setEditingPostcard({...editingPostcard, content: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">选择邮戳：</label>
+                                        <div className="flex gap-2">
+                                            <img src="https://picsum.photos/id/1102/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1103/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1104/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1105/60/40" className="w-15 h-10 object-cover rounded border" />
+                                            <img src="https://picsum.photos/id/1106/60/40" className="w-15 h-10 object-cover rounded border" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-3 mt-6">
+                                    <button 
+                                        onClick={() => {setShowEditModal(false); setEditingPostcard(null);}}
+                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded flex items-center justify-center gap-2"
+                                    >
+                                        <i className="fas fa-save"></i>
+                                        保存
+                                    </button>
+                                    <button 
+                                        onClick={() => {setShowEditModal(false); setEditingPostcard(null);}}
+                                        className="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded flex items-center justify-center gap-2"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

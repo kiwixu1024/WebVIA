@@ -1,0 +1,488 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>微耐心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        }
+        /* Custom styles for the range slider */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #F97316; /* orange-500 */
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 2px solid #F97316; /* orange-500 */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const initialChallengesData = [
+            { id: 1, user: '耐心大师', title: '耐心等电梯不插队', days: 15, avatar: 'https://picsum.photos/id/1005/40/40', type: '礼让', difficulty: 3, goal: 30 },
+            { id: 2, user: '冷静小王', title: '公交车上给老人让座', days: 12, avatar: 'https://picsum.photos/id/1012/40/40', type: '礼让', difficulty: 2, goal: 15 },
+            { id: 3, user: '淡定哥', title: '排队买奶茶不催促', days: 10, avatar: 'https://picsum.photos/id/1025/40/40', type: '排队', difficulty: 4, goal: 20 },
+            { id: 4, user: '从容妹', title: '专注写代码45分钟不碰手机', days: 8, avatar: 'https://picsum.photos/id/1027/40/40', type: '专注', difficulty: 5, goal: 25 },
+            { id: 5, user: '静姐', title: '等人迟到不发脾气', days: 6, avatar: 'https://picsum.photos/id/1028/40/40', type: '等待', difficulty: 5, goal: 10 },
+        ];
+
+        function App() {
+            const [view, setView] = useState('main'); // 'main', 'edit', 'help'
+            const [challenges, setChallenges] = useState(initialChallengesData);
+            
+            // New challenge form state
+            const [newTitle, setNewTitle] = useState('');
+            const [newType, setNewType] = useState('排队');
+            const [newDifficulty, setNewDifficulty] = useState(3);
+            const [newDaysGoal, setNewDaysGoal] = useState(7);
+            
+            // Edit modal state
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingChallenge, setEditingChallenge] = useState(null);
+            
+            const handleAddChallenge = () => {
+                if (!newTitle.trim() || !newDaysGoal) return;
+                const newChallenge = {
+                    id: challenges.length + 1,
+                    user: '新用户',
+                    title: newTitle,
+                    days: 0,
+                    avatar: `https://picsum.photos/id/${1030 + challenges.length}/40/40`,
+                    type: newType,
+                    difficulty: newDifficulty,
+                    goal: newDaysGoal,
+                };
+                setChallenges([...challenges, newChallenge]);
+                // Reset form
+                setNewTitle('');
+                setNewType('排队');
+                setNewDifficulty(3);
+                setNewDaysGoal(7);
+            };
+
+            const handleDeleteChallenge = (idToDelete) => {
+                setChallenges(challenges.filter(c => c.id !== idToDelete));
+            };
+
+            const handleOpenEditModal = (challenge) => {
+                setEditingChallenge(challenge);
+                setIsModalOpen(true);
+            };
+
+            const handleCloseModal = () => {
+                setIsModalOpen(false);
+                setEditingChallenge(null);
+            };
+
+            const handleSaveChanges = (updatedChallenge) => {
+                setChallenges(challenges.map(c => c.id === updatedChallenge.id ? updatedChallenge : c));
+                handleCloseModal();
+            };
+
+            const renderMainContent = () => {
+                switch (view) {
+                    case 'edit':
+                        return <EditChallengeList challenges={challenges} onEdit={handleOpenEditModal} onDelete={handleDeleteChallenge} />;
+                    case 'help':
+                        return <HelpGuide />;
+                    case 'main':
+                    default:
+                        return (
+                            <div>
+                                <TopChallengesList challenges={challenges} />
+                                <AddChallengeForm 
+                                    title={newTitle} setTitle={setNewTitle}
+                                    type={newType} setType={setNewType}
+                                    difficulty={newDifficulty} setDifficulty={setNewDifficulty}
+                                    daysGoal={newDaysGoal} setDaysGoal={setNewDaysGoal}
+                                    onAdd={handleAddChallenge}
+                                />
+                            </div>
+                        );
+                }
+            };
+            
+            return (
+                <div className="min-h-screen bg-gray-50 text-gray-800">
+                    <Header currentView={view} setView={setView} />
+                    <main className="container mx-auto px-4 py-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            <div className="lg:col-span-3">
+                                <Sidebar />
+                            </div>
+                            <div className="lg:col-span-6 space-y-8">
+                                {renderMainContent()}
+                                <WhyChoose />
+                            </div>
+                            <div className="lg:col-span-3">
+                                <RightPane />
+                            </div>
+                        </div>
+                    </main>
+                    <Footer />
+                    {isModalOpen && editingChallenge && (
+                        <EditModal 
+                            challenge={editingChallenge} 
+                            onClose={handleCloseModal}
+                            onSave={handleSaveChanges}
+                        />
+                    )}
+                </div>
+            );
+        }
+        
+        const Header = ({ currentView, setView }) => {
+            const navItems = [
+                { id: 'main', label: '展示榜单' },
+                { id: 'edit', label: '编辑挑战' },
+                { id: 'help', label: '帮助指南' }
+            ];
+            
+            return (
+                <header className="bg-gradient-to-r from-pink-400 to-orange-300 text-white shadow-md">
+                    <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <i className="fas fa-heartbeat text-2xl"></i>
+                            <span className="font-bold text-2xl">微耐心</span>
+                        </div>
+                        <nav className="hidden md:flex items-center gap-2">
+                            {navItems.map(item => (
+                                <a 
+                                    key={item.id}
+                                    href="#" 
+                                    onClick={(e) => { e.preventDefault(); setView(item.id); }}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        currentView === item.id 
+                                        ? 'bg-white text-orange-500' 
+                                        : 'text-white hover:bg-white/20'
+                                    }`}
+                                >
+                                    {item.label}
+                                </a>
+                            ))}
+                        </nav>
+                        <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-md text-sm">
+                            登录/注册
+                        </button>
+                    </div>
+                </header>
+            );
+        };
+
+        const Sidebar = () => (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h3 className="font-bold text-lg mb-4 text-gray-700">导航菜单</h3>
+                <ul className="space-y-2">
+                    <li>
+                        <a href="#" className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 text-blue-600 font-semibold">
+                            <i className="fas fa-calendar-day w-5 text-center"></i>
+                            <span>今日挑战</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-600">
+                            <i className="fas fa-history w-5 text-center"></i>
+                            <span>历史战绩</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-600">
+                            <i className="fas fa-user-cog w-5 text-center"></i>
+                            <span>个人设置</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        );
+
+        const TopChallengesList = ({ challenges }) => (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-4">生活微耐心挑战榜 Top10</h2>
+                <div className="space-y-2">
+                    {challenges.map((challenge, index) => (
+                        <div key={challenge.id} className="flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                            <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold mr-4">{index + 1}</div>
+                            <img src={challenge.avatar} alt={challenge.user} className="w-10 h-10 rounded-full mr-4" />
+                            <div className="flex-grow">
+                                <p className="font-semibold">{challenge.user}</p>
+                                <p className="text-sm text-gray-600">{challenge.title}</p>
+                                <p className="text-xs text-gray-400">已坚持{challenge.days}次</p>
+                            </div>
+                            <div className="flex items-center gap-3 text-sm ml-4">
+                                <a href="#" className="text-blue-500 hover:underline">查看详情</a>
+                                <a href="#" className="text-orange-500 hover:underline">编辑挑战</a>
+                                <a href="#" className="px-3 py-1 rounded-md bg-red-100 text-red-600 hover:bg-red-200">删除挑战</a>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const AddChallengeForm = ({ title, setTitle, type, setType, difficulty, setDifficulty, daysGoal, setDaysGoal, onAdd }) => (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-4">新增微耐心挑战</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">挑战标题</label>
+                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="例如：耐心排队买奶茶" className="w-full p-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">挑战类型</label>
+                        <select value={type} onChange={e => setType(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500 bg-white">
+                            <option>排队</option>
+                            <option>等待</option>
+                            <option>礼让</option>
+                            <option>专注</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">难度评分</label>
+                        <div className="flex items-center gap-4">
+                            <input type="range" min="1" max="5" value={difficulty} onChange={e => setDifficulty(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                            <span className="font-semibold text-orange-500">{difficulty} 星</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">持续天数目标</label>
+                        <div className="flex items-center gap-2">
+                             <input type="number" value={daysGoal} onChange={e => setDaysGoal(Number(e.target.value))} className="w-24 p-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500" />
+                             <span className="text-gray-600">天</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button onClick={onAdd} className="w-full sm:w-auto bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                            添加挑战
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const EditChallengeList = ({ challenges, onEdit, onDelete }) => (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-2">编辑您的挑战</h2>
+                <p className="text-gray-600 mb-6">在这里您可以管理所有已创建的挑战，包括修改目标、更新进度、删除不需要的挑战等。</p>
+                <div className="space-y-4">
+                    {challenges.map(challenge => (
+                        <div key={challenge.id} className="flex items-center p-4 border rounded-lg">
+                            <div className="flex-grow">
+                                <p className="font-semibold">{challenge.title}</p>
+                                <p className="text-sm text-gray-500">类型: {challenge.type} | 难度: {challenge.difficulty}星 | 目标: {challenge.goal}天</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => onEdit(challenge)} className="text-orange-500 font-semibold hover:underline">编辑</button>
+                                <button onClick={() => onDelete(challenge.id)} className="px-3 py-1 rounded-md bg-red-100 text-red-600 hover:bg-red-200 font-semibold">删除</button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const HelpGuide = () => (
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+                <h2 className="text-xl font-bold mb-6">如何参与微耐心挑战?</h2>
+                <div className="space-y-6">
+                    <div className="flex gap-4 items-start">
+                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold">1</div>
+                        <div>
+                            <h3 className="font-semibold mb-1">点击"新增微耐心挑战"填写表单</h3>
+                            <p className="text-gray-600">在页面底部找到“新增微耐心挑战”表单，填写您想要挑战的内容，设定难度和目标天数，点击添加按钮即可创建您的个人挑战。</p>
+                        </div>
+                    </div>
+                     <div className="flex gap-4 items-start">
+                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold">2</div>
+                        <div>
+                            <h3 className="font-semibold mb-1">坚持每日打卡并更新完成情况</h3>
+                            <p className="text-gray-600">每完成一次挑战，点击对应挑战卡片上的“更新进度”按钮，记录您的完成情况，系统会自动统计您的完成次数并更新排行榜。</p>
+                        </div>
+                    </div>
+                     <div className="flex gap-4 items-start">
+                        <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold">3</div>
+                        <div>
+                            <h3 className="font-semibold mb-1">在"展示榜单"中查看最新排行</h3>
+                            <p className="text-gray-600">通过首页的“展示榜单”，您可以看到所有参与者的排名情况、排名根据挑战完成次数、难度等因素综合计算，每周更新一次。</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-8 bg-orange-50 border-l-4 border-orange-400 text-orange-700 p-4">
+                    <p><span className="font-bold">小贴士:</span> 坚持是成功的关键！即便是简单的微耐心挑战，每天坚持也能带来巨大的改变。加油！</p>
+                </div>
+            </div>
+        );
+
+        const WhyChoose = () => (
+            <div>
+                 <h2 className="text-xl text-center font-bold mb-6">为什么选择生活微耐心?</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
+                        <div className="inline-block bg-orange-100 text-orange-500 rounded-full p-3 mb-4">
+                            <i className="fas fa-brain fa-lg"></i>
+                        </div>
+                        <h3 className="font-bold mb-2">提升专注力</h3>
+                        <p className="text-sm text-gray-600">通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散的情况，提高工作学习效率。</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
+                        <div className="inline-block bg-pink-100 text-pink-500 rounded-full p-3 mb-4">
+                             <i className="far fa-heart fa-lg"></i>
+                        </div>
+                        <h3 className="font-bold mb-2">缓解焦虑</h3>
+                        <p className="text-sm text-gray-600">培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更加平和。</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80 text-center">
+                         <div className="inline-block bg-blue-100 text-blue-500 rounded-full p-3 mb-4">
+                             <i className="fas fa-rocket fa-lg"></i>
+                        </div>
+                        <h3 className="font-bold mb-2">增强恒心</h3>
+                        <p className="text-sm text-gray-600">小的耐心挑战累积成大的习惯改变。通过每日的坚持，逐渐培养出持之以恒的品质和意志力。</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const RightPane = () => (
+            <div className="space-y-8">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="font-bold text-lg mb-4">今日完成率</h3>
+                    <div className="relative flex justify-center items-center h-40">
+                        <svg className="w-36 h-36" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" strokeWidth="12" />
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#FBBF24" strokeWidth="12" strokeLinecap="round"
+                                    strokeDasharray="339.29" strokeDashoffset="84.82" /* 100 - 75 = 25% */
+                                    transform="rotate(-90 60 60)" />
+                        </svg>
+                        <span className="absolute text-3xl font-bold text-gray-700">75%</span>
+                    </div>
+                    <p className="text-center text-gray-600 mt-2">已完成 3/4 项挑战</p>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="font-bold text-lg mb-4">本周排行榜</h3>
+                    <ul className="space-y-3">
+                        <li className="flex justify-between items-center">
+                            <span><span className="inline-block text-center w-5 mr-2">1</span>️耐心大师</span>
+                            <span className="font-semibold text-gray-700">15天</span>
+                        </li>
+                        <li className="flex justify-between items-center">
+                            <span><span className="inline-block text-center w-5 mr-2">2</span>冷静小王</span>
+                            <span className="font-semibold text-gray-700">12天</span>
+                        </li>
+                        <li className="flex justify-between items-center">
+                            <span><span className="inline-block text-center w-5 mr-2">3</span>淡定哥</span>
+                            <span className="font-semibold text-gray-700">10天</span>
+                        </li>
+                    </ul>
+                </div>
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="font-bold text-lg mb-4">温馨提示</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        坚持每日微耐心，收获大能量！<br />今天的一小步，明天的一大步。持续的微小改变，最终带来巨大的成长。
+                    </p>
+                </div>
+            </div>
+        );
+
+        const EditModal = ({ challenge, onClose, onSave }) => {
+            const [title, setTitle] = useState(challenge.title);
+            const [type, setType] = useState(challenge.type);
+            const [difficulty, setDifficulty] = useState(challenge.difficulty);
+
+            const handleSaveClick = () => {
+                onSave({ ...challenge, title, type, difficulty });
+            };
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+                        <h2 className="text-xl font-bold mb-6">编辑挑战</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">挑战标题</label>
+                                <input 
+                                    type="text" 
+                                    value={title} 
+                                    onChange={(e) => setTitle(e.target.value)} 
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">挑战类型</label>
+                                <select 
+                                    value={type} 
+                                    onChange={(e) => setType(e.target.value)} 
+                                    className="w-full p-2 border border-gray-300 rounded-md bg-white"
+                                >
+                                    <option>排队</option>
+                                    <option>等待</option>
+                                    <option>礼让</option>
+                                    <option>专注</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">难度评分</label>
+                                <div className="flex items-center gap-4">
+                                    <input 
+                                        type="range" 
+                                        min="1" 
+                                        max="5" 
+                                        value={difficulty}
+                                        onChange={(e) => setDifficulty(Number(e.target.value))}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" 
+                                    />
+                                    <span className="font-semibold text-orange-500">{difficulty} 星</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-4 mt-8">
+                            <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={handleSaveClick} className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const Footer = () => (
+            <footer className="bg-gradient-to-r from-pink-400 to-orange-300 text-white">
+                <div className="container mx-auto px-4 py-4 flex justify-between items-center text-sm">
+                    <p>&copy;2024 微耐心</p>
+                    <div className="flex gap-6">
+                        <a href="#" className="hover:underline">关于我们</a>
+                        <a href="#" className="hover:underline">使用条款</a>
+                        <a href="#" className="hover:underline">隐私政策</a>
+                    </div>
+                    <div className="flex gap-4 text-lg">
+                        <a href="#" className="hover:text-white/80"><i className="fab fa-weixin"></i></a>
+                        <a href="#" className="hover:text-white/80"><i className="fab fa-weibo"></i></a>
+                        <a href="#" className="hover:text-white/80"><i className="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+            </footer>
+        );
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

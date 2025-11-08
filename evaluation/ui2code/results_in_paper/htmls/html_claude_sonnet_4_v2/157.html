@@ -1,0 +1,351 @@
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      const [showModal, setShowModal] = useState(false);
+      const [formData, setFormData] = useState({
+        studentId: '',
+        name: '',
+        class: '',
+        status: '正常'
+      });
+      const [students, setStudents] = useState([
+        { id: '001', name: '张三', class: '一班', status: '正常' },
+        { id: '002', name: '李四', class: '一班', status: '正常' },
+        { id: '003', name: '王五', class: '一班', status: '缺勤' },
+        { id: '004', name: '赵六', class: '二班', status: '正常' },
+        { id: '005', name: '钱七', class: '二班', status: '迟到' }
+      ]);
+
+      const handleAddStudent = () => {
+        setShowModal(true);
+      };
+
+      const handleCloseModal = () => {
+        setShowModal(false);
+        setFormData({
+          studentId: '',
+          name: '',
+          class: '',
+          status: '正常'
+        });
+      };
+
+      const handleConfirmAdd = () => {
+        if (formData.studentId && formData.name && formData.class) {
+          setStudents([...students, {
+            id: formData.studentId,
+            name: formData.name,
+            class: formData.class,
+            status: formData.status
+          }]);
+          handleCloseModal();
+        }
+      };
+
+      const handleInputChange = (field, value) => {
+        setFormData(prev => ({
+          ...prev,
+          [field]: value
+        }));
+      };
+
+      const getStatusColor = (status) => {
+        switch(status) {
+          case '正常': return 'text-green-600';
+          case '缺勤': return 'text-yellow-600';
+          case '迟到': return 'text-red-600';
+          default: return 'text-gray-600';
+        }
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-100">
+          {/* Top Navigation */}
+          <div className="bg-white border-b border-gray-200">
+            <div className="flex">
+              <div className="flex-1 flex">
+                <div className="bg-blue-500 text-white px-4 py-3 text-sm font-medium">班级点名系统</div>
+                <div className="border-b-2 border-blue-500 px-4 py-3 text-sm font-medium text-blue-600 bg-gray-50">日常点名</div>
+                <div className="px-4 py-3 text-sm text-gray-600 hover:text-gray-900">周报统计</div>
+                <div className="px-4 py-3 text-sm text-gray-600 hover:text-gray-900">身份记录</div>
+              </div>
+              <div className="px-4 py-3 text-sm text-gray-600">当前出勤率</div>
+              <div className="px-4 py-3">
+                <i className="fas fa-cog text-gray-400"></i>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex">
+            {/* Left Sidebar */}
+            <div className="w-48 bg-white border-r border-gray-200 min-h-screen">
+              <div className="p-4">
+                <div className="mb-4">
+                  <div className="bg-blue-500 text-white px-3 py-2 rounded text-sm font-medium flex items-center">
+                    <i className="fas fa-users mr-2"></i>
+                    学生管理
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded flex items-center">
+                    <i className="fas fa-bell mr-2"></i>
+                    公告管理
+                  </div>
+                  <div className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded flex items-center">
+                    <i className="fas fa-clipboard-list mr-2"></i>
+                    点名记录
+                  </div>
+                  <div className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded flex items-center">
+                    <i className="fas fa-cog mr-2"></i>
+                    系统设置
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 p-6">
+              <div className="bg-white rounded-lg shadow">
+                <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                  <div>
+                    <h2 className="text-lg font-medium">学生管理</h2>
+                    <p className="text-sm text-gray-500 mt-1">在此管理班级学生信息，可编辑、编辑或新增学生记录</p>
+                  </div>
+                  <button 
+                    onClick={handleAddStudent}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
+                  >
+                    <i className="fas fa-plus mr-2"></i>
+                    添加学生
+                  </button>
+                </div>
+
+                <div className="p-4">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-sm text-gray-600 border-b border-gray-200">
+                        <th className="text-left py-3 px-4">学号</th>
+                        <th className="text-left py-3 px-4">姓名</th>
+                        <th className="text-left py-3 px-4">班级</th>
+                        <th className="text-left py-3 px-4">状态</th>
+                        <th className="text-left py-3 px-4">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {students.map((student, index) => (
+                        <tr key={student.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-4 text-sm">{student.id}</td>
+                          <td className="py-3 px-4 text-sm">{student.name}</td>
+                          <td className="py-3 px-4 text-sm">{student.class}</td>
+                          <td className={`py-3 px-4 text-sm ${getStatusColor(student.status)}`}>{student.status}</td>
+                          <td className="py-3 px-4 text-sm">
+                            <button className="text-blue-500 hover:text-blue-600 mr-3">
+                              <i className="fas fa-edit mr-1"></i>编辑
+                            </button>
+                            <button className="text-red-500 hover:text-red-600">
+                              <i className="fas fa-trash mr-1"></i>删除
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="mt-4 text-xs text-gray-500">
+                    Tip: 点击表格行间的复选框可进行批量操作
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="w-80 p-6 space-y-6">
+              {/* Chart Widget */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-medium">当日出勤率</h3>
+                  <i className="fas fa-sync-alt text-gray-400 text-xs"></i>
+                </div>
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <svg width="120" height="120" className="transform -rotate-90">
+                      <circle cx="60" cy="60" r="50" stroke="#e5e7eb" strokeWidth="8" fill="none"/>
+                      <circle cx="60" cy="60" r="50" stroke="#10b981" strokeWidth="8" fill="none"
+                              strokeDasharray="282.7" strokeDashoffset="28.27"/>
+                      <circle cx="60" cy="60" r="40" stroke="#ef4444" strokeWidth="8" fill="none"
+                              strokeDasharray="251.3" strokeDashoffset="226.17"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex justify-center space-x-4 text-xs">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                    <span>出勤 90%</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
+                    <span>缺勤 10%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trend Chart */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-medium">本周出勤趋势</h3>
+                  <i className="fas fa-sync-alt text-gray-400 text-xs"></i>
+                </div>
+                <img src="https://picsum.photos/id/123/280/120" alt="出勤趋势图" className="w-full h-30 object-cover rounded"/>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="text-sm font-medium mb-4">快速点名</h3>
+                <button className="w-full bg-blue-500 text-white py-2 rounded text-sm font-medium mb-4 flex items-center justify-center">
+                  <i className="fas fa-play mr-2"></i>
+                  开始点名
+                </button>
+                <p className="text-xs text-gray-500">今日尚未进行点名，点击开始</p>
+              </div>
+
+              {/* Common Functions */}
+              <div className="bg-white rounded-lg shadow p-4">
+                <h3 className="text-sm font-medium mb-4">常用功能</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center">
+                    <div className="bg-blue-50 rounded-lg p-3 mb-2">
+                      <i className="fas fa-download text-blue-500"></i>
+                    </div>
+                    <div className="text-xs text-gray-600">导出数据</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-green-50 rounded-lg p-3 mb-2">
+                      <i className="fas fa-file-alt text-green-500"></i>
+                    </div>
+                    <div className="text-xs text-gray-600">消息管理</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-gray-50 rounded-lg p-3 mb-2">
+                      <i className="fas fa-users text-gray-500"></i>
+                    </div>
+                    <div className="text-xs text-gray-600">班级点名</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="bg-orange-50 rounded-lg p-3 mb-2">
+                      <i className="fas fa-chart-bar text-orange-500"></i>
+                    </div>
+                    <div className="text-xs text-gray-600">数据分析</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-white border-t border-gray-200 px-6 py-4 flex justify-between items-center text-xs text-gray-500">
+            <div>班级点名系统 V1.0.0</div>
+            <div className="flex items-center">
+              <i className="fas fa-question-circle mr-1"></i>
+              帮助说明
+            </div>
+          </div>
+
+          {/* Modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg shadow-lg w-96 max-w-md">
+                <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                  <h3 className="text-lg font-medium">添加学生</h3>
+                  <button 
+                    onClick={handleCloseModal}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">学号</label>
+                    <input
+                      type="text"
+                      value={formData.studentId}
+                      onChange={(e) => handleInputChange('studentId', e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="请输入学号"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">姓名</label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="请输入姓名"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">班级</label>
+                    <input
+                      type="text"
+                      value={formData.class}
+                      onChange={(e) => handleInputChange('class', e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                      placeholder="请输入班级"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">状态</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="正常">正常</option>
+                      <option value="缺勤">缺勤</option>
+                      <option value="迟到">迟到</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 p-4 border-t border-gray-200">
+                  <button
+                    onClick={handleCloseModal}
+                    className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={handleConfirmAdd}
+                    className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                  >
+                    确认添加
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

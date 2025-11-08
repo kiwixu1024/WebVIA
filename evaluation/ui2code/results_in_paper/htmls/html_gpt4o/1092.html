@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <title>头像定制生成</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <div id="app"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      function App() {
+        const [pageState, setPageState] = useState("initial");
+        const [selectedCategory, setSelectedCategory] = useState("卡通风");
+        const [formData, setFormData] = useState({
+          name: "",
+          hairLength: 50,
+          hairColor: "#5F370E",
+          eyeColor: "#0000FF",
+          style: "微笑",
+        });
+
+        const handleCategorySelect = (category) => {
+          setSelectedCategory(category);
+        };
+
+        const handleEditAvatar = () => {
+          setPageState("edit");
+        };
+
+        const handleAddAvatar = () => {
+          setPageState("add");
+        };
+
+        const handleSave = () => {
+          setPageState("initial");
+        };
+
+        return (
+          <div className="p-5">
+            <div className="bg-white shadow-sm rounded p-5">
+              <header className="flex justify-between items-center border-b pb-4 mb-5">
+                <h1 className="text-xl font-bold">头像定制生成</h1>
+                <nav>
+                  <button className="mx-2">预览</button>
+                  <button className="mx-2">编辑</button>
+                  <button className="mx-2">统计</button>
+                  <button className="mx-2">帮助</button>
+                </nav>
+              </header>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* 左侧栏 */}
+                <aside>
+                  <h2 className="text-lg font-bold mb-3">我的头像列表</h2>
+                  <ul>
+                    <li className="flex items-center my-2">
+                      <img
+                        src="https://picsum.photos/id/1015/50/50"
+                        alt="头像"
+                        className="rounded-full"
+                      />
+                      <span className="ml-3">梦幻基调</span>
+                    </li>
+                    <li className="flex items-center my-2">
+                      <img
+                        src="https://picsum.photos/id/1016/50/50"
+                        alt="头像"
+                        className="rounded-full"
+                      />
+                      <span className="ml-3">科技风格</span>
+                    </li>
+                    <li className="flex items-center my-2">
+                      <img
+                        src="https://picsum.photos/id/1018/50/50"
+                        alt="头像"
+                        className="rounded-full"
+                      />
+                      <span className="ml-3">卡通场像</span>
+                    </li>
+                  </ul>
+                  <div className="mt-5">
+                    <h3 className="text-lg font-bold mb-2">模板分类</h3>
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => handleCategorySelect(e.target.value)}
+                      className="border rounded px-3 py-2 w-full"
+                    >
+                      <option value="卡通风">卡通风</option>
+                      <option value="写实风">写实风</option>
+                    </select>
+                    {selectedCategory === "卡通风" && (
+                      <div className="mt-3 flex items-center">
+                        <img
+                          src="https://picsum.photos/id/1025/50/50"
+                          className="rounded-full"
+                          alt="卡通风1"
+                        />
+                        <img
+                          src="https://picsum.photos/id/1031/50/50"
+                          className="ml-3 rounded-full"
+                          alt="卡通风2"
+                        />
+                      </div>
+                    )}
+                    {selectedCategory === "写实风" && (
+                      <div className="mt-3 flex items-center">
+                        <img
+                          src="https://picsum.photos/id/105/50/50"
+                          className="rounded-full"
+                          alt="写实风1"
+                        />
+                        <img
+                          src="https://picsum.photos/id/106/50/50"
+                          className="ml-3 rounded-full"
+                          alt="写实风2"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <button

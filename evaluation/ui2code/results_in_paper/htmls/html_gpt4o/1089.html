@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二手交易平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+</head>
+<body class="min-h-screen bg-white">
+  <div id="root"></div>
+  <script type="text/babel">
+    const App = () => {
+      const [modalType, setModalType] = React.useState(null); // "add", "edit", "delete"
+      const [selectedProduct, setSelectedProduct] = React.useState(null);
+      const [editManagerMode, setEditManagerMode] = React.useState(false);
+      const [products, setProducts] = React.useState([
+        {
+          id: 1,
+          name: "二手 iPhone 11",
+          category: "电子产品",
+          price: 1800,
+          imageUrl: "https://picsum.photos/id/1/300/200",
+          publishDate: "2023-05-15",
+          description: "黑色，8GB，成色良好",
+        },
+        {
+          id: 2,
+          name: "宜家折叠餐桌",
+          category: "家具",
+          price: 300,
+          imageUrl: "https://picsum.photos/id/2/300/200",
+          publishDate: "2023-05-10",
+          description: "带椅子，九成新",
+        },
+        {
+          id: 3,
+          name: "儿童绘画套装",
+          category: "文具",
+          price: 50,
+          imageUrl: "https://picsum.photos/id/3/300/200",
+          publishDate: "2023-05-05",
+          description: "九成新，完整纸等",
+        },
+      ]);
+
+      const handleAddProduct = (product) => {
+        setProducts([...products, { ...product, id: Date.now() }]);
+        setModalType(null);
+      };
+
+      const handleEditProduct = (editedProduct) => {
+        setProducts(products.map(product => product.id === editedProduct.id ? editedProduct : product));
+        setModalType(null);
+      };
+
+      const handleDeleteProduct = (productId) => {
+        setProducts(products.filter(product => product.id !== productId));
+        setModalType(null);
+      };
+
+      return (
+        <div className="flex bg-gray-100 min-h-screen">
+          {/* Sidebar */}
+          <aside className="w-64 bg-green-600 text-white">
+            <div className="p-4 text-xl font-bold">二手交易平台</div>
+            <nav className="space-y-4 p-4">
+              <a href="#" className="block text-lg hover:underline">首页</a>
+              <a href="#" className="block text-lg hover:underline">发布商品</a>
+              <a href="#" className="block text-lg hover:underline">我的订单</a>
+              <a href="#" className="block text-lg hover:underline">帮助中心</a>
+            </nav>
+            <div className="absolute bottom-4 left-4 text-xs text-gray-200">
+              ©2023 二手交易平台<br />
+              本平台支持环保、促进循环经济发展
+            </div>
+          </aside>
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col">
+            {/* Header */}
+            <header className="bg-white shadow-sm flex justify-between items-center p-4">
+              <h2 className="text-green-600 text-xl font-bold">环保·循环·价值——让闲置焕发新生</h2>
+            </header>
+            {/* Navigation */}
+            <nav className="flex justify-start bg-green-100 border-b border-green-300 p-4">
+              <button className={`text-lg font-bold px-4 ${modalType === "statistics" ? "text-green-600" : "text-gray-600"}`} onClick={() => setModalType("statistics")}>数据统计</button>
+              <button className={`text-lg font-bold px-4 ${modalType === "management" ? "text-green-600" : "text-gray-600"}`} onClick={() => setEditManagerMode(prev=> !prev)}>编辑管理。...</

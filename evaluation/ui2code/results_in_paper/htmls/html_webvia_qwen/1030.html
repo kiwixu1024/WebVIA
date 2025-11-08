@@ -1,0 +1,620 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跑步打卡榜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('daily');
+            const [currentDate, setCurrentDate] = useState('2024-06-10');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [selectedRecord, setSelectedRecord] = useState(null);
+            const [records, setRecords] = useState([
+                { id: 1, name: 'Alice', distance: 5.2, time: '00:30:15', date: '2024-06-10', dateSun: '6/10/2024' },
+                { id: 2, name: 'Bob', distance: 10, time: '00:50:00', date: '2024-06-09', dateSun: '6/9/2024' },
+                { id: 3, name: 'Carol', distance: 3.8, time: '00:22:45', date: '2024-06-10', dateSun: '6/10/2024' },
+                { id: 4, name: 'David', distance: 7.5, time: '00:40:30', date: '2024-06-08', dateSun: '6/8/2024' },
+                { id: 5, name: 'Eve', distance: 6.3, time: '00:35:20', date: '2024-06-07', dateSun: '6/7/2024' }
+            ]);
+
+            const goals = {
+                distance: 5.0,
+                time: 30
+            };
+
+            const formatTime = (seconds) => {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            const formatDate = (dateStr) => {
+                return `6/${dateStr.split('-').slice(1).join('/')}'2024`;
+            };
+
+            const handleBack = () => {
+                setCurrentDate('2024-06-09');
+            };
+
+            const handleWeeklyRanking = () => {
+                setCurrentView('weekly');
+                setCurrentDate('2024-06-09');
+            };
+
+            const handleDailyRanking = () => {
+                setCurrentView('daily');
+                setCurrentDate('2024-06-10');
+            };
+
+            const handleMonthlyRanking = () => {
+                setCurrentView('month');
+            };
+
+            const handleEditClick = (record) => {
+                setSelectedRecord(record);
+                setShowEditModal(true);
+            };
+
+            const handleAddClick = () => {
+                setShowAddModal(true);
+            };
+
+            const handleTrashClick = (recordId) => {
+                setRecords(records.filter(r => r.id !== recordId));
+            };
+
+            const handleSaveEdit = () => {
+                setRecords(records.map(r => r.id === selectedRecord.id 
+                    ? { ...r, ...selectedRecord }
+                    : r
+                ));
+                setShowEditModal(false);
+                setSelectedRecord(null);
+            };
+
+            const handleAddRecord = () => {
+                if (selectedRecord) {
+                    const updatedRecord = { ...selectedRecord };
+                    setRecords([updatedRecord, ...records]);
+                } else {
+                    setRecords([...records, {
+                        id: records.length + 1,
+                        name: '',
+                        distance: 0,
+                        time: '00:00:00',
+                        date: currentView === 'daily' ? '2025-09-23' : '2024-06-09'
+                    }]);
+                }
+                setShowAddModal(false);
+                setSelectedRecord(null);
+            };
+
+            const handleDateChange = (newDate) => {
+                setCurrentDate(newDate);
+            };
+
+            const handleRefresh = () => {
+                const updatedRecords = [
+                    { id: 1, name: 'David', distance: 7.5, time: '00:40:30', date: '2024-06-08', dateSun: '6/8/2024' },
+                    { id: 2, name: 'Bob', distance: 10, time: '00:50:00', date: '2024-06-09', dateSun: '6/9/2024' },
+                    { id: 3, name: 'Eve', distance: 6.3, time: '00:35:20', date: '2024-06-07', dateSun: '6/7/2024' },
+                    { id: 4, name: 'Alice', distance: 5.2, time: '00:30:15', date: '2024-06-10', dateSun: '6/10/2024' },
+                    { id: 5, name: 'Carol', distance: 3.8, time: '00:22:45', date: '2024-06-10', dateSun: '6/10/2024' }
+                ];
+                setRecords(updatedRecords);
+            };
+
+            const currentRecords = currentView === 'weekly' 
+                ? records.filter(r => r.dateSun === '6/9/2024')
+                : records.filter(r => r.dateSun === formatDate(currentDate));
+
+            const totalRecords = currentView === 'weekly'
+                ? records.filter(r => r.dateSun === '6/9/2024').length
+                : records.filter(r => r.dateSun === formatDate(currentDate)).length;
+
+            const isAddModal = showAddModal;
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <img src="https://picsum.photos/id/64/40/40" alt="Logo" className="w-10 h-10 rounded-full" />
+                                <div>
+                                    <h1 className="text-orange-500 text-xl font-bold">跑步打卡榜</h1>
+                                    <p className="text-sm text-gray-500">跑步社群记录平台</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleBack}
+                                className="text-gray-600 hover:text-gray-800"
+                            >
+                                <i className="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div className="flex px-6 py-6 space-x-6">
+                        {/* Sidebar */}
+                        <div className="w-80 space-y-6">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-clipboard-list text-orange-500"></i>
+                                    <h3 className="font-semibold">打卡记录</h3>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                    <button 
+                                        onClick={handleDailyRanking}
+                                        className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                                            currentView === 'daily' 
+                                                ? 'bg-orange-500 text-white' 
+                                                : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        日常打卡
+                                    </button>
+                                    <button 
+                                        onClick={handleWeeklyRanking}
+                                        className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                                            currentView === 'weekly' 
+                                                ? 'bg-orange-500 text-white' 
+                                                : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        周榜
+                                    </button>
+                                    <button 
+                                        onClick={handleMonthlyRanking}
+                                        className={`w-full text-left px-3 py-2 rounded-md text-sm ${
+                                            currentView === 'month' 
+                                                ? 'bg-orange-500 text-white' 
+                                                : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        月榜
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-chart-bar text-green-500"></i>
+                                    <h3 className="font-semibold">实时排行榜</h3>
+                                </div>
+                                <button className="w-full text-left px-3 py-2 rounded-md text-sm bg-green-500 text-white">
+                                    点击上方栏点击更新榜单统计
+                                </button>
+                            </div>
+
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-chart-line text-blue-500"></i>
+                                    <h3 className="font-semibold">统计报表</h3>
+                                </div>
+                                <button className="w-full text-left px-3 py-2 rounded-md text-sm bg-blue-500 text-white">
+                                    查看详细统计分析
+                                </button>
+                            </div>
+
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-question-circle text-purple-500"></i>
+                                    <h3 className="font-semibold">帮助说明</h3>
+                                </div>
+                                
+                                <ul className="text-sm text-gray-600 space-y-1">
+                                    <li>• 连续打卡7天可解锁徽章</li>
+                                    <li>• 可在记录管理中编辑和删除</li>
+                                    <li>• 周榜为7天的累计数据统计</li>
+                                    <li>• 月榜为当月累计里程的每月情况</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-trophy text-yellow-500"></i>
+                                    <h2 className="text-lg font-semibold">跑步打卡数据看心</h2>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-sm text-gray-500 flex items-center">
+                                        <i className="far fa-calendar-alt mr-1"></i>
+                                        {currentView === 'daily' ? '2024年6月10日' : currentView === 'weekly' ? '2024年6月9日' : '2024年6月10日'}
+                                    </span>
+                                    <span className="text-sm bg-orange-100 text-orange-600 px-2 py-1 rounded">
+                                        今日还有 1 次免费打卡
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Tab Buttons */}
+                            <div className="flex space-x-2 mb-6">
+                                <button 
+                                    onClick={handleDailyRanking}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                        currentView === 'daily' 
+                                            ? 'bg-orange-500 text-white' 
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    日常打卡
+                                </button>
+                                <button 
+                                    onClick={handleWeeklyRanking}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                        currentView === 'weekly' 
+                                            ? 'bg-orange-500 text-white' 
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    周榜
+                                </button>
+                                <button 
+                                    onClick={handleMonthlyRanking}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                        currentView === 'month' 
+                                            ? 'bg-orange-500 text-white' 
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    月榜
+                                </button>
+                            </div>
+
+                            {/* Dashboard Content */}
+                            <div className="grid grid-cols-2 gap-6">
+                                {/* Daily Check-in List */}
+                                <div className="bg-white rounded-lg shadow-sm">
+                                    <div className="p-4 border-b border-gray-100">
+                                        <div className="flex items-center space-x-2">
+                                            <i className="fas fa-list text-green-500"></i>
+                                            <h3 className="font-semibold">日常打卡榜单</h3>
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Tip: 连续 7 天打卡可解锁专属徽章!
+                                        </p>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">排名</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">用户名</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">公里数</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">时间</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">日期</th>
+                                                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">操作</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {currentRecords.map((record, index) => (
+                                                    <tr key={record.id} className="last:pb-0">
+                                                        <td className="px-4 py-3 text-xs font-medium text-gray-900">{index + 1}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">{record.name}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">{record.distance} km</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">{record.time}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-900">{record.date}</td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex space-x-2">
+                                                                <button 
+                                                                    onClick={() => handleEditClick(record)}
+                                                                    className="text-green-600 hover:text-green-800"
+                                                                >
+                                                                    <i className="fas fa-edit"></i>
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleTrashClick(record.id)}
+                                                                    className="text-red-600 hover:text-red-800"
+                                                                >
+                                                                    <i className="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* Check-in Management */}
+                                <div className="bg-white rounded-lg shadow-sm">
+                                    <div className="p-4 border-b border-gray-100">
+                                        <h3 className="font-semibold">打卡管理</h3>
+                                        <button 
+                                            onClick={showAddModal ? handleAddRecord : handleAddClick}
+                                            className="float-right bg-orange-500 text-white px-4 py-2 rounded-md text-sm hover:bg-orange-600"
+                                        >
+                                            <i className="fas fa-plus mr-1"></i>
+                                            添加新记录
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="p-4">
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">今日目标</label>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-gray-600">距离目标</span>
+                                                    <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                                                        <div className="bg-orange-500 h-2 rounded-full" style={{width: '100%'}}></div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between mt-1">
+                                                    <span className="text-sm">{goals.distance} km</span>
+                                                    <span className="text-sm text-gray-600">{currentDate}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">时间目标</span>
+                                                <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <span className="text-sm">{goals.time} 分钟</span>
+                                                <span className="text-sm text-gray-600">{currentDate}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="text-sm text-gray-500 mt-4">
+                                            确保公路数与时间填写准确，保存后不可撤销。
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Statistics Panel */}
+                        <div className="w-80 bg-white rounded-lg p-6 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-chart-bar text-blue-500"></i>
+                                    <h3 className="font-semibold">统计分析</h3>
+                                </div>
+                                <button 
+                                    onClick={handleRefresh}
+                                    className="text-white bg-gray-600 px-3 py-1 rounded text-sm flex items-center"
+                                >
+                                    <i className="fas fa-sync-alt mr-1"></i>
+                                    刷新
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-blue-50 rounded-lg p-4 text-center">
+                                    <div className="text-lg font-semibold text-blue-600">75%</div>
+                                </div>
+                                <div className="bg-teal-50 rounded-lg p-4 text-center">
+                                    <div className="text-lg font-semibold text-teal-600">75%</div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-100 rounded-lg p-4 mb-4">
+                                <h4 className="font-medium mb-3">过去7天累计公里数</h4>
+                                <div className="space-y-2">
+                                    {[
+                                        { day: '6/4', height: '24px' },
+                                        { day: '6/5', height: '52px' },
+                                        { day: '6/6', height: '32px' },
+                                        { day: '6/7', height: '48px' },
+                                        { day: '6/8', height: '56px' },
+                                        { day: '6/9', height: '20px' },
+                                        { day: '6/10', height: '58px' }
+                                    ].map((record, index) => (
+                                        <div key={index} className="flex items-end justify-between h-8 bg-white rounded">
+                                            <span className="text-xs text-gray-500 w-8 truncate">{record.day}</span>
+                                            <div className="flex-1 bg-orange-400 h-full rounded flex items-end justify-between mx-4">
+                                                <span className="text-xs text-gray-600 w-8">{record.day}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="text-center">
+                                <div className="text-lg font-semibold">{totalRecords}%</div>
+                                <div className="text-sm text-gray-600">本月目标完成率</div>
+                            </div>
+
+                            <div className="text-xs text-gray-500 text-center mt-4">
+                                数据来源于用户实时上传，更新频率1分钟一次。
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold">编辑打卡记录</h3>
+                                    <button 
+                                        onClick={() => {
+                                            setShowEditModal(false);
+                                            setSelectedRecord(null);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                {!isAddModal && selectedRecord ? (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                跑步者姓名 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input 
+                                                type="text"
+                                                value={selectedRecord.name}
+                                                onChange={(e) => setSelectedRecord({...selectedRecord, name: e目标});
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">公里数</label>
+                                            <input 
+                                                type="number"
+                                                value={selectedRecord.distance}
+                                                onChange={(e) => setSelectedRecord({...selectedRecord, distance: parseInt(e.target.value) || 0});
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">时间</label>
+                                            <input 
+                                                type="text"
+                                                value={selectedRecord.time}
+                                                readOnly
+                                                className="w-full px-3 py-2 border rounded-md bg-gray-50"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                            <input 
+                                                type="date"
+                                                value={selectedRecord.date + 'T' + 
+                                                    ((selectedRecord.time === '00:30:15' ? '00:30:25' : 
+                                                      selectedRecord.time === '00:22:45' ? '00:22:35' : 
+                                                      selectedRecord.time === '00:40:30' ? '00:19:35' : 
+                                                      selectedRecord.time === '00:35:20' ? '00:23:15' :
+                                                      '00:00:00').replace(' ', 'T').replace('T', '')}
+                                                onChange={(e) => {
+                                                    if (!e.target.value) {
+                                                        return;
+                                                    }
+                                                    const newDate = new Date(e.target.value);
+                                                    setSelectedRecord({...selectedRecord, date: `${newDate.getFullYear()}-${String(newDate.getMonth() + 1).padStart(2, '0')}-${String(newDate.getDate()).padStart(2, '0')}`});
+                                                }}
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => setShowEditModal(false)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleSaveEdit}
+                                                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 text-sm"
+                                            >
+                                                保存修改
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                跑步者姓名 <span className="text-red-500">*</span>
+                                            </label>
+                                            <input 
+                                                type="text"
+                                                placeholder="请输入姓名"
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">公里数</label>
+                                            <input 
+                                                type="number"
+                                                placeholder="0"
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">时间</label>
+                                            <input 
+                                                type="text"
+                                                value={isAddModal ? '00:00:00' : '00:00:00'}
+                                                readOnly
+                                                className="w-full px-3 py-2 border rounded-md bg-gray-50"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                            <input 
+                                                type="date"
+                                                value={isAddModal ? '2025-09-23' : '2024-09-23'}
+                                                onChange={(e) => setShowEditModal(false)}
+                                                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            />
+                                        </div>
+                                        <div className="flex space-x-3 pt-4">
+                                            <button 
+                                                onClick={() => setShowEditModal(false)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={handleAddRecord}
+                                                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 text-sm"
+                                            >
+                                                确认添加
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t border-gray-200 px-6 py-4 mt-8">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <img src="https://picsum.photos/id/64/24/24" alt="Logo" className="w-6 h-6 rounded-full" />
+                                <div>
+                                    <div className="font-medium">跑步打卡榜</div>
+                                    <div className="text-xs text-gray-500">© 2024 跑步打卡榜. 坚持打卡，跑出健康人生!</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button className="text-xs text-orange-500 hover:text-orange-600">
+                                    <i className="fas fa-question-circle mr-1"></i>
+                                    联系我们
+                                </button>
+                                <img src="https://picsum.photos/id/1/24/24" alt="Social" className="w-6 h-6" />
+                                <img src="https://picsum.photos/id/2/24/24" alt="Social" className="w-6 h-6" />
+                                <img src="https://picsum.photos/id/3/24/24" alt="Social" className="w-6 h-6" />
+                            </div>
+                        </div>
+                        
+                        <div className="text-center text-xs text-gray-400 mt-4">
+                            有任何问题，请点击右侧帮助按钮或查看页面顶部的'帮助说明'。
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

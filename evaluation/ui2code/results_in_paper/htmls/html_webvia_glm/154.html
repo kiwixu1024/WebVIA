@@ -1,0 +1,624 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健身食谱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [recipes, setRecipes] = useState([
+                {
+                    id: 1,
+                    name: "高蛋白鸡胸肉沙拉",
+                    calories: 350,
+                    protein: 40,
+                    carbs: 26,
+                    fat: 15,
+                    notes: "适合健身后食用，补充蛋白质",
+                    category: "沙拉",
+                    image: "https://picsum.photos/id/96/300/200",
+                    tags: ["高蛋白", "低脂"]
+                },
+                {
+                    id: 2,
+                    name: "牛油果三文鱼饭",
+                    calories: 420,
+                    protein: 30,
+                    carbs: 45,
+                    fat: 20,
+                    notes: "",
+                    category: "主食",
+                    image: "https://picsum.photos/id/292/300/200",
+                    tags: ["高蛋白", "健康脂肪"]
+                },
+                {
+                    id: 3,
+                    name: "希腊酸奶水果碗",
+                    calories: 280,
+                    protein: 35,
+                    carbs: 20,
+                    fat: 9,
+                    notes: "",
+                    category: "甜品",
+                    image: "https://picsum.photos/id/312/300/200",
+                    tags: ["高纤维", "低糖"]
+                }
+            ]);
+
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [editingRecipe, setEditingRecipe] = useState(null);
+            const [deletingRecipe, setDeletingRecipe] = useState(null);
+
+            const handleEdit = (recipe) => {
+                setEditingRecipe({...recipe});
+                setShowEditModal(true);
+            };
+
+            const handleDelete = (recipe) => {
+                setDeletingRecipe(recipe);
+                setShowDeleteModal(true);
+            };
+
+            const handleAdd = () => {
+                const newRecipe = {
+                    id: Date.now(),
+                    name: "例如：高蛋白鸡胸肉沙拉",
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                    notes: "添加关于这个食谱的备注...",
+                    category: "沙拉",
+                    image: "https://picsum.photos/id/326/300/200",
+                    tags: ["主食"]
+                };
+                setEditingRecipe(newRecipe);
+                setShowAddModal(true);
+            };
+
+            const handleSave = () => {
+                if (showAddModal && editingRecipe.name.includes("例如")) {
+                    // Add new recipe
+                    const newRecipe = {
+                        ...editingRecipe,
+                        name: editingRecipe.name.replace("例如：", ""),
+                        calories: parseInt(editingRecipe.calories) || 360,
+                        protein: parseInt(editingRecipe.protein) || 42,
+                        carbs: parseInt(editingRecipe.carbs) || 27,
+                        fat: parseInt(editingRecipe.fat) || 18
+                    };
+                    setRecipes([...recipes, newRecipe]);
+                } else {
+                    // Update existing recipe
+                    setRecipes(recipes.map(r => 
+                        r.id === editingRecipe.id ? editingRecipe : r
+                    ));
+                }
+                setShowEditModal(false);
+                setShowAddModal(false);
+                setEditingRecipe(null);
+            };
+
+            const confirmDelete = () => {
+                setRecipes(recipes.filter(r => r.id !== deletingRecipe.id));
+                setShowDeleteModal(false);
+                setDeletingRecipe(null);
+            };
+
+            const closeModal = () => {
+                setShowEditModal(false);
+                setShowAddModal(false);
+                setShowDeleteModal(false);
+                setEditingRecipe(null);
+                setDeletingRecipe(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex">
+                    {/* Sidebar */}
+                    <div className="w-48 bg-slate-800 text-white">
+                        <div className="p-4 border-b border-slate-700">
+                            <h2 className="text-lg font-semibold">健身食谱</h2>
+                        </div>
+                        <nav className="mt-4">
+                            <div className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-700">
+                                <i className="fas fa-heart mr-2"></i>
+                                我的食谱
+                            </div>
+                            <div className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-700">
+                                <i className="fas fa-utensils mr-2"></i>
+                                食材库
+                            </div>
+                            <div className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-700">
+                                <i className="fas fa-chart-bar mr-2"></i>
+                                食谱分析
+                            </div>
+                            <div className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-700">
+                                <i className="fas fa-chart-line mr-2"></i>
+                                统计分析
+                            </div>
+                            <div className="px-4 py-2 text-sm cursor-pointer hover:bg-slate-700">
+                                <i className="fas fa-question-circle mr-2"></i>
+                                帮助说明
+                            </div>
+                        </nav>
+                        <div className="absolute bottom-4 left-4 text-xs text-gray-400">
+                            版本 1.00
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="flex-1 p-6">
+                        {/* Hero Banner */}
+                        <div className="bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 rounded-lg p-6 mb-8 flex justify-between items-center text-white">
+                            <div>
+                                <h1 className="text-xl font-bold mb-2">定制你的专属健身餐，从营养均衡到口感美味一步到位</h1>
+                            </div>
+                            <img src="https://picsum.photos/id/133/120/80" alt="Banner" className="rounded-lg" />
+                        </div>
+
+                        {/* Recipe Grid */}
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4">我的食谱集</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {recipes.map((recipe) => (
+                                    <div key={recipe.id} className="bg-white rounded-lg shadow-md overflow-hidden relative">
+                                        <button className="absolute top-4 right-4 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                                            <i className="fas fa-search text-sm"></i>
+                                        </button>
+                                        <img src={recipe.image} alt={recipe.name} className="w-full h-48 object-cover" />
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-lg mb-2">{recipe.name}</h3>
+                                            <div className="text-sm text-gray-600 mb-3">
+                                                <span>{recipe.calories} 卡路里</span>
+                                                <span className="ml-4">蛋白质 {recipe.protein}g</span>
+                                            </div>
+                                            
+                                            {/* Nutrition Progress Bars */}
+                                            <div className="space-y-2 mb-4">
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span>碳水 {recipe.carbs}g</span>
+                                                    <span className="text-right">32%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-green-500 h-2 rounded-full" style={{width: '32%'}}></div>
+                                                </div>
+                                                
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span>脂肪 {recipe.fat}g</span>
+                                                    <span className="text-right">56%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-yellow-500 h-2 rounded-full" style={{width: '56%'}}></div>
+                                                </div>
+                                                
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <span className="text-orange-500">蛋白质 {recipe.protein}g</span>
+                                                    <span className="text-right">13%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '13%'}}></div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Tags */}
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {recipe.tags.map((tag, index) => (
+                                                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Action Buttons */}
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => handleEdit(recipe)}
+                                                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                                >
+                                                    <i className="fas fa-edit mr-1"></i>
+                                                    编辑
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(recipe)}
+                                                    className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                                >
+                                                    <i className="fas fa-trash mr-1"></i>
+                                                    删除
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Add Recipe Button */}
+                        <div className="text-center">
+                            <button 
+                                onClick={handleAdd}
+                                className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium"
+                            >
+                                <i className="fas fa-plus mr-2"></i>
+                                添加食谱
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="w-80 bg-white p-6 border-l border-gray-200">
+                        <h3 className="text-lg font-semibold mb-4">营养摄入统计</h3>
+                        <p className="text-sm text-gray-600 mb-4">本周营养摄入对比</p>
+                        
+                        {/* Week Calendar */}
+                        <div className="mb-6">
+                            <div className="flex space-x-2 mb-2">
+                                {['周一', '周二', '周三', '周四', '周五', '周六', '周日'].map(day => (
+                                    <span key={day} className="px-2 py-1 text-xs bg-gray-100 rounded">{day}</span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Progress Circles */}
+                        <div className="mb-6">
+                            <h4 className="text-sm font-medium mb-3">营养目标完成度</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="text-center">
+                                    <div className="relative w-16 h-16 mx-auto mb-2">
+                                        <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3"/>
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#ef4444" strokeWidth="3" strokeDasharray="85, 100"/>
+                                        </svg>
+                                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium">85%</span>
+                                    </div>
+                                    <span className="text-xs text-gray-600">高蛋白</span>
+                                </div>
+                                <div className="text-center">
+                                    <div className="relative w-16 h-16 mx-auto mb-2">
+                                        <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3"/>
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" strokeWidth="3" strokeDasharray="65, 100"/>
+                                        </svg>
+                                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium">65%</span>
+                                    </div>
+                                    <span className="text-xs text-gray-600">低脂</span>
+                                </div>
+                                <div className="text-center">
+                                    <div className="relative w-16 h-16 mx-auto mb-2">
+                                        <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb" strokeWidth="3"/>
+                                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" strokeWidth="3" strokeDasharray="75, 100"/>
+                                        </svg>
+                                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium">75%</span>
+                                    </div>
+                                    <span className="text-xs text-gray-600">膳食纤维</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Export Options */}
+                        <div className="border-t pt-4">
+                            <div className="flex gap-4 mb-4">
+                                <button className="flex items-center text-sm text-gray-600">
+                                    <i className="fas fa-file-pdf mr-2"></i>
+                                    导出PDF
+                                </button>
+                                <button className="flex items-center text-sm text-gray-600">
+                                    <i className="fas fa-download mr-2"></i>
+                                    导出CSV
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Tips */}
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4">
+                            <div className="flex items-start">
+                                <i className="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                                <div>
+                                    <h4 className="text-sm font-medium text-yellow-800">使用小贴士</h4>
+                                    <p className="text-xs text-yellow-700 mt-1">
+                                        高蛋白食物优先选择，有助于肌肉修复与生长。可在训练前后及睡前适量补充蛋白质。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold">编辑健身餐食谱</h3>
+                                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* Left Column */}
+                                    <div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">食谱名称</label>
+                                            <input 
+                                                type="text" 
+                                                value={editingRecipe?.name || ""}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, name: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                            />
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">当前图片</label>
+                                            <img src={editingRecipe?.image} alt="食谱图片" className="w-full h-32 object-cover rounded" />
+                                            <button className="w-full mt-2 px-4 py-2 bg-gray-100 text-gray-600 rounded text-sm">
+                                                <i className="fas fa-upload mr-1"></i>
+                                                更改图片
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">菜系类型</label>
+                                            <select 
+                                                value={editingRecipe?.category || "沙拉"}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, category: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                            >
+                                                <option>沙拉</option>
+                                                <option>主食</option>
+                                                <option>甜品</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Right Column */}
+                                    <div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">营养标签</label>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                {['高蛋白', '低脂', '高纤维', '生食'].map(tag => (
+                                                    <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">营养成分</label>
+                                            <div className="grid grid-cols-3 gap-2 text-sm">
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">热量(kcal)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.calories || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, calories: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">蛋白质(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.protein || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, protein: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">脂肪(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.fat || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, fat: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div className="col-span-3">
+                                                    <label className="block text-xs text-gray-600">碳水(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.carbs || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, carbs: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">备注</label>
+                                            <textarea 
+                                                value={editingRecipe?.notes || ""}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, notes: e.target.value})}
+                                                placeholder="适合健身后食用，补充蛋白质"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded resize-none h-20"
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <button onClick={closeModal} className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50">
+                                        取消
+                                    </button>
+                                    <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                        保存更改
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <div className="flex items-center mb-4">
+                                    <i className="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+                                    <h3 className="text-lg font-semibold">删除确认</h3>
+                                </div>
+                                <p className="text-gray-600 mb-6">
+                                    确认删除《{deletingRecipe?.name}》？此操作不可撤销。
+                                </p>
+                                <div className="flex justify-end gap-2">
+                                    <button onClick={closeModal} className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50">
+                                        取消
+                                    </button>
+                                    <button onClick={confirmDelete} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold">新增健身餐食谱</h3>
+                                    <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* Left Column */}
+                                    <div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">食谱名称</label>
+                                            <input 
+                                                type="text" 
+                                                value={editingRecipe?.name || ""}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, name: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                            />
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">当前图片</label>
+                                            <img src={editingRecipe?.image} alt="食谱图片" className="w-full h-32 object-cover rounded" />
+                                            <button className="w-full mt-2 px-4 py-2 bg-gray-100 text-gray-600 rounded text-sm">
+                                                <i className="fas fa-upload mr-1"></i>
+                                                上传图片
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">菜系类型</label>
+                                            <select 
+                                                value={editingRecipe?.category || "沙拉"}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, category: e.target.value})}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                            >
+                                                <option>沙拉</option>
+                                                <option>主食</option>
+                                                <option>甜品</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Right Column */}
+                                    <div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">营养标签</label>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                {['高蛋白', '低脂', '高纤维', '生食'].map(tag => (
+                                                    <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">营养成分</label>
+                                            <div className="grid grid-cols-3 gap-2 text-sm">
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">热量(kcal)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.calories || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, calories: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">蛋白质(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.protein || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, protein: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs text-gray-600">脂肪(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.fat || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, fat: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                                <div className="col-span-3">
+                                                    <label className="block text-xs text-gray-600">碳水(g)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={editingRecipe?.carbs || 0}
+                                                        onChange={(e) => setEditingRecipe({...editingRecipe, carbs: e.target.value})}
+                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium mb-2">备注</label>
+                                            <textarea 
+                                                value={editingRecipe?.notes || ""}
+                                                onChange={(e) => setEditingRecipe({...editingRecipe, notes: e.target.value})}
+                                                placeholder="添加关于这个食谱的备注..."
+                                                className="w-full px-3 py-2 border border-gray-300 rounded resize-none h-20"
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-2 mt-6">
+                                    <button onClick={closeModal} className="px-4 py-2 text-gray-600 border rounded hover:bg-gray-50">
+                                        取消
+                                    </button>
+                                    <button onClick={handleSave} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

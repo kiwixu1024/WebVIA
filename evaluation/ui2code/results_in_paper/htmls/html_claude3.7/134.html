@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物养护日志</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        .bg-plant-green {
+            background-color: #a5d6a7;
+        }
+        .bg-light-green {
+            background-color: #d7ebd8;
+        }
+        .bg-btn-green {
+            background-color: #86c28b;
+        }
+        .bg-btn-brown {
+            background-color: #a17a56;
+        }
+        .tag-healthy {
+            background-color: #4caf50;
+            color: white;
+        }
+        .tag-warning {
+            background-color: #ffb300;
+            color: white;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [showAddLogModal, setShowAddLogModal] = useState(false);
+            const [showStatsModal, setShowStatsModal] = useState(false);
+            const [activeCard, setActiveCard] = useState(null);
+
+            const openAddModal = () => {
+                setShowAddModal(true);
+            };
+            
+            const openEditModal = (plantId) => {
+                setActiveCard(plantId);
+                setShowEditModal(true);
+            };
+            
+            const openDeleteModal = (plantId) => {
+                setActiveCard(plantId);
+                setShowDeleteModal(true);
+            };
+            
+            const openAddLogModal = () => {
+                setShowAddLogModal(true);
+            };
+            
+            const openStatsModal = () => {
+                setShowStatsModal(true);
+            };
+
+            const plants = [
+                {
+                    id: 1,
+                    name: '绿梦',
+                    date: '2024-06-01',
+                    description: '今天阳光灿烂，给绿梦浇了水，长势良好！',
+                    waterAmount: '200ml',
+                    status: 'healthy',
+                    imageUrl: 'https://picsum.photos/id/123/800/400',
+                    tags: ['200ml', '阳光充足']
+                },
+                {
+                    id: 2,
+                    name: '虎皮兰',
+                    date: '2024-06-03',
+                    description: '叶子有点发黄，可能晒水了。',
+                    waterAmount: '100ml',
+                    status: 'warning',
+                    imageUrl: 'https://picsum.photos/id/234/800/400',
+                    tags: ['100ml', '弱光']
+                },
+                {
+                    id: 3,
+                    name: '多肉',
+                    date: '2024-06-05',
+                    description: '多肉长势喜人，颜色非常漂亮！',
+                    waterAmount: '50ml',
+                    status: 'healthy',
+                    imageUrl: 'https://picsum.photos/id/345/800/400',
+                    tags: ['50ml', '弱光']
+                }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-plant-green py-3 px-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                            <i className="fas fa-leaf text-green-800 mr-2"></i>
+                            <span className="text-green-900 font-semibold">植物养护日志</span>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button className="px-3 py-1 rounded bg-btn-brown text-white text-sm">日志总览</button>
+                            <button onClick={openAddModal} className="px-3 py-1 rounded bg-btn-brown text-white text-sm">新增记录</button>
+                            <button className="px-3 py-1 rounded bg-btn-brown text-white text-sm">统计分析</button>
+                            <button className="px-3 py-1 rounded bg-btn-brown text-white text-sm">帮助中心</button>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-40 bg-white min-h-screen p-4 shadow-md">
+                            <ul className="space-y-4">
+                                <li className="flex items-center text-gray-700">
+                                    <i className="fas fa-calendar-alt mr-2 text-green-600"></i>
+                                    <span className="text-sm font-medium">今日记录</span>
+                                </li>
+                                <li className="flex items-center text-gray-700">
+                                    <i className="fas fa-history mr-2 text-green-600"></i>
+                                    <span className="text-sm font-medium">历史记录</span>
+                                </li>
+                                <li className="flex items-center text-gray-700">
+                                    <i className="fas fa-seedling mr-2 text-green-600"></i>
+                                    <span className="text-sm font-medium">植物库</span>
+                                </li>
+                                <li className="flex items-center text-gray-700">
+                                    <i className="fas fa-cog mr-2 text-green-600"></i>
+                                    <span className="text-sm font-medium">我的设置</span>
+                                </li>
+                            </ul>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-4">
+                            <div className="bg-light-green mb-4 p-3 text-center text-gray-600">
+                                记录每一滴水，每一缕阳光，让绿意常在。
+                            </div>
+
+                            <div className="mb-4">
+                                <button onClick={openAddLogModal} className="bg-btn-green text-white px-4 py-2 rounded flex items-center">
+                                    <i className="fas fa-plus mr-2"></i>
+                                    添加新日志
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {plants.map(plant => (
+                                    <div key={plant.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                        <div className="relative h-48 bg-gray-200">
+                                            <img src={plant.imageUrl} alt={plant.name} className="w-full h-full object-cover" />
+                                            <div className="absolute top-2 right-2 flex space-x-1">
+                                                <button onClick={() => openEditModal(plant.id)} className="bg-white p-1 rounded-full shadow hover:bg-gray-100">
+                                                    <i className="fas fa-pencil-alt text-gray-600"></i>
+                                                </button>
+                                                <button onClick={() => openDeleteModal(plant.id)} className="bg-white p-1 rounded-full shadow hover:bg-gray-100">
+                                                    <i className="fas fa-trash text-gray-600"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-medium text-lg">{plant.name}</h3>
+                                                <span className={`text-xs px-2 py-1 rounded-full ${plant.status === 'healthy' ? 'tag-healthy' : 'tag-warning'}`}>
+                                                    {plant.status === 'healthy' ? '健康' : '警告'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center text-gray-500 text-sm mb-2">
+                                                <i className="far fa-calendar-alt mr-1"></i>
+                                                <span>{plant.date}</span>
+                                            </div>
+                                            <p className="text-sm text-gray-700 mb-3">{plant.description}</p>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                <div className="flex items-center text-xs text-gray-600">
+                                                    <i className="fas fa-tint mr-1"></i>
+                                                    {plant.waterAmount}
+                                                </div>
+                                                <div className="flex items-center text-xs text-gray-600">
+                                                    <i className="fas fa-sun mr-1"></i>
+                                                    {plant.tags[1]}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-64 bg-white p-4 shadow-md">
+                            <h3 className="text-gray-700 font-medium mb-4">植物类型分布</h3>
+                            
+                            <div className="mb-4 flex justify-center">
+                                <div className="w-40 h-40 relative rounded-full border-8 border-gray-100">
+                                    <div className="absolute inset-0 border-t-8 border-r-8 border-green-500 rounded-full" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }}></div>
+                                    <div className="absolute inset-0 border-t-8 border-l-8 border-yellow-500 rounded-full" style={{ clipPath: 'polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%)' }}></div>
+                                    <div className="absolute inset-0 border-b-8 border-l-8 border-blue-500 rounded-full" style={{ clipPath: 'polygon(0 50%, 50% 50%, 50% 100%, 0 100%)' }}></div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-center gap-4 mb-6 text-xs text-gray-600">
+                                <div className="flex items-center">
+                                    <span className="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                    绿梦 40%
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="w-3 h-3 bg-yellow-500 rounded-full mr-1"></span>
+                                    多肉 30%
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
+                                    观赏花 30%
+                                </div>
+                            </div>
+                            
+                            <h4 className="text-gray-700 font-medium mb-2">每周浇水次数</h4>
+                            
+                            <div className="flex items-end h-32 gap-1 mb-2">
+                                <div className="flex-1 bg-green-200" style={{ height: '20%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '15%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '40%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '30%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '60%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '80%' }}></div>
+                                <div className="flex-1 bg-green-200" style={{ height: '40%' }}></div>
+                            </div>
+                            
+                            <div className="flex text-xs text-gray-500 justify-between">
+                                <span>周一</span>
+                                <span>周二</span>
+                                <span>周三</span>
+                                <span>周四</span>
+                                <span>周五</span>
+                                <span>周六</span>
+                                <span>周日</span>
+                            </div>
+                            
+                            <h4 className="text-gray-700 font-medium mt-6 mb-2">本月记录统计</h4>
+                            
+                            <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-gray-700 text-sm">本月养护记录</span>
+                                    <span className="text-xl font-semibold text-green-600">3</span>
+                                </div>
+                                <div className="text-gray-500 text-xs">种植物</div>
+                            </div>
+                            
+                            <button onClick={openStatsModal} className="w-full bg-btn-brown text-white px-3 py-2 rounded text-sm">
+                                查看详情
+                            </button>
+                            
+                            <div className="mt-4 text-xs text-gray-400 text-center">
+                                数据来源于您的养护记录，为您的植物提供更好的养护服务！
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-plant-green py-2 px-4 text-sm text-green-900">
+                        <div className="flex justify-between items-center">
+                            <div>© 2024 植物养护日志 版权所有</div>
+                            <div>联系客服：plantsupport@example.com</div>
+                        </div>
+                        <div className="flex flex-wrap mt-1 text-xs gap-2">
+                            <div className="flex items-center">
+                                <i className="fas fa-seedling text-xs mr-1"></i>
+                                小贴士：多肉植物冬季浇水应少而分次
+                            </div>
+                            <div className="flex items-center">
+                                <i className="fas fa-seedling text-xs mr-1"></i>
+                                小贴士：绿萝喜欢温暖湿润的环境
+                            </div>
+                            <div className="flex items-center">
+                                <i className="fas fa-seedling text-xs mr-1"></i>
+                                小贴士：虎皮兰耐旱、耐阴，适合放在室内养护
+                            </div>
+                            <div className="flex items-center">
+                                <i className="fas fa-seedling text-xs mr-1"></i>
+                                小贴士：定期给植物松土可以增加土壤透气性
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Add New Plant Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 modal-backdrop">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+                                <div className="flex justify-between items-center px-6 py-4 border-b">
+                                    <h3 className="font-medium text-lg">添加新植物记录</h3>
+                                    <button onClick={() => setShowAddModal(false)} className="text-gray-500 hover:text-gray-700">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="p-6">
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入植物名称（例如：绿萝）" 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护日期</label>
+                                        <div className="flex items-center">
+                                            <input 
+                                                type="text" 
+                                                value="09/23/2025" 
+                                                className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                                readOnly
+                                            />
+                                            <button className="ml-2 text-gray-500">
+                                                <i className="far fa-calendar-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物状态</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>健康</option>
+                                                <option>需要关注</option>
+                                                <option>状态不佳</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">浇水量 (ml)</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="0" 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">阳光需求</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>中等光照</option>
+                                                <option>强光照</option>
+                                                <option>弱光照</option>
+                                                <option>散射光</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护内容</label>
+                                        <textarea 
+                                            placeholder="请输入养护内容..." 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 h-20"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物照片</label>
+                                        <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4">
+                                            <div className="text-center">
+                                                <img 
+                                                    src="https://picsum.photos/id/456/800/400" 
+                                                    alt="植物照片" 
+                                                    className="mb-2 mx-auto w-32 h-20 object-cover rounded"
+                                                />
+                                                <div className="text-sm text-gray-500">已选择的照片</div>
+                                                <button className="mt-2 text-green-500 hover:underline text-sm">
+                                                    更换其他照片
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+                                    <button onClick={() => setShowAddModal(false)} className="mr-2 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100">取消</button>
+                                    <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Plant Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 modal-backdrop">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+                                <div className="flex justify-between items-center px-6 py-4 border-b">
+                                    <h3 className="font-medium text-lg">编辑植物记录</h3>
+                                    <button onClick={() => setShowEditModal(false)} className="text-gray-500 hover:text-gray-700">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="p-6">
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物名称</label>
+                                        <input 
+                                            type="text" 
+                                            value="绿梦"
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护日期</label>
+                                        <div className="flex items-center">
+                                            <input 
+                                                type="text" 
+                                                value="06/01/2024" 
+                                                className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                                readOnly
+                                            />
+                                            <button className="ml-2 text-gray-500">
+                                                <i className="far fa-calendar-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物状态</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>健康</option>
+                                                <option>需要关注</option>
+                                                <option>状态不佳</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">浇水量 (ml)</label>
+                                        <input 
+                                            type="text" 
+                                            value="200" 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">阳光需求</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>中等光照</option>
+                                                <option>强光照</option>
+                                                <option>弱光照</option>
+                                                <option>散射光</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护内容</label>
+                                        <textarea 
+                                            value="今天阳光灿烂，给绿梦浇了水，长势良好！"
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 h-20"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物照片</label>
+                                        <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4">
+                                            <div className="text-center">
+                                                <img 
+                                                    src="https://picsum.photos/id/123/800/400" 
+                                                    alt="植物照片" 
+                                                    className="mb-2 mx-auto w-32 h-20 object-cover rounded"
+                                                />
+                                                <div className="text-sm text-gray-500">当前已选照片</div>
+                                                <button className="mt-2 text-green-500 hover:underline text-sm">
+                                                    更换其他照片
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="px-6 py-4 bg-gray-50 flex justify-end rounded-b-lg">
+                                    <button onClick={() => setShowEditModal(false)} className="mr-2 px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100">取消</button>
+                                    <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">保存</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 modal-backdrop">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
+                                <div className="flex justify-center mb-4 text-red-500">
+                                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                        <i className="fas fa-exclamation-triangle text-xl"></i>
+                                    </div>
+                                </div>
+                                <h3 className="text-center font-medium text-lg mb-4">确定删除此记录吗?</h3>
+                                <p className="text-center text-gray-600 text-sm mb-6">您即将删除"绿梦"的养护记录，此操作不可撤销。</p>
+                                <div className="flex justify-center space-x-4">
+                                    <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">取消</button>
+                                    <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">确认删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Add New Log Modal */}
+                    {showAddLogModal && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 modal-backdrop">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+                                <div className="flex justify-between items-center px-6 py-4 border-b">
+                                    <h3 className="font-medium text-lg">添加新植物记录</h3>
+                                    <button onClick={() => setShowAddLogModal(false)} className="text-gray-500 hover:text-gray-700">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div className="p-6">
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物名称</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="请输入植物名称（例如：绿萝）" 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护日期</label>
+                                        <div className="flex items-center">
+                                            <input 
+                                                type="text" 
+                                                value="09/23/2025" 
+                                                className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                                readOnly
+                                            />
+                                            <button className="ml-2 text-gray-500">
+                                                <i className="far fa-calendar-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物状态</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>健康</option>
+                                                <option>需要关注</option>
+                                                <option>状态不佳</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">浇水量 (ml)</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="0" 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500" 
+                                        />
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">阳光需求</label>
+                                        <div className="relative">
+                                            <select className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 appearance-none">
+                                                <option>中等光照</option>
+                                                <option>强光照</option>
+                                                <option>弱光照</option>
+                                                <option>散射光</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                                                <i className="fas fa-chevron-down text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">养护内容</label>
+                                        <textarea 
+                                            placeholder="请输入养护内容..." 
+                                            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-green-500 h-20"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">植物照片</label>
+                                        <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4">
+                                            <div className="text-center">
+                                                <img 
+                                                    src="https://picsum.photos/id/456/800/400" 
+                                                    alt="植物照片" 
+                                                    className="mb-2 mx-auto w-32 h-20 object-cover rounded"
+                                                />
+                                                <div className="text-sm text-gray-500">已选择照片</div>
+                                                <button className="mt-2 text-green-500 hover:underline text-sm">

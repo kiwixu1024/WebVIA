@@ -1,0 +1,752 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭理财计划</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function FinanceApp() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingRecord, setEditingRecord] = useState(null);
+            const [billRecords, setBillRecords] = useState([
+                {
+                    id: 1,
+                    date: "2023-10-15",
+                    category: "餐饮",
+                    amount: -200,
+                    note: "家庭聚餐",
+                    tag: "支出"
+                },
+                {
+                    id: 2, 
+                    date: "2023-10-10",
+                    category: "交通",
+                    amount: -50,
+                    note: "地铁月票",
+                    tag: "支出"
+                },
+                {
+                    id: 3,
+                    date: "2023-10-05",
+                    category: "收入",
+                    amount: 10000,
+                    note: "工资",
+                    tag: "收入"
+                },
+                {
+                    id: 4,
+                    date: "2023-10-03",
+                    category: "购物",
+                    amount: -1500,
+                    note: "生活用品",
+                    tag: "支出"
+                },
+                {
+                    id: 5,
+                    date: "2023-09-28",
+                    category: "家庭支出",
+                    amount: -2000,
+                    note: "水电费",
+                    tag: "支出"
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                date: "",
+                category: "",
+                amount: "",
+                note: ""
+            });
+
+            // Modal form state
+            const [modalFormData, setModalFormData] = useState({
+                date: "",
+                category: "",
+                amount: "",
+                note: ""
+            });
+
+            const toggleAddModal = () => {
+                setShowAddModal(!showAddModal);
+                setModalFormData({
+                    date: "",
+                    category: "",
+                    amount: "",
+                    note: ""
+                });
+            };
+
+            const toggleEditModal = (record) => {
+                setEditingRecord(record);
+                setModalFormData({
+                    date: record.date,
+                    category: record.category,
+                    amount: record.amount.toString(),
+                    note: record.note
+                });
+                setShowEditModal(true);
+            };
+
+            const handleSave = () => {
+                setBillRecords(prev => {
+                    const currentRecord = prev.find(r => r.id === editingRecord.id);
+                    if (currentRecord) {
+                        const updatedRecords = prev.map(record => {
+                            if (record.id === editingRecord.id) {
+                                const amountNum = parseFloat(modalFormData.amount);
+                                return {
+                                    ...record,
+                                    date: modalFormData.date,
+                                    category: modalFormData.category,
+                                    amount: amountNum,
+                                    note: modalFormData.note
+                                };
+                            }
+                            return record;
+                        });
+                        return updatedRecords;
+                    }
+                    return prev;
+                });
+                setShowEditModal(false);
+                setEditingRecord(null);
+            };
+
+            const handleCancel = () => {
+                setShowEditModal(false);
+                setEditingRecord(null);
+            };
+
+            const handleFormSubmit = (e) => {
+                e.preventDefault();
+                if (formData.category === "收入" && formData.amount !== "") {
+                    const amountNum = parseFloat(formData.amount);
+                    const newRecord = {
+                        id: Date.now(),
+                        date: formData.date,
+                        category: formData.category,
+                        amount: amountNum,
+                        note: formData.note,
+                        tag: formData.category
+                    };
+                    setBillRecords(prev => [...prev, newRecord]);
+                    setModalFormData({
+                        date: "",
+                        category: "",
+                        amount: "",
+                        note: ""
+                    });
+                    setShowAddModal(false);
+                }
+            };
+
+            const totalIncomes = billRecords.filter(r => r.amount > 0).reduce((acc, r) => acc + r.amount, 0);
+            const totalExpenses = billRecords.filter(r => r.amount < 0).reduce((acc, r) => acc + Math.abs(r.amount), 0);
+            const balance = totalIncomes - Math.abs(totalExpenses);
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex items-center">
+                            <img src="https://picsum.photos/id/1/40/40" alt="Logo" className="w-10 h-10 rounded mr-3" />
+                            <div>
+                                <h1 className="text-xl font-semibold text-blue-600">家庭理财计划</h1>
+                                <p className="text-sm text-gray-600">可可视化家庭理财一站式管理，实时数据统计与可定制预算，安全便捷，支持多端同步</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Left Sidebar */}
+                        <div className="w-64 bg-white p-6 space-y-4">
+                            <div className="border border-gray-200 rounded-lg">
+                                <div className="flex items-center text-orange-500 mb-3">
+                                    <i className="fas fa-chart-pie mr-2"></i>
+                                    <span className="font-medium">预算模板</span>
+                                </div>
+                                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded">
+                                    <i className="fas fa-edit mr-2"></i>
+                                    编写预算模板
+                                </a>
+                            </div>
+
+                            <div className="border border-gray-200 rounded-lg">
+                                <div className="flex items-center text-green-500 mb-3">
+                                    <i className="fas fa-file-invoice mr-2"></i>
+                                    <span className="font-medium">账单记录</span>
+                                </div>
+                                <a href="#" className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded">
+                                    <i className="fas fa-file-alt mr-2"></i>
+                                    查看账单记录
+                                </a>
+                            </div>
+
+                            <div className="border border-gray-200 rounded-lg">
+                                <div className="flex items-center text-purple-500 mb-3">
+                                    <i className="fas fa-chart-bar mr-2"></i>
+                                    <span className="font-medium">资产负债</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-blue-600 to-orange-400 rounded-lg p-6 mb-6">
+                                <h2 className="text-white text-2xl font-semibold mb-2">家庭理财计划</h2>
+                                <div className="flex items-center gap-4 text-white text-sm">
+                                    <span className="bg-blue-500 px-3 py-1 rounded">
+                                        <i className="fas fa-chart-pie mr-2"></i>
+                                        可视化家庭理财一站式管理
+                                    </span>
+                                    <span className="bg-green-500 px-3 py-1 rounded">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        实时数据统计与可定制预算
+                                    </span>
+                                    <span className="bg-orange-500 px-3 py-1 rounded">
+                                        <i className="fas fa-shield-alt mr-2"></i>
+                                        安全便捷，支持多端同步
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Budget Overview */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="bg-orange-500 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                                    <h3 className="font-medium">
+                                        <i className="fas fa-chart-pie mr-2"></i>
+                                        财务总览
+                                    </h3>
+                                    <div className="flex space-x-2">
+                                        <button 
+                                            onClick={toggleAddModal}
+                                            className="bg-orange-500 hover:bg-orange-600 px-3 py-1 rounded text-sm"
+                                        >
+                                            <i className="fas fa-plus mr-1"></i>
+                                            新增账单
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleEditModal(billRecords[1])}
+                                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleEditModal(billRecords[4])}
+                                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleEditModal(billRecords[3])}
+                                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleEditModal(billRecords[2])}
+                                            className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
+                                        >
+                                            <i className="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="p-4 space-y-4">
+                                    {billRecords.map((record) => (
+                                        <div key={record.id} className="flex items-center justify-between py-2">
+                                            <div className="flex items-center space-x-4">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <i className="fas fa-dollar-sign text-gray-500"></i>
+                                                </div>
+                                                <div>
+                                                    <div className="font-medium">{record.date}</div>
+                                                    <div className="text-sm text-gray-600">{record.category}</div>
+                                                    <div className="text-xs text-gray-500">{record.tag}</div>
+                                                </div>
+                                            </div>
+                                            <div className={`font-semibold ${record.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {record.amount > 0 ? '+' : ''}¥{Math.abs(record.amount).toLocaleString()}
+                                            </div>
+                                            <button 
+                                                onClick={() => toggleEditModal(record)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                            >
+                                                <i className="fas fa-bars"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Add Bill Section */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4 border-l-4 border-green-500">
+                                    <h3 className="font-medium text-green-700">
+                                        <i className="fas fa-check-circle mr-2"></i>
+                                        添加记账信息
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {/* Bill Record Form */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4 border-l-4 border-orange-500">
+                                    <h3 className="font-medium text-orange-700">
+                                        <i className="fas fa-edit mr-2"></i>
+                                        添加财务记录
+                                    </h3>
+                                </div>
+                                
+                                <div className="p-4 grid grid-cols-4 gap-4">
+                                    <input type="date" placeholder="mm/dd/yyyy" className="border border-gray-300 rounded px-3 py-2" />
+                                    <select className="border border-gray-300 rounded px-3 py-2">
+                                        <option>选择类别</option>
+                                    </select>
+                                    <input 
+                                        type="number" 
+                                        placeholder="收入为正数，支出为负数" 
+                                        className="border border-gray-300 rounded px-3 py-2" 
+                                    />
+                                    <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded">
+                                        添加
+                                    </button>
+                                </div>
+
+                                <div className="p-4 flex items-center justify-between bg-white rounded-lg shadow-sm">
+                                    <h3 className="font-medium text-orange-600">
+                                        <i className="fas fa-plus mr-2"></i>
+                                        添加财务记录
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {/* Add Financial Goal */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4">
+                                    <h3 className="font-medium text-orange-500 flex items-center">
+                                        <i className="fas fa-plus-circle mr-2"></i>
+                                        添加理财目标
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {/* Recent Records */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4 border-l-4 border-blue-500">
+                                    <h3 className="font-medium text-blue-700">
+                                        <i className="fas fa-undo mr-2"></i>
+                                        近期财务记录
+                                    </h3>
+                                </div>
+                                
+                                <div className="p-4">
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">时间调整</label>
+                                            <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                                <option>10/01/2024</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">货币单位</label>
+                                            <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                                <option>财务元</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-6 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <img src="https://picsum.photos/id/2/40/40" alt="交通" className="w-10 h-10 rounded" />
+                                                <div>
+                                                    <div className="font-medium">交通</div>
+                                                    <div className="text-sm text-gray-500">地铁月票</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-red-600 font-semibold">-¥50</div>
+                                                <div className="text-xs text-gray-500">2024-09 | 支出</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <img src="https://picsum.photos/id/3/40/40" alt="工资" className="w-10 h-10 rounded" />
+                                                <div>
+                                                    <div className="font-medium">工资</div>
+                                                    <div className="text-sm text-gray-500">10/05/2024</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-green-600 font-semibold">+¥10,000</div>
+                                                <div className="text-xs text-gray-500">2024-10 | 收入</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <img src="https://picsum.photos/id/4/40/40" alt="生活用品" className="w-10 h-10 rounded" />
+                                                <div>
+                                                    <div className="font-medium">生活用品</div>
+                                                    <div className="text-sm text-gray-500">10/03/2024</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-red-600 font-semibold">-¥1,500</div>
+                                                <div className="text-xs text-gray-500">2024-09 | 支出</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <img src="https://picsum.photos/id/5/40/40" alt="水电费" className="w-10 h-10 rounded" />
+                                                <div>
+                                                    <div className="font-medium">水电费</div>
+                                                    <div className="text-sm text-gray-500">10/28/2024</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-red-600 font-semibold">-¥2,000</div>
+                                                <div className="text-xs text-gray-500">2024-10 | 支出</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <img src="https://picsum.photos/id/6/40/40" alt="家庭聚餐" className="w-10 h-10 rounded" />
+                                                <div>
+                                                    <div className="font-medium">家庭聚餐</div>
+                                                    <div className="text-sm text-gray-500">10/15/2024</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-red-600 font-semibold">-¥200</div>
+                                                <div className="text-xs text-gray-500">2024-10 | 支出</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Investment Recommendations */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4 border-l-4 border-red-500">
+                                    <h3 className="font-medium text-red-700">
+                                        <i className="fas fa-bullseye mr-2"></i>
+                                        推荐理财产品
+                                    </h3>
+                                </div>
+                                
+                                <div className="p-6 grid grid-cols-3 gap-6">
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white mr-3">
+                                                <i className="fas fa-bolt"></i>
+                                            </div>
+                                            <h4 className="font-medium">余额宝</h4>
+                                        </div>
+                                        <div className="space-y-1 text-sm text-gray-600">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-percent mr-2"></i>
+                                                <span>预期收益：2.5%</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                <span>风险：低</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">灵活存取，日收益结算</p>
+                                        <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded mt-3 text-sm">
+                                            查看详情 <i className="fas fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white mr-3">
+                                                <i className="fas fa-chart-line"></i>
+                                            </div>
+                                            <h4 className="font-medium">指数基金</h4>
+                                        </div>
+                                        <div className="space-y-1 text-sm text-gray-600">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-percent mr-2"></i>
+                                                <span>预期收益：8.0%</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                <span>风险：中</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">长期投资，跟踪市场指数</p>
+                                        <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded mt-3 text-sm">
+                                            查看详情 <i className="fas fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="border rounded-lg p-4">
+                                        <div className="flex items-center mb-3">
+                                            <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white mr-3">
+                                                <i className="fas fa-chart-bar"></i>
+                                            </div>
+                                            <h4 className="font-medium">定期存款</h4>
+                                        </div>
+                                        <div className="space-y-1 text-sm text-gray-600">
+                                            <div className="flex items-center">
+                                                <i className="fas fa-percent mr-2"></i>
+                                                <span>预期收益：3.5%</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                <span>风险：低</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">稳健收益，固定期限</p>
+                                        <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded mt-3 text-sm">
+                                            查看详情 <i className="fas fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Investment Portfolio */}
+                            <div className="bg-white rounded-lg shadow-sm mb-6">
+                                <div className="p-4 border-l-4 border-green-500">
+                                    <h3 className="font-medium text-green-700">
+                                        <i className="fas fa-chart-bar mr-2"></i>
+                                        投资表现
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {/* Financial Tips */}
+                            <div className="bg-white rounded-lg shadow-sm">
+                                <div className="p-4 border-l-4 border-purple-500">
+                                    <h3 className="font-medium text-purple-700">
+                                        <i className="fas fa-lightbulb mr-2"></i>
+                                        理财小贴士
+                                    </h3>
+                                </div>
+                                <div className="p-4 space-y-3">
+                                    <div className="flex items-start">
+                                        <span className="text-green-500 mr-2">✓</span>
+                                        <span className="text-sm text-gray-700">制定合理预算，量入为出是理财基础。</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <span className="text-green-500 mr-2">✓</span>
+                                        <span className="text-sm text-gray-700">建立应急资金，至少覆盖3-6个月生活费。</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <span className="text-green-500 mr-2">✓</span>
+                                        <span className="text-sm text-gray-700">分散投资，不要把所有鸡蛋放在一个篮子里。</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <span className="text-green-500 mr-2">✓</span>
+                                        <span className="text-sm text-gray-700">定期检查财务状况，及时调整治策策略。</span>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <span className="text-green-500 mr-2">✓</span>
+                                        <span className="text-sm text-gray-700">提早规划退休金，越早开始复利效应越明显。</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Floating Action Button */}
+                    <button className="fixed bottom-6 right-6 bg-gray-600 text-white w-12 h-12 rounded-full shadow-lg z-40 flex items-center justify-center hover:bg-gray-700">
+                        <i className="fas fa-chart-pie"></i>
+                    </button>
+
+                    {/* Add Bill Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-orange-500">
+                                        <i className="fas fa-plus-circle mr-2"></i>
+                                        添加账单记录
+                                    </h3>
+                                    <button 
+                                        onClick={toggleAddModal}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <form onSubmit={handleFormSubmit}>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">日期</label>
+                                            <input 
+                                                type="date" 
+                                                value={modalFormData.date}
+                                                onChange={(e) => setModalFormData(prev => ({...prev, date: e.target.value}))}
+                                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                                placeholder="mm/dd/yyyy"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">类别</label>
+                                            <select 
+                                                value={modalFormData.category}
+                                                onChange={(e) => setModalFormData(prev => ({...prev, category: e.target.value}))}
+                                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                            >
+                                                <option>选择类别</option>
+                                                <option>收入</option>
+                                                <option>支出</option>
+                                                <option>其他</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">金额</label>
+                                            <input 
+                                                type="number" 
+                                                value={modalFormData.amount}
+                                                onChange={(e) => setModalFormData(prev => ({...prev, amount: e.target.value}))}
+                                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                                placeholder="收入为正数，支出为负数"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                                            <textarea 
+                                                value={modalFormData.note}
+                                                onChange={(e) => setModalFormData(prev => ({...prev, note: e.target.value}))}
+                                                className="w-full border border-gray-300 rounded px-3 py-2 h-20"
+                                                placeholder="账单备注"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-3 mt-6">
+                                        <button 
+                                            type="button"
+                                            onClick={toggleAddModal}
+                                            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            type="submit"
+                                            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded"
+                                        >
+                                            <i className="fas fa-save mr-1"></i>
+                                            保存
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Bill Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-blue-500">
+                                        <i className="fas fa-edit mr-2"></i>
+                                        编辑账单记录
+                                    </h3>
+                                    <button 
+                                        onClick={handleCancel}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">日期</label>
+                                        <input 
+                                            type="date" 
+                                            value={modalFormData.date}
+                                            onChange={(e) => setModalFormData(prev => ({...prev, date: e.target.value}))}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">类别</label>
+                                        <select 
+                                            value={modalFormData.category}
+                                            onChange={(e) => setModalFormData(prev => ({...prev, category: e.target.value}))}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        >
+                                            <option>收入</option>
+                                            <option>支出</option>
+                                            <option>其他</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">金额</label>
+                                        <input 
+                                            type="number" 
+                                            value={modalFormData.amount}
+                                            onChange={(e) => setModalFormData(prev => ({...prev, amount: e.target.value}))}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            placeholder="收入为正数，支出为负数"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">备注</label>
+                                        <input 
+                                            type="text" 
+                                            value={modalFormData.note}
+                                            onChange={(e) => setModalFormData(prev => ({...prev, note: e.target.value}))}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                            placeholder="账单备注"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={handleCancel}
+                                        className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded"
+                                    >
+                                        <i className="fas fa-save mr-1"></i>
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<FinanceApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>

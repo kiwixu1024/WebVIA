@@ -1,0 +1,194 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班级点名系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+<div id="app"></div>
+<script type="text/babel">
+    const App = () => {
+        const [students, setStudents] = React.useState([
+            { id: '001', name: '张三', class: '一班', status: '正常' },
+            { id: '002', name: '李四', class: '一班', status: '正常' },
+            { id: '003', name: '王五', class: '一班', status: '请假' },
+            { id: '004', name: '赵六', class: '二班', status: '正常' },
+            { id: '005', name: '钱七', class: '二班', status: '迟到' },
+        ]);
+
+        const [showModal, setShowModal] = React.useState(false);
+        const [formData, setFormData] = React.useState({ id: '', name: '', class: '', status: '正常' });
+
+        const handleAddStudent = () => setShowModal(true);
+
+        const handleConfirmAdd = () => {
+            setStudents([...students, formData]);
+            setShowModal(false);
+        };
+
+        const handleChange = (e) => {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        };
+
+        return (
+            <div className="min-h-screen bg-gray-100 text-sm font-sans">
+                <div className="flex">
+                    <aside className="w-64 bg-blue-600 text-white">
+                        <div className="text-lg font-bold p-4 border-b border-blue-700">班级点名系统</div>
+                        <nav className="p-2">
+                            <ul>
+                                <li className="p-2 hover:bg-blue-700 cursor-pointer">学生管理</li>
+                                <li className="p-2 hover:bg-blue-700 cursor-pointer">公告管理</li>
+                                <li className="p-2 hover:bg-blue-700 cursor-pointer">点名记录</li>
+                                <li className="p-2 hover:bg-blue-700 cursor-pointer">系统设置</li>
+                            </ul>
+                        </nav>
+                    </aside>
+                    <main className="flex-1">
+                        <div className="p-4 bg-white border-b">
+                            <nav className="flex space-x-4">
+                                <span>日常点名</span>
+                                <span>周榜统计</span>
+                                <span>导出记录</span>
+                            </nav>
+                        </div>
+                        <div className="p-4">
+                            <div className="bg-white p-4 rounded shadow-sm">
+                                <div className="flex justify-between items-start pb-4">
+                                    <h1 className="text-lg font-bold">学生管理</h1>
+                                    <button
+                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                        onClick={handleAddStudent}
+                                    >
+                                        + 添加学生
+                                    </button>
+                                </div>
+                                <table className="w-full border-collapse border">
+                                    <thead>
+                                    <tr className="bg-gray-200">
+                                        <th className="border px-4 py-2">学号</th>
+                                        <th className="border px-4 py-2">姓名</th>
+                                        <th className="border px-4 py-2">班级</th>
+                                        <th className="border px-4 py-2">状态</th>
+                                        <th className="border px-4 py-2">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {students.map((student, index) => (
+                                        <tr key={index} className="text-center">
+                                            <td className="border px-4 py-2">{student.id}</td>
+                                            <td className="border px-4 py-2">{student.name}</td>
+                                            <td className="border px-4 py-2">{student.class}</td>
+                                            <td className="border px-4 py-2">
+                                                {student.status === '正常' && (
+                                                    <span className="px-2 py-1 bg-green-100 text-green-600 rounded">
+                                正常
+                              </span>
+                                                )}
+                                                {student.status === '请假' && (
+                                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-600 rounded">
+                                请假
+                              </span>
+                                                )}
+                                                {student.status === '迟到' && (
+                                                    <span className="px-2 py-1 bg-red-100 text-red-600 rounded">
+                                迟到
+                              </span>
+                                                )}
+                                            </td>
+                                            <td className="border px-4 py-2 text-blue-600">
+                                                <button className="mr-2 hover:underline">编辑</button>
+                                                <button className="hover:underline">删除</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                                <p className="text-gray-600 mt-4">
+                                    Tip: 点击表格顶部的列标题可以进行排序
+                                </p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+
+                {/* Add Student Modal */}
+                {showModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                        <div className="bg-white p-4 rounded shadow-lg w-96">
+                            <h2 className="text-lg font-bold mb-4">添加学生</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-gray-600">学号</label>
+                                    <input
+                                        type="text"
+                                        name="id"
+                                        value={formData.id}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-600">姓名</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-600">班级</label>
+                                    <input
+                                        type="text"
+                                        name="class"
+                                        value={formData.class}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border rounded"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-600">状态</label>
+                                    <select
+                                        name="status"
+                                        value={formData.status}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border rounded"
+                                    >
+                                        <option value="正常">正常</option>
+                                        <option value="请假">请假</option>
+                                        <option value="迟到">迟到</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="flex justify-end space-x-2 mt-4">
+                                <button
+                                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    onClick={handleConfirmAdd}
+                                >
+                                    确认添加
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('app'));
+</script>
+</body>
+</html>

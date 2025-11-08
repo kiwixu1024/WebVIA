@@ -1,0 +1,838 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童益智游戏推荐库</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('推荐游戏');
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingGame, setEditingGame] = useState(null);
+            const [gameCount, setGameCount] = useState(3);
+            const [stats, setStats] = useState({
+                拼图: 3,
+                数学: 2,
+                逻辑: 3,
+                记忆: 3,
+                语言: 0,
+                科学: 0
+            });
+
+            const [games, setGames] = useState([
+                {
+                    id: 1,
+                    name: '拼图大师',
+                    description: '锻炼逻辑思维和图形识别能力',
+                    category: '拼图',
+                    tags: ['图拼', '逻辑', '图形'],
+                    deleted: false
+                },
+                {
+                    id: 2,
+                    name: '魔法数字',
+                    description: '趣味数字迷宫，提升数学计算速度',
+                    category: '数学',
+                    tags: ['数学', '计算', '迷宫'],
+                    deleted: false
+                },
+                {
+                    id: 3,
+                    name: '记忆配对',
+                    description: '经典记忆卡片翻翻看，考验短期记忆力',
+                    category: '记忆',
+                    tags: ['记忆', '配对', '专注'],
+                    deleted: false
+                }
+            ]);
+
+            const handleEditClick = (game) => {
+                setEditingGame(game);
+                setShowEditModal(true);
+            };
+
+            const handleDeleteClick = (gameId) => {
+                setGames(games.filter(game => game.id !== gameId));
+                setGameCount(prev => prev - 1);
+            };
+
+            const handleSaveEdit = () => {
+                setShowEditModal(false);
+                setEditingGame(null);
+            };
+
+            const handleCancelEdit = () => {
+                setShowEditModal(false);
+                setEditingGame(null);
+            };
+
+            const handleRemoveTag = (gameId, tag) => {
+                setGames(games.map(game => 
+                    game.id === gameId 
+                        ? { ...game, tags: game.tags.filter(t => t !== tag) }
+                        : game
+                ));
+            };
+
+            const addTag = (tagName) => {
+                if (editingGame && editingGame.tags.includes(tagName)) {
+                    return;
+                }
+                
+                setGames(games.map(game => 
+                    game.id === editingGame?.id 
+                        ? { ...game, tags: [...game.tags, tagName] }
+                        : game
+                ));
+                
+                if (editingGame) {
+                    setEditingGame({ ...editingGame, tags: [...editingGame.tags, tagName] });
+                }
+            };
+
+            const decreaseGameCount = (category) => {
+                setStats(prev => ({
+                    ...prev,
+                    [category]: prev[category] - 1
+                }));
+                setGameCount(prev => prev - 1);
+            };
+
+            const increaseGameCount = (category) => {
+                setStats(prev => ({
+                    ...prev,
+                    [category]: prev[category] + 1
+                }));
+                setGameCount(prev => prev + 1);
+            };
+
+            const handleEditFromGameCard = (game) => {
+                setEditingGame({ ...game });
+            };
+
+            const handleDeleteFromGameCard = (game) => {
+                handleDeleteClick(game.id);
+            };
+
+            const getGameCoverUrl = (gameId) => {
+                const game = games.find(g => g.id === gameId);
+                if (game && game.id === 1) return "https://picsum.photos/id/1025/400/250";
+                if (game && game.id === 2) return "https://picsum.photos/id/1015/400/250";
+                if (game && game.id === 3) return "https://picsum.photos/id/1060/400/250";
+                return "https://picsum.photos/id/1025/400/250";
+            };
+
+            const renderGameCard = (game) => {
+                const bgClass = game.deleted ? 'bg-gray-600' : 
+                               activeTab === '推荐游戏' ? 'bg-white' : 'bg-gray-600';
+                
+                return (
+                    <div key={game.id} className={`max-w-xs ${bgClass} rounded-lg overflow-hidden shadow-lg relative`}>
+                        <div className="relative">
+                            <img 
+                                src={getGameCoverUrl(game.id)} 
+                                alt={game.name}
+                                className="w-full h-40 object-cover"
+                            />
+                            {game.deleted && <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end">
+                                <div className="p-4 text-white">
+                                    <p className="text-sm font-medium">删除</p>
+                                </div>
+                            </div>}
+                        </div>
+                        <div className="p-4">
+                            <h3 className="font-semibold text-gray-800 mb-2">{game.name}</h3>
+                            <p className="text-sm text-gray-600 mb-3">{game.description}</p>
+                            
+                            <div className="flex gap-1 mb-4">
+                                <span className="px-2 py-1 bg-yellow-200 text-xs rounded">{game.category}</span>
+                                {game.tags.map(tag => (
+                                    <span key={tag} className="px-2 py-1 bg-gray-200 text-xs rounded">{tag}</span>
+                                ))}
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => handleEditFromGameCard(game)}
+                                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded text-sm font-medium"
+                                >
+                                    <i className="fas fa-edit mr-1"></i>编辑
+                                </button>
+                                {!game.deleted && (
+                                    <button 
+                                        onClick={() => handleDeleteFromGameCard(game)}
+                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded text-sm font-medium"
+                                    >
+                                        <i className="fas fa-trash mr-1"></i>删除
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderStatistics = () => {
+                const colors = {
+                    0: 'bg-gray-500',
+                    1: 'bg-green-500',
+                    2: 'bg-red-500',
+                    3: 'bg-yellow-500',
+                    4: 'bg-blue-500',
+                    5: 'bg-pink-500'
+                };
+
+                return (
+                    <div className="bg-white rounded-lg p-6 shadow-lg max-w-lg">
+                        <h3 className="text-lg font-semibold mb-4">数据统计</h3>
+                        <p className="text-sm text-gray-600 mb-6">各分类游戏数量分布信息</p>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="text-sm font-medium mb-3">柱状图</h4>
+                                <div className="flex items-end justify-between h-32 space-x-4">
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.拼图]} rounded-t`}
+                                            style={{ minHeight: `${stats.拼图 * 30}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">拼图</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.数学]} rounded-t`}
+                                            style={{ minHeight: `${stats.数学 * 30}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">数学</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.逻辑]} rounded-t`}
+                                            style={{ minHeight: `${stats.逻辑 * 30}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">逻辑</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.记忆]} rounded-t`}
+                                            style={{ minHeight: `${stats.记忆 * 30}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">记忆</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.语言]} rounded-t`}
+                                            style={{ minHeight: `${stats.语言 * 40}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">语言</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div 
+                                            className={`w-8 ${colors[stats.科学]} rounded-t`}
+                                            style={{ minHeight: `${stats.科学 * 40}px` }}
+                                        ></div>
+                                        <span className="text-xs mt-2">科学</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 className="text-sm font-medium mb-3">饼图</h4>
+                                <div className="flex items-center justify-center h-48">
+                                    <div className="relative">
+                                        <svg width="200" height="200" className="transform -rotate-90">
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke="#e5e7eb"
+                                                strokeWidth="8"
+                                                fill="none"
+                                            />
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke={colors[stats.拼图]}
+                                                strokeWidth="8"
+                                                fill="none"
+                                                strokeDasharray={`${(stats.拼图 / 3) * 2 * Math.PI} ${2 * Math.PI}`}
+                                                strokeLinecap="round"
+                                            />
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke={colors[stats.数学]}
+                                                strokeWidth="8"
+                                                fill="none"
+                                                strokeDasharray={`${(stats.数学 / 2) * 2 * Math.PI} ${2 * Math.PI}`}
+                                                strokeLinecap="round"
+                                            />
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke={colors[stats.逻辑]}
+                                                strokeWidth="8"
+                                                fill="none"
+                                                strokeDasharray={`${(stats.逻辑 / 3) * 2 * Math.PI} ${2 * Math.PI}`}
+                                                strokeLinecap="round"
+                                            />
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke={colors[stats.记忆]}
+                                                strokeWidth="8"
+                                                fill="none"
+                                                strokeDasharray={`${(stats.记忆 / 4) * 2 * Math.PI} ${2 * Math.PI}`}
+                                                strokeLinecap="round"
+                                            />
+                                            <circle
+                                                cx="100"
+                                                cy="100"
+                                                r="80"
+                                                stroke={colors[stats.语言]}
+                                                strokeWidth="8"
+                                                fill="none"
+                                                strokeDasharray={`${(stats.语言 / 4) * 2 * Math.PI} ${2 * Math.PI}`}
+                                                strokeLinecap="round"
+                                            />
+                                            <text x="100" y="150" textAnchor="middle" className="text-xs font-medium">3</text>
+                                            <text x="100" y="70" textAnchor="middle" className="text-xs font-medium">2</text>
+                                            <text x="100" y="130" textAnchor="middle" className="text-xs font-medium">2</text>
+                                            <text x="100" y="90" textAnchor="middle" className="text-xs font-medium">2</text>
+                                            <text x="100" y="110" textAnchor="middle" className="text-xs font-medium">2</text>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-6 text-center">
+                            <button className="text-yellow-600 hover:text-yellow-700 text-sm">
+                                <i className="fas fa-chart-line mr-1"></i>查看详情
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            const getHelpContent = () => {
+                return (
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-info-circle text-orange-500 mr-2"></i>
+                                <h4 className="font-semibold">如何添加游戏</h4>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">点击页面右下角的"+ 添加游戏"按钮，填写游戏信息后点击保存即可添加新游戏到推荐库中。确保填写完整的游戏名称、分类和简介，以便其他用户了解游戏内容。</p>
+                            
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-edit text-orange-500 mr-2"></i>
+                                <h4 className="font-semibold">如何编辑游戏</h4>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">在游戏卡片右下角点击"编辑"按钮，可以修改游戏的各项信息，编辑完成后点击保存，系统会自动更新游戏信息。</p>
+                            
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-chart-bar text-orange-500 mr-2"></i>
+                                <h4 className="font-semibold">统计报表说明</h4>
+                            </div>
+                            <p className="text-sm text-gray-600">统计报表展示了游戏中各分类游戏的数量分布、总游戏数和本周新增游戏数。柱状图展示各分类数量，饼图展示各类占比。点击"查看详情"可查看更多详细的统计数据。</p>
+                            
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-headset text-blue-500 mr-2"></i>
+                                <h4 className="font-semibold">联系我们</h4>
+                            </div>
+                            <p className="text-sm text-gray-600">如对游戏有任何问题或建议，请发送邮件至：contact@kidsgames.example.com，或拨打电话热线：400-123-4567。我们周一至周五工作，9:00-17:00。</p>
+                        </div>
+                        
+                        <div>
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-lightbulb text-orange-500 mr-2"></i>
+                                <h4 className="font-semibold">推荐游戏标准</h4>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">我们的推荐游戏都经过专业教育工作者的评估，确保其教育价值和趣味性，游戏按照年龄段、发展领域和难度级别进行分类，方便家长和教育工作者根据儿童需求选择合适的游戏。</p>
+                            
+                            <div className="flex items-center mb-3">
+                                <i className="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                                <h4 className="font-semibold">注意事项</h4>
+                            </div>
+                            <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+                                <li>请确保游戏标签准确反映游戏的特点</li>
+                                <li>建议控制每个游戏标签不超过3个</li>
+                                <li>避免在游戏简介中使用广告性语言</li>
+                                <li>如有不明确的情况，请与专家发送邮件联系</li>
+                            </ul>
+                        </div>
+                    </div>
+                );
+            };
+
+            if (showEditModal) {
+                return (
+                    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                        <div className="w-full max-w-7xl">
+                            {/* 导航栏 */}
+                            <div className="bg-green-500 text-white px-6 py-4">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center">
+                                        <img src="https://picsum.photos/id/91/40/40" alt="头像" className="w-8 h-8 rounded-full mr-3" />
+                                        <h1 className="text-lg font-semibold">儿童益智游戏推荐库</h1>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button className="bg-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                                            <i className="fas fa-home mr-1"></i>首页
+                                        </button>
+                                        <button className="bg-yellow-400 text-white px-4 py-2 rounded-full text-sm font-medium">
+                                            <i className="fas fa-thumbs-up mr-1"></i>分类
+                                        </button>
+                                        <button className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                                            <i className="fas fa-question-circle mr-1"></i>帮助
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 左侧边栏 */}
+                            <div className="bg-white rounded-lg p-4 shadow-md h-96">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <i className="fas fa-gamepad text-orange-500"></i>
+                                    <h2 className="text-lg font-semibold">推荐游戏</h2>
+                                </div>
+                                
+                                <div className="text-center">
+                                    Choose tab at left!
+                                </div>
+                            </div>
+
+                            {/* 统计报表 */}
+                            <div className="bg-white rounded-lg p-6 shadow-md h-96">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                                    <i className="fas fa-chart-bar text-orange-500 mr-2"></i>
+                                    统计报表
+                                </h3>
+                                
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 className="text-sm font-medium mb-3">游戏总览</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between">
+                                                <span className="text-sm">趣味卡片</span>
+                                                <span className="text-sm text-green-600 font-medium">2倍</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-sm">滑块游戏</span>
+                                                <span className="text-sm text-green-600 font-medium">3倍</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-sm">记忆配对</span>
+                                                <span className="text-sm text-green-600 font-medium">2倍</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mt-6">
+                                            <h4 className="text-sm font-medium mb-3">新游戏统计</h4>
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm flex items-center">
+                                                        <i className="fas fa-plus-circle mr-1"></i>新开发游戏
+                                                    </span>
+                                                    <span className="text-sm text-gray-600 font-medium">3次</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm flex items-center">
+                                                        <i className="fas fa-download mr-1"></i>2024年更新
+                                                    </span>
+                                                    <span className="text-sm text-gray-600 font-medium">投2</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="text-sm flex items-center">
+                                                        <i className="fas fa-tachometer-alt mr-1"></i>儿童特别版
+                                                    </span>
+                                                    <span className="text-sm text-gray-600 font-medium">8项</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 className="text-sm font-medium mb-3">数据可视化</h4>
+                                        <div className="space-y-3">
+                                            <div className="text-center">
+                                                <div className="w-24 h-24 mr-12 flex items-center justify-center">
+                                                    <img src="https://picsum.photos/id/1005/96/96" alt="游戏图标" className="w-16 h-16 rounded" />
+                                                </div>
+                                            </div>
+                                            <div className="text-center text-yellow-600 font-medium">
+                                                2
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mt-6">
+                                            <p className="text-sm text-gray-600 mb-3">存储统计 heute
+                                                <i className="fas fa-upload text-green-500 mr-1"></i>
+                                                为了优化用户体验
+                                            </p>
+                                            <button className="bg-green-500 text-white px-3 py-1 rounded text-xs">
+                                                充值
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-4">
+                                    <span className="text-sm font-medium text-gray-700">数据概览</span>
+                                    <button className="text-yellow-600 hover:text-yellow-700 text-sm mt-1">
+                                        <i className="fas fa-chart-line mr-1"></i>查看详情
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 右侧游戏展示 */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                {renderGameCard(games[0])}
+                                {renderGameCard(games[1])}
+                                {renderGameCard(games[2])}
+                            </div>
+
+                            {/* 帮助与说明 */}
+                            <div className="mt-6 bg-green-50 rounded-lg p-4">
+                                {getHelpContent()}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-7xl">
+                        {/* 导航栏 */}
+                        <div className="bg-green-500 text-white px-6 py-4">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <img src="https://picsum.photos/id/91/40/40" alt="头像" className="w-8 h-8 rounded-full mr-3" />
+                                    <h1 className="text-lg font-semibold">儿童益智游戏推荐库</h1>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => setActiveTab('推荐游戏')}
+                                        className={`bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium ${activeTab === '推荐游戏' ? 'bg-red-600' : ''}`}
+                                    >
+                                        <i className="fas fa-home mr-1"></i>首页
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('我的游戏库')}
+                                        className={`bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium ${activeTab === '我的游戏库' ? 'bg-gray-500 text-white' : ''}`}
+                                    >
+                                        <i className="fas fa-thumbs-up mr-1"></i>我的游戏库
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('统计报表')}
+                                        className={`bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-medium ${activeTab === '统计报表' ? 'bg-gray-500 text-white' : ''}`}
+                                    >
+                                        <i className="fas fa-chart-bar mr-1"></i>统计报表
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 左侧边栏 */}
+                        <div className="bg-white rounded-lg shadow-md p-4 h-96">
+                            <div className="flex items-center gap-2 mb-4">
+                                <i className="fas fa-gamepad text-orange-500"></i>
+                                <h2 className="text-lg font-semibold">{activeTab}</h2>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <div className="flex gap-2 mb-4">
+                                    <button 
+                                        onClick={() => setActiveTab('推荐游戏')}
+                                        className={`flex items-center px-3 py-2 rounded text-sm font-medium ${activeTab === '推荐游戏' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                    >
+                                        <i className="fas fa-gamepad mr-1"></i>推荐游戏
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('我的游戏库')}
+                                        className={`flex items-center px-3 py-2 rounded text-sm font-medium ${activeTab === '我的游戏库' ? 'bg-gray-500 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                    >
+                                        <i className="fas fa-thumbs-up mr-1"></i>我的游戏库
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveTab('统计报表')}
+                                        className={`flex items-center px-3 py-2 rounded text-sm font-medium ${activeTab === '统计报表' ? 'bg-gray-500 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                    >
+                                        <i className="fas fa-chart-bar mr-1"></i>统计报表
+                                    </button>
+                                </div>
+                            </div>
+
+                            {activeTab === '推荐游戏' && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-700 mb-4">游戏描述</h3>
+                                    
+                                    <div className="space-y-4">
+                                        {games.map(game => renderGameCard(game))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === '我的游戏库' && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-700 mb-4">游戏描述</h3>
+                                    
+                                    <div className="space-y-4">
+                                        {games.map(game => renderGameCard(game))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === '统计报表' && (
+                                <>
+                                    <div className="bg-white rounded-lg shadow-md p-6">
+                                        <h3 className="text-lg font-semibold mb-4">统计报表</h3>
+                                        <p className="text-sm text-gray-600 mb-6">游戏库中各分类游戏的数量分布、总游戏数和本周新增游戏数。柱状图展示各分类数量，饼图展示各类分类占比。</p>
+                                        
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h4 className="text-sm font-medium mb-3">游戏数量</h4>
+                                                    <div className="flex items-end justify-between h-32 space-x-4">
+                                                        {Object.entries(stats).map(([category, count]) => (
+                                                            <div key={category} className="flex flex-col items-center">
+                                                                <div 
+                                                                    className={`w-8 ${colors[count]} rounded-t`}
+                                                                    style={{ minHeight: `${(count / gameCount) * 120}px` }}
+                                                                ></div>
+                                                                <span className="text-xs mt-2">{category}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="space-y-2">
+                                                    <div className="text-gray-600 text-sm font-medium">总游戏数</div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>拼图:</span>
+                                                        <span>3</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>数学:</span>
+                                                        <span>2</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>逻辑:</span>
+                                                        <span>3</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>记忆:</span>
+                                                        <span>3</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <h4 className="text-sm font-medium mb-3">新增游戏</h4>
+                                                <div className="space-y-2">
+                                                    <div className="text-gray-600 text-sm font-medium">本周新增</div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>拼图:</span>
+                                                        <span>2</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>数学:</span>
+                                                        <span>2</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="mt-4 text-center">
+                                            <button className="text-yellow-600 hover:text-yellow-700 text-sm">
+                                                <i className="fas fa-chart-line mr-1"></i>查看详情
+                                            </button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        {/* 右侧游戏展示 */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {renderGameCard(games[0])}
+                            {renderGameCard(games[1])}
+                            {renderGameCard(games[2])}
+                        </div>
+
+                        {/* 帮助与说明 */}
+                        <div className="mt-6 bg-green-50 rounded-lg p-4">
+                            {getHelpContent()}
+                        </div>
+                    </div>
+
+                    {/* 编辑游戏模态框 */}
+                    {(showEditModal && editingGame) && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96">
+                                <h3 className="text-lg font-semibold mb-4">编辑游戏</h3>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="flex items-center text-sm font-medium mb-2">
+                                            <i className="fas fa-image text-orange-500 mr-2"></i>
+                                            游戏封面
+                                        </label>
+                                        <div className="relative">
+                                            <img 
+                                                src="https://picsum.photos/id/1025/400/250" 
+                                                alt="游戏封面"
+                                                className="w-full h-32 object-cover rounded"
+                                            />
+                                            <button className="absolute top-2 right-2 bg-white rounded-full w-8 h-8 flex items-center justify-center">
+                                                <i className="fas fa-edit text-blue-500"></i>
+                                            </button>
+                                            <span className="absolute top-2 right-12 bg-orange-500 text-white px-2 py-1 rounded text-xs">
+                                                更换图片
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            value={editingGame.name}
+                                            onChange={(e) => setEditingGame({...editingGame, name: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+                                            placeholder="请输入游戏名称"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            value={editingGame.description}
+                                            onChange={(e) => setEditingGame({...editingGame, description: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+                                            placeholder="请输入游戏简介"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <select 
+                                            value={editingGame.category}
+                                            onChange={(e) => setEditingGame({...editingGame, category: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-orange-500"
+                                        >
+                                            <option value="拼图">拼图</option>
+                                            <option value="数学">数学</option>
+                                            <option value="逻辑">逻辑</option>
+                                            <option value="记忆">记忆</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <p className="text-sm font-medium mb-3">游戏标签 (多个标签可选)</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {editingGame.tags.map((tag, index) => (
+                                                <span 
+                                                    key={index}
+                                                    className="flex items-center justify-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"
+                                                >
+                                                    {tag}
+                                                    <button 
+                                                        onClick={() => handleRemoveTag(editingGame.id, tag)}
+                                                        className="ml-1 text-yellow-600 hover:text-red-600"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </span>
+                                            ))}
+                                            <span className="flex items-center justify-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                                                抽拼
+                                                <button 
+                                                    onClick={() => addTag('抽拼')}
+                                                    className="ml-1 text-yellow-600 hover:text-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </span>
+                                            <span className="flex items-center justify-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">
+                                                逻辑
+                                                <button 
+                                                    onClick={() => addTag('逻辑')}
+                                                    className="ml-1 text-yellow-600 hover:text-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </span>
+                                            <button 
+                                                onClick={() => addTag('图形')}
+                                                className="flex items-center justify-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"
+                                            >
+                                                图形
+                                                <button 
+                                                    onClick={() => addTag('图形')}
+                                                    className="ml-1 text-yellow-600 hover:text-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </button>
+                                        </div>
+                                        <button 
+                                            onClick={() => addTag('新游戏')}
+                                            className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                                        >
+                                            添加
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-3 mt-6">
+                                    <button 
+                                        onClick={handleCancelEdit}
+                                        className="flex-1 bg-gray-400 text-white py-2 rounded text-sm"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveEdit}
+                                        className="flex-1 bg-pink-500 text-white py-2 rounded text-sm"
+                                    >
+                                        <i className="fas fa-save mr-1"></i>保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 右下角添加按钮 */}
+                    <button className="fixed bottom-6 right-6 bg-green-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600">
+                        <i className="fas fa-plus text-lg"></i>
+                        <span className="text-xs ml-2 bg-green-600 text-white px-1 py-1 rounded">添加游戏</span>
+                    </button>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

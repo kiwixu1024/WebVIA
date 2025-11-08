@@ -1,0 +1,460 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>论文管理系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body class="h-screen overflow-hidden">
+  <div id="root" class="h-full"></div>
+  <script type="text/babel">
+
+    const { useState, useEffect } = React;
+
+    function App() {
+      const initialPapers = [
+        {
+          id: 1,
+          title: "基于深度学习的自然语言处理技术研究",
+          authors: ["张明", "李华"],
+          year: 2023,
+          tags: ["深度学习", "自然语言处理", "人工智能"],
+          views: 1245,
+          downloads: 356
+        },
+        {
+          id: 2,
+          title: "新冠肺炎疫情下远程医疗服务的应用与挑战",
+          authors: ["王五", "赵四"],
+          year: 2022,
+          tags: ["远程医疗", "COVID-19", "医疗信息化"],
+          views: 2367,
+          downloads: 892
+        },
+        {
+          id: 3,
+          title: "区块链技术在供应链金融中的应用研究",
+          authors: ["刘伟", "张小红"],
+          year: 2021,
+          tags: ["区块链", "供应链金融", "金融科技"],
+          views: 1832,
+          downloads: 647
+        },
+        {
+          id: 4,
+          title: "中国农村电子商务发展现状与对策研究",
+          authors: ["李明", "王芳"],
+          year: 2023,
+          tags: ["农村电商", "乡村振兴", "数字经济"],
+          views: 1056,
+          downloads: 423
+        },
+        {
+          id: 5,
+          title: "基于物联网的智能家居安全风险评估框架",
+          authors: ["张三", "李四", "王五"],
+          year: 2022,
+          tags: ["物联网", "智能家居", "安全风险", "评估框架"],
+          views: 1678,
+          downloads: 589
+        }
+      ];
+
+      const [papers, setPapers] = useState(initialPapers);
+      const [filter, setFilter] = useState("");
+      const [filtered, setFiltered] = useState(initialPapers);
+      const [showAdd, setShowAdd] = useState(false);
+      const [editing, setEditing] = useState(null);
+
+      const [newData, setNewData] = useState({
+        title: "",
+        authors: "",
+        year: "",
+        tags: "",
+        summary: ""
+      });
+
+      const [editData, setEditData] = useState({
+        title: "",
+        authors: "",
+        year: "",
+        tags: [],
+        summary: ""
+      });
+
+      useEffect(() => {
+        if (filter.trim() === "") {
+          setFiltered(papers);
+        } else {
+          const key = filter.trim().toLowerCase();
+          setFiltered(papers.filter(p => p.title.includes(filter)));
+        }
+      }, [filter, papers]);
+
+      function doSearch() {
+        // filter is already applied by effect
+      }
+
+      function openAdd() {
+        setNewData({ title:"", authors:"", year:"", tags:"", summary:"" });
+        setShowAdd(true);
+      }
+      function closeAdd() {
+        setShowAdd(false);
+      }
+      function saveNew() {
+        const next = {
+          id: papers.length + 1,
+          title: newData.title,
+          authors: newData.authors.split(",").map(s=>s.trim()),
+          year: Number(newData.year),
+          tags: newData.tags.split(",").map(s=>s.trim()).filter(s=>s),
+          views: 0,
+          downloads: 0
+        };
+        setPapers([next, ...papers]);
+        setShowAdd(false);
+      }
+
+      function openEdit(p) {
+        setEditing(p.id);
+        setEditData({
+          title: p.title,
+          authors: p.authors.join(","),
+          year: p.year,
+          tags: [...p.tags],
+          summary: "随着计算机技术的发展，深度学习在自然语言处理领域取得了显著成果。本次综述了近年来深度学习在NLP中的应用进展，包括预训练语言模型、注意力机制等创新技术，并探讨了未来可能的研究方向。"
+        });
+      }
+      function closeEdit() {
+        setEditing(null);
+      }
+      function saveEdit() {
+        const idx = papers.findIndex(p=>p.id===editing);
+        if (idx>=0) {
+          const updated = [...papers];
+          updated[idx] = {
+            ...updated[idx],
+            title: editData.title,
+            authors: editData.authors.split(",").map(s=>s.trim()),
+            year: Number(editData.year),
+            tags: editData.tags.filter(s=>s),
+            // summary not stored in list
+          };
+          setPapers(updated);
+        }
+        setEditing(null);
+      }
+
+      return (
+        <div className="flex h-full">
+          {/* 左侧导航 */}
+          <div className="w-64 bg-blue-800 text-white flex flex-col">
+            <div className="h-16 flex items-center justify-center text-2xl font-bold border-b border-blue-700">
+              万方数据
+            </div>
+            <nav className="flex-1 overflow-auto">
+              <ul className="space-y-1 p-2">
+                <li className="bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-file-alt mr-2"></i>我的论文</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-bookmark mr-2"></i>收藏论文</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-clock mr-2"></i>最近使用</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-tags mr-2"></i>我的分类</li>
+                <li className="mt-4 text-gray-300 uppercase text-xs px-2">论文分类</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-microscope mr-2"></i>科学研究</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-stethoscope mr-2"></i>医学健康</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-landmark mr-2"></i>人文社科</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-chart-line mr-2"></i>经济管理</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-cogs mr-2"></i>工程技术</li>
+                <li className="mt-4 text-gray-300 uppercase text-xs px-2">常用工具</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-upload mr-2"></i>批量导出</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-share-alt mr-2"></i>文献分享</li>
+                <li className="hover:bg-blue-700 rounded px-2 py-2 flex items-center"><i className="fas fa-cog mr-2"></i>系统设置</li>
+              </ul>
+            </nav>
+            <div className="p-4 text-gray-400 text-sm border-t border-blue-700">
+              可用空间: 68% (1.7GB/2.5GB)
+            </div>
+          </div>
+          {/* 右侧内容 */}
+          <div className="flex-1 flex flex-col bg-gray-100">
+            {/* 顶部 */}
+            <div className="h-16 bg-white flex items-center justify-between px-6 border-b">
+              <div className="flex space-x-6">
+                <span className="text-blue-600 font-semibold">我的论文</span>
+                <span className="hover:text-blue-600 cursor-pointer">文献检索</span>
+                <span className="hover:text-blue-600 cursor-pointer">数据分析</span>
+                <span className="hover:text-blue-600 cursor-pointer">引用管理</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="border rounded px-3 py-1 w-64"
+                    placeholder="搜索论文..."
+                    value={filter}
+                    onChange={e => setFilter(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') doSearch(); }}
+                  />
+                  <i
+                    className="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                    onClick={doSearch}
+                  ></i>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img src="https://picsum.photos/id/1005/40/40" alt="avatar" className="w-10 h-10 rounded-full"/>
+                  <span>张教授</span>
+                </div>
+              </div>
+            </div>
+            {/* 主体 */}
+            <div className="flex flex-1 overflow-hidden">
+              {/* 论文列表 */}
+              <div className="w-2/5 bg-white p-4 overflow-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold">论文列表</h2>
+                  <button
+                    className="bg-orange-500 text-white px-3 py-1 rounded flex items-center"
+                    onClick={openAdd}
+                  >
+                    <i className="fas fa-plus mr-1"></i>添加新论文
+                  </button>
+                </div>
+                <ul className="space-y-3">
+                  {filtered.map(p => (
+                    <li key={p.id} className="border rounded p-3 bg-white hover:shadow cursor-pointer" onClick={()=>openEdit(p)}>
+                      <div className="flex justify-between">
+                        <div className="font-semibold">{p.title}</div>
+                        <div className="flex space-x-2">
+                          <i className="fas fa-edit text-gray-500 hover:text-blue-600" onClick={(e)=>{e.stopPropagation(); openEdit(p);}}></i>
+                          <i className="fas fa-trash-alt text-gray-400 hover:text-red-500"></i>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">{p.authors.join("、")}  {p.year}</div>
+                      <div className="flex flex-wrap mt-1">
+                        {p.tags.map((t,i)=>(
+                          <span key={i} className="text-xs bg-blue-100 text-blue-600 rounded px-1 mr-1">{t}</span>
+                        ))}
+                      </div>
+                      <div className="text-sm text-blue-600 mt-2 hover:underline" onClick={(e)=>{e.stopPropagation(); openEdit(p);}}>查看详情</div>
+                      <div className="flex text-gray-500 text-xs mt-1">
+                        <div className="mr-4"><i className="fas fa-eye mr-1"></i>{p.views}</div>
+                        <div><i className="fas fa-download mr-1"></i>{p.downloads}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* 编辑区 */}
+              <div className="w-2/5 p-4 border-l border-r bg-white overflow-auto">
+                {editing ? (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">正在编辑：{initialPapers.find(p=>p.id===editing)?.title}</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">论文标题</label>
+                        <input
+                          type="text"
+                          className="border rounded px-2 py-1 w-full"
+                          value={editData.title}
+                          maxLength={100}
+                          onChange={e=>setEditData({...editData, title:e.target.value})}
+                        />
+                        <div className="text-xs text-gray-400 text-right mt-1">{editData.title.length}/100</div>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">作者</label>
+                        <input
+                          type="text"
+                          className="border rounded px-2 py-1 w-full"
+                          placeholder="多个作者用逗号分隔"
+                          value={editData.authors}
+                          onChange={e=>setEditData({...editData, authors:e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">发表年份</label>
+                        <input
+                          type="number"
+                          className="border rounded px-2 py-1 w-full"
+                          value={editData.year}
+                          onChange={e=>setEditData({...editData, year:e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">关键词</label>
+                        <div className="flex flex-wrap">
+                          {editData.tags.map((t,i)=>(
+                            <span key={i} className="text-xs bg-blue-100 text-blue-600 rounded px-1 mr-1 mb-1">{t}</span>
+                          ))}
+                        </div>
+                        <input
+                          type="text"
+                          className="border rounded px-2 py-1 w-full"
+                          placeholder="选择或输入关键词"
+                          onKeyDown={e=>{
+                            if(e.key==="Enter" && e.target.value.trim()){
+                              setEditData({...editData,tags:[...editData.tags,e.target.value.trim()]});
+                              e.target.value="";
+                            }
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">摘要</label>
+                        <textarea
+                          className="border rounded px-2 py-1 w-full h-32"
+                          value={editData.summary}
+                          onChange={e=>setEditData({...editData, summary:e.target.value})}
+                        ></textarea>
+                      </div>
+                      <div className="flex justify-end space-x-4">
+                        <button className="px-4 py-1 border rounded text-gray-600" onClick={closeEdit}>取消</button>
+                        <button className="px-4 py-1 bg-blue-600 text-white rounded" onClick={saveEdit}>保存修改</button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-gray-400">
+                    <div className="text-center">
+                      <i className="fas fa-edit text-4xl mb-2"></i>
+                      <div>论文编辑区</div>
+                      <div className="text-sm mt-1">点击列表中的“编辑论文”按钮来编辑论文</div>
+                      <div className="text-xs text-blue-500 mt-2">提示：您可以直接在此区域编辑论文的所有元素，包括标题、作者、关键词等</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* 统计区 */}
+              <div className="w-1/5 p-4 overflow-auto">
+                <div className="bg-white p-4 rounded mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">论文阅读趋势</span>
+                    <i className="fas fa-sync-alt text-gray-400 cursor-pointer"></i>
+                  </div>
+                  <img src="https://picsum.photos/id/1024/280/160" alt="trend" className="w-full"/>
+                </div>
+                <div className="bg-white p-4 rounded mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">下载排行榜</span>
+                    <i className="fas fa-sync-alt text-gray-400 cursor-pointer"></i>
+                  </div>
+                  <img src="https://picsum.photos/id/1025/280/160" alt="bar" className="w-full"/>
+                </div>
+                <div className="flex space-x-2 mb-4">
+                  <div className="flex-1 bg-white p-2 rounded text-center">
+                    <div className="text-lg font-bold">5</div>
+                    <div className="text-xs text-gray-500">论文总数</div>
+                  </div>
+                  <div className="flex-1 bg-white p-2 rounded text-center">
+                    <div className="text-lg font-bold">12</div>
+                    <div className="text-xs text-gray-500">作者总数</div>
+                  </div>
+                  <div className="flex-1 bg-white p-2 rounded text-center">
+                    <div className="text-lg font-bold">2907</div>
+                    <div className="text-xs text-gray-500">总下载次数</div>
+                  </div>
+                </div>
+                <div className="bg-orange-100 p-3 rounded text-sm text-gray-700 mb-4">
+                  <div className="font-semibold mb-2">万方数据论文管理特色</div>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>全面支持论文元数据管理</li>
+                    <li>一键导出报告</li>
+                    <li>数据安全加密</li>
+                    <li>智能论文分析</li>
+                  </ul>
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <button className="flex items-center justify-center bg-blue-600 text-white px-3 py-1 rounded">
+                    <i className="fas fa-file-import mr-1"></i>导入论文
+                  </button>
+                  <button className="flex items-center justify-center bg-green-600 text-white px-3 py-1 rounded">
+                    <i className="fas fa-file-excel mr-1"></i>导出Excel
+                  </button>
+                </div>
+                <div className="text-center text-xs text-gray-500 mt-6">© 2023 万方数据 · 论文管理系统 v2.1.5</div>
+                <div className="flex justify-center space-x-4 text-xs text-gray-500 mt-2">
+                  <span className="hover:underline cursor-pointer">服务条款</span>
+                  <span className="hover:underline cursor-pointer">隐私政策</span>
+                  <span className="hover:underline cursor-pointer">联系我们</span>
+                  <span className="hover:underline cursor-pointer">帮助中心</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 添加新论文弹窗 */}
+          {showAdd && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded w-96">
+                <div className="bg-blue-600 text-white px-4 py-2 flex justify-between items-center rounded-t">
+                  <span>添加新论文</span>
+                  <i className="fas fa-times cursor-pointer" onClick={closeAdd}></i>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">论文标题</label>
+                    <input
+                      type="text"
+                      className="border rounded px-2 py-1 w-full"
+                      value={newData.title}
+                      onChange={e=>setNewData({...newData, title:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">作者</label>
+                    <input
+                      type="text"
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="多个作者用逗号分隔"
+                      value={newData.authors}
+                      onChange={e=>setNewData({...newData, authors:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">发表年份</label>
+                    <input
+                      type="number"
+                      className="border rounded px-2 py-1 w-full"
+                      value={newData.year}
+                      onChange={e=>setNewData({...newData, year:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">关键词</label>
+                    <input
+                      type="text"
+                      className="border rounded px-2 py-1 w-full"
+                      placeholder="选择或输入关键词"
+                      value={newData.tags}
+                      onChange={e=>setNewData({...newData, tags:e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">摘要</label>
+                    <textarea
+                      className="border rounded px-2 py-1 w-full h-24"
+                      value={newData.summary}
+                      onChange={e=>setNewData({...newData, summary:e.target.value})}
+                    ></textarea>
+                  </div>
+                  <div className="text-xs text-gray-500">所有字段均为必填，摘要不超过100字</div>
+                  <div className="flex justify-end space-x-4">
+                    <button className="px-4 py-1 border rounded text-gray-600" onClick={closeAdd}>取消</button>
+                    <button className="px-4 py-1 bg-orange-500 text-white rounded" onClick={saveNew}>添加论文</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

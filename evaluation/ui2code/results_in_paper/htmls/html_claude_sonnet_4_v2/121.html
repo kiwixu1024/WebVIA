@@ -1,0 +1,464 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>节气日历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [isListView, setIsListView] = useState(false);
+            const [showModal, setShowModal] = useState(false);
+            const [solarTerms, setSolarTerms] = useState([
+                {
+                    id: 1,
+                    name: '立春',
+                    date: '2023-02-04',
+                    season: '春季',
+                    image: 'https://picsum.photos/id/243/300/200',
+                    description: '立春是二十四节气中的第一个节气，标志着新一年农历活动的开始。立春时节，气温回升，万物复苏，大地开始显现勃勃生机。在这个时候，人们常常通过各种传统活动来庆祝新春的到来，感受大地的生机。'
+                },
+                {
+                    id: 2,
+                    name: '惊蛰',
+                    date: '2023-03-06',
+                    season: '春季', 
+                    image: 'https://picsum.photos/id/157/300/200',
+                    description: '惊蛰是二十四节气中的第三个节气，表示天气回暖，春雷始鸣，惊醒了蛰伏在土中冬眠的各种昆虫。经过漫长的冬季，各种小动物开始苏醒，小动物们纷纷从蛰伏中醒来。'
+                },
+                {
+                    id: 3,
+                    name: '夏至',
+                    date: '2023-06-21',
+                    season: '夏季',
+                    image: 'https://picsum.photos/id/162/300/200',
+                    description: '夏至是二十四节气中的第十个节气，也是太阳直射北回归线的日子最高的一天一年中白昼最长，黑夜最短的日子。在夏至这一天，太阳几乎直射北回归线，是北半球各地全年白昼最长的一天。'
+                }
+            ]);
+
+            const [formData, setFormData] = useState({
+                name: '',
+                date: '',
+                season: '春季',
+                imageUrl: 'https://picsum.photos/id/164/200/200',
+                description: ''
+            });
+
+            const handleSearchInput = (e) => {
+                setSearchTerm(e.target.value);
+            };
+
+            const handleAddSolarTerm = () => {
+                setShowModal(true);
+            };
+
+            const handleFormSubmit = () => {
+                const newSolarTerm = {
+                    id: solarTerms.length + 1,
+                    name: formData.name,
+                    date: formData.date,
+                    season: formData.season,
+                    image: formData.imageUrl,
+                    description: formData.description
+                };
+                setSolarTerms([...solarTerms, newSolarTerm]);
+                setShowModal(false);
+                setFormData({
+                    name: '',
+                    date: '',
+                    season: '春季',
+                    imageUrl: 'https://picsum.photos/id/164/200/200',
+                    description: ''
+                });
+            };
+
+            const handleCancel = () => {
+                setShowModal(false);
+                setFormData({
+                    name: '',
+                    date: '',
+                    season: '春季',
+                    imageUrl: 'https://picsum.photos/id/164/200/200',
+                    description: ''
+                });
+            };
+
+            const toggleView = () => {
+                setIsListView(!isListView);
+            };
+
+            const getSeasonColor = (season) => {
+                switch(season) {
+                    case '春季': return 'bg-green-100 text-green-800';
+                    case '夏季': return 'bg-red-100 text-red-800';
+                    case '秋季': return 'bg-yellow-100 text-yellow-800';
+                    case '冬季': return 'bg-blue-100 text-blue-800';
+                    default: return 'bg-gray-100 text-gray-800';
+                }
+            };
+
+            const getSeasonStats = () => {
+                const stats = { '春季': 0, '夏季': 0, '秋季': 0, '冬季': 0 };
+                solarTerms.forEach(term => {
+                    stats[term.season] = (stats[term.season] || 0) + 1;
+                });
+                return stats;
+            };
+
+            const seasonStats = getSeasonStats();
+
+            return (
+                <div className="min-h-screen bg-pink-50">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm border-b">
+                        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center space-x-8">
+                                <div className="flex items-center space-x-2">
+                                    <img src="https://picsum.photos/id/123/40/40" className="w-8 h-8 rounded-full" />
+                                    <span className="text-gray-700 font-medium">节气日历</span>
+                                </div>
+                                <nav className="flex items-center space-x-6">
+                                    <button className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm">🗓 日历视图</button>
+                                    <button onClick={toggleView} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-full text-sm">📋 列表视图</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-full text-sm">📊 统计报表</button>
+                                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-full text-sm">ℹ️ 主站介绍</button>
+                                </nav>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="搜索节气..."
+                                        value={searchTerm}
+                                        onChange={handleSearchInput}
+                                        className="pl-10 pr-4 py-2 border border-orange-300 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                    />
+                                    <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white m-4 rounded-lg shadow-sm p-4">
+                            <div className="space-y-4">
+                                <button className="w-full px-4 py-3 bg-orange-100 text-orange-700 rounded-lg text-left">🗓 日历视图</button>
+                                <button onClick={toggleView} className="w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg text-left">📋 列表视图</button>
+                                <button className="w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg text-left">📊 统计报表</button>
+                                <button className="w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg text-left">ℹ️ 帮助说明</button>
+                            </div>
+
+                            <div className="mt-8 p-4 bg-orange-50 rounded-lg">
+                                <h3 className="font-medium text-gray-700 mb-2">小贴士</h3>
+                                <p className="text-sm text-gray-600">
+                                    点击"添加节气条目"按钮可以创建自定义节气信息，包括名称、时间、季节分类、相关图片以及详细说明。
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 m-4">
+                            <div className="bg-white rounded-lg shadow-sm">
+                                {/* Top Section */}
+                                <div className="p-6 border-b">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center space-x-4">
+                                            <button className="px-6 py-2 bg-orange-500 text-white rounded-full">🔄 添加节气条目</button>
+                                            <h1 className="text-xl font-medium text-gray-800">节气日历</h1>
+                                        </div>
+                                        <button onClick={handleAddSolarTerm} className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
+                                            添加节气条目
+                                        </button>
+                                    </div>
+
+                                    {/* Solar Terms Display */}
+                                    {!isListView ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                            {solarTerms.map((term) => (
+                                                <div key={term.id} className="border rounded-lg overflow-hidden">
+                                                    <div className="relative">
+                                                        <img src={term.image} alt={term.name} className="w-full h-48 object-cover" />
+                                                        <div className={`absolute top-3 left-3 px-2 py-1 text-xs rounded ${getSeasonColor(term.season)}`}>
+                                                            {term.season}
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h3 className="font-medium text-gray-800">{term.name}</h3>
+                                                            <span className="text-sm text-gray-500">{term.date}</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 line-clamp-3">{term.description}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white rounded-lg">
+                                            <h2 className="text-xl font-medium text-gray-800 mb-4">节气列表</h2>
+                                            <div className="overflow-hidden rounded-lg border">
+                                                <table className="w-full">
+                                                    <thead className="bg-gradient-to-r from-orange-400 to-pink-400 text-white">
+                                                        <tr>
+                                                            <th className="px-4 py-3 text-left">节气名</th>
+                                                            <th className="px-4 py-3 text-left">日期</th>
+                                                            <th className="px-4 py-3 text-left">分类</th>
+                                                            <th className="px-4 py-3 text-left">简介</th>
+                                                            <th className="px-4 py-3 text-left">操作</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {solarTerms.map((term, index) => (
+                                                            <tr key={term.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                <td className="px-4 py-3">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <img src={term.image} alt={term.name} className="w-8 h-8 rounded object-cover" />
+                                                                        <span className="font-medium">{term.name}</span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-gray-600">{term.date}</td>
+                                                                <td className="px-4 py-3">
+                                                                    <span className={`px-2 py-1 text-xs rounded ${getSeasonColor(term.season)}`}>
+                                                                        {term.season}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{term.description}</td>
+                                                                <td className="px-4 py-3">
+                                                                    <div className="flex space-x-2">
+                                                                        <button className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600">
+                                                                            <i className="fas fa-edit text-xs"></i>
+                                                                        </button>
+                                                                        <button className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
+                                                                            <i className="fas fa-trash text-xs"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {!isListView && (
+                                        <div className="bg-orange-50 p-6 rounded-lg">
+                                            <h3 className="font-medium text-gray-800 mb-3">节气小知识</h3>
+                                            <p className="text-gray-600 text-sm leading-relaxed">
+                                                二十四节气是中国古代订立的一种用来指导农事的补充历法，是根据地球在黄道（即地球绕太阳公转的轨道）上的位置变化而制定的，每一个分别相应于地球在黄道上每运动15°所到达的一定位置。它们反映了太阳对地球产生的影响，属于太阳历范畴。气候、物候等方面的变化规律。
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 m-4 space-y-4">
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <h3 className="font-medium text-orange-600 mb-4">节气统计</h3>
+                                
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">总节气数量</span>
+                                        <span className="text-2xl font-bold text-orange-600">{solarTerms.length}</span>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 className="text-sm font-medium text-gray-700 mb-2">节气分布</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">春季</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-16 h-2 bg-gray-200 rounded-full">
+                                                        <div 
+                                                            className="h-2 bg-green-500 rounded-full" 
+                                                            style={{width: `${(seasonStats['春季'] / solarTerms.length) * 100}%`}}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium text-gray-700">{seasonStats['春季']}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">夏季</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-16 h-2 bg-gray-200 rounded-full">
+                                                        <div 
+                                                            className="h-2 bg-red-500 rounded-full" 
+                                                            style={{width: `${(seasonStats['夏季'] / solarTerms.length) * 100}%`}}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium text-gray-700">{seasonStats['夏季']}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">秋季</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-16 h-2 bg-gray-200 rounded-full">
+                                                        <div 
+                                                            className="h-2 bg-yellow-500 rounded-full" 
+                                                            style={{width: `${(seasonStats['秋季'] / solarTerms.length) * 100}%`}}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium text-gray-700">{seasonStats['秋季']}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm text-gray-600">冬季</span>
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-16 h-2 bg-gray-200 rounded-full">
+                                                        <div 
+                                                            className="h-2 bg-blue-500 rounded-full" 
+                                                            style={{width: `${(seasonStats['冬季'] / solarTerms.length) * 100}%`}}
+                                                        ></div>
+                                                    </div>
+                                                    <span className="text-sm font-medium text-gray-700">{seasonStats['冬季']}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <h3 className="font-medium text-orange-600 mb-2">下一个节气</h3>
+                                <div className="text-sm text-gray-600">
+                                    <div className="text-lg font-medium text-blue-600">立春</div>
+                                    <div className="text-xs text-gray-500">还有10天</div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <h3 className="font-medium text-orange-600 mb-2">节气小贴士</h3>
+                                <p className="text-sm text-gray-600">
+                                    霜降农历九月节。霜降二十四节气中的第十八个节气，是秋季的最后一个节气，也是冬季的过渡节气。霜降时节，大部分地区已进入深秋。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-white border-t mt-8">
+                        <div className="max-w-7xl mx-auto px-4 py-4 text-center">
+                            <p className="text-sm text-gray-500">© 2023 生活节气日历 | 让美美满满的日常的版权</p>
+                            <div className="flex justify-center space-x-4 mt-2">
+                                <i className="fab fa-weibo text-orange-500"></i>
+                                <i className="fab fa-weixin text-green-500"></i>
+                                <i className="fas fa-envelope text-gray-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-medium text-gray-800">添加节气</h2>
+                                    <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">节气名称</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            placeholder="请输入节气名称"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                        <input 
+                                            type="date" 
+                                            value={formData.date}
+                                            onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                                        <select 
+                                            value={formData.season}
+                                            onChange={(e) => setFormData({...formData, season: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        >
+                                            <option value="春季">春季</option>
+                                            <option value="夏季">夏季</option>
+                                            <option value="秋季">秋季</option>
+                                            <option value="冬季">冬季</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">图片URL</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.imageUrl}
+                                            onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            placeholder="https://picsum.photos/id/164/200/200"
+                                        />
+                                        <div className="flex items-center space-x-2 mt-2">
+                                            <img src={formData.imageUrl} alt="预览" className="w-8 h-8 rounded object-cover" />
+                                            <span className="text-xs text-gray-500">图片预览</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">简介</label>
+                                        <textarea 
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                                            rows="4"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                            placeholder="请输入节气简介..."
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={handleCancel}
+                                        className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleFormSubmit}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活妙招</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body class="bg-orange-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [tips, setTips] = useState([
+                {
+                    id: 1,
+                    title: "用旧牙刷清洁水龙头",
+                    description: "旧牙刷+小苏打，让水龙头光亮如新。",
+                    category: "厨房",
+                    difficulty: 1,
+                    likes: 2,
+                    image: "https://picsum.photos/id/1/400/250",
+                    isNew: false
+                },
+                {
+                    id: 2,
+                    title: "橡皮筋收纳筷子",
+                    description: "用橡皮筋固定筷子，收纳更整洁！",
+                    category: "收纳",
+                    difficulty: 2,
+                    likes: 1,
+                    image: "https://picsum.photos/id/2/400/250",
+                    isNew: false
+                },
+                {
+                    id: 3,
+                    title: "旧报纸去油污",
+                    description: "旧报纸可吸油，抹布更耐用！",
+                    category: "厨房",
+                    difficulty: 1,
+                    likes: 1,
+                    image: "https://picsum.photos/id/3/400/250",
+                    isNew: false
+                },
+                {
+                    id: 4,
+                    title: "醋除水垢小窍门",
+                    description: "食用白醋加热后喷洒在水垢处，静置10分钟后擦拭，轻松去除顽固水垢。",
+                    category: "清洁",
+                    difficulty: 2,
+                    likes: 0,
+                    image: "https://picsum.photos/id/4/400/250",
+                    isNew: false
+                },
+                {
+                    id: 5,
+                    title: "电视机发热处理",
+                    description: "电视机背面定期用干净毛巾除尘，保持通风孔畅通，延长使用寿命。",
+                    category: "家电",
+                    difficulty: 3,
+                    likes: 0,
+                    image: "https://picsum.photos/id/5/400/250",
+                    isNew: false
+                },
+                {
+                    id: 6,
+                    title: "衣物去皱技巧",
+                    description: "没有熨斗时，可将衣物挂在浴室，利用热水澡产生的蒸汽自然去皱。",
+                    category: "衣物",
+                    difficulty: 1,
+                    likes: 0,
+                    image: "https://picsum.photos/id/6/400/250",
+                    isNew: false
+                }
+            ]);
+
+            const [newTip, setNewTip] = useState({
+                title: "",
+                description: "",
+                category: "厨房",
+                difficulty: "1"
+            });
+
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingTip, setEditingTip] = useState(null);
+            const [deletingTip, setDeletingTip] = useState(null);
+
+            const [selectedCategory, setSelectedCategory] = useState("全部妙招");
+            const [hasLoadMore, setHasLoadMore] = useState(false);
+
+            const categories = ["全部妙招", "厨房", "家居", "清洁", "收纳", "衣物", "家电", "节能", "其他"];
+
+            const difficultyOptions = [
+                { value: "1", label: "简单 ▲" },
+                { value: "2", label: "适中 ••" },
+                { value: "3", label: "困难 ▼" }
+            ];
+
+            const getFilteredTips = () => {
+                if (selectedCategory === "全部妙招") return tips;
+                return tips.filter(tip => tip.category === selectedCategory);
+            };
+
+            const getDifficultyStats = () => {
+                const stats = {
+                    "1": 0,
+                    "2": 0,
+                    "3": 0
+                };
+                tips.forEach(tip => {
+                    stats[tip.difficulty]++;
+                });
+                return stats;
+            };
+
+            const getHighestDifficulty = () => {
+                return Math.max(...getDifficultyStats().keys());
+            };
+
+            const getHotTips = () => {
+                return [...tips.filter(tip => tip.id === 1 || tip.id === 4 || tip.id === 5),
+                        ...tips.slice(2)];
+            };
+
+            const handleAddTip = () => {
+                if (!newTip.title || !newTip.description) return;
+                
+                const tip = {
+                    id: tips.length + 1,
+                    title: newTip.title,
+                    description: newTip.description,
+                    category: newTip.category,
+                    difficulty: parseInt(newTip.difficulty),
+                    likes: 0,
+                    image: "https://picsum.photos/id/7/400/250",
+                    isNew: true
+                };
+                
+                setTips([tip, ...tips]);
+                setNewTip({ title: "", description: "", category: "厨房", difficulty: "1" });
+                setShowAddModal(false);
+            };
+
+            const handleEditTip = (tip) => {
+                setNewTip({
+                    title: tip.title,
+                    description: tip.description,
+                    category: tip.category,
+                    difficulty: tip.difficulty.toString()
+                });
+                setEditingTip(tip);
+                setShowAddModal(true);
+            };
+
+            const handleSaveEdit = () => {
+                setTips(tips.map(tip => 
+                    tip.id === editingTip.id ? {
+                        ...tip,
+                        title: newTip.title,
+                        description: newTip.description,
+                        category: newTip.category,
+                        difficulty: parseInt(newTip.difficulty)
+                    } : tip
+                ));
+                setNewTip({ title: "", description: "", category: "厨房", difficulty: "1" });
+                setEditingTip(null);
+                setShowAddModal(false);
+            };
+
+            const handleDeleteTip = (tip) => {
+                setDeletingTip(tip);
+                setShowDeleteModal(true);
+            };
+
+            const confirmDelete = () => {
+                setTips(tips.filter(tip => tip.id !== deletingTip.id));
+                setShowDeleteModal(false);
+                setDeletingTip(null);
+            };
+
+            const updateStatistics = () => {
+                const total = tips.length;
+                const newTips = tips.filter(tip => tip.id !== 6);
+                const deleted = tips.filter(tip => tip.id === 6).length;
+                const categoryStats = getDifficultyStats();
+                
+                return { total, newTips, deleted, categoryStats };
+            };
+
+            const stats = updateStatistics();
+            const highestDifficulty = getHighestDifficulty();
+
+            return (
+                <div className="min-h-screen bg-orange-50">
+                    {/* Header */}
+                    <div className="bg-orange-400 px-6 py-4 shadow-sm">
+                        <div className="max-w-7xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <img src="https://picsum.photos/id/20/40/40" alt="头像" className="w-10 h-10 rounded-full" />
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-lightbulb text-orange-300"></i>
+                                    <span className="text-white font-medium">生活妙招</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-6 text-white">
+                                <span className="hover:text-orange-200 cursor-pointer">首页</span>
+                                <span className="text-orange-200 border-b-2 border-orange-300 pb-1">分类</span>
+                                <span className="hover:text-orange-200 cursor-pointer">我的收藏</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-12 gap-6">
+                        {/* Left Sidebar */}
+                        <div className="col-span-3 space-y-6">
+                            {/* Add Tip Button */}
+                            <button 
+                                onClick={() => setShowAddModal(true)}
+                                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center space-x-2"
+                            >
+                                <i className="fas fa-plus"></i>
+                                <span>添加妙招</span>
+                            </button>
+
+                            {/* Category Filter */}
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-3">
+                                    <i className="fas fa-filter text-orange-500"></i>
+                                    <span className="font-medium text-gray-700">分类筛选</span>
+                                </div>
+                                <select 
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-3 py-2 text-gray-600"
+                                >
+                                    {categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Statistics */}
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-chart-bar text-orange-500"></i>
+                                    <span className="font-medium text-gray-700">分类分布</span>
+                                </div>
+                                {categories.slice(1).map(category => (
+                                    <div key={category} className="flex justify-between items-center py-2">
+                                        <span className="text-gray-600">{category}</span>
+                                        <span className="text-orange-500 font-medium">{stats[highestDifficulty] === 1 ? 1 : 0}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="col-span-6">
+                            <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <img src="https://picsum.photos/id/30/40/40" alt="应用图标" className="w-10 h-10 rounded-full" />
+                                    <h1 className="text-xl font-bold text-gray-800">生活妙招经验集</h1>
+                                </div>
+                                <p className="text-gray-600 mb-4">在这里，你可以随时新增、编辑或删除生活中的实用小窍门，还能查看使用统计与社区热门推荐。</p>
+                                
+                                <div className="bg-white border-l-4 border-yellow-400 p-4 mb-6">
+                                    <div className="flex items-center space-x-2">
+                                        <i className="fas fa-star text-yellow-500"></i>
+                                        <span className="text-gray-700">本周精选 10 条妙招已更新，快来看看哪个最实用！</span>
+                                    </div>
+                                </div>
+
+                                {/* Tips Grid */}
+                                {getFilteredTips().map(tip => (
+                                    <div key={tip.id} className="bg-white rounded-lg p-4 flex space-x-4 mb-4">
+                                        <img src={tip.image} alt={tip.title} className="w-32 h-24 object-cover rounded-lg flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-medium text-gray-800">{tip.title}</h3>
+                                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                                    {tip.id === 1 ? "热门" : tip.id === 4 ? "热门" : "新"}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mb-2">{tip.description}</p>
+                                            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
+                                                <span className="flex items-center space-x-1">
+                                                    <i className="fas fa-tag"></i>
+                                                    <span>{tip.category}</span>
+                                                </span>
+                                                <span className="flex items-center space-x-1">
+                                                    <i className="fas fa-star"></i>
+                                                    <span>难度等级 ({0-5颗星})</span>
+                                                    <div className="w-20 bg-gray-200 rounded-full h-1">
+                                                        <div 
+                                                            className={`h-1 rounded-full ${tip.difficulty === 1 ? 'bg-yellow-400' : tip.difficulty === 2 ? 'bg-gray-400' : 'bg-red-500'}`}
+                                                            style={{width: `${(tip.difficulty || 1) * 100}%`}}
+                                                        ></div>
+                                                    </div>
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-4 text-yellow-500">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <i key={i} className={`fas fa-star text-sm ${i < tip.difficulty ? 'fas' : 'far'}`}></i>
+                                                    ))}
+                                                </div>
+                                                <div className="flex space-x-2">
+                                                    <button 
+                                                        onClick={() => handleEditTip(tip)}
+                                                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        <i className="fas fa-edit mr-1"></i>编辑
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteTip(tip)}
+                                                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        <i className="fas fa-trash mr-1"></i>删除
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Load More Button */}
+                            {!hasLoadMore && (
+                                <div className="bg-white rounded-lg p-4 shadow-sm text-center">
+                                    <button 
+                                        onClick={() => setHasLoadMore(true)}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2 mx-auto"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>加载更多</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="col-span-3">
+                            <div className="bg-white rounded-lg p-4 shadow-sm">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <img src="https://picsum.photos/id/40/40/40" alt="数据图标" className="w-8 h-8 rounded-full" />
+                                    <span className="text-orange-500 font-medium">数据统计</span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div className="bg-yellow-100 rounded-lg p-4">
+                                        <div className="text-2xl font-bold text-orange-500">{stats[highestDifficulty]}</div>
+                                        <div className="text-sm text-gray-600">条妙招</div>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">本月变化</span>
+                                            <div className="flex items-center space-x-1">
+                                                <div className="w-20 bg-gray-200 rounded-full h-2">
+                                                    <div className="w-4/6 h-1 bg-green-400 rounded-full"></div>
+                                                </div>
+                                                <span className="text-green-500 font-medium">{stats[highestDifficulty] === 1 ? 3 : 3}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">分类分布</span>
+                                            <span className="text-orange-500 font-medium">{stats[highestDifficulty] === 1 ? 1 : 0}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="text-xs text-gray-500 mt-4 space-y-2">
+                                        <div>当前点赞</div>
+                                        <div>快看热门</div>
+                                        <div>数据变化</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-plus text-blue-500"></i>
+                                    <span className="font-bold text-gray-800">添加妙招</span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">妙招标题 <span className="text-red-500">*</span></label>
+                                        <input 
+                                            type="text"
+                                            value={newTip.title}
+                                            onChange={(e) => setNewTip({...newTip, title: e.target.value})}
+                                            placeholder="输入妙招标题"
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">妙招详情</label>
+                                        <textarea 
+                                            value={newTip.description}
+                                            onChange={(e) => setNewTip({...newTip, description: e.target.value})}
+                                            placeholder="输入妙招详细内容"
+                                            rows="4"
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">选择分类</label>
+                                            <select 
+                                                value={newTip.category}
+                                                onChange={(e) => setNewTip({...newTip, category: e.target.value})}
+                                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                            >
+                                                <option value="厨房">厨房</option>
+                                                <option value="家居">家居</option>
+                                                <option value="清洁">清洁</option>
+                                                <option value="收纳">收纳</option>
+                                                <option value="衣物">衣物</option>
+                                                <option value="家电">家电</option>
+                                                <option value="节能">节能</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">难度等级 (0-5颗星)</label>
+                                            <div className="flex items-center space-x-1">
+                                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">简单</span>
+                                                <span className="bg-gray-400 text-xs px-2 py-1">适中</span>
+                                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">困难</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleAddTip}
+                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded"
+                                    >
+                                        <i className="fas fa-save mr-1"></i>保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Edit Modal */}
+                    {showEditModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-edit text-blue-500"></i>
+                                    <span className="font-bold text-gray-800">编辑妙招</span>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">妙招标题 <span className="text-red-500">*</span></label>
+                                        <input 
+                                            type="text"
+                                            value={newTip.title}
+                                            onChange={(e) => setNewTip({...newTip, title: e.target.value})}
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">妙招详情</label>
+                                        <textarea 
+                                            value={newTip.description}
+                                            onChange={(e) => setNewTip({...newTip, description: e.target.value})}
+                                            className="w-full border border-gray-300 rounded px-3 py-2 h-24"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">选择分类</label>
+                                            <select 
+                                                value={newTip.category}
+                                                onChange={(e) => setNewTip({...newTip, category: e.target.value})}
+                                                className="w-full border border-gray-300 rounded px-3 py-2"
+                                            >
+                                                <option value="厨房">厨房</option>
+                                                <option value="家居">家居</option>
+                                                <option value="清洁">清洁</option>
+                                                <option value="收纳">收纳</option>
+                                                <option value="衣物">衣物</option>
+                                                <option value="家电">家电</option>
+                                                <option value="节能">节能</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">难度等级 (0-3颗星)</label>
+                                            <div className="flex items-center space-x-1">
+                                                <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">简单</span>
+                                                <span className="bg-gray-400 text-xs px-2 py-1 rounded">适中</span>
+                                                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">困难</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowEditModal(false)}
+                                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSaveEdit}
+                                        className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded"
+                                    >
+                                        <i className="fas fa-save mr-1"></i>保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center space-x-2 mb-4">
+                                    <i className="fas fa-exclamation-triangle text-red-500"></i>
+                                    <span className="font-bold text-gray-800">确认删除</span>
+                                </div>
+                                
+                                <div className="text-gray-600 mb-6 mt-2">
+                                    <div>D确定要删除【{deletingTip?.title} "{deletingTip?.description}"】吗？此操作不可恢复。</div>
+                                </div>
+                                
+                                <div className="flex space-x-3">
+                                    <button 
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={confirmDelete}
+                                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

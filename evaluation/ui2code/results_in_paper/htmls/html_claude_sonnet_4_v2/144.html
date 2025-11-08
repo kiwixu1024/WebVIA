@@ -1,0 +1,394 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容聚合平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [subscriptionName, setSubscriptionName] = useState('');
+            const [currentImage, setCurrentImage] = useState('https://picsum.photos/id/1022/300/200');
+
+            const images = [
+                'https://picsum.photos/id/1022/300/200',
+                'https://picsum.photos/id/1025/300/200', 
+                'https://picsum.photos/id/1039/300/200',
+                'https://picsum.photos/id/1042/300/200'
+            ];
+
+            const handleAddSubscription = () => {
+                setShowAddModal(true);
+            };
+
+            const handleDeleteSubscription = () => {
+                setShowDeleteModal(true);
+            };
+
+            const handleRefreshData = () => {
+                const randomIndex = Math.floor(Math.random() * images.length);
+                setCurrentImage(images[randomIndex]);
+            };
+
+            const handleCloseModal = () => {
+                setShowAddModal(false);
+                setSubscriptionName('');
+            };
+
+            const handleCloseDeleteModal = () => {
+                setShowDeleteModal(false);
+            };
+
+            const handleSave = () => {
+                setShowAddModal(false);
+                setSubscriptionName('');
+                handleRefreshData();
+            };
+
+            const handleSubscriptionNameChange = (e) => {
+                setSubscriptionName(e.target.value);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-xl font-semibold text-blue-600">内容聚合平台</h1>
+                            <p className="text-gray-600">一站式订阅内容聚合与推送平台，实时同步，多端分发，智能统计。</p>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Left Sidebar */}
+                        <div className="w-48 bg-white h-screen border-r border-gray-200">
+                            <div className="p-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center text-blue-600 bg-blue-50 px-3 py-2 rounded">
+                                        <i className="fas fa-rss mr-2"></i>
+                                        <span className="text-sm">订阅管理</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                                        <i className="fas fa-cog mr-2"></i>
+                                        <span className="text-sm">推送设置</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                                        <i className="fas fa-history mr-2"></i>
+                                        <span className="text-sm">历史记录</span>
+                                    </div>
+                                    <div className="flex items-center text-gray-600 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer">
+                                        <i className="fas fa-user mr-2"></i>
+                                        <span className="text-sm">账号中心</span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-6 p-3 bg-yellow-50 rounded text-sm">
+                                    <div className="flex items-center text-orange-600 mb-1">
+                                        <i className="fas fa-exclamation-triangle mr-1"></i>
+                                        <span className="font-medium">使用提醒</span>
+                                    </div>
+                                    <p className="text-gray-600 text-xs leading-relaxed">
+                                        使用订阅聚合功能，可批量管理多平台信息，提升内容获取效率。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            <div className="flex justify-between items-center mb-6">
+                                <div className="flex space-x-6">
+                                    <button className="text-blue-600 border-b-2 border-blue-600 pb-2 font-medium">订阅聚合</button>
+                                    <button className="text-gray-500 pb-2">推送调度</button>
+                                    <button className="text-gray-500 pb-2">统计报表</button>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-lg font-medium">我的订阅</h2>
+                                <div className="flex space-x-3">
+                                    <button 
+                                        onClick={handleAddSubscription}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm flex items-center"
+                                    >
+                                        <i className="fas fa-plus mr-2"></i>
+                                        新增订阅
+                                    </button>
+                                    <div className="flex space-x-2">
+                                        <button className="text-gray-600 text-sm">数据概览</button>
+                                        <button 
+                                            onClick={handleRefreshData}
+                                            className="text-blue-600 text-sm flex items-center"
+                                        >
+                                            <i className="fas fa-sync-alt mr-1"></i>
+                                            刷新数据
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Subscription Cards */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <div className="flex items-center mb-2">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                <h3 className="font-medium">科技新闻日报</h3>
+                                                <i className="fas fa-edit ml-2 text-gray-400 cursor-pointer"></i>
+                                            </div>
+                                            <div className="text-sm text-gray-600 space-y-1">
+                                                <div>来源：新浪科技</div>
+                                                <div>频率：每日</div>
+                                                <div>推送时间：上午 9:00</div>
+                                            </div>
+                                            <button 
+                                                onClick={handleDeleteSubscription}
+                                                className="text-red-500 text-sm mt-3 flex items-center"
+                                            >
+                                                <i className="fas fa-trash mr-1"></i>
+                                                删除订阅
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <div className="flex items-center mb-2">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                <h3 className="font-medium">财经周刊精选</h3>
+                                                <i className="fas fa-edit ml-2 text-gray-400 cursor-pointer"></i>
+                                            </div>
+                                            <div className="text-sm text-gray-600 space-y-1">
+                                                <div>来源：财经网</div>
+                                                <div>频率：每周</div>
+                                                <div>推送时间：周一 8:00</div>
+                                            </div>
+                                            <button className="text-red-500 text-sm mt-3 flex items-center">
+                                                <i className="fas fa-trash mr-1"></i>
+                                                删除订阅
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-lg border border-gray-200 p-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <div className="flex items-center mb-2">
+                                                <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                                                <h3 className="font-medium">生活小窍门</h3>
+                                                <i className="fas fa-edit ml-2 text-gray-400 cursor-pointer"></i>
+                                            </div>
+                                            <div className="text-sm text-gray-600 space-y-1">
+                                                <div>来源：小红书</div>
+                                                <div>频率：每3天</div>
+                                                <div>推送时间：下午 3:00</div>
+                                            </div>
+                                            <button className="text-red-500 text-sm mt-3 flex items-center">
+                                                <i className="fas fa-trash mr-1"></i>
+                                                删除订阅
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-72 bg-white border-l border-gray-200 p-6">
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex items-center text-blue-600 mb-3">
+                                        <i className="fas fa-rss mr-2"></i>
+                                        <span className="font-medium">订阅数量</span>
+                                    </div>
+                                    <div className="text-2xl font-bold">3</div>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center text-green-600 mb-3">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                        <span className="font-medium">推送成功率</span>
+                                    </div>
+                                    <div className="text-2xl font-bold">92%</div>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center text-orange-600 mb-3">
+                                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                                        <span className="font-medium">当日新增订阅</span>
+                                    </div>
+                                    <div className="text-2xl font-bold">5</div>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center text-yellow-600 mb-3">
+                                        <i className="fas fa-exclamation-triangle mr-2"></i>
+                                        <span className="font-medium">故障提醒数</span>
+                                    </div>
+                                    <div className="text-2xl font-bold">1</div>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-medium mb-3">实时信息统计</h3>
+                                    <img 
+                                        src={currentImage} 
+                                        alt="实时信息统计图" 
+                                        className="w-full rounded-lg"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        点击图表查看详细数据报告，随时了解推送状况。
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <h3 className="font-medium mb-3">常见问题</h3>
+                                    <div className="space-y-2 text-sm">
+                                        <a href="#" className="block text-blue-600 hover:underline">如何设置推送时间？</a>
+                                        <a href="#" className="block text-blue-600 hover:underline">如何管理订阅源链接？</a>
+                                        <a href="#" className="block text-blue-600 hover:underline">为什么我的推送频率变了？</a>
+                                        <a href="#" className="block text-blue-600 hover:underline">如何管理订阅的相关设置？</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-white border-t border-gray-200 p-4 text-center text-sm text-gray-500">
+                        <div className="mb-2">© 2023 订阅内容聚合与推送平台 版权所有</div>
+                        <div className="mb-2">版本：1.2.5 | 联系客服：support@example.com</div>
+                        <div className="space-x-4">
+                            <a href="#" className="text-blue-600 hover:underline">关于我们</a>
+                            <a href="#" className="text-blue-600 hover:underline">使用条款</a>
+                            <a href="#" className="text-blue-600 hover:underline">隐私政策</a>
+                        </div>
+                    </div>
+
+                    {/* Add Subscription Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg w-96 p-6">
+                                <div className="flex justify-between items-center mb-4 bg-blue-600 text-white -m-6 p-4 rounded-t-lg">
+                                    <h2 className="text-lg font-medium">新增订阅</h2>
+                                    <button onClick={handleCloseModal} className="text-white hover:text-gray-200">
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4 mt-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">订阅名称</label>
+                                        <input 
+                                            type="text" 
+                                            value={subscriptionName}
+                                            onChange={handleSubscriptionNameChange}
+                                            placeholder="输入订阅名称"
+                                            className="w-full border border-gray-300 rounded px-3 py-2"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">来源渠道</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>新浪科技</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">推送频率</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>每日</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">推送时间</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2">
+                                            <option>上午 9:00</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">订阅状态</label>
+                                        <div className="flex space-x-4">
+                                            <label className="flex items-center">
+                                                <input type="radio" name="status" value="open" defaultChecked className="mr-2" />
+                                                <span>开启</span>
+                                            </label>
+                                            <label className="flex items-center">
+                                                <input type="radio" name="status" value="close" className="mr-2" />
+                                                <span>暂停</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={handleCloseModal}
+                                        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg w-80 p-6">
+                                <h2 className="text-lg font-medium mb-4">确认删除</h2>
+                                <p className="text-gray-600 mb-6">您确定要删除这个订阅吗？此操作无法撤销。</p>
+                                
+                                <div className="flex justify-end space-x-3">
+                                    <button 
+                                        onClick={handleCloseDeleteModal}
+                                        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleCloseDeleteModal}
+                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                                    >
+                                        确认删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

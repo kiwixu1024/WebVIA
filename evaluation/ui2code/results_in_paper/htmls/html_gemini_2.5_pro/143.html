@@ -1,0 +1,396 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上古籍阅读</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <style>
+        body {
+            background-color: #f3f0e9;
+            background-image: url('https://img.hellogithub.com/cos/static/website/bg/grid.png');
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        .active-nav {
+            background-color: white;
+            color: #3b82f6; /* Tailwind's blue-500 */
+            border-left: 4px solid #3b82f6;
+            font-weight: 600;
+        }
+        .active-nav svg {
+            color: #3b82f6;
+        }
+        .nav-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const initialBooks = [
+            {
+                id: 1,
+                title: '楚辞',
+                author: '屈原 等',
+                dynasty: '先秦',
+                categories: ['诗歌', '辞赋'],
+                rating: 4.8,
+                views: 1857,
+                description: '《楚辞》是中国古代诗歌的浪漫主义源头，与《诗经》并称“风骚”。主要收录了屈原、宋玉等人的作品，内容想象丰富，辞藻华丽，对后世文学产生了深远影响。',
+                imageUrl: 'https://picsum.photos/id/1015/300/200',
+            },
+            {
+                id: 2,
+                title: '史记',
+                author: '司马迁',
+                dynasty: '汉',
+                categories: ['史书', '纪传体'],
+                rating: 5.0,
+                views: 2789,
+                description: '《史记》是西汉史学家司马迁撰写的中国第一部纪传体通史，记载了上起上古传说中的黄帝时代，下至汉武帝元狩元年共3000多年的历史。全书包括十二本纪、三十世家、七十列传、十表、八书，…',
+                imageUrl: 'https://picsum.photos/id/1016/300/200',
+            },
+            {
+                id: 3,
+                title: '资治通鉴',
+                author: '司马光',
+                dynasty: '宋',
+                categories: ['史书', '编年体'],
+                rating: 4.9,
+                views: 1253,
+                description: '《资治通鉴》是北宋司马光主编的一部多卷本编年体史书，记载了从战国末期（前403年）到五代末期（959年）共1362年的历史。此书包罗万象思想，认为君主和历史学家可以从稳固的史料教训，“鉴”…',
+                imageUrl: 'https://picsum.photos/id/1025/300/200',
+            },
+            {
+                id: 4,
+                title: '红楼梦',
+                author: '曹雪芹',
+                dynasty: '清',
+                categories: ['小说', '章回体'],
+                rating: 5.0,
+                views: 5283,
+                description: '《红楼梦》，原名《石头记》，中国古代四大名著之首，章回体长篇小说，成书于1784年（清乾隆四十九年）。一般认为前80回为清代作家曹雪芹所著，后40回作者为无名氏，整理者为程伟元、高鹗。',
+                imageUrl: 'https://picsum.photos/id/219/300/200',
+            },
+            {
+                id: 5,
+                title: '论语',
+                author: '孔子弟子及再传弟子',
+                dynasty: '春秋战国',
+                categories: ['儒家经典', '语录体'],
+                rating: 4.9,
+                views: 3156,
+                description: '《论语》是儒家学派的经典著作之一，由孔子的弟子及其再传弟子编撰而成。它以语录体和对话文体为主，记载了孔子及其弟子言行，集中体现了孔子的政治主张、伦理思想、道德观念及教育原则等。',
+                imageUrl: 'https://picsum.photos/id/30/300/200',
+            },
+            {
+                id: 6,
+                title: '道德经',
+                author: '老子',
+                dynasty: '春秋',
+                categories: ['道家经典', '哲学'],
+                rating: 4.7,
+                views: 2453,
+                description: '《道德经》，又称《老子》，是中国古代先秦诸子分家前的一部著作，为道家哲学的重要来源。全书约5000字，分上下两篇，分别称为《道经》、《德经》，又称《老子五千文》、《道德真经》等。',
+                imageUrl: 'https://picsum.photos/id/305/300/200',
+            },
+        ];
+
+        const allCategories = ['史书', '诗歌', '小说', '子部', '儒家经典', '道家经典', '佛经', '兵书', '农书', '杂家', '史评', '政论', '文集'];
+        const allDynasties = ['先秦', '汉', '魏晋', '南北朝', '隋', '唐', '宋', '元', '明', '清'];
+
+        function AddModal({ onClose }) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-[#fcfaf2] p-8 rounded-lg shadow-xl w-full max-w-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-800">新增古籍</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">书名</label>
+                                    <input type="text" placeholder="请输入古籍名称" className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">作者</label>
+                                    <input type="text" placeholder="请输入作者姓名" className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">朝代</label>
+                                    <select className="w-full p-2 border border-gray-300 rounded-md bg-white">
+                                        <option>唐</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">封面</label>
+                                    <input type="text" defaultValue="https://picsum.photos/id/83/300/400" className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">分类 (可选)</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {allCategories.map(cat => <span key={cat} className="px-3 py-1 text-sm rounded-full cursor-pointer bg-gray-200 text-gray-600 hover:bg-yellow-400">{cat}</span>)}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">简介</label>
+                                <textarea placeholder="请输入简介" rows="4" className="w-full p-2 border border-gray-300 rounded-md bg-white"></textarea>
+                            </div>
+                        </div>
+                        <div className="flex justify-end mt-6 space-x-3">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={onClose} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">保存</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function EditModal({ book, onClose }) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-[#fcfaf2] p-8 rounded-lg shadow-xl w-full max-w-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-800">编辑古籍</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">&times;</button>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">书名</label>
+                                    <input type="text" defaultValue={book.title} className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">作者</label>
+                                    <input type="text" defaultValue={book.author} className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">朝代</label>
+                                    <select defaultValue={book.dynasty} className="w-full p-2 border border-gray-300 rounded-md bg-white">
+                                        {allDynasties.map(d => <option key={d}>{d}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">封面</label>
+                                    <input type="text" defaultValue="https://picsum.photos/id/28/300/400" className="w-full p-2 border border-gray-300 rounded-md bg-white"/>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">分类 (可选)</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {allCategories.map(cat => {
+                                        const isActive = book.categories.includes(cat);
+                                        const activeClass = isActive ? 'bg-yellow-400 text-gray-800' : 'bg-gray-200 text-gray-600';
+                                        return <span key={cat} className={`px-3 py-1 text-sm rounded-full cursor-pointer ${activeClass} hover:bg-yellow-400`}>{cat}</span>
+                                    })}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">简介</label>
+                                <textarea rows="4" defaultValue={book.description} className="w-full p-2 border border-gray-300 rounded-md bg-white"></textarea>
+                            </div>
+                        </div>
+                        <div className="flex justify-end mt-6 space-x-3">
+                            <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={onClose} className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">保存更改</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        function DeleteModal({ book, onClose, onConfirm }) {
+            return (
+                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+                        <div className="mb-4">
+                            <i className="fas fa-exclamation-triangle text-red-500 text-4xl"></i>
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-800 mb-2">确认删除</h2>
+                        <p className="text-gray-600 mb-6">您确定要删除《{book.title}》吗？此操作不可恢复。</p>
+                        <div className="flex justify-center space-x-4">
+                             <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">取消</button>
+                            <button onClick={onConfirm} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">确认删除</button>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+
+        function BookCard({ book, onEdit, onDelete }) {
+            return (
+                <div className="bg-[#fcfaf2] border border-[#e6e0d4] rounded-lg shadow-md p-4 flex flex-col">
+                    <div className="flex gap-4">
+                        <img src={book.imageUrl} alt={book.title} className="w-24 h-32 object-cover rounded-md flex-shrink-0" />
+                        <div className="flex-grow">
+                            <h3 className="text-lg font-bold text-gray-800">{book.title}</h3>
+                            <p className="text-sm text-gray-600">作者: {book.author}</p>
+                            <p className="text-sm text-gray-600">朝代: {book.dynasty}</p>
+                            <div className="mt-1 flex flex-wrap gap-1.5">
+                                {book.categories.map(cat => <span key={cat} className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">{cat}</span>)}
+                            </div>
+                            <div className="mt-2 flex items-center text-sm text-gray-500 gap-4">
+                                <span className="flex items-center gap-1"><i className="fas fa-star text-yellow-400"></i>{book.rating.toFixed(1)}</span>
+                                <span className="flex items-center gap-1"><i className="fas fa-eye"></i>{book.views}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-3 flex-grow">{book.description}</p>
+                    <div className="border-t border-gray-200 mt-3 pt-3 flex justify-between items-center">
+                        <button onClick={() => onEdit(book)} className="text-sm text-green-600 hover:text-green-800"><i className="fas fa-edit mr-1"></i>编辑</button>
+                        <button onClick={() => onDelete(book)} className="text-red-500 hover:text-red-700"><i className="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+            )
+        }
+
+        function App() {
+            const [books, setBooks] = useState(initialBooks);
+            const [sortType, setSortType] = useState('default');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [editingBook, setEditingBook] = useState(null);
+            const [deletingBook, setDeletingBook] = useState(null);
+
+            const sortedBooks = useMemo(() => {
+                const newBooks = [...books];
+                if (sortType === 'hot') {
+                    return newBooks.sort((a, b) => b.views - a.views);
+                }
+                return newBooks.sort((a,b) => a.id - b.id);
+            }, [books, sortType]);
+            
+            const handleEdit = (book) => {
+                setEditingBook(book);
+            };
+
+            const handleDelete = (book) => {
+                setDeletingBook(book);
+            };
+            
+            const confirmDelete = () => {
+                setBooks(books.filter(b => b.id !== deletingBook.id));
+                setDeletingBook(null);
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Header */}
+                    <header className="bg-[#6b4a2e] text-white py-3 px-8 flex justify-between items-center shadow-md">
+                        <div>
+                            <h1 className="text-xl font-semibold">线上古籍阅读</h1>
+                            <p className="text-xs text-gray-300">传承千年文化，品读中华雅韵</p>
+                        </div>
+                    </header>
+                    
+                    <div className="flex flex-1">
+                        {/* Left Sidebar */}
+                        <aside className="w-60 bg-gray-100 p-4 pt-8 border-r border-gray-200 flex-shrink-0">
+                            <nav className="space-y-2">
+                                <a href="#" className="flex items-center p-3 text-gray-700 rounded-md nav-item active-nav">
+                                    <i className="fas fa-th-large w-6 text-center"></i>
+                                    <span>古籍展示</span>
+                                </a>
+                                <a href="#" className="flex items-center p-3 text-gray-700 rounded-md nav-item">
+                                    <i className="fas fa-user w-6 text-center"></i>
+                                    <span>我的藏书</span>
+                                </a>
+                                <a href="#" className="flex items-center p-3 text-gray-700 rounded-md nav-item">
+                                    <i className="fas fa-plus-square w-6 text-center"></i>
+                                    <span>新增书目</span>
+                                </a>
+                                <a href="#" className="flex items-center p-3 text-gray-700 rounded-md nav-item">
+                                    <i className="fas fa-star w-6 text-center"></i>
+                                    <span>平台特色</span>
+                                </a>
+                                <a href="#" className="flex items-center p-3 text-gray-700 rounded-md nav-item">
+                                    <i className="fas fa-question-circle w-6 text-center"></i>
+                                    <span>使用帮助</span>
+                                </a>
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-3xl font-bold text-gray-800">古籍典藏</h2>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex items-center bg-gray-200 rounded-md p-1">
+                                        <button className={`px-4 py-1.5 rounded-md text-sm ${sortType === 'default' ? 'bg-white shadow text-gray-800' : 'text-gray-600'}`} onClick={() => setSortType('default')}>按朝代</button>
+                                        <button className="px-4 py-1.5 rounded-md text-sm text-gray-600" onClick={() => {}}>按分类</button>
+                                        <button className={`px-4 py-1.5 rounded-md text-sm ${sortType === 'hot' ? 'bg-white shadow text-gray-800' : 'text-gray-600'}`} onClick={() => setSortType('hot')}>按热门</button>
+                                    </div>
+                                    <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+                                        <i className="fas fa-plus"></i>
+                                        <span>添加古籍</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {sortedBooks.map(book => <BookCard key={book.id} book={book} onEdit={handleEdit} onDelete={handleDelete}/>)}
+                            </div>
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-64 p-6 bg-white border-l border-gray-200 flex-shrink-0">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">统计信息</h3>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between items-center py-2 border-b">
+                                    <span className="text-gray-600">总古籍数</span>
+                                    <span className="font-semibold text-gray-800">6</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b">
+                                    <span className="text-gray-600">今日新增</span>
+                                    <span className="font-semibold text-gray-800">2</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b">
+                                    <span className="text-gray-600">总阅读量</span>
+                                    <span className="font-semibold text-gray-800">16791</span>
+                                </div>
+                                <div className="flex justify-between items-center py-2 border-b">
+                                    <span className="text-gray-600">平均评分</span>
+                                    <span className="font-semibold text-yellow-500 flex items-center">4.9 <i className="fas fa-star ml-1"></i></span>
+                                </div>
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-800 mt-6 mb-4">朝代分布</h3>
+                            <div className="bg-gray-100 h-32 rounded-md flex items-center justify-center text-gray-500 text-xs">
+                              先秦&nbsp;&nbsp;&nbsp;&nbsp;汉&nbsp;&nbsp;&nbsp;&nbsp;宋&nbsp;&nbsp;&nbsp;&nbsp;清&nbsp;&nbsp;&nbsp;&nbsp;明&nbsp;&nbsp;&nbsp;&nbsp;唐
+                            </div>
+                        </aside>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-[#6b4a2e] text-gray-300 text-xs py-3 px-8 flex justify-between items-center">
+                        <span>© 2023 线上古籍阅读平台 - 传承千年文化</span>
+                        <div className="flex items-center space-x-4 text-sm">
+                            <a href="#" className="hover:text-white"><i className="fab fa-github"></i></a>
+                            <a href="#" className="hover:text-white"><i className="fas fa-question-circle"></i></a>
+                            <a href="#" className="hover:text-white"><i className="fas fa-cog"></i></a>
+                        </div>
+                    </footer>
+
+                    {/* Modals */}
+                    {showAddModal && <AddModal onClose={() => setShowAddModal(false)} />}
+                    {editingBook && <EditModal book={editingBook} onClose={() => setEditingBook(null)} />}
+                    {deletingBook && <DeleteModal book={deletingBook} onClose={() => setDeletingBook(null)} onConfirm={confirmDelete} />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

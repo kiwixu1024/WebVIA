@@ -1,0 +1,681 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>远程团队协作平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [projects, setProjects] = useState([
+                {
+                    id: 1,
+                    name: "移动应用开发",
+                    description: "为公司产品开发配套移动应用，支持iOS和Android",
+                    priority: "中优先级",
+                    progress: 45,
+                    leaders: "李华",
+                    members: ["张明", "刘洋", "赵强"]
+                },
+                {
+                    id: 2,
+                    name: "数据分析平台",
+                    description: "构建内部数据分析平台，支持多维度数据可视化",
+                    priority: "低优先级",
+                    progress: 20,
+                    leaders: "王芳",
+                    members: ["张明", "黄华", "赵强"]
+                },
+                {
+                    id: 3,
+                    name: "网站重构项目",
+                    description: "重构公司官网，提升用户体验与加载速度",
+                    priority: "高优先级",
+                    progress: 75,
+                    leaders: "张明",
+                    members: ["张明"]
+                }
+            ]);
+
+            const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+            const [showHelp, setShowHelp] = useState(false);
+            const [selectedProject, setSelectedProject] = useState(null);
+            const [showEditDialog, setShowEditDialog] = useState(false);
+            const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+            const [currentOperation, setCurrentOperation] = useState(null);
+
+            const [newProject, setNewProject] = useState({
+                name: "",
+                description: "",
+                priority: "中优先级",
+                progress: 0,
+                members: []
+            });
+
+            const getPriorityColor = (priority) => {
+                switch(priority) {
+                    case "高优先级": return "#ef4444";
+                    case "中优先级": return "#eab308";
+                    case "低优先级": return "#10b981";
+                    default: return "#6b7280";
+                }
+            };
+
+            const getTotalProgress = () => {
+                return projects.reduce((total, project) => total + project.progress, 0);
+            };
+
+            const helpContent = (
+                <div className="w-full max-h-96 overflow-auto bg-white rounded-lg p-4 mb-6">
+                    <div className="space-y-4">
+                        <div className="border-l-4 border-blue-500 pl-4">
+                            <h3 className="font-semibold text-blue-800 mb-2">1. 如何添加项目</h3>
+                            <ol className="text-sm text-gray-600 space-y-1">
+                                <li>1. 点击页面顶部或主内容区域的"新建项目"按钮</li>
+                                <li>2. 在表单中填写项目名称、描述等相关信息</li>
+                                <li>3. 选择项目优先级和成员</li>
+                                <li>4. 点击"保存项目"按钮完成添加</li>
+                            </ol>
+                        </div>
+                        
+                        <div className="border-l-4 border-blue-500 pl-4">
+                            <h3 className="font-semibold text-blue-800 mb-2">2. 如何编辑并删除</h3>
+                            <ol className="text-sm text-gray-600 space-y-1">
+                                <li>1. 在项目卡片右上角找到"编辑"或"删除"按钮</li>
+                                <li>2. 点击"编辑"弹出编辑窗口，修改后保存</li>
+                                <li>3. 点击"删除"会有确认提示，确认后删除</li>
+                                <li>4. 所有操作都会即时在页面上反映</li>
+                            </ol>
+                        </div>
+                        
+                        <div className="border-l-4 border-blue-500 pl-4">
+                            <h3 className="font-semibold text-blue-800 mb-2">3. 如何查看统计</h3>
+                            <ol className="text-sm text-gray-600 space-y-1">
+                                <li>1. 右侧统计区域提供多种数据可视化图表</li>
+                                <li>2. 可点击"实时统计"、"周报统计"、"月报统计"切换视图</li>
+                                <li>3. 点击"导出报表"可导出当前项目数据</li>
+                                <li>4. 图表数据会随团队任务完成情况实时更新</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const handleNewProject = () => {
+                setCurrentOperation('新建项目');
+                setShowNewProjectForm(true);
+                setShowHelp(false);
+                setShowEditDialog(false);
+                setShowDeleteDialog(false);
+            };
+
+            const handleHelp = () => {
+                setCurrentOperation('帮助');
+                setShowHelp(true);
+                setShowNewProjectForm(false);
+                setShowEditDialog(false);
+                setShowDeleteDialog(false);
+            };
+
+            const handleEdit = (project) => {
+                setCurrentOperation('编辑');
+                setSelectedProject(project);
+                setShowEditDialog(true);
+            };
+
+            const handleDelete = (project) => {
+                setCurrentOperation('删除');
+                setSelectedProject(project);
+                setShowDeleteDialog(true);
+            };
+
+            const handleCancel = () => {
+                setCurrentOperation(null);
+                if (showNewProjectForm) {
+                    setShowNewProjectForm(false);
+                } else if (showEditDialog) {
+                    setShowEditDialog(false);
+                } else if (showDeleteDialog) {
+                    setShowDeleteDialog(false);
+                }
+            };
+
+            const handleSaveProject = () => {
+                if (newProject.name) {
+                    const nextProject = {
+                        id: projects.length + 1,
+                        name: newProject.name,
+                        description: newProject.description,
+                        priority: newProject.priority,
+                        progress: newProject.progress,
+                        leaders: "张明",
+                        members: newProject.members
+                    };
+                    setProjects([...projects, nextProject]);
+                    setNewProject({
+                        name: "",
+                        description: "",
+                        priority: "中优先级",
+                        progress: 0,
+                        members: []
+                    });
+                    setShowNewProjectForm(false);
+                    setCurrentOperation(null);
+                }
+            };
+
+            const handleSaveEdit = () => {
+                setProjects(projects.map(p => 
+                    p.id === selectedProject.id 
+                        ? { ...p, name: selectedProject.name, progress: selectedProject.progress }
+                        : p
+                ));
+                setShowEditDialog(false);
+                setShowHelp(false);
+                setCurrentOperation(null);
+            };
+
+            const handleConfirmDelete = () => {
+                setProjects(projects.filter(p => p.id !== selectedProject.id));
+                setShowDeleteDialog(false);
+                setShowHelp(false);
+                setCurrentOperation(null);
+                setSelectedProject(null);
+            };
+
+            const handleCancelDelete = () => {
+                setShowDeleteDialog(false);
+                setShowHelp(false);
+                setCurrentOperation(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center cursor-pointer" onClick={handleHelp}>
+                                    <i className="fas fa-hands-helping text-blue-600 text-xl mr-3"></i>
+                                    <h1 className="text-xl font-semibold text-gray-900">远程团队协作平台</h1>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm">
+                                        <i className="fas fa-plus mr-2"></i>新建项目
+                                    </button>
+                                    <button 
+                                        className="flex items-center text-gray-600 hover:text-gray-900"
+                                        onClick={handleHelp}
+                                    >
+                                        <i className="fas fa-question-circle mr-2"></i>帮助
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex gap-8">
+                            {/* Left Content Area */}
+                            <div className="flex-1">
+                                {/* Project Progress Display */}
+                                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-lg font-semibold text-gray-900">项目进度展示</h2>
+                                        <span className="text-sm text-gray-500">共 {projects.length} 个项目</span>
+                                    </div>
+                                    
+                                    <div className="space-y-6">
+                                        {projects.map(project => (
+                                            <div key={project.id} className="border border-gray-200 rounded-lg p-6 bg-white">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <h3 className="text-lg font-medium text-gray-900">{project.name}</h3>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            className="text-blue-600 text-sm hover:text-blue-700"
+                                                            onClick={() => handleEdit(project)}
+                                                        >
+                                                            <i className="fas fa-edit mr-1"></i>编辑
+                                                        </button>
+                                                        <button 
+                                                            className="text-red-600 text-sm hover:text-red-700"
+                                                            onClick={() => handleDelete(project)}
+                                                        >
+                                                            <i className="fas fa-trash mr-1"></i>删除
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="text-sm text-gray-600 mb-2">{project.description}</div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(project.priority)}`}>
+                                                        {project.priority}
+                                                    </span>
+                                                    <div className="flex-1 bg-gray-200 rounded-full h-2 mb-4">
+                                                        <div 
+                                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                                            style={{width: `${project.progress}%`}}
+                                                        ></div>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600">
+                                                        进度: <span className="font-medium text-blue-600">{project.progress}%</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center space-x-2 mt-3">
+                                                    <img src="https://picsum.photos/id/64/32/32" alt="Leader" className="w-8 h-8 rounded-full" />
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">{project.leaders}</div>
+                                                        <div className="text-xs text-gray-500">负责人</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Project Management */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h2 className="text-lg font-semibold text-gray-900">项目管理</h2>
+                                        <button 
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center"
+                                            onClick={handleNewProject}
+                                        >
+                                            <i className="fas fa-plus mr-2"></i>添加新项目
+                                        </button>
+                                    </div>
+
+                                    {!showNewProjectForm && currentOperation !== '新建项目' && (
+                                        <div className="text-center py-12">
+                                            <div className="text-gray-300 mb-4">
+                                                <i className="fas fa-plus-circle text-4xl"></i>
+                                            </div>
+                                            <p className="text-gray-500 mb-2">点击"添加新项目"按钮开始创建</p>
+                                            <p className="text-gray-400 text-sm">您可以随时添加、编辑和删除项目</p>
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                        {showNewProjectForm ? (
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-900 mb-6">添加新项目</h3>
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">项目名称</label>
+                                                        <input
+                                                            type="text"
+                                                            value={newProject.name}
+                                                            onChange={(e) => setNewProject({...newProject, name: e.target.value})}
+                                                            placeholder="输入项目名称"
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">项目描述</label>
+                                                        <textarea
+                                                            value={newProject.description}
+                                                            onChange={(e) => setNewProject({...newProject, description: e.target.value})}
+                                                            placeholder="输入项目描述"
+                                                            rows="4"
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-2">优先级</label>
+                                                            <select
+                                                                value={newProject.priority}
+                                                                onChange={(e) => setNewProject({...newProject, priority: e.target.value})}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            >
+                                                                <option value="高优先级">高</option>
+                                                                <option value="中优先级">中</option>
+                                                                <option value="低优先级">低</option>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-2">初始进度</label>
+                                                            <input
+                                                                type="number"
+                                                                value={newProject.progress}
+                                                                onChange={(e) => setNewProject({...newProject, progress: Math.max(parseInt(e.target.value) || 0, 0)})}
+                                                                min="0"
+                                                                max="100"
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            />
+                                                            <div className="text-xs text-gray-500 mt-1">0</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-2">选择团队成员</label>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {['张明', '黄华', '王芳', '赵强', '刘洋'].map(member => (
+                                                                <button
+                                                                    key={member}
+                                                                    className={`px-3 py-1 rounded-full text-sm border ${member === '张明' && newProject.members.includes('张明') ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'}`}
+                                                                    onClick={() => {
+                                                                        if (member === '张明' && !newProject.members.includes('张明')) {
+                                                                            setNewProject({...newProject, members: [...newProject.members, '张明']});
+                                                                        }
+                                                                        
+                                                                        if (!newProject.members.includes('张明')) {
+                                                                            setNewProject({...newProject, members: [...newProject.members, '张明'], progress: 75});
+                                                                        }
+                                                                        if (member !== '张明') {
+                                                                            handleNewProject();
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    {member}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-3">
+                                                        <button 
+                                                            onClick={handleCancel}
+                                                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex items-center"
+                                                        >
+                                                            <i className="fas fa-times mr-2"></i>取消
+                                                        </button>
+                                                        <button 
+                                                            onClick={handleSaveProject}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                                                        >
+                                                            <i className="fas fa-save mr-2"></i>保存项目
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : currentOperation === '新建项目' && currentOperation !== '编辑' && !showNewProjectForm ? (
+                                            <div className="min-h-[300px] text-center py-12">
+                                                <div className="text-gray-300 mb-4">
+                                                    <i className="fas fa-plus-circle text-4xl"></i>
+                                                </div>
+                                                <p className="text-gray-500 mb-2">点击"添加新项目"按钮开始创建</p>
+                                                <p className="text-gray-400 text-sm">您可以随时添加、编辑和删除项目</p>
+                                            </div>
+                                        ) : null}
+
+                                        {showEditDialog && selectedProject ? (
+                                            <div>
+                                                <h3 className="text-lg font-medium text-gray-900 mb-6">编辑项目</h3>
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <div className="block text-sm font-medium text-gray-700 mb-2">
+                                                            项目名称 <span className="text-red-500">*</span>
+                                                        </div>
+                                                        <input
+                                                            type="text"
+                                                            value={selectedProject.name}
+                                                            onChange={(e) => setSelectedProject({...selectedProject, name: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <div className="block text-sm font-medium text-gray-700 mb-2">项目描述</div>
+                                                        <textarea
+                                                            value={selectedProject.description}
+                                                            onChange={(e) => setSelectedProject({...selectedProject, description: e.target.value})}
+                                                            rows="4"
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <div className="block text-sm font-medium text-gray-700 mb-2">优先级</div>
+                                                            <select
+                                                                value={selectedProject.priority}
+                                                                onChange={(e) => setSelectedProject({...selectedProject, priority: e.target.value})}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            >
+                                                                <option value="高优先级">高</option>
+                                                                <option value="中优先级">中</option>
+                                                                <option value="低优先级">低</option>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <div className="block text-sm font-medium text-gray-700 mb-2">项目进度</div>
+                                                            <input
+                                                                type="text"
+                                                                value={selectedProject.progress}
+                                                                onChange={(e) => setSelectedProject({...selectedProject, progress: parseInt(e.target.value)})}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex gap-3">
+                                                        <button 
+                                                            onClick={handleCancel}
+                                                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 flex items-center"
+                                                        >
+                                                            <i className="fas fa-times mr-2"></i>取消
+                                                        </button>
+                                                        <button 
+                                                            onClick={handleSaveEdit}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                                                        >
+                                                            <i className="fas fa-save mr-2"></i>保存修改
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-80">
+                                {/* Team Data Analysis */}
+                                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">团队数据分析</h3>
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
+                                        <button className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i className="fas fa-chart-line mr-2"></i>实时统计
+                                        </button>
+                                        <button className="bg-gray-500 text-white px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i className="fas fa-chart-bar mr-2"></i>周报统计
+                                        </button>
+                                        <button className="bg-gray-500 text-white px-3 py-2 rounded-md text-sm flex items-center justify-center">
+                                            <i className="fas fa-chart-area mr-2"></i>月报统计
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Real-time chart */}
+                                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <h4 className="text-sm font-medium">团队成员在线时长（今日）</h4>
+                                            <span className="text-xs text-gray-500">实时更新</span>
+                                        </div>
+                                        
+                                        <div className="h-32 bg-gray-50 rounded-lg">
+                                            <svg width="100%" height="100%" viewBox="0 0 400 160">
+                                                <polyline
+                                                    fill="none"
+                                                    stroke="#10b981"
+                                                    strokeWidth="2"
+                                                    points="50,100 100,60 150,80 200,40 250,70 300,90 350,50 400,120"
+                                                />
+                                                <circle cx="50" cy="100" r="3" fill="#10b981" />
+                                                <circle cx="100" cy="60" r="3" fill="#10b981" />
+                                                <circle cx="150" cy="80" r="3" fill="#10b981" />
+                                                <circle cx="200" cy="40" r="3" fill="#10b981" />
+                                                <circle cx="250" cy="70" r="3" fill="#10b981" />
+                                                <circle cx="300" cy="90" r="3" fill="#10b981" />
+                                                <circle cx="350" cy="50" r="3" fill="#10b981" />
+                                                <circle cx="400" cy="120" r="3" fill="#10b981" />
+                                            </svg>
+                                        </div>
+                                        
+                                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                            <span>9:00</span>
+                                            <span>11:00</span>
+                                            <span>13:00</span>
+                                            <span>15:00</span>
+                                            <span>17:00</span>
+                                        </div>
+                                        
+                                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                            <span>0h</span>
+                                            <span>2h</span>
+                                            <span>4h</span>
+                                            <span>6h</span>
+                                            <span>8h</span>
+                                        </div>
+                                        
+                                        <div className="text-xs text-yellow-500 flex items-center justify-end mt-1">
+                                            <i className="fas fa-info-circle mr-1"></i>
+                                            定期同步可降低沟
+                                            <br />
+                                            通成本
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Statistics */}
+                                <div className="bg-white rounded-lg shadow-sm p-6">
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">统计概览</h3>
+                                    
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                                                <div>
+                                                    <div className="text-sm font-medium">当前在线成员</div>
+                                                    <div className="text-lg font-bold text-gray-900">5人</div>
+                                                </div>
+                                            </div>
+                                            <i className="fas fa-chart-bar text-green-600"></i>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                                                <div>
+                                                    <div className="text-sm font-medium">完成进度</div>
+                                                    <div className="text-lg font-bold text-gray-900">70%</div>
+                                                </div>
+                                            </div>
+                                            <i className="fas fa-chart-line text-blue-600"></i>
+                                        </div>
+                                        
+                                        <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                                            <div className="flex items-center">
+                                                <div className="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+                                                <div>
+                                                    <div className="text-sm font-medium">项目总数</div>
+                                                    <div className="text-lg font-bold text-gray-900">{projects.length}项</div>
+                                                </div>
+                                            </div>
+                                            <i className="fas fa-tasks text-purple-600"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 space-y-2">
+                                        <div className="text-xs text-gray-500">
+                                            本页数据最后更新时间: {new Date().toLocaleString()}
+                                        </div>
+                                        <div className="text-xs">
+                                            <i className="fas fa-sync-alt mr-1"></i>
+                                            每15分钟自动同步最新数据
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Floating Help Panel */}
+                    {showHelp && (
+                        <div className="fixed right-4 top-60 z-50 w-80 bg-white rounded-lg shadow-lg border border-gray-200">
+                            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+                                <h3 className="text-lg font-semibold">使用指南</h3>
+                                <button 
+                                    onClick={() => setShowHelp(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
+                            {helpContent}
+                        </div>
+                    )}
+
+                    {/* Confirmation Dialog */}
+                    {showDeleteDialog && selectedProject && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i className="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">确认删除项目</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        您确定要删除项目"{selectedProject.name}"吗？此操作无法撤销
+                                        <br />
+                                        <br />
+                                        确认后该项目的全部数据都将被删除。
+                                    </p>
+                                    <div className="flex gap-3 justify-center">
+                                        <button 
+                                            onClick={handleCancelDelete}
+                                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            onClick={handleConfirmDelete}
+                                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                        >
+                                            确定删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Help Button */}
+                    <button 
+                        onClick={handleHelp}
+                        className="fixed bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center z-40"
+                    >
+                        <i className="fas fa-question-circle"></i>
+                        {currentOperation === '帮助' && (
+                            <div className="absolute top-0 right-0 bg-blue-800 text-white px-2 py-1 rounded text-xs">
+                                3
+                            </div>
+                        )}
+                    </button>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

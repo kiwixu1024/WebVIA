@@ -1,0 +1,460 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>梦想清单管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+    /* Custom styles for range input to match screenshot */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #E5E7EB; /* gray-200 */
+      border-radius: 5px;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #3B82F6; /* blue-500 */
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 2px rgba(0,0,0,0.3);
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #3B82F6;
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 2px rgba(0,0,0,0.3);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'custom-bg': '#FFFBF5',
+            'custom-widget-bg': '#FFFBEB',
+            'custom-yellow-light': '#FEF3C7',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Initial data for the dreams, matching the first screenshot
+    const initialDreamsData = [
+      {
+        id: 1,
+        title: '环游世界',
+        targetDate: '2024-12-31',
+        owner: '小明',
+        progress: 45,
+        priority: '高',
+        hasCollaboration: true,
+        collaborators: ['小明', '小王'],
+        allCollaborators: ['小明', '小红', '小王', '小李'],
+        description: '探索世界各地的文化和美景，计划访问至少10个国家。'
+      },
+      {
+        id: 2,
+        title: '学习一门新语言',
+        targetDate: '2025-08-15',
+        owner: '小红',
+        progress: 30,
+        priority: '中',
+        hasCollaboration: false
+      },
+      {
+        id: 3,
+        title: '完成马拉松',
+        targetDate: '2023-11-05',
+        owner: '小李',
+        progress: 70,
+        priority: '高',
+        hasCollaboration: true
+      },
+      {
+        id: 4,
+        title: '写一本小说',
+        targetDate: '2024-06-30',
+        owner: '小王',
+        progress: 15,
+        priority: '低',
+        hasCollaboration: false
+      },
+    ];
+
+    const emptyDream = {
+      title: '',
+      targetDate: '',
+      owner: '',
+      progress: 0,
+      priority: '中',
+      collaborators: [],
+      allCollaborators: ['小明', '小红', '小王', '小李'],
+      description: ''
+    };
+    
+    // Helper for priority styles
+    const priorityStyles = {
+      '高': { bg: 'bg-red-100', text: 'text-red-800', name: '高优先级' },
+      '中': { bg: 'bg-yellow-100', text: 'text-yellow-800', name: '中优先级' },
+      '低': { bg: 'bg-green-100', text: 'text-green-800', name: '低优先级' },
+    };
+
+    // Components
+    const Sidebar = () => (
+      <div className="w-64 bg-white p-4 flex flex-col space-y-2">
+        <h1 className="text-xl font-bold text-gray-800 px-4 pb-4">梦想清单管理</h1>
+        <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg bg-custom-yellow-light text-gray-800 font-bold">
+          <i className="fas fa-sun w-5 text-center"></i>
+          <span>全部梦想</span>
+        </a>
+        <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+          <i className="fas fa-calendar-day w-5 text-center"></i>
+          <span>今日目标</span>
+        </a>
+        <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+          <i className="fas fa-folder w-5 text-center"></i>
+          <span>分类管理</span>
+        </a>
+        <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+          <i className="fas fa-chart-pie w-5 text-center"></i>
+          <span>统计报表</span>
+        </a>
+        <a href="#" className="flex items-center space-x-3 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+          <i className="fas fa-cog w-5 text-center"></i>
+          <span>设置</span>
+        </a>
+        <div className="flex-grow"></div>
+        <div className="bg-custom-widget-bg p-4 rounded-lg">
+          <div className="flex items-start space-x-2">
+            <i className="fas fa-lightbulb text-yellow-500 mt-1"></i>
+            <div>
+              <h3 className="font-bold text-gray-800">小贴士</h3>
+              <p className="text-sm text-gray-600 mt-1">每天为梦想打卡，才能不断前行，点击“今日目标”开启您的每日任务！</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    const DreamCard = ({ dream, onEdit, onDelete }) => {
+      const priority = priorityStyles[dream.priority];
+      const progressColor = dream.progress < 40 ? 'bg-yellow-400' : dream.progress < 70 ? 'bg-blue-400' : 'bg-green-400';
+      const isYellow = dream.title === '环游世界' || dream.title === '完成马拉松';
+
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-bold text-gray-800">{dream.title}</h3>
+            <div className="text-sm text-gray-500 space-x-4">
+              <button onClick={() => onEdit(dream)} className="hover:text-blue-500"><i className="fas fa-pen mr-1"></i>编辑</button>
+              <button onClick={() => onDelete(dream)} className="hover:text-red-500"><i className="fas fa-trash mr-1"></i>删除</button>
+            </div>
+          </div>
+          <div className="text-sm text-gray-500 space-y-2 mb-3">
+            <div className="flex items-center"><i className="fas fa-calendar-alt w-5 mr-1"></i>目标日期: {dream.targetDate}</div>
+            <div className="flex items-center"><i className="fas fa-user w-5 mr-1"></i>负责人: {dream.owner}</div>
+          </div>
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-1">
+            <span>进度</span>
+            <span>{dream.progress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+            <div className={`h-1.5 rounded-full ${isYellow ? 'bg-yellow-400' : 'bg-blue-400'}`} style={{ width: `${dream.progress}%` }}></div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${priority.bg} ${priority.text}`}>{priority.name}</span>
+            {dream.hasCollaboration && <span className="text-sm text-gray-500"><i className="fas fa-users mr-1"></i>多人协作</span>}
+          </div>
+        </div>
+      );
+    };
+    
+    const HelpAccordion = () => {
+        const [openIndex, setOpenIndex] = useState(null);
+        const faqs = ["如何添加梦想", "如何编辑/删除梦想", "使用技巧/小贴士"];
+
+        return (
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mt-6">
+                <h3 className="text-base font-bold text-gray-800 mb-4"><i className="fas fa-question-circle text-yellow-500 mr-2"></i>帮助说明</h3>
+                <div className="space-y-2">
+                    {faqs.map((faq, index) => (
+                        <div key={index} className="border-b border-gray-200 last:border-b-0">
+                            <button onClick={() => setOpenIndex(openIndex === index ? null : index)} className="w-full flex justify-between items-center py-3 text-left text-gray-700">
+                                <span>{faq}</span>
+                                <i className={`fas fa-chevron-down transform transition-transform ${openIndex === index ? 'rotate-180' : ''}`}></i>
+                            </button>
+                            {openIndex === index && <div className="pb-3 text-gray-500 text-sm">在这里您可以找到相关操作的详细说明和提示。</div>}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+    
+    const AddEditModal = ({ modalInfo, onClose, onSave }) => {
+        if (!modalInfo || (modalInfo.type !== 'add' && modalInfo.type !== 'edit')) return null;
+
+        const isEdit = modalInfo.type === 'edit';
+        const initialData = isEdit ? modalInfo.dream : emptyDream;
+
+        const [formData, setFormData] = useState(initialData);
+
+        useEffect(() => {
+          setFormData(isEdit ? modalInfo.dream : emptyDream);
+        }, [modalInfo]);
+
+        const handleChange = (e) => {
+            const { name, value } = e.target;
+            setFormData(prev => ({ ...prev, [name]: value }));
+        };
+
+        const handleProgressChange = (e) => {
+          setFormData(prev => ({...prev, progress: parseInt(e.target.value, 10)}));
+        }
+
+        const handleCollaboratorToggle = (name) => {
+          setFormData(prev => {
+            const newCollaborators = prev.collaborators.includes(name) 
+              ? prev.collaborators.filter(c => c !== name)
+              : [...prev.collaborators, name];
+            return {...prev, collaborators: newCollaborators};
+          });
+        }
+        
+        const handleSave = (e) => {
+            e.preventDefault();
+            onSave(formData);
+        }
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-[500px]">
+                    <div className="flex justify-between items-center p-4 border-b">
+                        <h2 className="text-lg font-bold text-gray-800">{isEdit ? '编辑梦想' : '添加新梦想'}</h2>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><i className="fas fa-times"></i></button>
+                    </div>
+                    <form onSubmit={handleSave}>
+                        <div className="p-6 space-y-4 text-sm">
+                            <div>
+                                <label className="block text-gray-700 mb-1">梦想标题 *</label>
+                                <input type="text" name="title" value={formData.title} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 mb-1">目标日期 *</label>
+                                <div className="relative">
+                                    <input type="text" name="targetDate" value={formData.targetDate} onChange={handleChange} placeholder="mm/dd/yyyy" className="w-full p-2 border rounded-md" required />
+                                    <i className="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 mb-1">负责人 *</label>
+                                <input type="text" name="owner" value={formData.owner} onChange={handleChange} className="w-full p-2 border rounded-md" required />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 mb-1">进度 ({formData.progress}%)</label>
+                                <input type="range" min="0" max="100" value={formData.progress} onChange={handleProgressChange} className="w-full" />
+                            </div>
+                            <div>
+                                <label className="block text-gray-700 mb-1">优先级 *</label>
+                                <select name="priority" value={formData.priority} onChange={handleChange} className="w-full p-2 border rounded-md bg-white">
+                                    <option value="高">高优先级</option>
+                                    <option value="中">中优先级</option>
+                                    <option value="低">低优先级</option>
+                                </select>
+                            </div>
+                            {isEdit && (
+                                <div>
+                                    <label className="block text-gray-700 mb-1">多人协作</label>
+                                    <div className="flex space-x-2">
+                                        {formData.allCollaborators.map(name => (
+                                            <button 
+                                              type="button"
+                                              key={name} 
+                                              onClick={() => handleCollaboratorToggle(name)}
+                                              className={`px-3 py-1 text-sm rounded-full ${formData.collaborators.includes(name) ? 'bg-yellow-100 border border-yellow-400 text-yellow-800' : 'bg-gray-100 border border-gray-200 text-gray-600'}`}>
+                                                {name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                             <div>
+                                <label className="block text-gray-700 mb-1">梦想描述</label>
+                                <textarea name="description" value={formData.description} onChange={handleChange} rows="3" className="w-full p-2 border rounded-md"></textarea>
+                            </div>
+                        </div>
+                        <div className="flex justify-end items-center p-4 border-t space-x-3">
+                            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">取消</button>
+                            <button type="submit" className="px-4 py-2 bg-yellow-400 text-gray-800 font-bold rounded-md hover:bg-yellow-500">保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    const DeleteConfirmModal = ({ modalInfo, onClose, onConfirm }) => {
+        if (!modalInfo || modalInfo.type !== 'delete') return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-96 p-6 text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900">确认删除</h3>
+                    <p className="text-sm text-gray-500 mt-2 mb-6">
+                        您确定要删除梦想“{modalInfo.dream.title}”吗？此操作无法撤销。
+                    </p>
+                    <div className="flex justify-center space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">取消</button>
+                        <button onClick={() => onConfirm(modalInfo.dream.id)} className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">确定删除</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    // Main App Component
+    function App() {
+      const [dreams, setDreams] = useState(initialDreamsData);
+      const [modalInfo, setModalInfo] = useState({ type: null, dream: null });
+
+      const handleAddNew = () => {
+        setModalInfo({ type: 'add', dream: emptyDream });
+      };
+
+      const handleEdit = (dream) => {
+        setModalInfo({ type: 'edit', dream: dream });
+      };
+
+      const handleDelete = (dream) => {
+        setModalInfo({ type: 'delete', dream: dream });
+      };
+
+      const handleCloseModal = () => {
+        setModalInfo({ type: null, dream: null });
+      };
+      
+      const handleSaveDream = (dreamData) => {
+        if (modalInfo.type === 'add') {
+            // Logic for adding a new dream
+            const newDream = { ...dreamData, id: Date.now(), hasCollaboration: dreamData.collaborators.length > 0 };
+            setDreams(prev => [...prev, newDream]);
+        } else if (modalInfo.type === 'edit') {
+            // Logic for updating an existing dream
+            setDreams(prev => prev.map(d => d.id === dreamData.id ? {...d, ...dreamData, hasCollaboration: dreamData.collaborators.length > 0} : d));
+        }
+        handleCloseModal();
+      };
+      
+      const handleConfirmDelete = (dreamId) => {
+        setDreams(prev => prev.filter(d => d.id !== dreamId));
+        handleCloseModal();
+      };
+
+      return (
+        <div className="bg-custom-bg min-h-screen">
+          <div className="flex">
+            <Sidebar />
+            <main className="flex-1 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex space-x-3">
+                  <button onClick={handleAddNew} className="bg-yellow-400 text-gray-800 font-bold px-4 py-2 rounded-lg shadow-sm hover:bg-yellow-500 flex items-center"><i className="fas fa-plus mr-2"></i>添加新梦想</button>
+                  <button className="bg-white text-gray-700 px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 flex items-center"><i className="fas fa-upload mr-2"></i>批量导入</button>
+                  <button className="bg-white text-gray-700 px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 flex items-center"><i className="fas fa-download mr-2"></i>导出清单</button>
+                </div>
+                <button className="bg-white text-gray-700 px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 flex items-center"><i className="fas fa-filter mr-2 text-yellow-500"></i>筛选排序</button>
+              </div>
+
+              <div className="flex space-x-6">
+                {/* Main content area */}
+                <div className="flex-grow">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {dreams.map(dream => (
+                      <DreamCard key={dream.id} dream={dream} onEdit={handleEdit} onDelete={handleDelete} />
+                    ))}
+                  </div>
+                  <HelpAccordion />
+                </div>
+
+                {/* Right sidebar widgets */}
+                <div className="w-72 flex-shrink-0 space-y-6">
+                  <div className="bg-custom-widget-bg p-4 rounded-lg shadow-sm">
+                    <h3 className="font-bold text-gray-800 mb-4">总体完成率</h3>
+                    <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
+                        <svg className="w-full h-full" viewBox="0 0 100 100">
+                           <circle cx="50" cy="50" r="42" stroke="#FBBF24" strokeWidth="12" fill="none" opacity="0.2"></circle>
+                           <circle cx="50" cy="50" r="42" stroke="#FBBF24" strokeWidth="12" fill="none" strokeDasharray="264" strokeDashoffset={264 * (1 - 0.40)} transform="rotate(-90 50 50)"></circle>
+                        </svg>
+                        <span className="absolute text-3xl font-bold text-gray-800">40%</span>
+                    </div>
+                    <button className="w-full mt-4 bg-white text-yellow-600 font-semibold py-2 rounded-lg border border-yellow-300 hover:bg-yellow-50">查看详情</button>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="font-bold text-gray-800 mb-4">分类分布</h3>
+                    <div className="w-32 h-32 mx-auto rounded-full bg-[conic-gradient(from_0deg_at_50%_50%,#FEE2E2_0%_35%,#FFFBEB_35%_75%,#D1FAE5_75%_90%,#E5E7EB_90%_100%)]"></div>
+                    <div className="text-xs text-gray-500 space-y-2 mt-4">
+                        <div className="flex items-center justify-between"><div><span className="inline-block w-2 h-2 rounded-full bg-red-200 mr-2"></span>高优先级</div></div>
+                        <div className="flex items-center justify-between"><div><span className="inline-block w-2 h-2 rounded-full bg-yellow-100 mr-2"></span>中优先级</div></div>
+                        <div className="flex items-center justify-between"><div><span className="inline-block w-2 h-2 rounded-full bg-green-200 mr-2"></span>低优先级</div></div>
+                        <div className="flex items-center justify-between"><div><span className="inline-block w-2 h-2 rounded-full bg-gray-200 mr-2"></span>已完成</div></div>
+                    </div>
+                    <button className="w-full mt-4 bg-white text-yellow-600 font-semibold py-2 rounded-lg border border-yellow-300 hover:bg-yellow-50">查看详情</button>
+                  </div>
+                   <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <h3 className="font-bold text-gray-800 mb-2">本周预警</h3>
+                    <p className="text-sm text-gray-600">写一本小说，进度: 15%</p>
+                    <button className="w-full mt-4 bg-white text-yellow-600 font-semibold py-2 rounded-lg border border-yellow-300 hover:bg-yellow-50">查看详情</button>
+                  </div>
+                </div>
+              </div>
+              
+              <footer className="text-center text-xs text-gray-400 mt-8 py-4 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                    <span>© 2023 梦想清单管理系统. 版权所有</span>
+                    <span>版本: v1.0.3</span>
+                    <a href="#" className="text-blue-500 hover:underline">反馈建议</a>
+                </div>
+              </footer>
+            </main>
+          </div>
+          
+          <AddEditModal modalInfo={modalInfo} onClose={handleCloseModal} onSave={handleSaveDream} />
+          <DeleteConfirmModal modalInfo={modalInfo} onClose={handleCloseModal} onConfirm={handleConfirmDelete} />
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的时光村</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('display');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [editingItem, setEditingItem] = useState(null);
+            const [batchMode, setBatchMode] = useState(false);
+
+            const [items, setItems] = useState([
+                {
+                    id: 1,
+                    date: '2023-01-15',
+                    title: '家庭野餐',
+                    description: '和家人一起去公园野餐，享受阳光和美食。',
+                    image: 'https://picsum.photos/id/1018/300/200',
+                    likes: 12,
+                    comments: '互动'
+                },
+                {
+                    id: 2,
+                    date: '2023-02-20',
+                    title: '孩子的第一次画展',
+                    description: '小明的绘画作品在学校展出，他兴奋得合不拢嘴。',
+                    image: 'https://picsum.photos/id/1025/300/200',
+                    likes: 8,
+                    comments: '互动'
+                },
+                {
+                    id: 3,
+                    date: '2023-03-10',
+                    title: '家庭游戏之夜',
+                    description: '全家人一起玩游戏，欢笑声充满了整个客厅。',
+                    image: 'https://picsum.photos/id/1040/300/200',
+                    likes: 15,
+                    comments: '互动'
+                }
+            ]);
+
+            const handleNavClick = (view) => {
+                setCurrentView(view);
+                if (view === 'add') {
+                    setShowAddModal(true);
+                    setBatchMode(false);
+                }
+            };
+
+            const handleAddNewTime = () => {
+                setCurrentView('add');
+                setShowAddModal(true);
+                setBatchMode(false);
+            };
+
+            const handleBatchAdd = () => {
+                setCurrentView('batchAdd');
+                setShowAddModal(true);
+                setBatchMode(true);
+            };
+
+            const handleEditClick = (item) => {
+                setEditingItem(item);
+                setShowEditModal(true);
+            };
+
+            const handleStatsClick = () => {
+                setCurrentView('stats');
+            };
+
+            const renderDisplayContent = () => (
+                <div className="flex-1 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold text-green-600">幸福时光展示</h2>
+                        <button 
+                            onClick={handleAddNewTime}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                        >
+                            <i className="fas fa-plus"></i>
+                            添加新时光
+                        </button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        {items.map((item) => (
+                            <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
+                                <div className="p-4">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="font-semibold text-gray-800">{item.title}</h3>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => handleEditClick(item)}
+                                                className="text-blue-500 hover:text-blue-700"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                            <button className="text-red-500 hover:text-red-700">
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-600 mb-2">{item.date}</p>
+                                    <p className="text-gray-700 text-sm mb-3">{item.description}</p>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-pink-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-heart"></i>
+                                            {item.likes} 互动
+                                        </span>
+                                        <button className="text-green-500 hover:text-green-700 text-sm">
+                                            分享
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center text-gray-500 text-sm">
+                        <i className="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                        Tip：长按卡片可快速分享至社交平台
+                    </div>
+                </div>
+            );
+
+            const renderEditContent = () => (
+                <div className="flex-1 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl font-semibold text-green-600">时光条目编辑</h2>
+                        <button 
+                            onClick={handleBatchAdd}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                        >
+                            <i className="fas fa-plus"></i>
+                            批量添加条目
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">标题</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {items.map((item) => (
+                                    <tr key={item.id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.date}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.title}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <button 
+                                                onClick={() => handleEditClick(item)}
+                                                className="text-blue-600 hover:text-blue-900 mr-4"
+                                            >
+                                                编辑
+                                            </button>
+                                            <button className="text-red-600 hover:text-red-900">
+                                                删除
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            const renderStatsContent = () => (
+                <div className="flex-1 p-6">
+                    <h2 className="text-xl font-semibold text-green-600 mb-6">时光统计</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div className="bg-blue-50 p-6 rounded-lg text-center">
+                            <h3 className="text-lg font-medium text-blue-800 mb-2">总互动次数</h3>
+                            <p className="text-3xl font-bold text-blue-600">35</p>
+                        </div>
+                        <div className="bg-pink-50 p-6 rounded-lg text-center">
+                            <h3 className="text-lg font-medium text-pink-800 mb-2">今日新增条目</h3>
+                            <p className="text-3xl font-bold text-pink-600">2</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h3 className="text-lg font-semibold text-green-600 mb-4">热门时光条目 Top3</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-yellow-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                                        <span>家庭游戏之夜</span>
+                                    </div>
+                                    <span className="text-pink-500 flex items-center gap-1">
+                                        <i className="fas fa-heart"></i> 15
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-gray-400 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                                        <span>家庭野餐</span>
+                                    </div>
+                                    <span className="text-pink-500 flex items-center gap-1">
+                                        <i className="fas fa-heart"></i> 12
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-orange-400 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                                        <span>孩子的第一次画展</span>
+                                    </div>
+                                    <span className="text-pink-500 flex items-center gap-1">
+                                        <i className="fas fa-heart"></i> 8
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h3 className="text-lg font-semibold text-green-600 mb-4">活跃用户排行前5</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <img src="https://picsum.photos/id/64/32/32" alt="妈妈" className="w-8 h-8 rounded-full" />
+                                        <span>妈妈</span>
+                                    </div>
+                                    <span className="text-green-500 flex items-center gap-1">
+                                        <i className="fas fa-star"></i> 18 活跃度
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <img src="https://picsum.photos/id/91/32/32" alt="爸爸" className="w-8 h-8 rounded-full" />
+                                        <span>爸爸</span>
+                                    </div>
+                                    <span className="text-green-500 flex items-center gap-1">
+                                        <i className="fas fa-star"></i> 12 活跃度
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <img src="https://picsum.photos/id/177/32/32" alt="小明" className="w-8 h-8 rounded-full" />
+                                        <span>小明</span>
+                                    </div>
+                                    <span className="text-green-500 flex items-center gap-1">
+                                        <i className="fas fa-star"></i> 9 活跃度
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <img src="https://picsum.photos/id/213/32/32" alt="奶奶" className="w-8 h-8 rounded-full" />
+                                        <span>奶奶</span>
+                                    </div>
+                                    <span className="text-green-500 flex items-center gap-1">
+                                        <i className="fas fa-star"></i> 7 活跃度
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <img src="https://picsum.photos/id/237/32/32" alt="爷爷" className="w-8 h-8 rounded-full" />
+                                        <span>爷爷</span>
+                                    </div>
+                                    <span className="text-green-500 flex items-center gap-1">
+                                        <i className="fas fa-star"></i> 5 活跃度
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 text-center">
+                        <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto">
+                            <i className="fas fa-download"></i>
+                            导出报表
+                        </button>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-clock text-green-500 text-xl"></i>
+                                    <span className="text-xl font-semibold text-gray-800">我的时光村</span>
+                                </div>
+                                <nav className="flex space-x-8">
+                                    <a href="#" className="bg-blue-500 text-white px-3 py-1.5 rounded text-sm">时间轴视图</a>
+                                    <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">树状视图</a>
+                                    <a href="#" className="text-gray-600 hover:text-gray-900 text-sm">地图视图</a>
+                                </nav>
+                                <div className="text-sm text-gray-500">
+                                    <i className="fas fa-user-circle text-yellow-500 mr-1"></i>
+                                    小贴士：点击顶部工具栏可切换不同视图模式，发现更多精彩！
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex max-w-7xl mx-auto">
+                        {/* Sidebar */}
+                        <aside className="w-64 bg-white min-h-screen border-r border-gray-200">
+                            <nav className="space-y-2 p-4">
+                                <button 
+                                    onClick={() => setCurrentView('display')}
+                                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                        currentView === 'display' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <i className="fas fa-th-large"></i>
+                                    <span>展示区</span>
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentView('edit')}
+                                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                        currentView === 'edit' || currentView === 'batchAdd' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <i className="fas fa-edit"></i>
+                                    <span>编辑区</span>
+                                </button>
+                                <button 
+                                    onClick={handleStatsClick}
+                                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left ${
+                                        currentView === 'stats' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <i className="fas fa-chart-bar"></i>
+                                    <span>统计区</span>
+                                </button>
+                                <a href="#" className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-cog"></i>
+                                    <span>操作台</span>
+                                </a>
+                                <a href="#" className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-question-circle"></i>
+                                    <span>帮助说明</span>
+                                </a>
+                                <a href="#" className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-600 hover:bg-gray-100">
+                                    <i className="fas fa-palette"></i>
+                                    <span>主题特色</span>
+                                </a>
+                            </nav>
+
+                            {/* Footer message */}
+                            <div className="absolute bottom-0 left-4 text-xs text-gray-500 p-2">
+                                "在互动幸福时光树上，分享家的温暖，记录爱的痕迹"
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className={currentView === 'batchAdd' ? 'flex-1' : 'flex-1 p-6'}>
+                            {currentView === 'display' && renderDisplayContent()}
+                            {currentView === 'edit' && renderEditContent()}
+                            {currentView === 'stats' && renderStatsContent()}
+                        </main>
+
+                        {/* Right Sidebar */}
+                        <aside className="w-80 bg-white min-h-screen border-l border-gray-200 p-6">
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">实时统计</h3>
+                                
+                                <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                                    <div className="text-sm text-blue-600 mb-1">总互动次数</div>
+                                    <div className="text-2xl font-bold text-blue-700">35</div>
+                                </div>
+                                
+                                <div className="bg-pink-50 p-4 rounded-lg mb-4">
+                                    <div className="text-sm text-pink-600 mb-1">今日新增</div>
+                                    <div className="text-2xl font-bold text-pink-700">2</div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-semibold text-gray-800 mb-3">热门时光条目</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">家庭游戏之夜</span>
+                                        <span className="text-pink-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 15
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">家庭野餐</span>
+                                        <span className="text-pink-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 12
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">孩子的第一次画展</span>
+                                        <span className="text-pink-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-heart"></i> 8
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mb-6">
+                                <h4 className="font-semibold text-gray-800 mb-3">活跃用户</h4>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <img src="https://picsum.photos/id/64/24/24" alt="妈妈" className="w-6 h-6 rounded-full" />
+                                            <span className="text-sm">妈妈</span>
+                                        </div>
+                                        <span className="text-green-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-star"></i> 18
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <img src="https://picsum.photos/id/91/24/24" alt="爸爸" className="w-6 h-6 rounded-full" />
+                                            <span className="text-sm">爸爸</span>
+                                        </div>
+                                        <span className="text-green-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-star"></i> 12
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <img src="https://picsum.photos/id/177/24/24" alt="小明" className="w-6 h-6 rounded-full" />
+                                            <span className="text-sm">小明</span>
+                                        </div>
+                                        <span className="text-green-500 text-sm flex items-center gap-1">
+                                            <i className="fas fa-star"></i> 9
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button className="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                                <i className="fas fa-download"></i>
+                                导出报表
+                            </button>
+                        </aside>
+                    </div>
+
+                    {/* Add/Edit Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <h3 className="text-lg font-semibold text-green-600 mb-4">
+                                    {batchMode ? '添加新时光' : '编辑时光'}
+                                </h3>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                        <input 
+                                            type="date" 
+                                            defaultValue="2025-09-23"
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入幸福的时光标题"
+                                            defaultValue={editingItem?.title || ''}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+                                        <textarea 
+                                            placeholder="描述这个幸福的时刻..."
+                                            rows="3"
+                                            defaultValue={editingItem?.description || ''}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">图片</label>
+                                        <div className="flex items-center gap-3">
+                                            <img 
+                                                src={editingItem?.image || "https://picsum.photos/id/292/60/40"} 
+                                                alt="预览" 
+                                                className="w-15 h-10 object-cover rounded"
+                                            />
+                                            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded text-sm">
+                                                选择图片
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button 
+                                        onClick={() => {
+                                            setShowAddModal(false);
+                                            setBatchMode(false);
+                                        }}
+                                        className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setShowAddModal(false);
+                                            setBatchMode(false);
+                                        }}
+                                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+                                    >
+                                        {batchMode ? '保存' : '添加'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>微耐心</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+  <body class="bg-amber-50">
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState } = React;
+
+      function Header({ currentView, setView }) {
+        return (
+          <div className="flex justify-between items-center bg-amber-200 px-4 py-2">
+            <div className="flex items-center">
+              <i className="fas fa-hourglass-half text-white text-xl mr-2"></i>
+              <span className="text-white font-semibold text-lg">微耐心</span>
+            </div>
+            <div className="space-x-4">
+              <button
+                className={
+                  "px-3 py-1 rounded " +
+                  (currentView === "today"
+                    ? "bg-amber-300 text-white"
+                    : "text-white hover:bg-amber-300")
+                }
+                onClick={() => setView("today")}
+              >
+                展示榜单
+              </button>
+              <button
+                className={
+                  "px-3 py-1 rounded " +
+                  (currentView === "edit"
+                    ? "bg-amber-300 text-white"
+                    : "text-white hover:bg-amber-300")
+                }
+                onClick={() => setView("edit")}
+              >
+                编辑挑战
+              </button>
+              <button
+                className={
+                  "px-3 py-1 rounded " +
+                  (currentView === "help"
+                    ? "bg-amber-300 text-white"
+                    : "text-white hover:bg-amber-300")
+                }
+                onClick={() => setView("help")}
+              >
+                帮助指南
+              </button>
+            </div>
+            <button className="bg-orange-500 text-white px-4 py-1 rounded">
+              登录/注册
+            </button>
+          </div>
+        );
+      }
+
+      function Sidebar({ currentView, setView }) {
+        const items = [
+          { key: "today", label: "今日挑战" },
+          { key: "history", label: "历史成绩" },
+          { key: "settings", label: "个人设置" },
+        ];
+        return (
+          <div className="w-48 bg-white shadow p-4 space-y-2">
+            <div className="font-semibold mb-2">导航菜单</div>
+            {items.map((it) => (
+              <div
+                key={it.key}
+                className={
+                  "cursor-pointer px-2 py-1 rounded hover:bg-amber-100 " +
+                  (currentView === it.key
+                    ? "bg-amber-100 font-medium"
+                    : "")
+                }
+                onClick={() => setView(it.key)}
+              >
+                {it.label}
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      function StatPanel() {
+        return (
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded shadow">
+              <div className="text-gray-600 mb-2">今日完成率</div>
+              <div className="flex items-center">
+                <svg
+                  className="w-24 h-24 -rotate-90"
+                  viewBox="0 0 100 100"
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="#F3F3F3"
+                    strokeWidth="10"
+                    fill="none"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="#FFA500"
+                    strokeWidth="10"
+                    fill="none"
+                    strokeDasharray={2 * Math.PI * 45}
+                    strokeDashoffset={2 * Math.PI * 45 * 0.25}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute ml-2 text-xl font-semibold">
+                  75%
+                </div>
+              </div>
+              <div className="text-gray-600 mt-2">已完成 3/4 项挑战</div>
+            </div>
+            <div className="bg-white p-4 rounded shadow">
+              <div className="text-gray-600 mb-2">本周排行榜</div>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>耐心大师 15天</li>
+                <li>冷静小王 12天</li>
+                <li>淡定哥 10天</li>
+              </ol>
+            </div>
+            <div className="bg-white p-4 rounded shadow text-gray-600">
+              <div className="font-semibold mb-2">温馨提示</div>
+              坚持每日微耐心，收获大能量！<br />
+              今天的一小步，明天的一大步。持续的微小改变，
+              能带来巨大的成长。
+            </div>
+          </div>
+        );
+      }
+
+      function Leaderboard({ data, onDelete, onEditChallenge }) {
+        return (
+          <div className="bg-white rounded shadow">
+            <div className="px-4 py-2 border-b font-semibold text-lg">
+              生活微耐心挑战 Top10
+            </div>
+            <div>
+              {data.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="flex items-center px-4 py-3 border-b"
+                >
+                  <div className="w-8 text-center">{idx + 1}</div>
+                  <img
+                    src={item.avatar}
+                    alt=""
+                    className="w-10 h-10 rounded-full mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {item.desc}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      已坚持{item.days}次
+                    </div>
+                  </div>
+                  <button className="text-blue-500 mr-2">
+                    查看详情
+                  </button>
+                  <button
+                    className="bg-amber-200 px-2 py-1 rounded mr-2"
+                    onClick={() => onEditChallenge(item.id)}
+                  >
+                    编辑挑战
+                  </button>
+                  <button
+                    className="bg-red-200 px-2 py-1 rounded"
+                    onClick={() => onDelete(item.id)}
+                  >
+                    删除挑战
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      function AddChallengeForm({ onAdd }) {
+        const [title, setTitle] = useState("");
+        const [type, setType] = useState("排队");
+        const [difficulty, setDifficulty] = useState(3);
+        const [goal, setGoal] = useState(7);
+
+        return (
+          <div className="bg-white rounded shadow mt-4 p-4">
+            <div className="font-semibold mb-2">新增微耐心挑战</div>
+            <div className="space-y-4">
+              <div>
+                <div className="text-gray-600 mb-1">挑战标题</div>
+                <input
+                  className="w-full border rounded px-2 py-1"
+                  placeholder="例如：耐心排队买奶茶"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <div className="text-gray-600 mb-1">挑战类型</div>
+                <select
+                  className="w-full border rounded px-2 py-1"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <option>礼让</option>
+                  <option>排队</option>
+                  <option>专注</option>
+                  <option>等待</option>
+                </select>
+              </div>
+              <div>
+                <div className="text-gray-600 mb-1">
+                  难度评分 {difficulty}星
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(+e.target.value)}
+                />
+              </div>
+              <div>
+                <div className="text-gray-600 mb-1">
+                  持续天数目标
+                </div>
+                <input
+                  type="number"
+                  className="w-20 border rounded px-2 py-1"
+                  value={goal}
+                  onChange={(e) => setGoal(+e.target.value)}
+                />
+                天
+              </div>
+              <button
+                className="bg-orange-300 text-white px-4 py-1 rounded"
+                onClick={() => {
+                  if (!title) return;
+                  onAdd({ title, type, difficulty, goal });
+                  setTitle("");
+                  setType("排队");
+                  setDifficulty(3);
+                  setGoal(7);
+                }}
+              >
+                添加挑战
+              </button>
+            </div>
+            <div className="mt-6">
+              <div className="font-semibold mb-2">
+                为什么选择生活微耐心？
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    提升专注力
+                  </div>
+                  通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散情况，提高工作学习效率。
+                </div>
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    缓解焦虑
+                  </div>
+                  培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更平和。
+                </div>
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    增强恒心
+                  </div>
+                  小的耐心挑战争取成就的大习惯改变，通过每日的坚持，逐渐培养持之以恒的品质和意志力。
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function EditList({ challenges, onDelete, onStartEdit }) {
+        return (
+          <div className="bg-white rounded shadow p-4">
+            <div className="font-semibold text-lg mb-2">
+              编辑您的挑战
+            </div>
+            {challenges.map((ch) => (
+              <div
+                key={ch.id}
+                className="flex items-center justify-between border-b py-3"
+              >
+                <div>
+                  <div className="font-medium">{ch.title}</div>
+                  <div className="text-sm text-gray-500">
+                    类型：{ch.type}；难度：{ch.difficulty}星；
+                    目标：{ch.goalDays}天
+                  </div>
+                </div>
+                <div>
+                  <button
+                    className="bg-amber-200 px-3 py-1 rounded mr-2"
+                    onClick={() => onStartEdit(ch.id)}
+                  >
+                    编辑
+                  </button>
+                  <button
+                    className="bg-red-200 px-3 py-1 rounded"
+                    onClick={() => onDelete(ch.id)}
+                  >
+                    删除
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="mt-6">
+              <div className="font-semibold mb-2">
+                为什么选择生活微耐心？
+              </div>
+              <div className="flex space-x-4">
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    提升专注力
+                  </div>
+                  通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散情况，提高工作学习效率。
+                </div>
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    缓解焦虑
+                  </div>
+                  培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更平和。
+                </div>
+                <div className="flex-1 bg-amber-100 p-4 rounded">
+                  <div className="font-medium mb-1">
+                    增强恒心
+                  </div>
+                  小的耐心挑战争取成就的大习惯改变，通过每日的坚持，逐渐培养持之以恒的品质和意志力。
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function HelpPage() {
+        const reasons = [
+          {
+            icon: "fas fa-bullseye",
+            title: "提升专注力",
+            desc:
+              "通过坚持微小的耐心挑战，培养大脑专注能力，减少注意力分散情况，提高工作学习效率。",
+          },
+          {
+            icon: "fas fa-heart",
+            title: "缓解焦虑",
+            desc:
+              "培养耐心能有效降低日常生活中的急躁情绪，减少因等待产生的焦虑感，让心态更平和。",
+          },
+          {
+            icon: "fas fa-seedling",
+            title: "增强恒心",
+            desc:
+              "小的耐心挑战争取成就的大习惯改变，通过每日的坚持，逐渐培养持之以恒的品质和意志力。",
+          },
+        ];
+        return (
+          <div className="bg-white rounded shadow p-4">
+            <div className="text-xl font-semibold mb-4">
+              如何参与微耐心挑战？
+            </div>
+            <div className="space-y-4 mb-6">
+              <div>
+                <span className="font-bold">1. </span>
+                点击“新增微耐心挑战”填写表单：
+                在页面底部找到“新增微耐心挑战”表单，填写您想要挑战的内容，
+                设置难度和目标天数，点击添加按钮即可创建您的个人挑战。
+              </div>
+              <div>
+                <span className="font-bold">2. </span>
+                坚持每日打卡并更新完成情况：
+                每完成一次挑战，点击对应挑战卡片上的“更新进度”按钮，记录您的完成情况。
+                系统会自动统计您的完成次数并更新排行榜。
+              </div>
+              <div>
+                <span className="font-bold">3. </span>
+                在“展示榜单”中查看最新排行：
+                通过页面的“展示榜单”中，您可以看到所有参与者的排名情况。
+                排名根据完成次数、难度等因素综合计算，每周更新一次。
+              </div>
+              <div className="mt-2 text-orange-600">
+                小贴士：坚持是成功的关键！即使是简单的微耐心挑战，
+                每天坚持也能带来巨大的改变。加油！
+              </div>
+            </div>
+            <div className="font-semibold mb-2">
+              为什么选择生活微耐心？
+            </div>
+            <div className="flex space-x-4">
+              {reasons.map((r, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-amber-100 p-4 rounded"
+                >
+                  <i className={r.icon + " text-orange-500 mb-2"}></i>
+                  <div className="font-medium mb-1">{r.title}</div>
+                  <div className="text-sm text-gray-700">
+                    {r.desc}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      function EditModal({
+        challenge,
+        onSave,
+        onClose,
+      }) {
+        const [title, setTitle] = useState(challenge.title);
+        const [type, setType] = useState(challenge.type);
+        const [difficulty, setDifficulty] = useState(
+          challenge.difficulty
+        );
+
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded p-6 w-96">
+              <div className="text-lg font-semibold mb-4">
+                编辑挑战
+              </div>
+              <div className="mb-4">
+                <div className="text-gray-600 mb-1">
+                  挑战标题
+                </div>
+                <input
+                  className="w-full border rounded px-2 py-1"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <div className="text-gray-600 mb-1">
+                  挑战类型
+                </div>
+                <select
+                  className="w-full border rounded px-2 py-1"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <option>礼让</option>
+                  <option>排队</option>
+                  <option>专注</option>
+                  <option>等待</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <div className="text-gray-600 mb-1">
+                  难度评分 {difficulty}星
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  value={difficulty}
+                  onChange={(e) =>
+                    setDifficulty(+e.target.value)
+                  }
+                />
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  className="px-4 py-1 border rounded"
+                  onClick={onClose}
+                >
+                  取消
+                </button>
+                <button
+                  className="bg-orange-500 text-white px-4 py-1 rounded"
+                  onClick={() => {
+                    onSave({
+                      ...challenge,
+                      title,
+                      type,
+                      difficulty,
+                    });
+                  }}
+                >
+                  保存
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function App() {
+        const [view, setView] = useState("today");
+
+        const [leaderboard, setLeaderboard] = useState([
+          {
+            id: 1,
+            name: "耐心大师",
+            desc: "耐心等电梯不插队",
+            days: 15,
+            avatar: "https://picsum.photos/id/237/40/40",
+          },
+          {
+            id: 2,
+            name: "冷静小王",
+            desc: "公交车上给老人让座",
+            days: 12,
+            avatar: "https://picsum.photos/id/238/40/40",
+          },
+          {
+            id: 3,
+            name: "淡定哥",
+            desc: "排队买奶茶不催促",
+            days: 10,
+            avatar: "https://picsum.photos/id/239/40/40",
+          },
+          {
+            id: 4,
+            name: "从容妹",
+            desc: "专注写作45分钟不碰手机",
+            days: 9,
+            avatar: "https://picsum.photos/id/240/40/40",
+          },
+          {
+            id: 5,
+            name: "静候灵",
+            desc: "等人迟到不发脾气",
+            days: 8,
+            avatar: "https://picsum.photos/id/241/40/40",
+          },
+        ]);
+
+        const [userChallenges, setUserChallenges] = useState([
+          {
+            id: 1,
+            title: "耐心等电梯不插队",
+            type: "礼让",
+            difficulty: 3,
+            goalDays: 30,
+          },
+          {
+            id: 2,
+            title: "公交车上给老人让座",
+            type: "礼让",
+            difficulty: 2,
+            goalDays: 15,
+          },
+          {
+            id: 3,
+            title: "排队买奶茶不催促",
+            type: "排队",
+            difficulty: 4,
+            goalDays: 20,
+          },
+          {
+            id: 4,
+            title: "专注写作45分钟不碰手机",
+            type: "专注",
+            difficulty: 5,
+            goalDays: 25,
+          },
+          {
+            id: 5,
+            title: "等人迟到不发脾气",
+            type: "等待",
+            difficulty: 3,
+            goalDays: 10,
+          },
+        ]);
+
+        const [editingId, setEditingId] = useState(null);
+
+        const handleAdd = ({ title, type, difficulty, goal }) => {
+          const newId = userChallenges.length + 1;
+          setUserChallenges([
+            ...userChallenges,
+            {
+              id: newId,
+              title,
+              type,
+              difficulty,
+              goalDays: goal,
+            },
+          ]);
+          setLeaderboard([
+            ...leaderboard,
+            {
+              id: leaderboard.length + 1,
+              name: "当前用户",
+              desc: title,
+              days: 0,
+              avatar: "https://picsum.photos/id/242/40/40",
+            },
+          ]);
+        };
+
+        const handleDeleteLeaderboard = (id) => {
+          setLeaderboard(
+            leaderboard.filter((it) => it.id !== id)
+          );
+        };
+
+        const handleDeleteUser = (id) => {
+          setUserChallenges(
+            userChallenges.filter((it) => it.id !== id)
+          );
+        };
+
+        const handleStartEdit = (id) => {
+          setEditingId(id);
+        };
+
+        const handleSaveEdit = (updated) => {
+          setUserChallenges(
+            userChallenges.map((it) =>
+              it.id === updated.id ? updated : it
+            )
+          );
+          setEditingId(null);
+        };
+
+        const editingChallenge = userChallenges.find(
+          (it) => it.id === editingId
+        );
+
+        return (
+          <div className="min-h-screen flex flex-col">
+            <Header currentView={view} setView={setView} />
+            <div className="flex flex-1">
+              <Sidebar currentView={view} setView={setView} />
+              <div className="flex-1 p-4 overflow-auto">
+                {view === "today" && (
+                  <div className="flex">
+                    <div className="flex-1">
+                      <Leaderboard
+                        data={leaderboard}
+                        onDelete={handleDeleteLeaderboard}
+                        onEditChallenge={(id) =>
+                          setView("edit")
+                        }
+                      />
+                      <AddChallengeForm onAdd={handleAdd} />
+                    </div>
+                    <div className="w-80 ml-4">
+                      <StatPanel />
+                    </div>
+                  </div>
+                )}
+                {view === "edit" && (
+                  <div className="flex">
+                    <div className="flex-1">
+                      <EditList
+                        challenges={userChallenges}
+                        onDelete={handleDeleteUser}
+                        onStartEdit={handleStartEdit}
+                      />
+                    </div>
+                    <div className="w-80 ml-4">
+                      <StatPanel />
+                    </div>
+                  </div>
+                )}
+                {view === "help" && (
+                  <div className="flex">
+                    <div className="flex-1">
+                      <HelpPage />
+                    </div>
+                    <div className="w-80 ml-4">
+                      <StatPanel />
+                    </div>
+                  </div>
+                )}
+                {editingChallenge && (
+                  <EditModal
+                    challenge={editingChallenge}
+                    onSave={handleSaveEdit}
+                    onClose={() => setEditingId(null)}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="bg-amber-200 text-center py-4">
+              ©2024 微耐心&nbsp;&nbsp;
+              <a href="#">关于我们</a>&nbsp;|&nbsp;
+              <a href="#">使用条款</a>&nbsp;|&nbsp;
+              <a href="#">隐私政策</a>
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
+</html>

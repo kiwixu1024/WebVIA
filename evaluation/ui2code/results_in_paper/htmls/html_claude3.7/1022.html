@@ -1,0 +1,474 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编程练习平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .heat-map {
+            background: linear-gradient(90deg, #4CAF50 0%, #FFEB3B 50%, #F44336 100%);
+            border-radius: 4px;
+            height: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const App = () => {
+            const [currentTab, setCurrentTab] = React.useState("练习列表");
+            const [showAddExercise, setShowAddExercise] = React.useState(false);
+            const [darkMode, setDarkMode] = React.useState(false);
+            
+            const handleTabClick = (tab) => {
+                setCurrentTab(tab);
+            };
+            
+            const toggleAddExercise = () => {
+                setShowAddExercise(!showAddExercise);
+            };
+            
+            const toggleDarkMode = () => {
+                setDarkMode(!darkMode);
+            };
+            
+            return (
+                <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+                    {/* 顶部导航栏 */}
+                    <div className="border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                        <div className="flex space-x-2">
+                            <button 
+                                onClick={() => handleTabClick("练习列表")} 
+                                className={`px-4 py-2 rounded-md ${currentTab === "练习列表" ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600'}`}
+                            >
+                                练习列表
+                            </button>
+                            <button 
+                                onClick={() => handleTabClick("主题介绍")} 
+                                className={`px-4 py-2 rounded-md ${currentTab === "主题介绍" ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            >
+                                主题介绍
+                            </button>
+                            <button 
+                                onClick={() => handleTabClick("帮助")} 
+                                className={`px-4 py-2 rounded-md ${currentTab === "帮助" ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            >
+                                帮助
+                            </button>
+                        </div>
+                        <div className="flex space-x-2 items-center">
+                            <button 
+                                onClick={toggleAddExercise}
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center"
+                            >
+                                <span className="mr-1">+</span> 添加新练习
+                            </button>
+                            <button className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                                <i className="fas fa-file-export mr-1"></i> 导出JSON
+                            </button>
+                            <button 
+                                onClick={toggleDarkMode}
+                                className={`rounded-full w-8 h-8 flex items-center justify-center ${darkMode ? 'bg-yellow-500' : 'bg-gray-200'}`}
+                            >
+                                {darkMode ? (
+                                    <i className="fas fa-sun"></i>
+                                ) : (
+                                    <i className="fas fa-moon"></i>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 主体内容 */}
+                    <div className="flex">
+                        {/* 左侧边栏 */}
+                        <div className="w-64 p-4 border-r border-gray-200">
+                            {/* 练习分类 */}
+                            <div className="mb-8">
+                                <h2 className="text-blue-500 font-medium mb-4">练习分类</h2>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-code mr-2 text-blue-500"></i>
+                                            <span>基础语法</span>
+                                        </div>
+                                        <span className="bg-blue-100 text-blue-500 rounded-full px-2 py-0.5 text-xs">1</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-sitemap mr-2 text-blue-500"></i>
+                                            <span>数据结构</span>
+                                        </div>
+                                        <span className="bg-blue-100 text-blue-500 rounded-full px-2 py-0.5 text-xs">1</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-cogs mr-2 text-blue-500"></i>
+                                            <span>算法</span>
+                                        </div>
+                                        <span className="bg-blue-100 text-blue-500 rounded-full px-2 py-0.5 text-xs">1</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center">
+                                            <i className="fas fa-folder-open mr-2 text-blue-500"></i>
+                                            <span>项目实战</span>
+                                        </div>
+                                        <span className="bg-blue-100 text-blue-500 rounded-full px-2 py-0.5 text-xs">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* 学习进度 */}
+                            <div>
+                                <h2 className="text-blue-500 font-medium mb-4">学习进度</h2>
+                                <div className="progress-bar bg-gray-200 mb-2">
+                                    <div className="bg-green-500 h-full" style={{width: '33%'}}></div>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-4">完成度: 33%</p>
+                                <div className={`border-l-4 border-blue-500 pl-3 py-1 ${darkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+                                    <p className="text-sm">小贴士:</p>
+                                    <p className="text-sm">连续学习5天+3道题，一个月能力提升加倍！</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 中间内容区 */}
+                        <div className="flex-1 p-4">
+                            {currentTab === "练习列表" && (
+                                <div>
+                                    {/* 变量声明与基本类型 */}
+                                    <div className={`mb-4 p-4 rounded-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center">
+                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">1</span>
+                                                <h3 className="text-lg font-medium">变量声明与基本类型</h3>
+                                                <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">易</span>
+                                            </div>
+                                            <button className="text-gray-500">
+                                                <i className="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>学习JavaScript中的变量声明方式（var、let、const）以及基本数据类型，理解变量作用域和提升概念。</p>
+                                    </div>
+
+                                    {/* 数组排序算法 */}
+                                    <div className={`mb-4 p-4 rounded-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center">
+                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">2</span>
+                                                <h3 className="text-lg font-medium">数组排序算法</h3>
+                                                <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">已完成</span>
+                                            </div>
+                                            <button className="text-gray-500">
+                                                <i className="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>实现一个基础的数组排序算法，对数组进行排序，理解时间复杂度和空间复杂度的概念。</p>
+                                    </div>
+
+                                    {/* 异步编程与Promise */}
+                                    <div className={`mb-4 p-4 rounded-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="flex items-center">
+                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2">3</span>
+                                                <h3 className="text-lg font-medium">异步编程与Promise</h3>
+                                                <span className="ml-2 bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full">难</span>
+                                            </div>
+                                            <button className="text-gray-500">
+                                                <i className="fas fa-chevron-down"></i>
+                                            </button>
+                                        </div>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>学习JavaScript中的异步编程模式，掌握Promise的使用方法，以及async/await语法糖。</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentTab === "主题介绍" && (
+                                <div>
+                                    <h2 className="text-xl font-medium mb-4 text-blue-500">编程习题集</h2>
+                                    <img src="https://picsum.photos/id/0/800/200" alt="编程习题集" className="w-full h-auto rounded-lg mb-6" />
+                                    
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-medium mb-2 text-green-600">项目简介</h3>
+                                        <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                                            本练习集覆盖基础语法、算法实现、项目实战，提供实时反馈与动态反馈，助你全面提升编程能力。无论你是编程新手还是想提升特定的开发能力，这里都有适合你的练习内容。
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-medium mb-4 text-green-600">特色亮点</h3>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+                                                <div className="text-center mb-2">
+                                                    <i className="fas fa-layer-group text-blue-500 text-2xl"></i>
+                                                </div>
+                                                <h4 className="text-center font-medium mb-2">难度分级</h4>
+                                                <p className="text-sm text-center">从易到难，循序渐进提高编程能力</p>
+                                            </div>
+                                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-green-50'}`}>
+                                                <div className="text-center mb-2">
+                                                    <i className="fas fa-chart-line text-green-500 text-2xl"></i>
+                                                </div>
+                                                <h4 className="text-center font-medium mb-2">进度追踪</h4>
+                                                <p className="text-sm text-center">实时记录学习进度，查看了解成长轨迹</p>
+                                            </div>
+                                            <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-yellow-50'}`}>
+                                                <div className="text-center mb-2">
+                                                    <i className="fas fa-code text-yellow-500 text-2xl"></i>
+                                                </div>
+                                                <h4 className="text-center font-medium mb-2">代码示例</h4>
+                                                <p className="text-sm text-center">每道题目配有详细代码示例，帮助理解</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h3 className="text-lg font-medium mb-4 text-green-600">使用小贴士</h3>
+                                        <ul className="space-y-4">
+                                            <li className="flex items-start">
+                                                <i className="fas fa-diamond text-blue-500 mt-1 mr-2"></i>
+                                                <p>定期练习: 建议每天完成1-2道题目，养成编程习惯</p>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <i className="fas fa-diamond text-blue-500 mt-1 mr-2"></i>
+                                                <p>复习巩固: 定期回顾已完成的练习，加深记忆</p>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <i className="fas fa-diamond text-blue-500 mt-1 mr-2"></i>
+                                                <p>实践应用: 尝试将所学知识应用到自己的项目中</p>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <i className="fas fa-diamond text-blue-500 mt-1 mr-2"></i>
+                                                <p>持续添加: 使用"添加新练习"功能，创建自己的题库</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentTab === "帮助" && (
+                                <div>
+                                    <h2 className="text-xl font-medium mb-4 text-blue-500">帮助中心</h2>
+                                    
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-medium mb-2 text-green-600">快速开始</h3>
+                                        <ol className="list-decimal pl-5 space-y-2">
+                                            <li>点击顶部"练习列表"标签查看所有练习</li>
+                                            <li>点击"添加新练习"按钮创建自己的练习</li>
+                                            <li>点击练习卡片可以展开详情并开始编码</li>
+                                            <li>完成练习后，点击卡片上方的"标记完成"按钮</li>
+                                            <li>查看右侧面板记录着了解的学习进度</li>
+                                        </ol>
+                                    </div>
+                                    
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-medium mb-2 text-green-600">快捷键</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                                <p>Ctrl+E - 编辑器中的快捷键</p>
+                                            </div>
+                                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                                <p>Ctrl+N - 添加新练习</p>
+                                            </div>
+                                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                                <p>双击 - 展开/折叠练习详情</p>
+                                            </div>
+                                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                                <p>Esc - 关闭当前弹窗</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-medium mb-2 text-green-600">常见问题</h3>
+                                        
+                                        <div className={`mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+                                            <h4 className="font-medium mb-2">如何导出我的练习集？</h4>
+                                            <p className="text-sm">点击顶部导航栏右边的"导出JSON"按钮，系统将自动下载包含所有练习记录的JSON文件。</p>
+                                        </div>
+                                        
+                                        <div className={`mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-green-50'}`}>
+                                            <h4 className="font-medium mb-2">如何更改习题顺序？</h4>
+                                            <p className="text-sm">编辑练习时，可以通过上下及按钮调整练习顺序等级（易/中/难）。</p>
+                                        </div>
+                                        
+                                        <div className={`mb-4 p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-yellow-50'}`}>
+                                            <h4 className="font-medium mb-2">数据会自动保存吗？</h4>
+                                            <p className="text-sm">目前版本需要手动保存，我们建议定期使用"导出JSON"功能备份你的数据。</p>
+                                        </div>
+                                        
+                                        <div className={`p-4 rounded-lg border-l-4 border-blue-500 ${darkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+                                            <h4 className="font-medium mb-2">需要更多帮助？</h4>
+                                            <p className="text-sm">如有任何问题或建议，请发送邮件至：support@codingexercises.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 右侧边栏 */}
+                        <div className="w-72 p-4 border-l border-gray-200">
+                            {/* 学习统计 */}
+                            <div className="mb-6">
+                                <h2 className="text-blue-500 font-medium mb-4">学习统计</h2>
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">总练习</p>
+                                        <p className="text-2xl font-medium">3</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">已完成</p>
+                                        <p className="text-2xl font-medium">1</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">平均得分</p>
+                                        <p className="text-2xl font-medium">2.0</p>
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm text-gray-500">完成率</p>
+                                        <p className="text-2xl font-medium">33%</p>
+                                    </div>
+                                </div>
+                                <p className="text-sm mb-1">难度分布</p>
+                                <div className="heat-map w-full mb-1"></div>
+                                <div className="flex justify-between text-xs text-gray-500">
+                                    <span>简(1)</span>
+                                    <span>中(1)</span>
+                                    <span>难(1)</span>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">数据展示仅供参考且自动更新，您可查看细节了解。</p>
+                            </div>
+                            
+                            {/* 编程小贴士 */}
+                            <div className="mb-6">
+                                <h2 className="text-blue-500 font-medium mb-4">编程小贴士</h2>
+                                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} mb-3`}>
+                                    <p className="text-sm font-medium mb-1">Tip: 学会使用搜索查找特定的编程代码片段，能大大提高工作开发效率。</p>
+                                </div>
+                                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} mb-3`}>
+                                    <p className="text-sm font-medium mb-1">定期使用学习法定期复习可以加深对知识点的掌握，确保代码的质量性能。</p>
+                                </div>
+                                <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                    <p className="text-sm font-medium mb-1">理解变量作用域和闭包对编程思维，是掌握JavaScript的关键。</p>
+                                </div>
+                            </div>
+                            
+                            {/* 推荐学习资源 */}
+                            <div>
+                                <h2 className="text-blue-500 font-medium mb-4">推荐学习资源</h2>
+                                <div className="space-y-3">
+                                    <div className="flex items-center">
+                                        <input type="checkbox" className="mr-2" checked />
+                                        <span className="text-sm">MDN Web 文档</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input type="checkbox" className="mr-2" checked />
+                                        <span className="text-sm">LeetCode 算法训练</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input type="checkbox" className="mr-2" checked />
+                                        <span className="text-sm">JavaScript 深入系列视频</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 添加新练习弹窗 */}
+                    {showAddExercise && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg w-full max-w-lg p-6">
+                                <h2 className="text-xl font-medium mb-4">添加新练习</h2>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">练习标题</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="输入练习标题" 
+                                        className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">练习描述</label>
+                                    <textarea 
+                                        placeholder="输入练习描述" 
+                                        className="w-full border border-gray-300 rounded-md p-2 h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    ></textarea>
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">代码示例</label>
+                                    <textarea 
+                                        placeholder="// 在此编写代码" 
+                                        className="w-full border border-gray-300 rounded-md p-2 h-24 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    ></textarea>
+                                </div>
+                                
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">难度等级</label>
+                                    <select className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option>易</option>
+                                        <option>中</option>
+                                        <option>难</option>
+                                    </select>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <label className="flex items-center">
+                                        <input type="checkbox" className="mr-2" />
+                                        <span className="text-sm">标记为已完成</span>
+                                    </label>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-2">
+                                    <button 
+                                        onClick={toggleAddExercise}
+                                        className="px-4 py-2 border border-gray-300 rounded-md"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="px-4 py-2 bg-green-500 text-white rounded-md">
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 底部版权信息 */}
+                    <div className="border-t border-gray-200 p-4 text-center text-sm text-gray-500">
+                        <span>© 2023 编程习题集 | v1.0</span>
+                        <span className="mx-4">|</span>
+                        <span>隐私政策</span>
+                        <span className="mx-4">|</span>
+                        <span>使用条款</span>
+                        <span className="mx-4">|</span>
+                        <span>联系我们</span>
+                    </div>
+
+                    {/* 帮助按钮 */}
+                    <button className="fixed bottom-4 right-4 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg">
+                        <i className="fas fa-question"></i>
+                    </button>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

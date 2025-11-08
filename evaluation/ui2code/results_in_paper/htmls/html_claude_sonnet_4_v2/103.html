@@ -1,0 +1,541 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>语音日记</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [currentView, setCurrentView] = useState('list');
+            const [selectedItems, setSelectedItems] = useState(new Set());
+            const [selectAll, setSelectAll] = useState(false);
+            const [showNewDiaryModal, setShowNewDiaryModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showRecording, setShowRecording] = useState(false);
+            const [editingItem, setEditingItem] = useState(null);
+            const [diaryEntries, setDiaryEntries] = useState([
+                {
+                    id: 1,
+                    title: '小确幸美食',
+                    date: '2024-06-20 22:15',
+                    duration: '时长: 02:36',
+                    content: '今天下班路上路过我们，心情很开朗喔.....',
+                    tag: '正能',
+                    image: 'https://picsum.photos/id/292/400/200'
+                },
+                {
+                    id: 2,
+                    title: '观采感悟',
+                    date: '2024-06-19 08:30',
+                    duration: '时长: 01:46',
+                    content: '所谓梦想是令你新鲜的，心灵美丽就坚持幸福.....',
+                    tag: '正能',
+                    image: 'https://picsum.photos/id/1036/400/200'
+                },
+                {
+                    id: 3,
+                    title: '工作压力',
+                    date: '2024-06-18 19:45',
+                    duration: '时长: 03:32',
+                    content: '今天我觉我丘日日记哦，要减压力有点大，需要调整心态.....',
+                    tag: '忧郁',
+                    image: 'https://picsum.photos/id/110/400/200'
+                }
+            ]);
+
+            const handleSelectAll = () => {
+                if (selectAll) {
+                    setSelectedItems(new Set());
+                } else {
+                    setSelectedItems(new Set(diaryEntries.map(entry => entry.id)));
+                }
+                setSelectAll(!selectAll);
+            };
+
+            const handleItemSelect = (id) => {
+                const newSelected = new Set(selectedItems);
+                if (newSelected.has(id)) {
+                    newSelected.delete(id);
+                } else {
+                    newSelected.add(id);
+                }
+                setSelectedItems(newSelected);
+                setSelectAll(newSelected.size === diaryEntries.length);
+            };
+
+            const handleBatchDelete = () => {
+                const filtered = diaryEntries.filter(entry => !selectedItems.has(entry.id));
+                setDiaryEntries(filtered);
+                setSelectedItems(new Set());
+                setSelectAll(false);
+                if (filtered.length === 0) {
+                    setCurrentView('empty');
+                }
+            };
+
+            const handleNewDiary = () => {
+                setShowNewDiaryModal(true);
+            };
+
+            const handleEdit = (entry) => {
+                setEditingItem(entry);
+                setShowEditModal(true);
+            };
+
+            const handleStartRecording = () => {
+                setShowRecording(true);
+                setShowNewDiaryModal(false);
+            };
+
+            const EmptyState = () => (
+                <div className="flex-1 flex flex-col items-center justify-center py-20">
+                    <div className="w-16 h-16 mb-4 text-gray-400">
+                        <i className="fas fa-microphone text-4xl"></i>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-2">还没有语音日记</h3>
+                    <p className="text-gray-500 mb-6">点击"新增语音日记"开始记录你的第一条语音</p>
+                    <button 
+                        onClick={handleStartRecording}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+                    >
+                        <span>立即开始记录</span>
+                    </button>
+                </div>
+            );
+
+            const RecordingInterface = () => (
+                <div className="flex-1 flex flex-col items-center justify-center py-20">
+                    <div className="w-16 h-16 mb-4 text-gray-400">
+                        <i className="fas fa-microphone text-4xl"></i>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-2">还没有语音日记</h3>
+                    <p className="text-gray-500 mb-6">点击"新增语音日记"开始记录你的第一条语音</p>
+                    <button 
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+                    >
+                        <span>立即开始记录</span>
+                    </button>
+                </div>
+            );
+
+            const NewDiaryModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-medium">新增语音日记</h3>
+                            <button 
+                                onClick={() => setShowNewDiaryModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入日记标题"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">情绪标签</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                    <option>平静</option>
+                                    <option>高兴</option>
+                                    <option>忧郁</option>
+                                    <option>愤怒</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">语音录制</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                    <button 
+                                        onClick={handleStartRecording}
+                                        className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-2"
+                                    >
+                                        <i className="fas fa-microphone"></i>
+                                    </button>
+                                    <p className="text-sm text-gray-500">点击开始录音</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">文字补充</label>
+                                <textarea 
+                                    placeholder="添加文字记录，补充你的语音内容..."
+                                    rows="3"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                ></textarea>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button 
+                                onClick={() => setShowNewDiaryModal(false)}
+                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                取消
+                            </button>
+                            <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const EditModal = () => (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-medium">编辑语音日记</h3>
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">标题</label>
+                                <input 
+                                    type="text" 
+                                    value={editingItem?.title || ''}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">情绪标签</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                                    <option>高兴</option>
+                                    <option>平静</option>
+                                    <option>忧郁</option>
+                                    <option>愤怒</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">语音录制</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                                    <button className="w-12 h-12 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <i className="fas fa-microphone"></i>
+                                    </button>
+                                    <p className="text-sm text-gray-500">点击开始录音</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">文字补充</label>
+                                <textarea 
+                                    value={editingItem?.content || ''}
+                                    rows="3"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                ></textarea>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3 mt-6">
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                            >
+                                取消
+                            </button>
+                            <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50 font-['Inter']">
+                    {/* Header */}
+                    <div className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4">
+                            <div className="flex items-center justify-between h-16">
+                                <div className="flex items-center gap-8">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                                            <i className="fas fa-microphone text-white text-sm"></i>
+                                        </div>
+                                        <span className="font-medium text-gray-900">语音日记</span>
+                                    </div>
+                                    <nav className="flex gap-6">
+                                        <a href="#" className="text-orange-500 border-b-2 border-orange-500 pb-4">日记管理</a>
+                                        <a href="#" className="text-gray-500 hover:text-gray-700 pb-4">录音编辑</a>
+                                        <a href="#" className="text-gray-500 hover:text-gray-700 pb-4">数据统计</a>
+                                        <a href="#" className="text-gray-500 hover:text-gray-700 pb-4">主题介绍</a>
+                                    </nav>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-right">
+                                        <div className="text-sm text-gray-500">本月录音</div>
+                                        <div className="text-lg font-medium">15天</div>
+                                    </div>
+                                    <button className="text-blue-500 hover:text-blue-600">
+                                        <i className="fas fa-download"></i> 导出
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex max-w-7xl mx-auto">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white shadow-sm min-h-screen">
+                            <div className="p-4">
+                                <nav className="space-y-2">
+                                    <a href="#" className="flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md">
+                                        <i className="fas fa-home"></i>
+                                        <span>首页</span>
+                                    </a>
+                                    <a href="#" className="flex items-center gap-3 text-gray-900 bg-gray-100 px-3 py-2 rounded-md">
+                                        <i className="fas fa-book"></i>
+                                        <span>我的日记</span>
+                                    </a>
+                                    <a href="#" className="flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md">
+                                        <i className="fas fa-archive"></i>
+                                        <span>保险库音</span>
+                                    </a>
+                                    <a href="#" className="flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md">
+                                        <i className="fas fa-tag"></i>
+                                        <span>语音库</span>
+                                    </a>
+                                    <a href="#" className="flex items-center gap-3 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md">
+                                        <i className="fas fa-cog"></i>
+                                        <span>设置</span>
+                                    </a>
+                                </nav>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {/* Content Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectAll}
+                                        onChange={handleSelectAll}
+                                        className="rounded"
+                                    />
+                                    <span className="text-gray-600">已选择 {selectedItems.size} 条</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                                        <i className="fas fa-check"></i> 多选记录
+                                    </button>
+                                    <button 
+                                        onClick={handleBatchDelete}
+                                        className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                                    >
+                                        <i className="fas fa-trash"></i> 批量删除
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="bg-white rounded-lg shadow-sm">
+                                <div className="p-4 border-b">
+                                    <button 
+                                        onClick={handleNewDiary}
+                                        className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 flex items-center gap-2"
+                                    >
+                                        <i className="fas fa-plus"></i>
+                                        <span>新增语音日记</span>
+                                    </button>
+                                </div>
+
+                                {/* Content Area */}
+                                {showRecording ? (
+                                    <RecordingInterface />
+                                ) : currentView === 'empty' ? (
+                                    <EmptyState />
+                                ) : (
+                                    <div className="p-4 space-y-4">
+                                        {diaryEntries.map((entry) => (
+                                            <div key={entry.id} className="border rounded-lg p-4">
+                                                <div className="flex items-start gap-4">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={selectedItems.has(entry.id)}
+                                                        onChange={() => handleItemSelect(entry.id)}
+                                                        className="mt-1"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <h3 className="font-medium">{entry.title}</h3>
+                                                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">
+                                                                    {entry.tag}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button 
+                                                                    onClick={() => handleEdit(entry)}
+                                                                    className="text-blue-500 hover:text-blue-600 text-sm"
+                                                                >
+                                                                    <i className="fas fa-edit"></i> 编辑
+                                                                </button>
+                                                                <button className="text-red-500 hover:text-red-600 text-sm">
+                                                                    <i className="fas fa-trash"></i> 删除
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 mb-2">
+                                                            <i className="fas fa-calendar"></i> {entry.date}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500 mb-3">
+                                                            <span className="text-orange-500">{entry.duration}</span>
+                                                        </div>
+                                                        <img 
+                                                            src={entry.image} 
+                                                            alt="" 
+                                                            className="w-full h-32 object-cover rounded mb-3"
+                                                        />
+                                                        <p className="text-gray-700 text-sm mb-3">{entry.content}</p>
+                                                        <div className="flex items-center gap-4">
+                                                            <button className="text-blue-500 hover:text-blue-600 text-sm">
+                                                                <i className="fas fa-thumbs-up"></i>
+                                                            </button>
+                                                            <button className="text-gray-500 hover:text-gray-600 text-sm">
+                                                                <i className="fas fa-comment"></i>
+                                                            </button>
+                                                            <button className="text-gray-500 hover:text-gray-600 text-sm ml-auto">
+                                                                <i className="fas fa-share"></i> 分享
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 p-6 space-y-6">
+                            {/* Record Stats */}
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-medium">录音统计</h3>
+                                    <button className="text-blue-500 hover:text-blue-600 text-sm">
+                                        <i className="fas fa-download"></i> 导出
+                                    </button>
+                                </div>
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <div>本月录音</div>
+                                    <div className="text-right">实时时长</div>
+                                    <div className="text-lg font-medium">03:46:20</div>
+                                </div>
+                                <img src="https://picsum.photos/id/1015/300/150" alt="统计图" className="w-full rounded mt-4" />
+                            </div>
+
+                            {/* Mood Stats */}
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="font-medium">情绪分析</h3>
+                                    <button className="text-blue-500 hover:text-blue-600 text-sm">
+                                        <i className="fas fa-download"></i> 导出
+                                    </button>
+                                </div>
+                                <img src="https://picsum.photos/id/1043/300/200" alt="情绪分析" className="w-full rounded mb-3" />
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex items-center justify-between">
+                                        <span className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                            平静 40%
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                            高兴 30%
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="flex items-center gap-2">
+                                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                            愤怒 30%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t mt-auto">
+                        <div className="max-w-7xl mx-auto px-4 py-8">
+                            <div className="grid grid-cols-3 gap-8">
+                                <div>
+                                    <h4 className="font-medium mb-3">如何享好语音日记</h4>
+                                    <ul className="space-y-1 text-sm text-gray-600">
+                                        <li>1. 高质量录制设备</li>
+                                        <li>2. 全程隐私保护</li>
+                                        <li>3. 支持离线录制功能</li>
+                                        <li>4. 分享给好友</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-medium mb-3">帮助中心</h4>
+                                    <ul className="space-y-1 text-sm text-blue-500">
+                                        <li><a href="#">常见问题</a></li>
+                                        <li><a href="#">隐私保护</a></li>
+                                        <li><a href="#">使用教程</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-medium mb-3">隐私保护</h4>
+                                    <p className="text-sm text-gray-600">
+                                        我们承诺音频数据第三方，所有记录均可您的设备本地储存，详情请查看
+                                        <a href="#" className="text-blue-500">隐私政策</a>。
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="border-t pt-4 mt-8 text-center text-sm text-gray-500">
+                                © 2024 语音日记 All Rights Reserved
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Help Button */}
+                    <button className="fixed bottom-6 right-6 w-12 h-12 bg-orange-500 text-white rounded-full shadow-lg hover:bg-orange-600">
+                        <i className="fas fa-question"></i>
+                    </button>
+
+                    {/* Modals */}
+                    {showNewDiaryModal && <NewDiaryModal />}
+                    {showEditModal && <EditModal />}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

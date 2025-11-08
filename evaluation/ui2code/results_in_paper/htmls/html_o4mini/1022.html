@@ -1,0 +1,363 @@
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>编程习题集</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+    function App() {
+      const [activeTab, setActiveTab] = useState('list');
+      const [modalOpen, setModalOpen] = useState(false);
+      const [darkMode, setDarkMode] = useState(false);
+      React.useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-white dark:bg-gray-800 shadow">
+            <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+              <nav className="flex items-center space-x-4">
+                <button
+                  className={
+                    (activeTab === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 dark:text-gray-300') +
+                    ' px-4 py-2 rounded'
+                  }
+                  onClick={() => setActiveTab('list')}
+                >
+                  练习列表
+                </button>
+                <button
+                  className={
+                    (activeTab === 'intro'
+                      ? 'text-blue-600 font-semibold'
+                      : 'text-gray-600 dark:text-gray-300') +
+                    ' hover:text-blue-600'
+                  }
+                  onClick={() => setActiveTab('intro')}
+                >
+                  主题介绍
+                </button>
+                <button
+                  className={
+                    (activeTab === 'help'
+                      ? 'text-blue-600 font-semibold'
+                      : 'text-gray-600 dark:text-gray-300') +
+                    ' hover:text-blue-600'
+                  }
+                  onClick={() => setActiveTab('help')}
+                >
+                  帮助
+                </button>
+              </nav>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded"
+                >
+                  <i className="fas fa-plus mr-1"></i> 添加新练习
+                </button>
+                <button className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded">
+                  <i className="fas fa-file-export mr-1"></i> 导出 JSON
+                </button>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                >
+                  <i className="fas fa-moon"></i>
+                </button>
+              </div>
+            </div>
+          </header>
+          {/* Content */}
+          <div className="flex flex-1 container mx-auto px-4 py-6 space-x-4">
+            {/* Left Sidebar */}
+            <aside className="w-64 space-y-6">
+              <div>
+                <h3 className="font-semibold mb-2">练习分类</h3>
+                <ul className="space-y-2">
+                  <li className="flex items-center justify-between text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-code"></i>
+                      <span>基础语法</span>
+                    </div>
+                    <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-0.5 rounded">1</span>
+                  </li>
+                  <li className="flex items-center justify-between text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-database"></i>
+                      <span>数据结构</span>
+                    </div>
+                    <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-0.5 rounded">1</span>
+                  </li>
+                  <li className="flex items-center justify-between text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-calculator"></i>
+                      <span>算法</span>
+                    </div>
+                    <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-0.5 rounded">1</span>
+                  </li>
+                  <li className="flex items-center justify-between text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-briefcase"></i>
+                      <span>项目实战</span>
+                    </div>
+                    <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-0.5 rounded">0</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">学习进度</h3>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-2">
+                  <div className="bg-green-500 h-3 rounded-full" style={{ width: '33%' }}></div>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">完成度：33%</p>
+                <div className="bg-blue-50 dark:bg-gray-800 border-l-4 border-blue-400 p-3 text-sm space-y-1">
+                  <p><strong>小贴士：</strong></p>
+                  <p>坚持每天练习2-3道题，一个月后你将看到明显进步！</p>
+                </div>
+              </div>
+            </aside>
+            {/* Main */}
+            <main className="flex-1">
+              {activeTab === 'list' && (
+                <div className="space-y-4">
+                  {[{
+                    id:1, title:'变量声明与基本类型', text:'学习JavaScript中的变量声明方式（var, let, const）以及基本数据类型。理解变量作用域和提升概念。', badge:'新', color:'bg-green-100 text-green-800'
+                  },{
+                    id:2, title:'数组排序算法', text:'实现一个基础的冒泡排序算法，对数组进行排序。理解时间复杂度和空间复杂度的概念。', badge:'已完成', color:'bg-green-100 text-green-800'
+                  },{
+                    id:3, title:'异步编程与Promise', text:'学习JavaScript中的异步编程模式，掌握Promise的使用方法，以及async/await语法糖。', badge:'难', color:'bg-red-100 text-red-800'
+                  }].map(item => (
+                    <div key={item.id} className="bg-white dark:bg-gray-800 shadow rounded p-4">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">{item.id}</span>
+                          <h4 className="font-semibold">{item.title}</h4>
+                          <span className={`${item.color} px-2 py-0.5 rounded text-xs`}>{item.badge}</span>
+                        </div>
+                        <button className="text-gray-500 dark:text-gray-400">
+                          <i className="fas fa-chevron-down"></i>
+                        </button>
+                      </div>
+                      <p className="mt-2 text-gray-600 dark:text-gray-300">{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {activeTab === 'intro' && (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">编程习题集</h2>
+                  <img src="https://picsum.photos/id/1015/1200/200" alt="banner" className="w-full h-48 object-cover rounded mb-4" />
+                  <div className="bg-white dark:bg-gray-800 shadow rounded p-6 space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">项目简介</h3>
+                      <p className="text-gray-600 dark:text-gray-300">本练习集覆盖基础语法、数据结构、算法实战、项目实战，提供统计与动态反馈，助你全面提升编程能力。无论你是编程新手还是想更进阶的开发者，这里都有适合你的练习内容。</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">特色亮点</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded text-center">
+                          <i className="fas fa-layer-group text-blue-500 text-2xl mb-2"></i>
+                          <h4 className="font-semibold mb-1">难度分级</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">从易到难，循序渐进提升编程能力</p>
+                        </div>
+                        <div className="bg-green-50 dark:bg-gray-700 p-4 rounded text-center">
+                          <i className="fas fa-chart-line text-green-500 text-2xl mb-2"></i>
+                          <h4 className="font-semibold mb-1">进度追踪</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">实时统计学习进度，直观了解成长轨迹</p>
+                        </div>
+                        <div className="bg-yellow-50 dark:bg-gray-700 p-4 rounded text-center">
+                          <i className="fas fa-code text-yellow-500 text-2xl mb-2"></i>
+                          <h4 className="font-semibold mb-1">代码示例</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">每道题目配有详细代码示例，帮助理解</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">使用小贴士</h3>
+                      <ul className="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li>◆ 定期练习：建议每天完成1-2道练习，养成编程习惯</li>
+                        <li>◆ 复习巩固：定期回顾已完成的练习，加深记忆</li>
+                        <li>◆ 实践应用：尝试将所学知识应用到自己的项目中</li>
+                        <li>◆ 持续练习：使用“添加新练习”功能，创建自己的题库</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === 'help' && (
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">帮助中心</h2>
+                  <div className="bg-white dark:bg-gray-800 shadow rounded p-6 space-y-6">
+                    <div>
+                      <h3 className="font-semibold mb-2">快速开始</h3>
+                      <ol className="list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-300">
+                        <li>点击顶部“练习列表”标签查看所有练习</li>
+                        <li>点击“添加新练习”按钮创建自己的练习</li>
+                        <li>点击练习标题可以展开/折叠详细内容</li>
+                        <li>完成练习后，点击练习卡片上的“标记完成”按钮</li>
+                        <li>查看右侧统计区了解自己的学习进度</li>
+                      </ol>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">快捷键</h3>
+                      <div className="grid grid-cols-2 gap-4 text-gray-600 dark:text-gray-300">
+                        <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded"><kbd className="font-mono">Ctrl+E</kbd> - 编辑选中的练习</div>
+                        <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded"><kbd className="font-mono">Ctrl+N</kbd> - 添加新练习</div>
+                        <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded"><kbd className="font-mono">双击</kbd> - 展开/折叠练习详情</div>
+                        <div className="bg-gray-100 dark:bg-gray-700 p-3 rounded"><kbd className="font-mono">Esc</kbd> - 关闭当前弹窗</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-2">常见问题</h3>
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded text-gray-600 dark:text-gray-300">
+                          <p><strong>如何导出我的练习集？</strong></p>
+                          <p>点击顶部导航栏中的“导出 JSON”按钮，系统将自动下载包含所有练习数据的JSON文件。</p>
+                        </div>
+                        <div className="bg-green-50 dark:bg-gray-700 p-4 rounded text-gray-600 dark:text-gray-300">
+                          <p><strong>如何更改练习难度？</strong></p>
+                          <p>编辑练习时，可以通过下拉菜单选择难度等级（易/中/难）。</p>
+                        </div>
+                        <div className="bg-yellow-50 dark:bg-gray-700 p-4 rounded text-gray-600 dark:text-gray-300">
+                          <p><strong>数据会自动保存吗？</strong></p>
+                          <p>目前版本需要手动保存，我们建议定期使用“导出 JSON”功能备份您的数据。</p>
+                        </div>
+                        <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded text-gray-600 dark:text-gray-300">
+                          <p><strong>需要更多帮助？</strong></p>
+                          <p>如有任何问题或建议，请发送邮件至：<a href="mailto:support@codingexercises.com" className="text-blue-600 underline">support@codingexercises.com</a></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </main>
+            {/* Right Sidebar */}
+            <aside className="w-80 space-y-6">
+              <div className="bg-white dark:bg-gray-800 shadow rounded p-4">
+                <h3 className="font-semibold mb-2">学习统计</h3>
+                <div className="flex justify-between mb-4">
+                  <div>
+                    <p className="text-lg font-bold">3</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">总练习</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">1</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">已完成</p>
+                  </div>
+                </div>
+                <div className="flex justify-between mb-4">
+                  <div>
+                    <p className="text-lg font-bold">2.0</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">平均难度</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">33%</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">通过率</p>
+                  </div>
+                </div>
+                <h4 className="font-semibold mb-2">难度分布</h4>
+                <div className="flex h-4 w-full rounded overflow-hidden mb-2">
+                  <div className="bg-green-500" style={{width:'33%'}}></div>
+                  <div className="bg-yellow-400" style={{width:'33%'}}></div>
+                  <div className="bg-red-500" style={{width:'34%'}}></div>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">数据仅供参考，需手动标记完成后更新进度。</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 shadow rounded p-4 space-y-3">
+                <h3 className="font-semibold">编程小贴士</h3>
+                <div className="text-gray-600 dark:text-gray-300 space-y-2 text-sm">
+                  <p>Tip：学会使用调试器调试代码，提高排错效率和开发效率。</p>
+                  <p>常用排序算法要实现原理并关注边界条件，确保代码稳健性。</p>
+                  <p>理解变量作用域和闭包概念，是掌握JavaScript的关键。</p>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 shadow rounded p-4">
+                <h3 className="font-semibold mb-2">推荐学习资源</h3>
+                <ul className="space-y-1 text-sm">
+                  <li><a href="#" className="text-blue-600 underline">MDN Web 文档</a></li>
+                  <li><a href="#" className="text-blue-600 underline">LeetCode 算法训练</a></li>
+                  <li><a href="#" className="text-blue-600 underline">JavaScript 深入系列视频</a></li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+          {/* Footer */}
+          <footer className="bg-white dark:bg-gray-800 text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+            © 2023 编程习题集 | v1.0&nbsp;&nbsp;
+            <a href="#" className="hover:underline">隐私政策</a>&nbsp;|&nbsp;
+            <a href="#" className="hover:underline">使用条款</a>&nbsp;|&nbsp;
+            <a href="#" className="hover:underline">联系我们</a>
+          </footer>
+          {/* Modal */}
+          {modalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white dark:bg-gray-800 rounded-lg w-96 p-6 space-y-4 shadow-lg">
+                <h3 className="text-lg font-semibold">添加新练习</h3>
+                <div className="space-y-2">
+                  <label className="block text-sm">练习标题</label>
+                  <input type="text" className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" placeholder="输入练习标题" />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm">练习描述</label>
+                  <textarea className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200" rows="3" placeholder="输入练习描述"></textarea>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm">代码示例</label>
+                  <textarea className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-mono" rows="4">// 在此编写代码</textarea>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1">
+                    <label className="block text-sm mb-1">难度等级</label>
+                    <select className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                      <option>易</option>
+                      <option>中</option>
+                      <option>难</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center">
+                    <input type="checkbox" id="done" className="h-4 w-4 text-green-600" />
+                    <label htmlFor="done" className="ml-2 text-sm">标记为已完成</label>
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-3 mt-4">
+                  <button
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
+                  >
+                    取消
+                  </button>
+                  <button className="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white">
+                    保存
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,732 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨读书感悟打卡圈</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showEditModal, setShowEditModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [editingBook, setEditingBook] = useState(null);
+            const [selectedBook, setSelectedBook] = useState(null);
+
+            const [books, setBooks] = useState([
+                {
+                    id: 1,
+                    title: '百年孤独',
+                    author: '加西亚·马尔克斯',
+                    date: '2023-03-15',
+                    content: '爱与孤独交织，时间如环，故事永不褪色。',
+                    likes: 15,
+                    dislikes: 5,
+                    tag1: '#孤独',
+                    tag2: '#魔幻现实'
+                },
+                {
+                    id: 2,
+                    title: '围城',
+                    author: '钱钟书',
+                    date: '2023-04-02',
+                    content: '婚姻像城，城外的人想冲进去，城里的人想逃出来。',
+                    likes: 12,
+                    dislikes: 3,
+                    tag1: '#婚姻',
+                    tag2: '#人生'
+                },
+                {
+                    id: 3,
+                    title: '活着',
+                    author: '余华',
+                    date: '2023-04-10',
+                    content: '苦难与希望同在，活着本身就是胜利。',
+                    likes: 24,
+                    dislikes: 8,
+                    tag1: '#生命',
+                    tag2: '#坚强'
+                }
+            ]);
+
+            const handleAddCheckin = () => {
+                setShowAddModal(true);
+                setShowEditModal(false);
+                setShowDeleteModal(false);
+            };
+
+            const handleEditClick = (book) => {
+                setEditingBook({...book});
+                setShowEditModal(true);
+                setShowAddModal(false);
+                setShowDeleteModal(false);
+            };
+
+            const handleLikeClick = (bookId) => {
+                setBooks(books.map(book => 
+                    book.id === bookId 
+                        ? { ...book, likes: book.likes + 1 }
+                        : book
+                ));
+            };
+
+            const handleDislikeClick = (bookId) => {
+                setBooks(books.map(book => 
+                    book.id === bookId 
+                        ? { ...book, dislikes: book.dislikes + 1 }
+                        : book
+                ));
+            };
+
+            const handleDeleteClick = (book) => {
+                setSelectedBook(book);
+                setShowDeleteModal(true);
+                setShowEditModal(false);
+                setShowAddModal(false);
+            };
+
+            const handleSaveEdit = () => {
+                setBooks(books.map(book => 
+                    book.id === editingBook.id ? editingBook : book
+                ));
+                setShowEditModal(false);
+                setEditingBook(null);
+            };
+
+            const handleCancelEdit = () => {
+                setShowEditModal(false);
+                setEditingBook(null);
+            };
+
+            const confirmDelete = () => {
+                if (selectedBook) {
+                    setBooks(books.filter(book => book.id !== selectedBook.id));
+                }
+                setShowDeleteModal(false);
+                setSelectedBook(null);
+            };
+
+            const cancelDelete = () => {
+                setShowDeleteModal(false);
+                setSelectedBook(null);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-100">
+                    {/* Header */}
+                    <div className="flex justify-between items-center p-6 bg-white shadow-sm">
+                        <div className="flex items-center">
+                            <img src="https://picsum.photos/id/24/60/60" alt="Book" className="w-15 h-15 rounded-full mr-4" />
+                            <div>
+                                <h1 className="text-xl font-semibold text-red-600">📖 读书感悟圈</h1>
+                                <p className="text-sm text-gray-600">记录每一次阅读的感悟与收获，让思考沉淀为智慧。</p>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <button 
+                                onClick={handleAddCheckin}
+                                className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all duration-200"
+                            >
+                                ➕ 新增打卡
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Left Content */}
+                        <div className="flex-1 p-6">
+                            {/* Add Check-in Modal */}
+                            {showAddModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-semibold">✏️ 新增打卡</h3>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowAddModal(false);
+                                                    setEditingBook(null);
+                                                }}
+                                                className="text-gray-500 hover:text-gray-700 text-xl"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📚 书名</label>
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="输入书名..."
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📅 日期</label>
+                                                <input 
+                                                    type="date"
+                                                    defaultValue="2025-09-23"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                {showEditModal && (
+                                                    <input 
+                                                        type="text" 
+                                                        value="10/3/2027"
+                                                        readOnly
+                                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md"
+                                                    />
+                                                )}
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📖 读后感悟</label>
+                                                <textarea 
+                                                    placeholder="写下你的感悟..."
+                                                    rows="4"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                ></textarea>
+                                                {showEditModal && (
+                                                    <textarea 
+                                                        rows="4"
+                                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md"
+                                                    ></textarea>
+                                                )}
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">🏷️ 标签</label>
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="添加标签..."
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    />
+                                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                                        添加
+                                                    </button>
+                                                </div>
+                                                <div className="bg-blue-50 px-3 py-2 rounded-md mt-2">
+                                                    {showEditModal ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-blue-700">🏷️</span>
+                                                            <span className="text-blue-700">#孤独</span>
+                                                            <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                                ×
+                                                            </button>
+                                                            <span className="text-blue-700">#魔幻现实</span>
+                                                            <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-blue-700">🏷️</span>
+                                                            <span className="text-blue-700">#孤独</span>
+                                                            <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                                ×
+                                                            </button>
+                                                            <span className="text-blue-700">#魔幻现实</span>
+                                                            <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">😊 阅读心情</label>
+                                                <div className="flex gap-2 justify-center">
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😫
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😋
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😅
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😌
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="mt-4 space-x-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        setShowAddModal(false);
+                                                        setEditingBook(null);
+                                                    }}
+                                                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                                                >
+                                                    取消
+                                                </button>
+                                                <button 
+                                                    onClick={handleSaveEdit}
+                                                    className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-md hover:shadow-lg transition-all duration-200"
+                                                >
+                                                    保存打卡
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Edit Check-in Modal */}
+                            {showEditModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-semibold">✏️ 编辑打卡</h3>
+                                            <button 
+                                                onClick={() => {
+                                                    setShowEditModal(false);
+                                                    setEditingBook(null);
+                                                }}
+                                                className="text-gray-500 hover:text-gray-700 text-xl"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📚 书名</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={editingBook?.title || "百年孤独"}
+                                                    readOnly
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📅 日期</label>
+                                                <input 
+                                                    type="text"
+                                                    value={editingBook?.date || "03/15/2023"}
+                                                    readOnly
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+                                                {showEditModal && (
+                                                    <input 
+                                                        type="text" 
+                                                        value="10/3/2027"
+                                                        readOnly
+                                                        className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md"
+                                                    />
+                                                )}
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">📖 读后感悟</label>
+                                                <textarea 
+                                                    rows="4"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                >
+                                                    {editingBook?.content || "爱与孤独交织，时间如环，故事永不褪色。"}
+                                                </textarea>
+                                                {showEditModal && (/* todo */)}
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">🏷️ 标签</label>
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="添加标签..."
+                                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    />
+                                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                                        添加
+                                                    </button>
+                                                </div>
+                                                <div className="bg-blue-50 px-3 py-2 rounded-md mt-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-blue-700">🏷️</span>
+                                                        <span className="text-blue-700">#孤独</span>
+                                                        <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                            ×
+                                                        </button>
+                                                        <span className="text-blue-700">#魔幻现实</span>
+                                                        <button className="bg-blue-400 text-white px-2 py-1 rounded text-xs">
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">😊 阅读心情</label>
+                                                <div className="flex gap-2 justify-center">
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😫
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😋
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😅
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleDislikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                    <span className="text-2xl cursor-pointer text-xl" onClick={() => handleLikeClick(editingBook?.id)}>
+                                                        😊
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="mt-4 space-x-2">
+                                                <button 
+                                                    onClick={() => {
+                                                        setShowEditModal(false);
+                                                        setEditingBook(null);
+                                                    }}
+                                                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                                                >
+                                                    取消
+                                                </button>
+                                                <button 
+                                                    onClick={handleSaveEdit}
+                                                    className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-md hover:shadow-lg transition-all duration-200"
+                                                >
+                                                    保存打卡
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Delete Confirmation Modal */}
+                            {showDeleteModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-semibold">⚠️ 确认删除</h3>
+                                            <button 
+                                                onClick={cancelDelete}
+                                                className="text-gray-500 hover:text-gray-700 text-xl"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        
+                                        <p className="text-center text-gray-600 mb-6">
+                                            确定要删除该条打卡吗？此操作不可撤销。
+                                        </p>
+                                        
+                                        <div className="flex gap-4">
+                                            <button 
+                                                onClick={cancelDelete}
+                                                className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                                            >
+                                                取消
+                                            </button>
+                                            <button 
+                                                onClick={confirmDelete}
+                                                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                            >
+                                                确定删除
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Reading Records Section */}
+                            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                                <h2 className="text-lg font-semibold text-gray-800 mb-4">📖 读书感悟记录</h2>
+                                <p className="text-sm text-orange-600 mb-6">记录每一次阅读的感悟与收获，让思考沉淀为智慧。</p>
+                                
+                                <div className="space-y-4">
+                                    {/* 百年孤独 */}
+                                    <div className="border-l-4 border-orange-400 pl-4 bg-orange-50 rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center">
+                                                <h3 className="font-semibold text-gray-800 mr-3">📖 百年孤独</h3>
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                                <button 
+                                                    onClick={() => handleEditClick(books[0])}
+                                                    className="text-xl"
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteClick(books[0])}
+                                                    className="text-xl"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="text-sm text-gray-600">
+                                                <span>👤 作者：<span className="text-orange-600">加西亚·马尔克斯</span></span>
+                                                <br />
+                                                <span>📅 2023-03-15</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-700 mb-4">爱与孤独交织，时间如环，故事永不褪色。</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-4">
+                                                <button 
+                                                    onClick={() => handleLikeClick(books[0].id)}
+                                                    className="text-lg"
+                                                >
+                                                    ❤️ {books[0].likes}
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDislikeClick(books[0].id)}
+                                                    className="text-lg"
+                                                >
+                                                    😤 {books[0].dislikes}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3">
+                                            <span className="text-sm text-gray-500">🏷️ 标签：</span>
+                                            <span className="text-sm text-blue-600">#孤独</span>
+                                            <span className="text-xs text-gray-400 ml-2">·</span>
+                                            <span className="text-sm text-blue-600">#魔幻现实</span>
+                                        </div>
+                                    </div>
+
+                                    {/* 围城 */}
+                                    <div className="border-l-4 border-orange-400 pl-4 bg-orange-50 rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center">
+                                                <h3 className="font-semibold text-gray-800 mr-3">📖 围城</h3>
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                                <button 
+                                                    onClick={() => handleEditClick(books[1])}
+                                                    className="text-xl"
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteClick(books[1])}
+                                                    className="text-xl"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="text-sm text-gray-600">
+                                                <span>👤 作者：<span className="text-orange-600">钱钟书</span></span>
+                                                <br />
+                                                <span>📅 2023-04-02</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-700 mb-4">婚姻像城，城外的人想冲进去，城里的人想逃出来。</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-4">
+                                                <button 
+                                                    onClick={() => handleLikeClick(books[1].id)}
+                                                    className="text-lg"
+                                                >
+                                                    ❤️ {books[1].likes}
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDislikeClick(books[1].id)}
+                                                    className="text-lg"
+                                                >
+                                                    😤 {books[1].dislikes}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3">
+                                            <span className="text-sm text-gray-500">🏷️ 标签：</span>
+                                            <span className="text-sm text-blue-600">#婚姻</span>
+                                            <span className="text-xs text-gray-400 ml-2">·</span>
+                                            <span className="text-sm text-blue-600">#人生</span>
+                                        </div>
+                                    </div>
+
+                                    {/* 生活家 */}
+                                    <div className="border-l-4 border-orange-400 pl-4 bg-orange-50 rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex items-center">
+                                                <h3 className="font-semibold text-gray-800 mr-3">📖 生活家</h3>
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <span className="text-sm bg-green-100 text-green-600 px-2 py-1 rounded">已打卡</span>
+                                                <button 
+                                                    onClick={() => handleEditClick(books[2])}
+                                                    className="text-xl"
+                                                >
+                                                    ✏️
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteClick(books[2])}
+                                                    className="text-xl"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-3">
+                                            <div className="text-sm text-gray-600">
+                                                <span>👤 作者：<span className="text-orange-600">余华</span></span>
+                                                <br />
+                                                <span>📅 2023-04-10</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-700 mb-4">苦难与希望同在，活着本身就是胜利。</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-4">
+                                                <button 
+                                                    onClick={() => handleLikeClick(books[2].id)}
+                                                    className="text-lg"
+                                                >
+                                                    ❤️ {books[2].likes}
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDislikeClick(books[2].id)}
+                                                    className="text-lg"
+                                                >
+                                                    😤 {books[2].dislikes}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3">
+                                            <span className="text-sm text-gray-500">🏷️ 标签：</span>
+                                            <span className="text-sm text-blue-600">#生命</span>
+                                            <span className="text-xs text-gray-400 ml-2">·</span>
+                                            <span className="text-sm text-blue-600">#坚强</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Reading Resources */}
+                            <div className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex items-center mb-4">
+                                    <span className="text-orange-500 mr-2">🏺</span>
+                                    <h3 className="font-semibold text-gray-800">📚 阅读资源推荐</h3>
+                                </div>
+                                <div className="h-32 bg-gray-100 rounded-md">💡</div>
+                                <button className="w-full text-left flex items-center justify-center text-orange-600 hover:text-orange-700 mt-4 bg-orange-100 hover:bg-orange-200 rounded-md p-3 flex-1 transition-colors">
+                                    <span className="mr-2">+</span>
+                                    查看更多推荐
+                                </button>
+                                <div className="mt-4">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ∧ 收起
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar */}
+                        <div className="w-80 p-6 space-y-6">
+                            {/* My Reading Statistics */}
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <div className="flex items-center mb-4">
+                                    <span className="text-yellow-500 mr-2">📊</span>
+                                    <h3 className="font-semibold text-gray-800">📊 我的阅读统计</h3>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div className="bg-yellow-100 rounded-lg p-4">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-700">📖 累计打卡天数</span>
+                                            <span className="text-2xl font-bold text-orange-600">45</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-2 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <div className="text-sm text-gray-600">📅 本月打卡次数</div>
+                                            <div className="text-lg font-bold text-orange-600">12</div>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-orange-500 h-2 rounded-full" style={{width: '30%'}}></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-gray-50 rounded-lg">
+                                        <div className="text-sm text-gray-600 mb-2">📅 最长连更天数</div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-500">7天</span>
+                                            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-4 p-3 bg-yellow-50 rounded-md">
+                                    <p className="text-sm text-gray-600">💡 阅读小贴士</p>
+                                    <ul className="list-disc list-inside mt-1 text-sm text-gray-700">
+                                        <li>每天坚持阅读15分钟，一年可读12-15本书</li>
+                                        <li>做读书笔记能提高阅读理解和记忆</li>
+                                        <li>尝试多元化阅读主题，拓宽知识面</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Circle Features */}
+                            <div className="bg-white rounded-lg shadow-sm p-4">
+                                <div className="flex items-center mb-4">
+                                    <span className="text-green-500 mr-2">𝗗∙</span>
+                                    <h3 className="font-semibold text-gray-800">✅ 圈子特色</h3>
+                                </div>
+                                
+                                <div className="space-y-3 text-sm">
+                                    <p className="text-gray-700">每日一打卡，分享阅读感悟，互相激励成长，在这里，我们共同探索文字的力量，让阅读成为生活的美好习惯。</p>
+                                    
+                                    <img src="https://picsum.photos/id/196/400/200" alt="Garden" className="w-full h-24 object-cover rounded-lg" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

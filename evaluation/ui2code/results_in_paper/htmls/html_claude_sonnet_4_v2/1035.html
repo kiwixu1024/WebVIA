@@ -1,0 +1,482 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨读书感悟打卡圈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [showModal, setShowModal] = useState(false);
+            const [showDeleteModal, setShowDeleteModal] = useState(false);
+            const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
+            const [currentCard, setCurrentCard] = useState(null);
+            const [formData, setFormData] = useState({
+                title: '',
+                date: '09/23/2025',
+                content: '',
+                tags: [],
+                mood: 'normal'
+            });
+
+            const [cards, setCards] = useState([
+                {
+                    id: 1,
+                    title: '百年孤独',
+                    date: '2023-03-15',
+                    content: '爱与孤独交织，时间如叶，故事永不落幕。',
+                    tags: ['孤独', '魔幻现实主义'],
+                    likes: 16,
+                    comments: 5,
+                    mood: 'happy'
+                },
+                {
+                    id: 2,
+                    title: '围城',
+                    date: '2023-04-02',
+                    content: '婚姻围城，城外的人想进去，城里的人想出来。',
+                    tags: ['讽刺', '本人生'],
+                    likes: 12,
+                    comments: 3,
+                    mood: 'happy'
+                },
+                {
+                    id: 3,
+                    title: '活着',
+                    date: '2023-04-10',
+                    content: '苦难与命运同行，活着本身就是意义。',
+                    tags: ['苦难', '生命'],
+                    likes: 24,
+                    comments: 8,
+                    mood: 'happy'
+                }
+            ]);
+
+            const openAddModal = () => {
+                setModalMode('add');
+                setFormData({
+                    title: '',
+                    date: '09/23/2025',
+                    content: '',
+                    tags: [],
+                    mood: 'normal'
+                });
+                setShowModal(true);
+            };
+
+            const openEditModal = (card) => {
+                setModalMode('edit');
+                setCurrentCard(card);
+                setFormData({
+                    title: card.title,
+                    date: card.date.split('-').reverse().join('/'),
+                    content: card.content,
+                    tags: card.tags,
+                    mood: card.mood
+                });
+                setShowModal(true);
+            };
+
+            const openDeleteModal = () => {
+                setShowDeleteModal(true);
+            };
+
+            const closeModal = () => {
+                setShowModal(false);
+                setShowDeleteModal(false);
+                setCurrentCard(null);
+            };
+
+            const handleSave = () => {
+                if (modalMode === 'edit' && currentCard) {
+                    setCards(cards.map(card => 
+                        card.id === currentCard.id 
+                            ? { ...card, ...formData, date: formData.date.split('/').reverse().join('-') }
+                            : card
+                    ));
+                }
+                closeModal();
+            };
+
+            const handleDelete = () => {
+                if (currentCard) {
+                    setCards(cards.filter(card => card.id !== currentCard.id));
+                }
+                closeModal();
+            };
+
+            const handleDateClick = (cardId) => {
+                // This simulates clicking on date "15"
+                setCards(cards.map(card => 
+                    card.id === cardId 
+                        ? { ...card, date: '2023-03-15' }
+                        : card
+                ));
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b">
+                        <div className="flex items-center justify-between px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
+                                    <img src="https://picsum.photos/id/237/40/40" className="w-full h-full rounded-full object-cover" alt="avatar" />
+                                </div>
+                                <div>
+                                    <h1 className="text-lg font-medium text-gray-900">温馨读书感悟打卡圈</h1>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={openAddModal}
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2"
+                            >
+                                <span>+</span>
+                                <span>新增打卡</span>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white h-screen shadow-sm">
+                            <div className="p-6">
+                                <div className="flex items-center space-x-3 mb-8">
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-600">
+                                        <img src="https://picsum.photos/id/237/48/48" className="w-full h-full rounded-full object-cover" alt="avatar" />
+                                    </div>
+                                    <div>
+                                        <h2 className="font-medium text-gray-900">读书感悟圈</h2>
+                                    </div>
+                                </div>
+                                
+                                <nav className="space-y-2">
+                                    <a href="#" className="flex items-center space-x-3 text-orange-600 bg-orange-50 px-3 py-2 rounded-md text-sm">
+                                        <i className="fas fa-home w-4"></i>
+                                        <span>首页</span>
+                                    </a>
+                                    <a href="#" className="flex items-center space-x-3 text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm">
+                                        <i className="fas fa-calendar-check w-4"></i>
+                                        <span>打卡记录</span>
+                                    </a>
+                                    <a href="#" className="flex items-center space-x-3 text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm">
+                                        <i className="fas fa-chart-bar w-4"></i>
+                                        <span>统计分析</span>
+                                    </a>
+                                    <a href="#" className="flex items-center space-x-3 text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-sm">
+                                        <i className="fas fa-question-circle w-4"></i>
+                                        <span>帮助说明</span>
+                                    </a>
+                                </nav>
+                            </div>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 flex">
+                            <div className="flex-1 p-6">
+                                <div className="max-w-4xl">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h2 className="text-xl font-semibold text-gray-900">读书感悟记录</h2>
+                                            <p className="text-gray-600 text-sm mt-1">记录每一次阅读的感悟和收获，让思考在文字中绽放。</p>
+                                        </div>
+                                        <div className="flex space-x-2">
+                                            <button 
+                                                onClick={openAddModal}
+                                                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm flex items-center space-x-1"
+                                            >
+                                                <span>+</span>
+                                                <span>添加新打卡</span>
+                                            </button>
+                                            <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-50">
+                                                导入导出
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Cards Grid */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {cards.map((card) => (
+                                            <div key={card.id} className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <h3 className="text-lg font-medium text-gray-900">{card.title}</h3>
+                                                    <div className="flex space-x-2">
+                                                        <button 
+                                                            onClick={() => openEditModal(card)}
+                                                            className="text-gray-400 hover:text-gray-600"
+                                                        >
+                                                            <i className="fas fa-edit"></i>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => {
+                                                                setCurrentCard(card);
+                                                                openDeleteModal();
+                                                            }}
+                                                            className="text-gray-400 hover:text-gray-600"
+                                                        >
+                                                            <i className="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center space-x-2 mb-4">
+                                                    <i className="fas fa-calendar text-gray-400 text-sm"></i>
+                                                    <span 
+                                                        className="text-gray-600 text-sm cursor-pointer hover:text-blue-600"
+                                                        onClick={() => handleDateClick(card.id)}
+                                                    >
+                                                        {card.date}
+                                                    </span>
+                                                    <span className="text-yellow-500">
+                                                        <i className="fas fa-star"></i>
+                                                    </span>
+                                                </div>
+
+                                                <p className="text-gray-700 mb-4 leading-relaxed">{card.content}</p>
+
+                                                <div className="flex flex-wrap gap-2 mb-4">
+                                                    {card.tags.map((tag, index) => (
+                                                        <span 
+                                                            key={index}
+                                                            className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs"
+                                                        >
+                                                            #{tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
+
+                                                <div className="flex items-center justify-between text-gray-500 text-sm">
+                                                    <span>感言录音</span>
+                                                    <div className="flex items-center space-x-4">
+                                                        <span className="flex items-center space-x-1">
+                                                            <i className="far fa-heart"></i>
+                                                            <span>{card.likes}</span>
+                                                        </span>
+                                                        <span className="flex items-center space-x-1">
+                                                            <i className="far fa-comment"></i>
+                                                            <span>{card.comments}</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Archive Section */}
+                                    <div className="mt-8">
+                                        <div className="bg-white rounded-lg shadow-sm border p-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-gray-600 flex items-center space-x-2">
+                                                    <i className="fas fa-archive"></i>
+                                                    <span>阅读记录的删除存档</span>
+                                                </span>
+                                                <i className="fas fa-chevron-down text-gray-400"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Sidebar */}
+                            <div className="w-80 bg-white border-l p-6">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">我的阅读统计</h3>
+                                
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between py-2">
+                                        <span className="text-gray-600">累计打卡天数</span>
+                                        <span className="font-medium text-orange-600">45</span>
+                                    </div>
+                                    <div className="flex items-center justify-between py-2 border-b border-orange-200">
+                                        <span className="text-gray-600">本月打卡天数</span>
+                                        <span className="font-medium">12</span>
+                                    </div>
+                                    <div className="flex items-center justify-between py-2">
+                                        <span className="text-gray-600">最长连续天数</span>
+                                        <span className="font-medium">7</span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8">
+                                    <h4 className="text-md font-medium text-gray-900 mb-4">阅读小贴士</h4>
+                                    <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 leading-relaxed">
+                                        每天坚持阅读15分钟，一年可以读完12-15本书。
+                                        <br /><br />
+                                        将读书心得及时用读书笔记记下，有助于加深记忆，建立自己的知识体系。
+                                    </div>
+                                </div>
+
+                                <div className="mt-8">
+                                    <h4 className="text-md font-medium text-gray-900 mb-4">推荐书目</h4>
+                                    <div className="space-y-3">
+                                        <div className="text-sm">
+                                            <div className="font-medium text-gray-900">每日一书：分身推荐、让知识</div>
+                                            <div className="text-gray-600 mt-1">相理性、企业、数字化绿色文学的力量，让感性回归理性的世界</div>
+                                        </div>
+                                        <div className="w-full h-32 rounded-lg overflow-hidden">
+                                            <img 
+                                                src="https://picsum.photos/id/24/300/200" 
+                                                alt="推荐书目"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 text-xs text-gray-500 space-y-1">
+                                    <div>"书是当今世界的圣殿"</div>
+                                    <div>"二十一世纪是读书人"</div>
+                                    <div>"高贵与灵魂的阅读"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Add/Edit Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-medium text-gray-900">
+                                        {modalMode === 'add' ? '新增打卡' : '编辑打卡'}
+                                    </h3>
+                                    <button 
+                                        onClick={closeModal}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">书名</label>
+                                        <input 
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                            placeholder="输入书名..."
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">日期</label>
+                                        <input 
+                                            type="text"
+                                            value={formData.date}
+                                            onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">感言理由</label>
+                                        <textarea 
+                                            value={formData.content}
+                                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                                            placeholder="写下你的感悟..."
+                                            rows="4"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">标签</label>
+                                        <div className="flex">
+                                            <input 
+                                                type="text"
+                                                placeholder="添加标签..."
+                                                className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                            <button className="bg-gray-500 text-white px-4 py-2 rounded-r-md text-sm hover:bg-gray-600">
+                                                添加
+                                            </button>
+                                        </div>
+                                        <div className="text-xs text-gray-500 mt-1">点击标签或者文字来选择标签</div>
+                                        <div className="flex space-x-2 mt-2">
+                                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs cursor-pointer hover:bg-blue-200">#经典文学</span>
+                                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs cursor-pointer hover:bg-blue-200">#现代文学</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">感受心情</label>
+                                        <div className="flex space-x-4">
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-2xl">😤</span>
+                                                <span className="text-xs text-gray-600">不满意</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-2xl">😐</span>
+                                                <span className="text-xs text-gray-600">一般</span>
+                                            </div>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-2xl">😊</span>
+                                                <span className="text-xs text-gray-600">满意</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={closeModal}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleSave}
+                                        className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 text-sm"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delete Confirmation Modal */}
+                    {showDeleteModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80 mx-4">
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">确认删除</h3>
+                                <p className="text-gray-600 mb-6">确定要删除这条打卡吗？此操作不可撤销。</p>
+                                <div className="flex justify-end space-x-3">
+                                    <button 
+                                        onClick={closeModal}
+                                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={handleDelete}
+                                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                                    >
+                                        确定删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>二手交易平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  </link>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+  </style>
+</head>
+
+<body class="bg-[#f0f9f4]">
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    const { useState, useEffect } = React;
+
+    const initialProducts = [
+      {
+        id: 1,
+        name: '二手 iPhone 11',
+        description: '黑色, 8GB, 成色良好',
+        price: 1800,
+        postDate: '2023-05-15',
+        category: '电子产品',
+        categoryColor: 'bg-yellow-400',
+        imageUrl: 'https://picsum.photos/id/0/300/200'
+      },
+      {
+        id: 2,
+        name: '宜家折叠餐桌',
+        description: '带椅子，九成新',
+        price: 300,
+        postDate: '2023-05-10',
+        category: '家具',
+        categoryColor: 'bg-yellow-400',
+        imageUrl: 'https://picsum.photos/id/29/300/200'
+      },
+      {
+        id: 3,
+        name: '儿童绘画套装',
+        description: '九成新，内含彩笔、画纸等',
+        price: 50,
+        postDate: '2023-05-05',
+        category: '文具',
+        categoryColor: 'bg-yellow-400',
+        imageUrl: 'https://picsum.photos/id/48/300/200'
+      }
+    ];
+
+    const AddProductModal = ({ onClose, onSave }) => {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">添加新商品</h2>
+                    <form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+                                商品名称
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-name" type="text" placeholder="请输入商品名称" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-category">
+                                商品分类
+                            </label>
+                            <select className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-category" defaultValue="电子产品">
+                                <option>电子产品</option>
+                                <option>家具</option>
+                                <option>文具</option>
+                                <option>图书</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-price">
+                                价格
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-price" type="text" placeholder="请输入价格" />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-url">
+                                图片 URL
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-url" type="text" placeholder="请输入图片 URL (可选)" />
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-description">
+                                商品描述
+                            </label>
+                            <textarea className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24" id="product-description" placeholder="请输入商品描述"></textarea>
+                        </div>
+                        <div className="flex items-center justify-end">
+                            <button className="text-gray-600 font-bold py-2 px-4 rounded mr-2" type="button" onClick={onClose}>
+                                取消
+                            </button>
+                            <button className="bg-[#16a34a] hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onClick={onClose}>
+                                保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    const EditProductModal = ({ product, onClose, onSave }) => {
+        if (!product) return null;
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-8">
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">编辑商品</h2>
+                    <form>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+                                商品名称
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-name" type="text" defaultValue={product.name} />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-category">
+                                商品分类
+                            </label>
+                            <select className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-category" defaultValue={product.category}>
+                                <option>电子产品</option>
+                                <option>家具</option>
+                                <option>文具</option>
+                                <option>图书</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-price">
+                                价格
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-price" type="text" defaultValue={product.price} />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-url">
+                                图片 URL
+                            </label>
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="product-url" type="text" defaultValue={product.imageUrl} />
+                        </div>
+                        <div className="mb-6">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-description">
+                                商品描述
+                            </label>
+                            <textarea className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24" id="product-description" defaultValue={product.description}></textarea>
+                        </div>
+                        <div className="flex items-center justify-end">
+                            <button className="text-gray-600 font-bold py-2 px-4 rounded mr-2" type="button" onClick={onClose}>
+                                取消
+                            </button>
+                            <button className="bg-[#16a34a] hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button" onClick={onClose}>
+                                保存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    };
+
+    const DeleteConfirmModal = ({ onClose, onConfirm }) => {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 text-center">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">确定删除此商品?</h2>
+                    <p className="text-red-500 mb-8">删除操作不可恢复，请谨慎!</p>
+                     <div className="flex items-center justify-center">
+                        <button className="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded mr-4" type="button" onClick={onClose}>
+                            取消
+                        </button>
+                        <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" type="button" onClick={onConfirm}>
+                            确认删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    };
+
+
+    const ProductItem = ({ product, onEdit, onDelete, activeTab }) => {
+      const { id, name, description, price, postDate, category, categoryColor, imageUrl } = product;
+      return (
+        <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm flex items-center mb-4">
+          <img src={imageUrl} alt={name} className="w-32 h-24 object-cover rounded-md mr-6" />
+          <div className="flex-grow">
+            <div className="flex justify-between items-start">
+              <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+              {activeTab !== '编辑管理' && (
+                <div className="flex items-center text-sm text-gray-500">
+                  <a href="#" className="flex items-center mr-4 hover:text-green-600" onClick={(e) => { e.preventDefault(); onEdit(product); }}>
+                    <i className="fas fa-edit mr-1"></i>编辑
+                  </a>
+                  <a href="#" className="flex items-center text-red-500 hover:text-red-700" onClick={(e) => { e.preventDefault(); onDelete(product); }}>
+                    <i className="fas fa-trash-alt mr-1"></i>删除
+                  </a>
+                </div>
+              )}
+               {activeTab === '编辑管理' && (
+                 <input type="checkbox" className="form-checkbox h-5 w-5 text-green-600 rounded border-gray-300 focus:ring-green-500" />
+              )}
+            </div>
+            <p className="text-gray-600 mt-1">{description}</p>
+            <div className="flex items-center justify-between mt-3">
+              <div className="flex items-center">
+                <span className="text-green-600 font-bold text-lg mr-4">¥{price}</span>
+                <span className="text-xs text-gray-400">发布于: {postDate}</span>
+              </div>
+              <div className="flex items-center">
+                 <span className={`text-xs text-gray-700 px-2 py-1 rounded ${categoryColor}`}>{category}</span>
+                 {activeTab !== '编辑管理' && (
+                    <button className="bg-green-600 text-white text-sm font-bold py-2 px-6 rounded-md ml-8 hover:bg-green-700">立即购买</button>
+                 )}
+                 {activeTab === '编辑管理' && (
+                    <button className="bg-white text-white text-sm font-bold py-2 px-6 rounded-md ml-8 cursor-default"></button>
+                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const App = () => {
+      const [products, setProducts] = useState(initialProducts);
+      const [activeTab, setActiveTab] = useState('商品展示');
+
+      const [showAddModal, setShowAddModal] = useState(false);
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [editingProduct, setEditingProduct] = useState(null);
+      const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+      const [deletingProduct, setDeletingProduct] = useState(null);
+
+
+      const handleEditClick = (product) => {
+        setEditingProduct(product);
+        setShowEditModal(true);
+      };
+
+      const handleDeleteClick = (product) => {
+        setDeletingProduct(product);
+        setShowDeleteConfirm(true);
+      }
+      
+      const handleConfirmDelete = () => {
+        // In a real app, you would delete the product from the state
+        setShowDeleteConfirm(false);
+        setDeletingProduct(null);
+      }
+
+      return (
+        <div className="min-h-screen flex">
+          {/* Modals */}
+          {showAddModal && <AddProductModal onClose={() => setShowAddModal(false)} />}
+          {showEditModal && <EditProductModal product={editingProduct} onClose={() => setShowEditModal(false)} />}
+          {showDeleteConfirm && <DeleteConfirmModal onClose={() => setShowDeleteConfirm(false)} onConfirm={handleConfirmDelete} />}
+
+          {/* Sidebar */}
+          <aside className="w-56 bg-[#15803d] text-white flex flex-col">
+            <div className="h-16 flex items-center justify-center text-xl font-bold border-b border-green-700">
+              二手交易平台
+            </div>
+            <nav className="flex-grow p-4">
+              <ul>
+                <li className="mb-4">
+                  <a href="#" className="flex items-center p-2 rounded-md bg-green-700">
+                    <i className="fas fa-home w-6"></i>
+                    <span>首页</span>
+                  </a>
+                </li>
+                <li className="mb-4">
+                  <a href="#" className="flex items-center p-2 rounded-md hover:bg-green-700" onClick={(e) => {e.preventDefault(); setShowAddModal(true)}}>
+                    <i className="fas fa-plus-circle w-6"></i>
+                    <span>发布商品</span>
+                  </a>
+                </li>
+                <li className="mb-4">
+                  <a href="#" className="flex items-center p-2 rounded-md hover:bg-green-700">
+                    <i className="fas fa-list-alt w-6"></i>
+                    <span>我的订单</span>
+                  </a>
+                </li>
+                <li className="mb-4">
+                  <a href="#" className="flex items-center p-2 rounded-md hover:bg-green-700">
+                    <i className="fas fa-question-circle w-6"></i>
+                    <span>帮助中心</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+            <div className="p-4 text-xs text-green-200">
+              <p>&copy; 2023 二手交易平台</p>
+              <p>本平台受法律保护,所有</p>
+              <p>数据操作均已记录在案</p>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col">
+            {/* Header */}
+            <header className="bg-white shadow-sm h-16 flex items-center justify-center">
+              <h1 className="text-2xl font-semibold text-gray-700 tracking-wider">环保-循环-价值——让闲置换发新生</h1>
+            </header>
+            
+            {/* Page Content */}
+            <main className="flex-1 flex p-6">
+                <div className="flex-grow">
+                    <div className="flex border-b mb-4">
+                        <button onClick={() => setActiveTab('商品展示')} className={`py-2 px-6 text-gray-600 text-sm font-medium ${activeTab === '商品展示' ? 'border-b-2 border-green-600 text-green-600' : 'hover:text-green-600'}`}>商品展示</button>
+                        <button onClick={() => setActiveTab('数据统计')} className={`py-2 px-6 text-gray-600 text-sm font-medium ${activeTab === '数据统计' ? 'border-b-2 border-green-600 text-green-600' : 'hover:text-green-600'}`}>数据统计</button>
+                        <button onClick={() => setActiveTab('编辑管理')} className={`py-2 px-6 text-gray-600 text-sm font-medium ${activeTab === '编辑管理' ? 'border-b-2 border-green-600 text-green-600' : 'hover:text-green-600'}`}>编辑管理</button>
+                    </div>
+
+                    {activeTab === '商品展示' && (
+                        <div>
+                            <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 rounded-r-lg mb-6 text-sm">
+                                <p>浏览我们的精选二手好物, 低价优质, 每一个都是物尽其用的环保之选!</p>
+                            </div>
+                            {products.map(product => <ProductItem key={product.id} product={product} activeTab={activeTab} onEdit={handleEditClick} onDelete={handleDeleteClick} />)}
+                        </div>
+                    )}
+                    
+                    {activeTab === '数据统计' && (
+                        <div className="w-full">
+                            <h2 className="text-xl font-bold text-gray-700 mb-6">交易数据统计</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 flex flex-col items-center justify-center h-64">
+                                  <h3 className="text-lg font-semibold text-gray-800 mb-4">月度销售趋势</h3>
+                                  <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center text-gray-400">图表区域 - 销售趋势图</div>
+                                </div>
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 flex flex-col items-center justify-center h-64">
+                                  <h3 className="text-lg font-semibold text-gray-800 mb-4">热门商品类别</h3>
+                                  <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center text-gray-400">图表区域 - 类别饼图</div>
+                                </div>
+                                <div className="bg-white p-6 rounded-lg border border-gray-200 flex flex-col items-center justify-center h-64">
+                                  <h3 className="text-lg font-semibold text-gray-800 mb-4">用户活跃度</h3>
+                                  <div className="w-full h-full bg-gray-100 rounded flex items-center justify-center text-gray-400">图表区域 - 活跃度折线图</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {activeTab === '编辑管理' && (
+                        <div>
+                            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-3 rounded-r-lg mb-6 text-sm flex items-center">
+                                <span className="font-bold mr-2">💡 Tip:</span><p>长按商品图片可快速拖拽排序!</p>
+                                <button className="ml-auto bg-red-500 text-white text-xs font-bold py-1 px-3 rounded">删除选中 (0)</button>
+                            </div>
+                            {products.map(product => <ProductItem key={product.id} product={product} activeTab={activeTab} />)}
+                        </div>
+                    )}
+
+                </div>
+                
+                {/* Right sidebar */}
+                <aside className="w-64 ml-6 flex-shrink-0">
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm mb-6">
+                        <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">实时数据</h3>
+                        <div className="flex items-center mb-4">
+                            <i className="fas fa-users text-green-600 text-2xl w-10"></i>
+                            <div>
+                                <p className="text-gray-500 text-sm">在线用户数</p>
+                                <p className="font-bold text-xl text-gray-800">1024</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center mb-4 bg-yellow-100 p-3 rounded-md">
+                            <i className="fas fa-shopping-cart text-yellow-600 text-2xl w-10"></i>
+                             <div>
+                                <p className="text-gray-500 text-sm">今日成交量</p>
+                                <p className="font-bold text-xl text-gray-800">23</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center bg-blue-100 p-3 rounded-md">
+                            <i className="fas fa-chart-line text-blue-600 text-2xl w-10"></i>
+                             <div>
+                                <p className="text-gray-500 text-sm">活跃买家数</p>
+                                <p className="font-bold text-xl text-gray-800">512</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-green-200 shadow-sm">
+                        <h3 className="font-bold text-gray-800 border-b pb-2 mb-4">交易提示</h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">商品状态良好, 包装已消毒. 请确认收货地址无误, 保障交易安全.</p>
+                    </div>
+                </aside>
+            </main>
+
+            {/* Footer */}
+            <footer className="bg-white h-16 border-t flex items-center px-6">
+                <button className="bg-[#16a34a] text-white py-2 px-4 rounded-md flex items-center hover:bg-green-700" onClick={() => setShowAddModal(true)}>
+                    <i className="fas fa-plus-circle mr-2"></i>
+                    <span>添加新商品</span>
+                </button>
+                <span className="text-sm text-gray-400 ml-3">点击添加商品, 快速发布</span>
+                <div className="ml-auto flex items-center space-x-2">
+                     <button className="bg-yellow-400 text-gray-800 py-2 px-4 rounded-md flex items-center hover:bg-yellow-500">
+                        <i className="fas fa-trash-alt mr-2"></i>
+                        <span>批量删除</span>
+                    </button>
+                     <button className="bg-yellow-400 text-gray-800 py-2 px-4 rounded-md flex items-center hover:bg-yellow-500">
+                        <i className="fas fa-download mr-2"></i>
+                        <span>导出报表</span>
+                    </button>
+                </div>
+            </footer>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+  </script>
+</body>
+
+</html>

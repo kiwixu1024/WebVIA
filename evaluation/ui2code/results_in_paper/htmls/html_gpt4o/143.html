@@ -1,0 +1,211 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线古籍阅读</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-50 font-sans">
+    <div id="app"></div>
+    <script type="text/babel">
+        const books = [
+            {
+                id: 1,
+                title: "楚辞",
+                author: "屈原等",
+                dynasty: "先秦",
+                classification: "诗歌",
+                cover: "https://picsum.photos/id/10/400/400",
+                ratingStars: 4.8,
+                ratingCount: 1857,
+                brief: "《楚辞》是中国古代浪漫主义文集，书《楚辞》并称“风骚”。主要收入了屈原、宋玉等人的作品，内容雄奇、辞章瑰丽。",
+            },
+            {
+                id: 2,
+                title: "史记",
+                author: "司马迁",
+                dynasty: "汉",
+                classification: "历史",
+                cover: "https://picsum.photos/id/12/400/400",
+                ratingStars: 5,
+                ratingCount: 2789,
+                brief: "《史记》是汉代史学家司马迁编写的中国第一部纪传体通史，记载了上古至汉武帝的历史。",
+            },
+            {
+                id: 3,
+                title: "资治通鉴",
+                author: "司马光",
+                dynasty: "宋",
+                classification: "历史",
+                cover: "https://picsum.photos/id/14/400/400",
+                ratingStars: 4.9,
+                ratingCount: 1253,
+                brief: "《资治通鉴》是以历史为主的一部编年体通史，涵盖了战国至五代十国的编年体史料。",
+            },
+            {
+                id: 4,
+                title: "红楼梦",
+                author: "曹雪芹",
+                dynasty: "清",
+                classification: "小说",
+                cover: "https://picsum.photos/id/16/400/400",
+                ratingStars: 5,
+                ratingCount: 5283,
+                brief: "《红楼梦》，原名《石头记》，中国古典四大名著之一，是中国封建社会的百科全书式的文学巨著。",
+            },
+            {
+                id: 5,
+                title: "论语",
+                author: "孔子弟子及再传弟子",
+                dynasty: "春秋战国",
+                classification: "哲学",
+                cover: "https://picsum.photos/id/18/400/400",
+                ratingStars: 4.9,
+                ratingCount: 3156,
+                brief: "《论语》是孔子及其弟子的言行纪实，集中体现了儒家思想，是儒家经典中的重要著作。",
+            },
+            {
+                id: 6,
+                title: "道德经",
+                author: "老子",
+                dynasty: "春秋",
+                classification: "哲学",
+                cover: "https://picsum.photos/id/20/400/400",
+                ratingStars: 4.7,
+                ratingCount: 2453,
+                brief: "《道德经》又称《老子》，是道家学派的经典之作，提出了“道法自然”思想。",
+            },
+        ];
+
+        const App = () => {
+            const [isModalVisible, setIsModalVisible] = React.useState(false);
+            const [modalType, setModalType] = React.useState(null); // 'add', 'edit', 'delete'
+            const [selectedBook, setSelectedBook] = React.useState(null);
+
+            const openAddModal = () => {
+                setModalType('add');
+                setSelectedBook(null);
+                setIsModalVisible(true);
+            };
+
+            const openEditModal = (book) => {
+                setModalType('edit');
+                setSelectedBook(book);
+                setIsModalVisible(true);
+            };
+
+            const openDeleteModal = (book) => {
+                setModalType('delete');
+                setSelectedBook(book);
+                setIsModalVisible(true);
+            };
+
+            const closeModal = () => {
+                setIsModalVisible(false);
+                setSelectedBook(null);
+                setModalType(null);
+            };
+
+            return (
+                <div className="flex bg-gray-50">
+                    <div className="w-1/6 bg-gray-800 text-white p-4">
+                        <h1 className="text-lg font-bold">在线古籍阅读</h1>
+                        <p className="text-sm mt-1">传承千年文化，在线轻松阅读</p>
+                        <ul className="mt-4 space-y-2">
+                            <li className="hover:text-yellow-300 cursor-pointer">古籍展示</li>
+                            <li className="hover:text-yellow-300 cursor-pointer">新增书目</li>
+                            <li className="hover:text-yellow-300 cursor-pointer">平台特色</li>
+                            <li className="hover:text-yellow-300 cursor-pointer">使用帮助</li>
+                        </ul>
+                    </div>
+                    <main className="w-5/6 p-6">
+                        <h2 className="text-xl font-semibold text-gray-700">古籍典藏</h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex space-x-2">
+                                <button className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-500">
+                                    按朝代
+                                </button>
+                                <button className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-500">
+                                    按分类
+                                </button>
+                                <button className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-500">
+                                    按热门
+                                </button>
+                            </div>
+                            <button
+                                onClick={openAddModal}
+                                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500"
+                            >
+                                + 添加古籍
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            {books.map((book) => (
+                                <div key={book.id} className="bg-white p-4 shadow rounded-lg">
+                                    <img
+                                        src={book.cover}
+                                        alt={book.title}
+                                        className="w-full h-40 object-cover rounded-lg"
+                                    />
+                                    <h3 className="text-lg font-semibold mt-2">{book.title}</h3>
+                                    <p className="text-sm text-gray-500">{book.author}</p>
+                                    <p className="text-sm text-gray-500">朝代: {book.dynasty}</p>
+                                    <p className="text-sm mt-2">{book.brief}</p>
+                                    <div className="flex justify-between items-center mt-4">
+                                        <button
+                                            onClick={() => openEditModal(book)}
+                                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-400"
+                                        >
+                                            编辑
+                                        </button>
+                                        <button
+                                            onClick={() => openDeleteModal(book)}
+                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-400"
+                                        >
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </main>
+
+                    {isModalVisible && modalType === 'add' && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                            <div className="bg-white p-6 w-1/3 rounded-lg shadow">
+                                <h3 className="text-lg font-semibold mb-4">新增古籍</h3>
+                                <form>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700 text-sm font-bold mb-2">
+                                            书名
+                                        </label>
+                                        <input type="text" className="w-full p-2 border rounded" />
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={closeModal}
+                                            className="bg-gray-500 text-white py-2 px-4 rounded mr-2"
+                                        >
+                                            取消
+                                        </button>
+                                        <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
+                                            保存
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('app'));
+    </script>
+</body>
+</html>

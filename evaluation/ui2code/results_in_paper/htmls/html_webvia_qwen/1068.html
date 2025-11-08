@@ -1,0 +1,591 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直播学院</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [activeNav, setActiveNav] = useState('首页');
+            const [showHelp, setShowHelp] = useState(false);
+            const [activeTab, setActiveTab] = useState('直播列表');
+            const [showModal, setShowModal] = useState(false);
+
+            const handleNavClick = (section) => {
+                setActiveNav(section);
+            };
+
+            const handleTabClick = (tab) => {
+                setActiveTab(tab);
+            };
+
+            const showHelpMenu = () => {
+                setShowHelp(true);
+            };
+
+            const hideHelpMenu = () => {
+                setShowHelp(false);
+            };
+
+            const editCourse = () => {
+                setShowModal(true);
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <i className="fas fa-graduation-cap text-white text-sm"></i>
+                                </div>
+                                <span className="text-lg font-semibold text-gray-900">直播学院</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button 
+                                    onClick={showHelpMenu}
+                                    className="flex items-center space-x-1 text-gray-700 hover:text-gray-900"
+                                >
+                                    <i className="fas fa-cog text-sm"></i>
+                                    <span className="text-sm">系统设置</span>
+                                </button>
+                                <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden flex items-center justify-center">
+                                    <img src="https://picsum.photos/id/42/40/40" alt="Teacher" className="w-full h-full object-cover" />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
+                            <nav className="p-6 space-y-2">
+                                <div 
+                                    onClick={() => handleNavClick('首页')}
+                                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                                        activeNav === '首页' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-home text-sm"></i>
+                                        <span>首页</span>
+                                    </div>
+                                    {activeNav === '首页' && (
+                                        <div className="w-1 h-6 bg-blue-500 rounded mx-auto"></div>
+                                    )}
+                                </div>
+
+                                <div 
+                                    onClick={() => handleNavClick('课程管理')}
+                                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                                        activeNav === '课程管理' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-book text-sm"></i>
+                                        <span>课程管理</span>
+                                    </div>
+                                    {activeNav === '课程管理' && (
+                                        <div className="w-1 h-6 bg-blue-500 rounded mx-auto"></div>
+                                    )}
+                                </div>
+
+                                <div 
+                                    onClick={() => handleNavClick('学员管理')}
+                                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                                        activeNav === '学员管理' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <i className="fas fa-users text-sm"></i>
+                                        <span>学员管理</span>
+                                    </div>
+                                    {activeNav === '学员管理' && (
+                                        <div className="w-1 h-6 bg-blue-500 rounded mx-auto"></div>
+                                    )}
+                                </div>
+                            </nav>
+
+                            <nav className="mt-12">
+                                <p className="text-sm text-gray-600 font-medium mb-4">数据统计</p>
+                                <div className="space-y-2">
+                                    <div 
+                                        onClick={() => handleNavClick('数据统计')}
+                                        className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                                            activeNav === '数据统计' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <i className="fas fa-chart-bar text-sm"></i>
+                                            <span>数据统计</span>
+                                        </div>
+                                        {activeNav === '数据统计' && (
+                                            <div className="w-1 h-6 bg-blue-500 rounded mx-auto"></div>
+                                        )}
+                                    </div>
+
+                                    <div 
+                                        onClick={() => handleNavClick('设置')}
+                                        className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                                            activeNav === '设置' ? 'bg-blue-100 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <i className="fas fa-cog text-sm"></i>
+                                            <span>设置</span>
+                                        </div>
+                                        {activeNav === '设置' && (
+                                            <div className="w-1 h-6 bg-blue-500 rounded mx-auto"></div>
+                                        )}
+                                    </div>
+                                </div>
+                            </nav>
+
+                            <div className="mt-16 bg-gray-50 rounded-lg p-4">
+                                <div className="flex items-center space-x-2 text-gray-500">
+                                    <i className="fas fa-user-circle text-sm"></i>
+                                    <span>教师账号</span>
+                                </div>
+                            </div>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 p-8">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <div className="text-blue-500 text-2xl">📚</div>
+                                        <h1 className="text-2xl font-semibold text-gray-900">首页</h1>
+                                    </div>
+                                    <p className="text-gray-600">在线直播课堂平台</p>
+                                </div>
+                                <div className="text-sm text-gray-400">欢迎回来，张老师</div>
+                            </div>
+
+                            {/* Platform Info Cards */}
+                            <div className="grid grid-cols-3 gap-6 mb-8">
+                                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i className="fas fa-video text-blue-500 text-lg"></i>
+                                        </div>
+                                        <h3 className="text-lg font-medium">高清直播</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-3">支持1080P高清画质，自动适应网络环境，确保流畅教学体验</p>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <i className="fas fa-comments text-green-500 text-lg"></i>
+                                        </div>
+                                        <h3 className="text-lg font-medium">实时互动</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-3">弹幕、提问、举手发言等多种互动方式，拉近师生距离</p>
+                                </div>
+
+                                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <i className="fas fa-chart-line text-purple-500 text-lg"></i>
+                                        </div>
+                                        <h3 className="text-lg font-medium">数据分析</h3>
+                                    </div>
+                                    <p className="text-gray-600 mb-3">全方位统计学习数据，生成详细报表，助力教学效果评估</p>
+                                </div>
+                            </div>
+
+                            {/* Course Management */}
+                            <div className="bg-white rounded-lg p-6 shadow-sm mb-8">
+                                <h2 className="text-lg font-semibold mb-6">在线直播课堂管理</h2>
+                                
+                                {/* Tab Navigation */}
+                                <div className="flex space-x-2 mb-6">
+                                    {[
+                                        { label: '直播列表', key: '直播列表' },
+                                        { label: '回放管理', key: '回放管理' },
+                                        { label: '互动课堂', key: '互动课堂' }
+                                    ].map(tab => (
+                                        <button
+                                            key={tab.key}
+                                            onClick={() => handleTabClick(tab.key)}
+                                            className={`px-4 py-2 rounded font-medium ${
+                                                activeTab === tab.key
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'text-blue-500 hover:bg-blue-50'
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Course List */}
+                                <div className="grid grid-cols-3 gap-6">
+                                    {/* Course 1 */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <img src="https://picsum.photos/id/180/400/200" alt="React基础入门实战" className="w-full h-40 object-cover rounded-lg mb-4" />
+                                        <h3 className="font-semibold text-gray-900 mb-2">React基础入门实战</h3>
+                                        <div className="space-y-1 text-sm text-gray-600 mb-4">
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-user text-blue-500"></i>
+                                                <span>张教授</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-calendar text-blue-500"></i>
+                                                <span>2023-06-15 19:00-21:00</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-tag text-blue-500"></i>
+                                                <span>前端开发</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center">
+                                            <button 
+                                                onClick={editCourse}
+                                                className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 flex items-center space-x-1"
+                                            >
+                                                <i className="fas fa-edit"></i>
+                                                <span>编辑课程</span>
+                                            </button>
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex items-center space-x-1">
+                                                <i className="fas fa-trash"></i>
+                                                <span>删除课程</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Course 2 */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <img src="https://picsum.photos/id/326/400/200" alt="数据结构与算法" className="w-full h-40 object-cover rounded-lg mb-4" />
+                                        <h3 className="font-semibold text-gray-900 mb-2">数据结构与算法</h3>
+                                        <div className="space-y-1 text-sm text-gray-600 mb-4">
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-user text-blue-500"></i>
+                                                <span>李博士</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-calendar text-blue-500"></i>
+                                                <span>2023-06-16 20:00-22:00</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-tag text-blue-500"></i>
+                                                <span>计算机基础</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center">
+                                            <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 flex items-center space-x-1">
+                                                <i className="fas fa-edit"></i>
+                                                <span>编辑课程</span>
+                                            </button>
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex items-center space-x-1">
+                                                <i className="fas fa-trash"></i>
+                                                <span>删除课程</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Course 3 */}
+                                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                                        <img src="https://picsum.photos/id/403/400/200" alt="Python数据分析实战" className="w-full h-40 object-cover rounded-lg mb-4" />
+                                        <h3 className="font-semibold text-gray-900 mb-2">Python数据分析实战</h3>
+                                        <div className="space-y-1 text-sm text-gray-600 mb-4">
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-user text-blue-500"></i>
+                                                <span>王讲师</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-calendar text-blue-500"></i>
+                                                <span>2023-06-17 14:00-16:30</span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <i className="fas fa-tag text-blue-500"></i>
+                                                <span>数据科学</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center">
+                                            <button className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 flex items-center space-x-1">
+                                                <i className="fas fa-edit"></i>
+                                                <span>编辑课程</span>
+                                            </button>
+                                            <button className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex items-center space-x-1">
+                                                <i className="fas fa-trash"></i>
+                                                <span>删除课程</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Course Data Statistics */}
+                            <div className="bg-white rounded-lg p-6 shadow-sm">
+                                <h2 className="text-lg font-semibold mb-6">课程数据统计</h2>
+                                
+                                <div className="grid grid-cols-4 gap-6 mb-8">
+                                    <div className="bg-blue-50 rounded-lg p-4 text-center">
+                                        <div className="text-3xl font-bold text-blue-500 mb-1">1254</div>
+                                        <div className="text-sm text-gray-600">在线学员</div>
+                                    </div>
+                                    <div className="bg-green-50 rounded-lg p-4 text-center">
+                                        <div className="text-3xl font-bold text-green-500 mb-1">78540</div>
+                                        <div className="text-sm text-gray-600">总观看时长（分钟）</div>
+                                    </div>
+                                    <div className="bg-purple-50 rounded-lg p-4 text-center">
+                                        <div className="text-3xl font-bold text-purple-500 mb-1">3682</div>
+                                        <div className="text-sm text-gray-600">互动弹幕数</div>
+                                    </div>
+                                    <div className="bg-gray-50 rounded-lg p-4 text-center">
+                                        <div className="text-sm text-gray-600">课程分类分布</div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <h3 className="text-sm text-gray-600 mb-4">课程分类分布</h3>
+                                    <div className="text-center py-12">
+                                        <div className="text-6xl text-gray-300 mb-4">📊</div>
+                                        <p className="text-gray-500">图表将在此显示</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 rounded-lg p-6">
+                                    <p className="text-sm text-gray-600 mb-3">刷新数据后查看统计数据</p>
+                                </div>
+                            </div>
+                        </main>
+
+                        {/* Scroll to top button */}
+                        <button 
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="fixed bottom-6 right-6 w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center"
+                        >
+                            <i className="fas fa-arrow-up"></i>
+                        </button>
+                    </div>
+
+                    {/* Help Center */}
+                    {showHelp && (
+                        <div 
+                            className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg z-50 transform transition-transform"
+                            style={{ transform: 'translateX(0%)' }}
+                        >
+                            <div 
+                                className="flex items-center justify-between p-4 h-16 border-b border-gray-200 cursor-pointer"
+                                onClick={hideHelpMenu}
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <i className="fas fa-question-circle text-blue-500"></i>
+                                    <span className="font-medium">帮助中心</span>
+                                </div>
+                                <button 
+                                    onClick={hideHelpMenu}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            <div className="p-6 space-y-6 h-fit">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-plus-circle text-blue-500"></i>
+                                        <span className="font-medium">如何新增课程</span>
+                                    </div>
+                                    <ul className="text-sm text-gray-600 space-y-1">
+                                        <li>1. 点击页面顶部的"新增课程"按钮</li>
+                                        <li>2. 在课程卡片上找到并点击"编辑课程"按钮</li>
+                                        <li>3. 在弹出的表单中填写课程信息</li>
+                                        <li>3. 点击"保存"按钮后流程完成操作</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-edit text-blue-500"></i>
+                                        <span className="font-medium">如何编辑课程</span>
+                                    </div>
+                                    <ul className="text-sm text-gray-600 space-y-1">
+                                        <li>1. 在课程卡片上找到并点击编辑课程按钮</li>
+                                        <li>2. 在弹出的表单中填写课程信息</li>
+                                        <li>3. 点击"保存"按钮后流程完成操作</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-trash text-red-500"></i>
+                                        <span className="font-medium">删除操作须知</span>
+                                    </div>
+                                    <ul className="text-sm text-gray-600 space-y-1">
+                                        <li>1. 在课程卡片上找到并点击删除课程按钮</li>
+                                        <li>2. 在弹出的确认对话框中点击"确认删除"</li>
+                                        <li>注意：删除操作无法撤销，请谨慎操作</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-chart-bar text-green-500"></i>
+                                        <span className="font-medium">统计数据说明</span>
+                                    </div>
+                                    <ul className="text-sm text-gray-600 space-y-1">
+                                        <li>1. 右侧面板显示当日实时数据统计</li>
+                                        <li>2. 点击"刷新数据"按钮可更新统计数</li>
+                                        <li>据图表将自动根据最新数据调整显示</li>
+                                    </ul>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-3">
+                                        <i className="fas fa-question-circle text-blue-500"></i>
+                                        <span className="font-medium">需要更多帮助？</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        联系客服邮箱：support@live.edu.com<br/>
+                                        工作时间：周一到周五 9:00-18:00
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Course Edit Modal */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-semibold">编辑课程</h3>
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">课程标题</label>
+                                        <input 
+                                            type="text" 
+                                            value="React基础入门实战"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">讲师姓名</label>
+                                        <input 
+                                            type="text" 
+                                            value="张教授"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">直播日期</label>
+                                            <input 
+                                                type="date" 
+                                                value="2023-06-15"
+                                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">开始时间</label>
+                                            <input 
+                                                type="time" 
+                                                defaultValue="--:-- --"
+                                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">课程分类</label>
+                                            <select 
+                                                value="前端开发"
+                                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="前端开发">前端开发</option>
+                                                <option value="数据科学">数据科学</option>
+                                                <option value="计算机基础">计算机基础</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">直播时长(分钟)</label>
+                                            <div className="flex items-center space-x-4">
+                                                <span className="text-sm text-gray-600">30分钟</span>
+                                                <input 
+                                                    type="range" 
+                                                    min="30" 
+                                                    max="240"
+                                                    defaultValue="120"
+                                                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none slider"
+                                                />
+                                                <span className="text-sm text-gray-600">120分钟</span>
+                                            </div>
+                                            <div className="text-sm text-gray-600">240分钟</div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">课程封面</label>
+                                        <input 
+                                            type="text" 
+                                            value="https://picsum.photos/id/460300/200"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            placeholder="1280×720px, JPG/PNG格式"
+                                        />
+                                        <button className="mt-2 bg-gray-200 text-gray-600 px-4 py-2 rounded text-sm">
+                                            上传图片
+                                        </button>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">课程简介</label>
+                                        <textarea 
+                                            value="从零开始学习React，掌握组件、状态管理和Hooks等核心概念"
+                                            rows="4"
+                                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        ></textarea>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowModal(false)}
+                                        className="flex-1 bg-gray-200 text-gray-600 py-2 rounded-lg"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="flex-1 bg-blue-500 text-white py-2 rounded-lg">
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

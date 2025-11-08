@@ -1,0 +1,161 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经典微视频回放墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [videos, setVideos] = useState([
+                {
+                    id: 1,
+                    title: "复古新闻",
+                    category: "新闻",
+                    tags: "时代记忆",
+                    image: "https://picsum.photos/id/10/300/200",
+                    views: "1523 次播放",
+                    duration: "3:45"
+                },
+                {
+                    id: 2,
+                    title: "城市记忆",
+                    category: "纪录片",
+                    tags: "历史",
+                    image: "https://picsum.photos/id/20/300/200",
+                    views: "892 次播放",
+                    duration: "3:45"
+                },
+                {
+                    id: 3,
+                    title: "经典广告集锦",
+                    category: "广告",
+                    tags: "回忆",
+                    image: "https://picsum.photos/id/30/300/200",
+                    views: "2156 次播放",
+                    duration: "3:45"
+                },
+                {
+                    id: 4,
+                    title: "音乐故事",
+                    category: "音乐",
+                    tags: "历史",
+                    image: "https://picsum.photos/id/40/300/200",
+                    views: "1082 次播放",
+                    duration: "3:45"
+                },
+                {
+                    id: 5,
+                    title: "历史瞬间",
+                    category: "历史",
+                    tags: "历史",
+                    image: "https://picsum.photos/id/50/300/200",
+                    views: "3678 次播放",
+                    duration: "3:45"
+                },
+            ]);
+
+            const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+            const [selectedVideo, setSelectedVideo] = useState(null);
+
+            const handleDeleteClick = (video) => {
+                setSelectedVideo(video);
+                setIsConfirmDeleteVisible(true);
+            };
+
+            const confirmDelete = () => {
+                setVideos(videos.filter(video => video.id !== selectedVideo.id));
+                setIsConfirmDeleteVisible(false);
+                setSelectedVideo(null);
+            };
+
+            const cancelDelete = () => {
+                setIsConfirmDeleteVisible(false);
+                setSelectedVideo(null);
+            };
+
+            return (
+                <div className="bg-gray-100">
+                    {/* Header */}
+                    <header className="bg-blue-500 text-white py-4 px-6 flex justify-between items-center">
+                        <h1 className="text-xl font-bold">经典微视频回放墙</h1>
+                        <div>
+                            <button className="bg-yellow-500 text-black px-3 py-2 mr-2 rounded">导入数据</button>
+                            <button className="bg-orange-500 text-white px-3 py-2 rounded">导出报表</button>
+                        </div>
+                    </header>
+
+                    <main className="px-8 py-6">
+                        {/* Video Showcase */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            {videos.map(video => (
+                                <div key={video.id} className="bg-white rounded overflow-hidden shadow-md">
+                                    <div>
+                                        <img src={video.image} alt={video.title} className="w-full h-40 object-cover" />
+                                    </div>
+                                    <div className="p-4">
+                                        <h2 className="text-md font-semibold">{video.title}</h2>
+                                        <p className="text-gray-500 text-sm">{video.category} · {video.tags}</p>
+                                        <div className="flex justify-between mt-2">
+                                            <div className="text-gray-600 text-sm">{video.views}</div>
+                                            <div className="text-gray-600 text-sm">{video.duration}</div>
+                                        </div>
+                                        <div className="flex justify-end mt-2">
+                                            <button
+                                                className="bg-red-500 text-white px-2 py-1 text-sm rounded-full mr-2"
+                                                onClick={() => handleDeleteClick(video)}
+                                            >
+                                                <i className="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Confirm Delete Modal */}
+                        {isConfirmDeleteVisible && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <div className="bg-white rounded shadow-lg p-6 w-80">
+                                    <div className="text-center">
+                                        <i className="fas fa-exclamation-triangle text-red-500 text-3xl"></i>
+                                        <h3 className="mt-4 text-lg font-semibold text-gray-800">确认删除</h3>
+                                        <p className="text-gray-600 text-sm mt-2">
+                                            您确定要删除视频 "{selectedVideo?.title}" 吗？
+                                        </p>
+                                    </div>
+                                    <div className="mt-6 flex justify-evenly">
+                                        <button
+                                            className="bg-gray-300 px-4 py-2 rounded-md text-sm"
+                                            onClick={cancelDelete}
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            className="bg-red-500 text-white px-4 py-2 rounded-md text-sm"
+                                            onClick={confirmDelete}
+                                        >
+                                            确认删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('app'));
+    </script>
+</body>
+</html>

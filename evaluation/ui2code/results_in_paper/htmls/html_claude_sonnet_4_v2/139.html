@@ -1,0 +1,436 @@
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表情日志</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        function App() {
+            const [currentView, setCurrentView] = useState('home');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [selectedMood, setSelectedMood] = useState('全部');
+            
+            const allLogs = [
+                {
+                    id: 1,
+                    date: '2024-06-01',
+                    mood: '开心',
+                    emoji: '😊',
+                    content: '今日工作顺利完成上线部署！',
+                    category: '开心'
+                },
+                {
+                    id: 2,
+                    date: '2024-05-30',
+                    mood: '伤感',
+                    emoji: '😢',
+                    content: '烦恼恶运，有点感谢...',
+                    category: '伤感'
+                },
+                {
+                    id: 3,
+                    date: '2024-05-29',
+                    mood: '惊讶',
+                    emoji: '😲',
+                    content: '收到意外惊喜，男友送了我一本满月日记本的小心！',
+                    category: '惊讶'
+                }
+            ];
+            
+            const filteredLogs = selectedMood === '全部' ? allLogs : allLogs.filter(log => log.category === selectedMood);
+            
+            const moodStats = [
+                { emoji: '😊', name: '开心', count: '1次' },
+                { emoji: '😍', name: '兴奋', count: '1次' },
+                { emoji: '😤', name: '愤怒', count: '1次' },
+                { emoji: '😭', name: '平静', count: '0次' },
+                { emoji: '😴', name: '疲累', count: '0次' },
+                { emoji: '😡', name: '愤怒', count: '0次' },
+                { emoji: '😮', name: '茫然', count: '0次' },
+                { emoji: '😷', name: '焦虑', count: '0次' }
+            ];
+            
+            if (currentView === 'daily') {
+                return (
+                    <div className="min-h-screen bg-gray-100">
+                        <header className="bg-white shadow-sm">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div className="flex justify-between items-center h-16">
+                                    <div className="flex items-center">
+                                        <div className="bg-orange-500 text-white p-2 rounded mr-3">📝</div>
+                                        <span className="text-lg font-medium">表情日志</span>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-lg font-bold">特色主题表情日志</span>
+                                        <div className="text-sm text-gray-500">每天记录心情，记录美好生活</div>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button 
+                                            onClick={() => setShowAddModal(true)}
+                                            className="bg-orange-400 text-white px-4 py-2 rounded text-sm hover:bg-orange-500"
+                                        >
+                                            📝 添加新日志
+                                        </button>
+                                        <button className="bg-green-400 text-white px-4 py-2 rounded text-sm hover:bg-green-500">
+                                            📄 导出日志
+                                        </button>
+                                        <button className="text-gray-400 hover:text-gray-600">
+                                            ❓
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+                        
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                            <div className="flex">
+                                <aside className="w-48 mr-8">
+                                    <nav className="space-y-1">
+                                        <a 
+                                            href="#" 
+                                            onClick={() => setCurrentView('home')}
+                                            className="bg-orange-100 text-orange-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                                        >
+                                            🏠 展示页
+                                        </a>
+                                        <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                            ✏️ 编辑区
+                                        </a>
+                                        <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                            📊 统计区
+                                        </a>
+                                        <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                            ❓ 解决说明
+                                        </a>
+                                    </nav>
+                                </aside>
+                                
+                                <main className="flex-1">
+                                    <div className="text-center py-20">
+                                        <img src="https://picsum.photos/id/1015/200/120" alt="日常小记" className="mx-auto mb-4 rounded-lg"/>
+                                        <h2 className="text-xl font-bold mb-2">暂无表情日志</h2>
+                                        <p className="text-gray-600 mb-6">点亮心情，创造生活精彩回忆，开始记录你的第一条表情日志吧！</p>
+                                        <button 
+                                            onClick={() => setShowAddModal(true)}
+                                            className="bg-orange-400 text-white px-6 py-2 rounded hover:bg-orange-500"
+                                        >
+                                            📝 立即添加日志
+                                        </button>
+                                    </div>
+                                </main>
+                                
+                                <aside className="w-64 ml-8">
+                                    <div className="bg-white rounded-lg shadow p-4">
+                                        <h3 className="font-medium mb-4">情绪统计</h3>
+                                        <div className="space-y-2">
+                                            <div className="text-sm text-gray-600 mb-2">表情动态排名</div>
+                                            {moodStats.map((mood, index) => (
+                                                <div key={index} className="flex items-center justify-between">
+                                                    <div className="flex items-center">
+                                                        <span className="mr-2">{mood.emoji}</span>
+                                                        <span className="text-sm">{mood.name}</span>
+                                                    </div>
+                                                    <span className="text-sm text-gray-500">{mood.count}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        
+                                        <div className="mt-6">
+                                            <div className="text-sm text-gray-600 mb-2">本周情绪趋势</div>
+                                            <div className="bg-gray-50 h-32 rounded flex items-center justify-center">
+                                                <div className="text-gray-400 text-2xl">📊 📈 📉 📊 📈 📉 📊</div>
+                                            </div>
+                                            <div className="text-right mt-2">
+                                                <a href="#" className="text-blue-500 text-sm">查看详细统计趋势 →</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </aside>
+                            </div>
+                        </div>
+                        
+                        <footer className="bg-white border-t mt-auto">
+                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                                <div className="flex justify-between items-center text-sm text-gray-500">
+                                    <div className="flex items-center space-x-2">
+                                        <span>🎨 主题切换</span>
+                                        <div className="flex space-x-1">
+                                            <div className="w-4 h-4 bg-yellow-300 rounded-full"></div>
+                                            <div className="w-4 h-4 bg-green-300 rounded-full"></div>
+                                            <div className="w-4 h-4 bg-blue-300 rounded-full"></div>
+                                            <div className="w-4 h-4 bg-purple-300 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div>© 2024 表情日志应用，版本 v1.0.0</div>
+                                    <div className="flex space-x-4">
+                                        <a href="#" className="hover:text-gray-700">关于我们</a>
+                                        <a href="#" className="hover:text-gray-700">使用条款</a>
+                                        <a href="#" className="hover:text-gray-700">隐私政策</a>
+                                        <a href="#" className="hover:text-gray-700">反馈建议</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                );
+            }
+            
+            return (
+                <div className="min-h-screen bg-gray-100">
+                    <header className="bg-white shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                <div className="flex items-center">
+                                    <div className="bg-orange-500 text-white p-2 rounded mr-3">📝</div>
+                                    <span className="text-lg font-medium">表情日志</span>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-lg font-bold">特色主题表情日志</span>
+                                    <div className="text-sm text-gray-500">每天记录心情，记录美好生活</div>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <button 
+                                        onClick={() => setShowAddModal(true)}
+                                        className="bg-orange-400 text-white px-4 py-2 rounded text-sm hover:bg-orange-500"
+                                    >
+                                        📝 添加新日志
+                                    </button>
+                                    <button className="bg-green-400 text-white px-4 py-2 rounded text-sm hover:bg-green-500">
+                                        📄 导出日志
+                                    </button>
+                                    <button className="text-gray-400 hover:text-gray-600">
+                                        ❓
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <div className="bg-white border-b">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <nav className="flex space-x-8">
+                                <a href="#" className="border-b-2 border-orange-500 py-4 px-1 text-sm font-medium text-gray-900">
+                                    全部
+                                </a>
+                                <a href="#" className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    开心
+                                </a>
+                                <a href="#" className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    伤感
+                                </a>
+                                <a href="#" className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                                    愤怒
+                                </a>
+                                <a 
+                                    href="#" 
+                                    onClick={() => setCurrentView('daily')}
+                                    className="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700"
+                                >
+                                    日常小记
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex">
+                            <aside className="w-48 mr-8">
+                                <nav className="space-y-1">
+                                    <a href="#" className="bg-orange-100 text-orange-700 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                        🏠 展示页
+                                    </a>
+                                    <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                        ✏️ 编辑区
+                                    </a>
+                                    <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                        📊 统计区
+                                    </a>
+                                    <a href="#" className="text-gray-600 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                                        ❓ 解决说明
+                                    </a>
+                                </nav>
+                            </aside>
+                            
+                            <main className="flex-1">
+                                <div className="space-y-6">
+                                    {filteredLogs.map(log => (
+                                        <div key={log.id} className="bg-white rounded-lg shadow p-6">
+                                            <div className="flex items-start">
+                                                <div className="text-2xl mr-4">{log.emoji}</div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="text-sm text-gray-500">{log.date}</div>
+                                                        <div className="flex space-x-2">
+                                                            <button className="text-blue-500 hover:text-blue-700">✏️</button>
+                                                            <button className="text-red-500 hover:text-red-700">🗑️</button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-gray-900 mb-2">{log.content}</div>
+                                                    <div className="text-sm text-gray-500">{log.mood}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </main>
+                            
+                            <aside className="w-64 ml-8">
+                                <div className="bg-white rounded-lg shadow p-4">
+                                    <h3 className="font-medium mb-4">情绪统计</h3>
+                                    <div className="space-y-2">
+                                        <div className="text-sm text-gray-600 mb-2">表情动态排名</div>
+                                        {moodStats.map((mood, index) => (
+                                            <div 
+                                                key={index} 
+                                                className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-1 rounded"
+                                                onClick={() => setSelectedMood(mood.name)}
+                                            >
+                                                <div className="flex items-center">
+                                                    <span className="mr-2">{mood.emoji}</span>
+                                                    <span className="text-sm">{mood.name}</span>
+                                                </div>
+                                                <span className="text-sm text-gray-500">{mood.count}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="mt-6">
+                                        <div className="text-sm text-gray-600 mb-2">本周情绪趋势</div>
+                                        <div className="bg-gray-50 h-32 rounded flex items-center justify-center">
+                                            <div className="text-gray-400 text-2xl">📊 📈 📉 📊 📈 📉 📊</div>
+                                        </div>
+                                        <div className="text-right mt-2">
+                                            <a href="#" className="text-blue-500 text-sm">查看详细统计趋势 →</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+                    
+                    <footer className="bg-white border-t mt-auto">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                            <div className="flex justify-between items-center text-sm text-gray-500">
+                                <div className="flex items-center space-x-2">
+                                    <span>🎨 主题切换</span>
+                                    <div className="flex space-x-1">
+                                        <div className="w-4 h-4 bg-yellow-300 rounded-full"></div>
+                                        <div className="w-4 h-4 bg-green-300 rounded-full"></div>
+                                        <div className="w-4 h-4 bg-blue-300 rounded-full"></div>
+                                        <div className="w-4 h-4 bg-purple-300 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div>© 2024 表情日志应用，版本 v1.0.0</div>
+                                <div className="flex space-x-4">
+                                    <a href="#" className="hover:text-gray-700">关于我们</a>
+                                    <a href="#" className="hover:text-gray-700">使用条款</a>
+                                    <a href="#" className="hover:text-gray-700">隐私政策</a>
+                                    <a href="#" className="hover:text-gray-700">反馈建议</a>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                    
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-bold">添加新日志</h2>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                
+                                <form className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">日期</label>
+                                        <input 
+                                            type="date" 
+                                            defaultValue="2025-01-23" 
+                                            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">表情</label>
+                                        <div className="flex space-x-2">
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😊</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😭</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😘</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😊</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😍</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😡</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😮</button>
+                                            <button type="button" className="text-2xl hover:bg-gray-100 p-1 rounded">😷</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">内容</label>
+                                        <textarea 
+                                            placeholder="写下你的心情心得..."
+                                            className="w-full border border-gray-300 rounded px-3 py-2 h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option>开心</option>
+                                            <option>伤感</option>
+                                            <option>愤怒</option>
+                                            <option>惊讶</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="flex justify-end space-x-2 mt-6">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowAddModal(false)}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                        >
+                                            取消
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowAddModal(false)}
+                                            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                        >
+                                            重置
+                                        </button>
+                                        <button 
+                                            type="submit" 
+                                            className="px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500"
+                                        >
+                                            保存
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

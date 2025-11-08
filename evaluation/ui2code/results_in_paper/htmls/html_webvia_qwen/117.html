@@ -1,0 +1,559 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感音频墙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('daily');
+            const [modalOpen, setModalOpen] = useState(false);
+            const [completedCount, setCompletedCount] = useState(1);
+            const [showNotification, setShowNotification] = useState(false);
+            const [ideas, setIdeas] = useState([
+                {
+                    id: 1,
+                    title: '晨间冥想引导',
+                    content: '开启美好的一天，15分钟的晨间冥想助你找到内心平静',
+                    tags: ['冥想', '放松'],
+                    image: 'https://picsum.photos/id/237/300/200',
+                    completed: true,
+                    description: '每天早晨5分钟的冥想能够让你的头脑更加清晰，让思绪得到平静的美好，开始美好的一天',
+                    likes: 12,
+                    plays: 45
+                },
+                {
+                    id: 2,
+                    title: '高效工作节奏',
+                    content: '提升工作效率的背景音乐，持续60分钟的专注节奏',
+                    tags: ['专注', '效率'],
+                    image: 'https://picsum.photos/id/200/300/200',
+                    completed: false,
+                    description: '专注彼此此刻要干正事，用传专制练师全注意力，让我们今日更专注更高效',
+                    likes: 8,
+                    plays: 32
+                },
+                {
+                    id: 3,
+                    title: '睡前轻音乐',
+                    content: '舒缓的轻音乐帮助你快速进入梦乡，远离失眠困扰',
+                    tags: ['助眠', '舒缓'],
+                    image: 'https://picsum.photos/id/251/300/200',
+                    completed: false,
+                    description: '通过轻音乐帮助大家进入深度睡眠，每天睡前10分钟的轻音乐，给最佳的深度洞察睡眠',
+                    likes: 5,
+                    plays: 28
+                }
+            ]);
+            const [showModal, setShowModal] = useState(false);
+
+            const handleCompleteChange = (id) => {
+                setIdeas(prev => prev.map(idea => 
+                    idea.id === id ? { ...idea, completed: !idea.completed } : idea
+                ));
+            };
+
+            const handleDelete = (id) => {
+                setIdeas(prev => prev.filter(idea => idea.id !== id));
+                setShowModal(false);
+            };
+
+            const completedIdeas = ideas.filter(idea => idea.completed);
+            const totalCount = ideas.length;
+
+            const renderSidebar = () => (
+                <div className="w-48 bg-gray-50 min-h-screen">
+                    <div className="p-4">
+                        <div className="flex items-center space-x-2 mb-6">
+                            <i className="fas fa-lightbulb text-blue-500"></i>
+                            <span className="text-lg font-semibold text-gray-800">今日喜感</span>
+                        </div>
+                        
+                        <nav className="space-y-2">
+                            <button 
+                                onClick={() => setCurrentPage('daily')}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded text-sm font-medium ${
+                                    currentPage === 'daily' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <i className="fas fa-bolt text-blue-500"></i>
+                                <span>今日喜感</span>
+                            </button>
+                            
+                            <button 
+                                onClick={() => setCurrentPage('library')}
+                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded text-sm font-medium ${
+                                    currentPage === 'library' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                <i className="fas fa-music text-green-500"></i>
+                                <span>音频库</span>
+                            </button>
+                            
+                            <button className="w-full flex items-center space-x-3 px-3 py-2 rounded text-sm font-medium text-gray-600 hover:bg-gray-100">
+                                <i className="fas fa-chart-bar text-purple-500"></i>
+                                <span>统计面板</span>
+                            </button>
+                            
+                            <button className="w-full flex items-center space-x-3 px-3 py-2 rounded text-sm font-medium text-gray-600 hover:bg-gray-100">
+                                <i className="fas fa-question-circle text-orange-500"></i>
+                                <span>帮助中心</span>
+                            </button>
+                            
+                            <button className="w-full flex items-center space-x-3 px-3 py-2 rounded text-sm font-medium text-gray-600 hover:bg-gray-100">
+                                <i className="fas fa-cog text-gray-500"></i>
+                                <span>设置</span>
+                            </button>
+                        </nav>
+                    </div>
+                    
+                    <div className="absolute bottom-4 left-4 bg-white border border-gray-200 rounded p-3 text-sm">
+                        <div className="flex items-center space-x-2 mb-1">
+                            <i className="fas fa-user-circle text-blue-500"></i>
+                            <span>个人账户</span>
+                        </div>
+                        <div className="text-gray-600">
+                            <span className="text-blue-600 font-medium">创意爱好者</span>
+                            <br />
+                            累计收藏 3 条灵感
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderNotification = () => {
+                if (!showNotification) return null;
+                
+                return (
+                    <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+                        <i className="fas fa-check-circle mr-2"></i>
+                        上传成功！已新增一条内容到内容池
+                    </div>
+                );
+            };
+
+            const renderMain = () => {
+                const tabs = [
+                    { key: 'all', label: '全部灵感', icon: '⚡', bgColor: 'bg-blue-100 text-blue-600' },
+                    { key: 'completed', label: '已完成', icon: '', bgColor: 'bg-green-100 text-green-600' },
+                    { key: 'uncompleted', label: '未完成', icon: '▶', bgColor: 'bg-orange-100 text-orange-600' },
+                    { key: 'favorites', label: '收藏', icon: '⭐', bgColor: 'bg-yellow-100 text-yellow-600' }
+                ];
+
+                const filteredIdeas = ideas.filter(idea => {
+                    if (currentPage === 'library') return false;
+                    if (currentPage === 'completed') return idea.completed;
+                    if (currentPage === 'uncompleted') return !idea.completed;
+                    if (currentPage === 'favorites') return idea.completed;
+                    return true;
+                });
+
+                const filteredCount = filteredIdeas.length;
+
+                return (
+                    <div className="flex-1 flex">
+                        <div className="flex-1 p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">每日灵感音频墙</h2>
+                            <p className="text-gray-500 mb-6">欢迎来到每日灵感音频墙，每天一条新灵感，让声音激发无限创意！</p>
+                            
+                            {/* Tabs */}
+                            <div className="flex space-x-2 mb-6">
+                                {tabs.map(tab => (
+                                    <button
+                                        key={tab.key}
+                                        onClick={() => setCurrentPage(tab.key === '-all' ? 'daily' : tab.key)}
+                                        className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                                            currentPage === tab.key ? tab.bgColor : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {tab.icon && (
+                                            <i className={`mr-1 ${tab.icon === '⚪' ? 'fas fa-book' : ''}`}></i>
+                                        )}
+                                        <span>{tab.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                    所有灵感 ({filteredCount} 条)
+                                </h3>
+                                <button
+                                    onClick={() => setModalOpen(true)}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 flex items-center space-x-2"
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    <span>添加新灵感</span>
+                                </button>
+                            </div>
+
+                            {/* Ideas List */}
+                            <div className="space-y-6">
+                                {filteredIdeas.map(idea => (
+                                    <div key={idea.id} className="bg-white rounded-lg shadow-sm p-6">
+                                        <div className="flex space-x-4">
+                                            <img 
+                                                src={idea.image}
+                                                alt={idea.title}
+                                                className="w-48 h-32 object-cover rounded-lg flex-shrink-0"
+                                            />
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h4 className="text-lg font-semibold text-gray-800">{idea.title}</h4>
+                                                    <span className={`px-2 py-1 text-xs font-medium rounded ${
+                                                        idea.completed ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
+                                                    }`}>
+                                                        {idea.completed ? '已完成' : '未完成'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-600 mb-3">{idea.content}</p>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex space-x-2">
+                                                        {idea.tags.map(tag => (
+                                                            <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                                                                {tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                                        <div className="flex items-center space-x-1">
+                                                            <i className="fas fa-heart text-red-500"></i>
+                                                            <span>{idea.likes} 次点赞</span>
+                                                        </div>
+                                                        <div className="flex items-center space-x-1">
+                                                            <i className="fas fa-play text-blue-500"></i>
+                                                            <span>{idea.plays} 次播放</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => handleCompleteChange(idea.id)}
+                                                            className="text-gray-400 hover:text-red-500"
+                                                        >
+                                                            <i className={idea.completed ? 'fas fa-times' : 'fas fa-heart'}></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="w-80 bg-gray-50 min-h-screen p-6">
+                            <div className="flex items-center space-x-2 mb-4">
+                                <i className="fas fa-chart-bar text-purple-500"></i>
+                                <span className="text-lg font-semibold text-gray-800">今日统计</span>
+                            </div>
+                            
+                            {/* Statistics Cards */}
+                            <div className="space-y-4 mb-6">
+                                <div className="bg-blue-500 text-white p-4 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xl font-bold">5</div>
+                                            <div className="text-sm opacity-90">今日上传</div>
+                                        </div>
+                                        <i className="fas fa-upload opacity-80"></i>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-yellow-500 text-white p-4 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xl font-bold">120</div>
+                                            <div className="text-sm opacity-90">播放次数</div>
+                                        </div>
+                                        <i className="fas fa-play opacity-80"></i>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-green-500 text-white p-4 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xl font-bold">85%</div>
+                                            <div className="text-sm opacity-90">点赞率</div>
+                                        </div>
+                                        <i className="fas fa-thumbs-up opacity-80"></i>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-purple-500 text-white p-4 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xl font-bold">62%</div>
+                                            <div className="text-sm opacity-90">完成率</div>
+                                        </div>
+                                        <i className="fas fa-check opacity-80"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Category Distribution */}
+                            <div className="mb-6">
+                                <h4 className="font-semibold text-gray-800 mb-3">分类分布</h4>
+                                <p className="text-sm text-gray-500">科学可视化统计，洞察灵感动态</p>
+                            </div>
+                            
+                            {/* Recent Updates */}
+                            <div>
+                                <h4 className="font-semibold text-gray-800 mb-3">最新更新</h4>
+                                <div className="space-y-3">
+                                    <div className="bg-gray-100 p-3 rounded-lg">
+                                        <div className="flex items-start space-x-3">
+                                            <img src="https://picsum.photos/id/456/24/24" alt="重驰工作复音" className="w-6 h-6 rounded" />
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-800">新增"深度工作背景音乐"</div>
+                                                <div className="text-xs text-gray-500">2小时前</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-100 p-3 rounded-lg">
+                                        <div className="flex items-start space-x-3">
+                                            <img src="https://picsum.photos/id/789/24/24" alt="文案心灵感" className="w-6 h-6 rounded" />
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-800">完成"晨间冥想引用"</div>
+                                                <div className="text-xs text-gray-500">5小时前</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-100 p-3 rounded-lg">
+                                        <div className="flex items-start space-x-3">
+                                            <img src="https://picsum.photos/id/123/24/24" alt="创意激发音频" className="w-6 h-6 rounded" />
+                                            <div>
+                                                <div className="text-sm font-medium text-gray-800">收藏"创意激发音频"</div>
+                                                <div className="text-xs text-gray-500">昨天</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderLibraryTab = () => (
+                <div className="flex-1 p-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-2">今日灵感音频墙</h2>
+                    <p className="text-gray-500 mb-6">欢迎来到日常灵感音频墙，每天一条新灵感，让声音激励无限创意！</p>
+                    
+                    <div className="flex space-x-2 mb-6">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setCurrentPage(tab.key === 'all' ? 'daily' : tab.key)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                                    currentPage === tab.key ? tab.bgColor : 'text-gray-600 hover:bg-gray-100'
+                                }`}
+                            >
+                                {tab.icon && (
+                                    <i className={`mr-1 ${tab.icon === '⚪' ? 'fas fa-book' : ''}`}></i>
+                                )}
+                                <span>{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="space-y-6">
+                        {ideas.map(idea => (
+                            <div key={idea.id} className="bg-white rounded-lg shadow-sm p-6">
+                                <div className="flex space-x-4">
+                                    <img 
+                                        src={idea.image}
+                                        alt={idea.title}
+                                        className="w-48 h-32 object-cover rounded-lg flex-shrink-0"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="text-lg font-semibold text-gray-800">{idea.title}</h4>
+                                            <span className={`px-2 py-1 text-xs font-medium rounded ${
+                                                idea.completed ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
+                                            }`}>
+                                                {idea.completed ? '已完成' : '未完成'}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-600 mb-3">{idea.content}</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex space-x-2">
+                                                {idea.tags.map(tag => (
+                                                    <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                                <div className="flex items-center space-x-1">
+                                                    <i className="fas fa-heart text-red-500"></i>
+                                                    <span>{idea.likes} 次点赞</span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                    <i className="fas fa-play text-blue-500"></i>
+                                                    <span>{idea.plays} 次播放</span>
+                                                </div>
+                                                <i className="fas fa-bookmark text-yellow-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {renderSidebar()}
+                    
+                    <div className="flex flex-1 bg-gray-50">
+                        {currentPage === 'library' ? renderLibraryTab() : renderMain()}
+                    </div>
+
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="fixed bottom-6 right-6 bg-blue-500 text-white w-12 h-12 rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center"
+                    >
+                        <i className="fas fa-plus text-lg"></i>
+                    </button>
+
+                    {renderNotification()}
+                    
+                    {modalOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-800">添加新灵感</h3>
+                                    <button
+                                        onClick={() => {
+                                            setModalOpen(false);
+                                            setShowModal(false);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            灵感标题 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="输入灵感标题"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            音频链接 <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            placeholder="输入音频链接"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            标签选择
+                                        </label>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['冥想', '放松', '专注', '效率', '助眠', '舒缓', '创意', '动力'].map(tag => (
+                                                <button key={tag} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-100">
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">灵感描述</label>
+                                        <textarea
+                                            placeholder="输入灵感描述"
+                                            rows="4"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        ></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">封面图片预览</label>
+                                        <img 
+                                            src="https://picsum.photos/id/456/400/200"
+                                            alt="封面预览"
+                                            className="w-full h-40 object-cover rounded-lg border"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex space-x-3 mt-6">
+                                    <button
+                                        onClick={() => {
+                                            setModalOpen(false);
+                                            setShowModal(false);
+                                        }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                                        保存灵感
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Confirmation Dialog */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg p-6 w-80">
+                                <div className="flex items-center space-x-3 mb-4">
+                                    <i className="fas fa-exclamation-triangle text-red-500"></i>
+                                    <h3 className="text-lg font-semibold text-gray-800">确认删除</h3>
+                                </div>
+                                <p className="text-gray-600 mb-6">您确定要删除这条灵感内容吗？此操作无法撤销。</p>
+                                <div className="flex space-x-3">
+                                    <button
+                                        onClick={() => {
+                                            handleDelete(1);
+                                            setShowModal(false);
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                    >
+                                        确认删除
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            setShowNotification(true);
+                                        }}
+                                        className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                    >
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

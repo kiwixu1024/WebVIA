@@ -1,0 +1,399 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线英语背单词</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans SC', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function App() {
+            const [currentView, setCurrentView] = useState('wordlist');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [filterType, setFilterType] = useState('All');
+            const [difficultyRange, setDifficultyRange] = useState([0, 3]);
+            const [difficultyValue, setDifficultyValue] = useState(3);
+            
+            const [words] = useState([
+                {
+                    id: 1,
+                    english: 'apple',
+                    chinese: '苹果',
+                    difficulty: 'Easy',
+                    level: 0,
+                    learned: false,
+                    image: 'https://picsum.photos/id/1080/300/150'
+                },
+                {
+                    id: 2,
+                    english: 'journey',
+                    chinese: '旅程',
+                    difficulty: 'Medium',
+                    level: 1,
+                    learned: false,
+                    image: 'https://picsum.photos/id/1081/300/150'
+                },
+                {
+                    id: 3,
+                    english: 'meticulous',
+                    chinese: '一丝不苟的',
+                    difficulty: 'Hard',
+                    level: 3,
+                    learned: true,
+                    image: 'https://picsum.photos/id/1082/300/150'
+                }
+            ]);
+            
+            const filteredWords = words.filter(word => {
+                if (filterType === '已学') return word.learned;
+                if (filterType === '未学') return !word.learned;
+                return true;
+            }).filter(word => {
+                return word.level <= difficultyValue;
+            });
+            
+            const getDifficultyColor = (difficulty) => {
+                switch(difficulty) {
+                    case 'Easy': return 'text-green-600 bg-green-100';
+                    case 'Medium': return 'text-yellow-600 bg-yellow-100';
+                    case 'Hard': return 'text-red-600 bg-red-100';
+                    default: return 'text-gray-600 bg-gray-100';
+                }
+            };
+            
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200 px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-4 h-4 bg-blue-500 rounded-sm"></div>
+                                <span className="text-lg font-medium text-gray-900">在线英语背单词</span>
+                            </div>
+                            <div className="flex space-x-6 text-sm text-blue-600">
+                                <button 
+                                    className={currentView === 'records' ? 'text-blue-800 font-medium' : ''}
+                                    onClick={() => setCurrentView('records')}
+                                >
+                                    今日检查
+                                </button>
+                                <button 
+                                    className={currentView === 'practice' ? 'text-blue-800 font-medium' : ''}
+                                    onClick={() => setCurrentView('practice')}
+                                >
+                                    学习记录
+                                </button>
+                                <button 
+                                    className={currentView === 'stats' ? 'text-blue-800 font-medium' : ''}
+                                    onClick={() => setCurrentView('stats')}
+                                >
+                                    统计报告
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className="w-64 bg-white border-r border-gray-200 min-h-screen">
+                            <div className="p-4">
+                                <div className="space-y-2">
+                                    <div className="flex items-center space-x-2 text-gray-700 py-2 px-3 hover:bg-gray-100 rounded cursor-pointer">
+                                        <i className="fas fa-list text-sm"></i>
+                                        <span className="text-sm">单词列表</span>
+                                    </div>
+                                    <div 
+                                        className="flex items-center space-x-2 text-gray-700 py-2 px-3 hover:bg-gray-100 rounded cursor-pointer"
+                                        onClick={() => setShowAddModal(true)}
+                                    >
+                                        <i className="fas fa-plus text-sm"></i>
+                                        <span className="text-sm">添加新单词</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-700 py-2 px-3 hover:bg-gray-100 rounded cursor-pointer">
+                                        <i className="fas fa-chart-bar text-sm"></i>
+                                        <span className="text-sm">学习统计</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2 text-gray-700 py-2 px-3 hover:bg-gray-100 rounded cursor-pointer">
+                                        <i className="fas fa-question-circle text-sm"></i>
+                                        <span className="text-sm">帮助中心</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {/* Top Controls */}
+                            <div className="flex items-center justify-between mb-6">
+                                <button 
+                                    className="bg-blue-500 text-white px-4 py-2 rounded text-sm flex items-center space-x-2"
+                                    onClick={() => setShowAddModal(true)}
+                                >
+                                    <i className="fas fa-plus"></i>
+                                    <span>添加单词</span>
+                                </button>
+                                
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-sm text-gray-600">筛选：</span>
+                                    <select 
+                                        className="border border-gray-300 rounded px-3 py-1 text-sm"
+                                        value={filterType}
+                                        onChange={(e) => setFilterType(e.target.value)}
+                                    >
+                                        <option value="All">All</option>
+                                        <option value="已学">已学</option>
+                                        <option value="未学">未学</option>
+                                    </select>
+                                    
+                                    <span className="text-sm text-gray-600">难度：</span>
+                                    <div className="flex items-center space-x-2">
+                                        <input 
+                                            type="range" 
+                                            min="0" 
+                                            max="3" 
+                                            value={difficultyValue}
+                                            onChange={(e) => setDifficultyValue(parseInt(e.target.value))}
+                                            className="w-20"
+                                        />
+                                        <span className="text-sm text-gray-600 min-w-[40px]">
+                                            {difficultyValue === 0 ? 'Easy' : difficultyValue === 1 ? 'Medium' : 'Hard'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Filter Status */}
+                            <div className="mb-4 text-sm text-gray-600">
+                                当前筛选: <span className="text-blue-600">{filterType === 'All' ? '全部单词' : filterType === '已学' ? '已学单词' : '未学单词'}</span> / <span className="text-blue-600">全部难度</span>
+                            </div>
+                            
+                            {/* Word Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {filteredWords.map(word => (
+                                    <div key={word.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="relative">
+                                            <img 
+                                                src={word.image} 
+                                                alt={word.english} 
+                                                className="w-full h-32 object-cover"
+                                            />
+                                            <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                                                <i className="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-medium text-gray-900 mb-1">{word.english}</h3>
+                                            <p className="text-sm text-gray-600 mb-3">{word.chinese}</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(word.difficulty)}`}>
+                                                    {word.difficulty}
+                                                </span>
+                                                <div className="flex items-center space-x-2 text-xs text-gray-500">
+                                                    <span>来学习</span>
+                                                    <i className="fas fa-bookmark"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        {/* Right Sidebar - Stats */}
+                        <div className="w-72 bg-white border-l border-gray-200 p-6">
+                            <h3 className="font-medium text-gray-900 mb-4">学习统计</h3>
+                            
+                            <div className="mb-6">
+                                <div className="text-sm text-gray-600 mb-2">今日已背单词</div>
+                                <div className="relative w-24 h-24 mx-auto mb-2">
+                                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="none" className="text-gray-200"/>
+                                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="none" strokeDasharray="251.2" strokeDashoffset="167.5" className="text-blue-500"/>
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-2xl font-bold text-blue-500">33%</span>
+                                    </div>
+                                </div>
+                                <div className="text-center text-xs text-gray-500">1/3</div>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <div className="text-sm text-gray-600 mb-3">累计学习</div>
+                                <div className="flex justify-between items-end space-x-1 h-20">
+                                    <div className="bg-blue-400 w-6 h-12 rounded-sm"></div>
+                                    <div className="bg-blue-400 w-6 h-8 rounded-sm"></div>
+                                    <div className="bg-blue-500 w-6 h-16 rounded-sm"></div>
+                                    <div className="bg-blue-400 w-6 h-10 rounded-sm"></div>
+                                    <div className="bg-blue-400 w-6 h-14 rounded-sm"></div>
+                                </div>
+                                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>一</span>
+                                    <span>二</span>
+                                    <span>三</span>
+                                    <span>四</span>
+                                    <span>五</span>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-2">本周学习: 5天</div>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <div className="text-sm text-gray-600 mb-3">难度分布</div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span>Easy</span>
+                                        </div>
+                                        <span>1个</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                                            <span>Medium</span>
+                                        </div>
+                                        <span>1个</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                            <span>Hard</span>
+                                        </div>
+                                        <span>1个</span>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
+                                    <div className="bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 h-2 rounded-full"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div className="text-sm text-gray-600 mb-2">熟练度正确率</div>
+                                <div className="text-2xl font-bold text-orange-500 mb-1">87%</div>
+                                <div className="text-xs text-green-600 flex items-center">
+                                    <i className="fas fa-arrow-up mr-1"></i>
+                                    较上周提升6%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Add Word Modal */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-lg shadow-lg w-96 p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-medium text-gray-900">添加新单词</h3>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">英文单词</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入英文单词"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">中文意义</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="输入中文意义"
+                                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">难度</label>
+                                        <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="Easy">Easy</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Hard">Hard</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                        <input type="checkbox" id="learned" className="rounded" />
+                                        <label htmlFor="learned" className="text-sm text-gray-700">标记为已学习</label>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 mt-6">
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+                                    >
+                                        取消
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowAddModal(false)}
+                                        className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                                    >
+                                        保存
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Bottom Features */}
+                    <div className="bg-white border-t border-gray-200 py-8">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-3">操作指引</h4>
+                                    <ul className="text-sm text-gray-600 space-y-2">
+                                        <li>• 点击单词卡片上的编辑图标可修改文及各类信息</li>
+                                        <li>• 点击删除图标可删除单词</li>
+                                        <li>• 在"增加"单元添加新单词可以同时添加多个</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-3">特色功能</h4>
+                                    <ul className="text-sm text-gray-600 space-y-2">
+                                        <li className="flex items-center"><i className="fas fa-star text-yellow-500 mr-2"></i>支持发音真听朗读函数增强学习体验</li>
+                                        <li className="flex items-center"><i className="fas fa-star text-yellow-500 mr-2"></i>智能的学习遗忘算法</li>
+                                        <li className="flex items-center"><i className="fas fa-star text-yellow-500 mr-2"></i>支持的起草文循环分类</li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <div className="text-blue-600 text-sm mb-2">
+                                        <i className="fas fa-info-circle mr-1"></i>
+                                        Tip: 长文件并升级，记忆效果音频如初30%!
+                                    </div>
+                                    <div className="text-orange-600 text-sm">
+                                        出线感受时新字备多分载总器性收EASY
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

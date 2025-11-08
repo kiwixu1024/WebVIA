@@ -1,0 +1,575 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物成长相册</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.0.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.0.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body { 
+            background-color: #e0f2e7; 
+            min-height: 100vh; 
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [currentView, setCurrentView] = useState('home');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [tempPhoto, setTempPhoto] = useState(null);
+
+            const photos = [
+                {
+                    id: 1,
+                    title: '第一次来到新家',
+                    date: '2023-01-15',
+                    description: '小猫咪刚到家时，胆小又可爱，一直躲在沙发底下的。',
+                    stage: '初识萌宠',
+                    image: 'https://picsum.photos/id/237/400/300'
+                },
+                {
+                    id: 2,
+                    title: '学会使用猫砂',
+                    date: '2023-02-01',
+                    description: '经过一周的训练，小咪终于学会正确使用猫砂了！',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/1084/400/300'
+                },
+                {
+                    id: 3,
+                    title: '第一次打疫苗',
+                    date: '2023-03-10',
+                    description: '今天带小咪去宠物医院打了第一针疫苗，很勇敢没有哭闹。',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/1021/400/300'
+                },
+                {
+                    id: 4,
+                    title: '学会爬猫架',
+                    date: '2023-04-20',
+                    description: '小咪的攀爬技能突飞猛进，新买的猫架成了最爱！',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/1077/400/300'
+                },
+                {
+                    id: 5,
+                    title: '第一次户外散步',
+                    date: '2023-05-15',
+                    description: '尝试用牵引绳带小咪出门散步，对一切都充满好奇。',
+                    stage: '成长之路',
+                    image: 'https://picsum.photos/id/200/400/300'
+                },
+                {
+                    id: 6,
+                    title: '一周岁生日',
+                    date: '2023-07-10',
+                    description: '给小咪庆祝一周岁生日，准备了猫咪蛋糕和新玩具。',
+                    stage: '成年时光',
+                    image: 'https://picsum.photos/id/1062/400/300'
+                }
+            ];
+
+            const stages = [
+                { name: '初识萌宠', icon: 'initial', color: '#fb8072' },
+                { name: '成长之路', icon: 'booming', color: '#4facfe' },
+                { name: '成年时光', icon: 'adult', color: '#43db97' }
+            ];
+
+            const handleSearch = (e) => {
+                if (e.key === 'Enter' || e.type === 'click') {
+                    setShowModal(false);
+                    setSearchTerm(e.target.value);
+                }
+            };
+
+            const handleModalSubmit = () => {
+                setShowModal(false);
+            };
+
+            const handleModalCancel = () => {
+                setShowModal(false);
+                setTempPhoto(null);
+            };
+
+            const handleStageClick = (stageName) => {
+                setCurrentView('home');
+            };
+
+            const getRenderedPhotos = () => {
+                if (searchTerm === '测试相册') {
+                    return (
+                        <div className="text-center py-20">
+                            <div className="text-gray-400 mb-4">
+                                <i className="fas fa-images text-6xl"></i>
+                            </div>
+                            <h3 className="text-xl text-gray-600 font-medium mb-2">暂无相册记录</h3>
+                            <p className="text-gray-500 mb-6">点击"添加记录"按钮开始创建您的宠物相册</p>
+                            <button 
+                                onClick={() => {
+                                    setShowModal(true);
+                                    setCurrentView('home');
+                                }}
+                                className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-full text-sm"
+                            >
+                                开始添加
+                            </button>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="grid grid-cols-3 gap-6">
+                        {photos.map((photo) => (
+                            <div key={photo.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                <div className="relative">
+                                    <img src={photo.image} alt={photo.title} className="w-full h-48 object-cover" />
+                                    <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm">
+                                        {photo.stage}
+                                    </div>
+                                    <div className="absolute bottom-2 right-2 bg-white bg-opacity-90 text-gray-700 px-2 py-1 rounded text-sm">
+                                        {photo.date}
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-medium text-gray-900 mb-2">{photo.title}</h3>
+                                    <p className="text-sm text-red-500">{photo.description}</p>
+                                    <div className="flex gap-2 mt-3">
+                                        <button 
+                                            onClick={() => handleStageClick(photo.stage)}
+                                            className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                                        >
+                                            编辑
+                                        </button>
+                                        <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                            删除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            const getStatistics = () => {
+                const stageStats = {
+                    '初识萌宠': 2,
+                    '成长之路': 3,
+                    '成年时光': 1
+                };
+
+                const monthStats = {
+                    '1月': 1, '2月': 1, '3月': 1, '4月': 1,
+                    '5月': 1, '7月': 1
+                };
+
+                return {
+                    totalPhotos: 6,
+                    stageStats,
+                    monthStats
+                };
+            };
+
+            const renderHome = () => (
+                <div>
+                    <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <i className="fas fa-star text-yellow-600"></i>
+                            <h3 className="font-medium text-gray-900">主题特色</h3>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="text-center">
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <i className="fas fa-upload text-red-600"></i>
+                                    </div>
+                                    <h4 className="font-medium text-gray-900 mb-1">一键管理</h4>
+                                    <p className="text-xs text-gray-600">快速添加/编辑/删除所有成长记录</p>
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <i className="fas fa-chart-bar text-blue-600"></i>
+                                    </div>
+                                    <h4 className="font-medium text-gray-900 mb-1">多维统计</h4>
+                                    <p className="text-xs text-gray-600">自动生成阶段、月份分布图表</p>
+                                </div>
+                            </div>
+                            <div className="text-center">
+                                <div className="bg-white rounded-lg p-4 shadow-sm">
+                                    <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <i className="fas fa-heart text-pink-600"></i>
+                                    </div>
+                                    <h4 className="font-medium text-gray-900 mb-1">温馨回顾</h4>
+                                    <p className="text-xs text-gray-600">随时翻阅，定格最萌瞬间</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {getRenderedPhotos()}
+                </div>
+            );
+
+            const renderReport = () => {
+                const stats = getStatistics();
+                return (
+                    <div>
+                        <div className="bg-white border rounded-lg p-6 mb-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <i className="fas fa-chart-bar text-blue-600"></i>
+                                <h3 className="text-lg font-medium text-gray-900">统计报告</h3>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">相册总数</span>
+                                    <span className="text-2xl font-bold text-blue-600">{stats.totalPhotos}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="bg-white rounded-lg p-4">
+                                <h4 className="font-medium text-gray-900 mb-4">按阶段分布</h4>
+                                <div className="space-y-3">
+                                    {Object.entries(stats.stageStats).map(([stage, count]) => (
+                                        <div key={stage} className="flex items-center gap-3">
+                                            <div className="w-20 text-sm">{stage}</div>
+                                            <div className="flex-1">
+                                                <div className="flex">
+                                                    {stage === '初识萌宠' && (
+                                                        <div className="w-20 h-2 bg-pink-500 rounded-r"></div>
+                                                    )}
+                                                    {stage === '成长之路' && (
+                                                        <div className="w-20 h-3 bg-pink-500 rounded-r mr-3"></div>
+                                                    )}
+                                                    {stage === '成年时光' && (
+                                                        <div className="w-20 h-3 bg-pink-500 rounded-r mr-3"></div>
+                                                    )}
+                                                </div>
+                                                <div className="text-right text-sm text-gray-600">{count} 张</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4">
+                                <h4 className="font-medium text-gray-900 mb-4">按月份分布</h4>
+                                <div className="space-y-2">
+                                    {['10月', '11月', '12月', '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月'].map(month => (
+                                        <div key={month} className="flex items-center gap-2">
+                                            <div className={`w-3 h-3 rounded-full ${month === '1月' ? 'bg-blue-500' : 'bg-gray-200'}`}></div>
+                                            <span className="text-sm text-gray-600">{month}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg p-4">
+                                <h4 className="font-medium text-gray-900 mb-4">最近添加</h4>
+                                <div className="space-y-3">
+                                    {photos.map(photo => (
+                                        <div key={photo.id} className="text-sm">
+                                            <div className="font-medium">{photo.title}</div>
+                                            <div className="text-red-500">{photo.date}</div>
+                                            <span className="text-blue-500">{photo.stage}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderHelp = () => {
+                const steps = [
+                    {
+                        title: '如何添加照片？',
+                        icon: 'upload',
+                        info: '点击顶部导航栏的"添加记录"按钮，在弹出的表单中填写相关信息并上传照片。您可以选择合适的成长阶段分类，并填写拍摄日期和描述，以使日后续回。添加成功后，新的记录将自动显示在相册首页，并更新统计数据。'
+                    },
+                    {
+                        title: '如何编辑和删除记录？',
+                        icon: 'edit',
+                        info: '在每张相册卡片的底部，您可以在找到"编辑"和"删除"按钮。点击"编辑"按钮打开侧边编辑面板，修改后点击保存即可。点击"删除"按钮将弹出确认对话框，确认后该记录将被永久删除，请谨慎操作。'
+                    },
+                    {
+                        title: '如何查看统计和筛选？',
+                        icon: 'stats',
+                        info: '点击顶部导航栏的"统计报告"标签，查看按阶段和月份分布的图表。点击图表中的条形可以快速筛选对应阶段或月份的照片，您也可以使用左边侧栏的阶段筛选筛选栏，或使用上方的搜索框。'
+                    },
+                    {
+                        title: '如何创建新的成长阶段？',
+                        icon: 'add',
+                        info: '在左侧侧栏底部，点击"新增阶段"按钮，输入新阶段名称并确认即可添加。新增的阶段将立即显示在侧边栏列表中，您可以在添加或编辑记录时选择使用这个新阶段。'
+                    }
+                ];
+
+                return (
+                    <div>
+                        <div className="bg-white rounded-lg p-6 mb-6">
+                            <div className="flex items-center gap-2 mb-6">
+                                <i className="fas fa-question-circle text-purple-600"></i>
+                                <h3 className="text-lg font-medium text-gray-900">帮助说明</h3>
+                            </div>
+                            <div className="space-y-4">
+                                {steps.map((item, index) => (
+                                    <div key={index} className="border-l-4 border-purple-500 pl-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-base">{item.icon}</span>
+                                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                                        </div>
+                                        <div className={`${item.icon === 'upload' ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'}`} 
+                                             className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 flex-shrink-0">
+                                            <i className={item.icon === 'upload' ? 'fas fa-cloud-upload-alt text-red-600' : 'fas fa-edit text-blue-600'}></i>
+                                        </div>
+                                        <p className="text-gray-700 text-sm">{item.info}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderModal = () => (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-medium text-gray-900">添加新记录</h3>
+                            <button onClick={handleModalCancel} className="text-gray-500 hover:text-gray-700">
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">照片标题</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="输入照片标题"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">拍摄日期</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="mm/dd/yyyy"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">成长阶段</label>
+                                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    {stages.map(stage => (
+                                        <option key={stage.name} value={stage.name}>{stage.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">照片 URL</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="请输入照片 URL"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">照片描述</label>
+                                <textarea 
+                                    placeholder="输入照片描述"
+                                    rows="4"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                ></textarea>
+                            </div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button 
+                                    onClick={handleModalCancel}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                >
+                                    取消
+                                </button>
+                                <button 
+                                    onClick={handleModalSubmit}
+                                    className="flex-1 px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600"
+                                >
+                                    添加
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-blue-100">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm border-b border-blue-100">
+                        <div className="max-w-7xl mx-auto px-6 py-4">
+                            <div className="flex justify-between items-center h-full">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-pink-500 text-white w-8 h-8 rounded-full flex items-center justify-center">
+                                        <i className="fas fa-heart"></i>
+                                    </div>
+                                    <h1 className="text-xl font-bold text-gray-900">宠物成长相册</h1>
+                                </div>
+                                <nav className="flex items-center gap-6">
+                                    <button 
+                                        onClick={() => {setCurrentView('home'); setShowModal(false);}}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                            currentView === 'home' ? 'bg-pink-500 text-white' : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        相册首页
+                                    </button>
+                                    <button 
+                                        onClick={() => {setCurrentView('home'); setShowModal(true);}}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                            currentView === 'add' ? 'bg-pink-500 text-white' : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        添加记录
+                                    </button>
+                                    <button 
+                                        onClick={() => {setCurrentView('report'); setShowModal(false);}}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                            currentView === 'report' ? 'bg-pink-500 text-white' : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        统计报告
+                                    </button>
+                                    <button 
+                                        onClick={() => {setCurrentView('help'); setShowModal(false);}}
+                                        className={`px-4 py-2 rounded-md text-sm font-medium ${
+                                            currentView === 'help' ? 'bg-pink-500 text-white' : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        帮助说明
+                                    </button>
+                                </nav>
+                                <div className="flex items-center gap-2">
+                                    <i className="fas fa-search text-gray-400"></i>
+                                    <div className="relative">
+                                        <input 
+                                            type="text" 
+                                            placeholder="搜索相册..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onKeyPress={handleSearch}
+                                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                        />
+                                    </div>
+                                    <div className="w-10 h-10 bg-gray-300 rounded-full">
+                                        <i className="fas fa-user text-gray-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Sidebar */}
+                    <aside className="w-72 bg-white border-l border-gray-200 min-h-screen">
+                        <div className="p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <i className="fas fa-calendar-alt text-gray-600"></i>
+                                <h3 className="font-medium text-gray-900">成长阶段</h3>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-6">按照不同阶段浏览您的宠物成长瞬间</p>
+                            <div className="space-y-2">
+                                {stages.map(stage => (
+                                    <div 
+                                        key={stage.name}
+                                        onClick={() => handleStageClick(stage.name)}
+                                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                                            currentView === 'home' && stage.name === '成长之路' ? 'bg-yellow-100 border border-yellow-200' : 'hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                                            stage.name === '成长之路' && currentView === 'home' ? 'border-yellow-400 bg-yellow-400' : 'border-gray-300'
+                                        }`}>
+                                            {stage.icon === 'initial' && <i className="fas fa-home text-xs"></i>}
+                                            {stage.icon === 'booming' && <i className="fas fa-chart-line text-xs"></i>}
+                                            {stage.icon === 'adult' && <i className="fas fa-star text-xs"></i>}
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700">{stage.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            
+                            <div className="mt-8">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <i className="fas fa-lightbulb text-yellow-500"></i>
+                                    <span className="font-medium text-gray-900">小贴士</span>
+                                </div>
+                                <p className="text-xs text-gray-600 leading-relaxed">
+                                    按照不同的成长阶段整理照片，能更好地回顾宠物从幼年到成年的珍贵瞬间！
+                                </p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main className="flex-1 p-6">
+                        <div className="max-w-4xl">
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">宠物相册</h2>
+                                <p className="text-sm text-red-500">在这里浏览您的宠物成长瞬间</p>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg p-6 mb-8">
+                                {currentView === 'home' && renderHome()}
+                                {(currentView === 'report' || currentView === 'help') && renderReport()}
+                                {currentView === 'help' && renderHelp()}
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Add Record Modal */}
+                    {showModal && renderModal()}
+
+                    {/* Footer */}
+                    <footer className="border-t border-gray-100 mt-auto">
+                        <div className="max-w-7xl mx-auto px-6 py-6">
+                            <div className="grid grid-cols-3 gap-6">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <i className="fas fa-heart text-pink-500"></i>
+                                        <span className="font-medium text-gray-900">宠物成长相册</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600 mb-3">关爱每一个毛孩子的成长</p>
+                                    <p className="text-xs text-gray-500">© 2023 宠物成长相册</p>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 mb-3">联系我们</p>
+                                    <p className="text-xs text-red-500">{currentView === 'home' ? 'petphoto@example.com' : 'petphoto@example.com'}</p>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900 mb-3">Tip</p>
+                                    <p className="text-xs text-gray-600">
+                                        {currentView === 'home' ? '定期整理相册，留住每个瞬间～' : '定期整理相册，留住每个瞬间～'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
