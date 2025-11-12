@@ -5,8 +5,9 @@
 ![image](./assets/WEBVIA.png)
 
 <p align="center">
-   📄 <a href="https://arxiv.org/abs/XXX" target="_blank">Paper</a> &nbsp; • &nbsp;
-   🤗 <a href="https://huggingface.co/ZhenYang21/WebVIA" target="_blank">Model</a> &nbsp; • &nbsp;
+   📄 <a href="https://arxiv.org/pdf/2511.06251" target="_blank">Paper</a> &nbsp; • &nbsp;
+   🤗 <a href="https://huggingface.co/zai-org/WebVIA-Agent" target="_blank">WebVIA-Agent</a> &nbsp; • &nbsp;
+   🤗 <a href="https://huggingface.co/zai-org/WebVIA-UI2Code" target="_blank">WebVIA-UI2Code</a> &nbsp; • &nbsp;
    🌐 <a href="https://zheny2751-dotcom.github.io/webvia.github.io/" target="_blank">Website</a>
 </p>
 
@@ -387,7 +388,7 @@ If you use this repository, code, or datasets in your research, please cite:
 @article{xu2025webvia,
   title={WebVIA: A Web-based Vision-Language Agentic Framework for Interactive and Verifiable UI-to-Code Generation},
   author={Xu, Mingde and et al.},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
+  journal={arXiv preprint arXiv:2511.06251},
   year={2025},
 }
 ```
