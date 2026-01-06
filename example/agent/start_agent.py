@@ -63,7 +63,7 @@ def load_config():
     final_config = {
         "input_type": get("input_type", "html"),
         "input_dir": abs_path(get("input_html_dir", "./input_html")),
-        "url_file": abs_path(get("url_file", "./urls.txt")),
+        "url_file": abs_path(get("input_url_txt", "./urls.txt")),
         "image_dir": abs_path(get("image_dir", "./output_images")),
         "bug_dir": abs_path(get("bug_dir", "./trash_dir")),
         "api_key": get("api_key", ""),
