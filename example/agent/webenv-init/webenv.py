@@ -18,7 +18,7 @@ import math
 import io
 from PIL import Image
 from pydantic import BaseModel
-
+import re
 
 class WebHtmlGymEnv:
     metadata = {'render_modes': ['human'], "render_fps": 4}
