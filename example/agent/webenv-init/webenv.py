@@ -160,7 +160,6 @@ class WebHtmlGymEnv:
             }
             function isButtonVisibleAndEnabled(elem) {
                 if (!elem) return false;
-                try { elem.scrollIntoView({block: 'center', inline: 'center'}); } catch(e) {}
                 const style = window.getComputedStyle(elem);
                 if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return false;
                 const rect = elem.getBoundingClientRect();
